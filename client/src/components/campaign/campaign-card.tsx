@@ -28,8 +28,15 @@ export default function CampaignCard({ campaign, isFounder = false, onEdit, onSh
     }
   };
 
-  const formatCurrency = (amount: string) => {
-    return `$${parseFloat(amount).toLocaleString()}`;
+  const formatCurrency = (amount: string | undefined) => {
+    if (!amount || amount === undefined || amount === null) {
+      return "$0";
+    }
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount)) {
+      return "$0";
+    }
+    return `$${numericAmount.toLocaleString()}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -105,11 +112,19 @@ export default function CampaignCard({ campaign, isFounder = false, onEdit, onSh
           
           {isFounder && (
             <>
-              <Button variant="outline">
+              <Button 
+                variant="outline" 
+                onClick={() => onEdit?.(campaign)}
+                className="hover:border-fundry-orange hover:text-fundry-orange"
+              >
                 <Edit className="mr-2" size={16} />
                 Edit
               </Button>
-              <Button variant="outline">
+              <Button 
+                variant="outline" 
+                onClick={() => onShare?.(campaign)}
+                className="hover:border-fundry-orange hover:text-fundry-orange"
+              >
                 <Share className="mr-2" size={16} />
                 Share
               </Button>

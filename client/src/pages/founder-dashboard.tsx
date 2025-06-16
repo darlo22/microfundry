@@ -8,6 +8,7 @@ import Footer from "@/components/layout/footer";
 import StatsCard from "@/components/dashboard/stats-card";
 import CampaignCard from "@/components/campaign/campaign-card";
 import CampaignCreationModal from "@/components/modals/campaign-creation-modal";
+import { EditCampaignModal } from "@/components/modals/edit-campaign-modal";
 import { ShareCampaignSelectorModal } from "@/components/modals/share-campaign-selector-modal";
 import { SafeTemplatesModal } from "@/components/modals/safe-templates-modal";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,18 @@ export default function FounderDashboard() {
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showSafeTemplatesModal, setShowSafeTemplatesModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState<CampaignWithStats | null>(null);
+
+  // Handlers for campaign actions
+  const handleEditCampaign = (campaign: CampaignWithStats) => {
+    setSelectedCampaign(campaign);
+    setShowEditModal(true);
+  };
+
+  const handleShareCampaign = (campaign: CampaignWithStats) => {
+    setShowShareModal(true);
+  };
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -177,7 +190,13 @@ export default function FounderDashboard() {
             ) : campaigns && campaigns.length > 0 ? (
               <div className="space-y-4">
                 {campaigns.map((campaign) => (
-                  <CampaignCard key={campaign.id} campaign={campaign} isFounder />
+                  <CampaignCard 
+                    key={campaign.id} 
+                    campaign={campaign} 
+                    isFounder 
+                    onEdit={handleEditCampaign}
+                    onShare={handleShareCampaign}
+                  />
                 ))}
               </div>
             ) : (

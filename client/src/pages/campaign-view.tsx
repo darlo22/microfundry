@@ -120,16 +120,30 @@ export default function CampaignView() {
         // Ensure we have a valid array with proper data
         if (Array.isArray(teamData) && teamData.length > 0 && teamData[0].name) {
           return teamData.map((member: any, index: number) => (
-            <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
-              <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
-                <span className="text-white text-xl font-bold">
-                  {member.name?.split(' ').map((n: string) => n[0]).join('') || 'TM'}
-                </span>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg text-gray-900">{member.name}</h3>
-                <p className="text-fundry-orange font-medium mb-2">{member.role}</p>
-                <p className="text-sm text-gray-600">{member.experience}</p>
+            <div key={index} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start space-x-4">
+                <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-xl font-bold">
+                    {member.name?.split(' ').map((n: string) => n[0]).join('') || 'TM'}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-1">{member.name}</h3>
+                  <p className="text-fundry-orange font-medium mb-3">{member.role}</p>
+                  <p className="text-sm text-gray-600 leading-relaxed">{member.experience}</p>
+                  {member.linkedin && (
+                    <div className="mt-3">
+                      <a 
+                        href={member.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        View LinkedIn Profile →
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ));
@@ -139,19 +153,30 @@ export default function CampaignView() {
       }
     }
 
-    // Solo founder display
+    // Solo founder display - only show if no team data is available
+    if (campaign.teamStructure === "solo") {
+      return (
+        <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
+          <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
+            <span className="text-white text-xl font-bold">
+              {campaign.title.charAt(0)}
+            </span>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg text-gray-900">Solo Founder</h3>
+            <p className="text-fundry-orange font-medium mb-2">CEO & Founder</p>
+            <p className="text-sm text-gray-600">
+              {campaign.businessSector ? `Experienced in ${campaign.businessSector}` : "Leading this venture"}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // Return null if no valid team data to display
     return (
-      <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
-        <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
-          <span className="text-white text-xl font-bold">
-            {campaign.title.charAt(0)}
-          </span>
-        </div>
-        <div className="flex-1">
-          <h3 className="font-semibold text-lg text-gray-900">Founder</h3>
-          <p className="text-fundry-orange font-medium mb-2">CEO & Founder</p>
-          <p className="text-sm text-gray-600">Leading this exciting venture</p>
-        </div>
+      <div className="text-center text-gray-500 py-8">
+        <p>Team information will be displayed once provided by the founder.</p>
       </div>
     );
   };
@@ -425,16 +450,28 @@ export default function CampaignView() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Traction & Growth</h2>
                 {renderTractionMetrics()}
                 <div className="space-y-4">
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <h3 className="font-semibold text-lg text-gray-900 mb-2">Business Model</h3>
-                    <p className="text-gray-600">
-                      {campaign.businessModel || "Subscription-based SaaS model with tiered pricing structure"}
-                    </p>
-                  </div>
+                  {campaign.businessModel && (
+                    <div className="p-4 bg-gray-50 rounded-xl">
+                      <h3 className="font-semibold text-lg text-gray-900 mb-2">Business Model</h3>
+                      <p className="text-gray-600">{campaign.businessModel}</p>
+                    </div>
+                  )}
                   {campaign.useOfFunds && (
                     <div className="p-4 bg-gray-50 rounded-xl">
                       <h3 className="font-semibold text-lg text-gray-900 mb-2">Use of Funds</h3>
                       <p className="text-gray-600">{campaign.useOfFunds}</p>
+                    </div>
+                  )}
+                  {campaign.marketSize && (
+                    <div className="p-4 bg-gray-50 rounded-xl">
+                      <h3 className="font-semibold text-lg text-gray-900 mb-2">Market Opportunity</h3>
+                      <p className="text-gray-600">{campaign.marketSize}</p>
+                    </div>
+                  )}
+                  {campaign.competitiveLandscape && (
+                    <div className="p-4 bg-gray-50 rounded-xl">
+                      <h3 className="font-semibold text-lg text-gray-900 mb-2">Competitive Landscape</h3>
+                      <p className="text-gray-600">{campaign.competitiveLandscape}</p>
                     </div>
                   )}
                 </div>
@@ -445,7 +482,7 @@ export default function CampaignView() {
             <Card>
               <CardContent className="p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Meet the Team</h2>
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
                   {renderTeamMembers()}
                 </div>
               </CardContent>

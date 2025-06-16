@@ -84,6 +84,9 @@ export const campaigns = pgTable("campaigns", {
   teamStructure: varchar("team_structure").notNull().default("solo"), // solo, team
   teamMembers: jsonb("team_members"), // Array of team member objects
   
+  // Business sector for categorization
+  businessSector: varchar("business_sector"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

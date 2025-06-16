@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   ArrowLeft, 
   Share, 
@@ -19,7 +20,8 @@ import {
   Building,
   Clock,
   Users,
-  DollarSign
+  DollarSign,
+  Edit
 } from "lucide-react";
 import type { CampaignWithStats } from "@/lib/types";
 
@@ -29,6 +31,8 @@ export default function CampaignView() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [showInvestmentModal, setShowInvestmentModal] = useState(false);
+  const [showPitchDeckModal, setShowPitchDeckModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Get campaign ID from URL params (either /campaign/:id or /c/:privateLink)
   const campaignId = params.id;
@@ -73,15 +77,150 @@ export default function CampaignView() {
     setShowInvestmentModal(true);
   };
 
-  const handleShare = () => {
-    if (campaign?.privateLink) {
-      const shareUrl = `${window.location.origin}/c/${campaign.privateLink}`;
-      navigator.clipboard.writeText(shareUrl);
+  const handleEdit = () => {
+    toast({
+      title: "Edit Feature",
+      description: "Campaign editing will be available soon",
+    });
+  };
+
+  const handleShare = async () => {
+    if (!campaign?.privateLink) return;
+    
+    const shareUrl = `${window.location.origin}/c/${campaign.privateLink}`;
+    const shareData = {
+      title: campaign.title,
+      text: campaign.shortPitch,
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast({
+          title: "Link Copied",
+          description: "Campaign link has been copied to your clipboard.",
+        });
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
       toast({
-        title: "Link Copied",
-        description: "Campaign link has been copied to your clipboard.",
+        title: "Share failed",
+        description: "Please try copying the link manually",
+        variant: "destructive",
       });
     }
+  };
+
+  const handleViewPitchDeck = () => {
+    if (campaign?.pitchDeckUrl) {
+      setShowPitchDeckModal(true);
+    } else {
+      toast({
+        title: "No pitch deck",
+        description: "This campaign hasn't uploaded a pitch deck yet",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const renderTeamMembers = () => {
+    if (!campaign) return null;
+
+    if (campaign.teamStructure === "team" && campaign.teamMembers) {
+      try {
+        const teamData = typeof campaign.teamMembers === 'string' 
+          ? JSON.parse(campaign.teamMembers) 
+          : campaign.teamMembers;
+        
+        if (Array.isArray(teamData) && teamData.length > 0) {
+          return teamData.map((member: any, index: number) => (
+            <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
+              <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
+                <span className="text-white text-xl font-bold">
+                  {member.name?.split(' ').map((n: string) => n[0]).join('') || 'TM'}
+                </span>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg text-gray-900">{member.name}</h3>
+                <p className="text-fundry-orange font-medium mb-2">{member.role}</p>
+                <p className="text-sm text-gray-600">{member.experience}</p>
+              </div>
+            </div>
+          ));
+        }
+      } catch (error) {
+        console.error("Error parsing team members:", error);
+      }
+    }
+
+    return (
+      <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
+        <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
+          <span className="text-white text-xl font-bold">
+            {campaign.title.charAt(0)}
+          </span>
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-lg text-gray-900">Founder</h3>
+          <p className="text-fundry-orange font-medium mb-2">CEO & Founder</p>
+          <p className="text-sm text-gray-600">Leading this exciting venture</p>
+        </div>
+      </div>
+    );
+  };
+
+  const renderTractionMetrics = () => {
+    if (!campaign) return null;
+
+    const metrics = [];
+    
+    if (campaign.currentRevenue) {
+      metrics.push({
+        label: "Monthly Revenue",
+        value: campaign.currentRevenue,
+        color: "text-blue-600"
+      });
+    }
+    
+    if (campaign.customers) {
+      metrics.push({
+        label: "Active Users",
+        value: campaign.customers,
+        color: "text-green-600"
+      });
+    }
+
+    if (campaign.previousFunding) {
+      metrics.push({
+        label: "Previous Funding",
+        value: campaign.previousFunding,
+        color: "text-purple-600"
+      });
+    }
+
+    if (metrics.length === 0) {
+      metrics.push(
+        { label: "Stage", value: campaign.startupStage || "Early Stage", color: "text-blue-600" },
+        { label: "Status", value: "Pre-revenue", color: "text-green-600" },
+        { label: "Growth", value: "25%", color: "text-purple-600" }
+      );
+    }
+
+    return (
+      <div className="grid md:grid-cols-3 gap-4 mb-6">
+        {metrics.slice(0, 3).map((metric, index) => (
+          <div key={index} className="text-center p-4 bg-gray-50 rounded-xl">
+            <div className={`text-2xl font-bold ${metric.color} mb-2`}>
+              {metric.value}
+            </div>
+            <div className="text-sm text-gray-600">{metric.label}</div>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const formatCurrency = (amount: string | number) => {
@@ -193,12 +332,12 @@ export default function CampaignView() {
                   </div>
                   
                   {/* Company Logo */}
-                  <div className="w-20 h-20 bg-fundry-orange-gradient rounded-xl flex items-center justify-center ml-6">
+                  <div className="w-20 h-20 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center ml-6 overflow-hidden">
                     {campaign.logoUrl ? (
                       <img 
                         src={campaign.logoUrl} 
                         alt={campaign.title}
-                        className="w-16 h-16 object-cover rounded-lg"
+                        className="w-full h-full object-contain p-2"
                       />
                     ) : (
                       <span className="text-white text-2xl font-bold">

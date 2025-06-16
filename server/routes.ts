@@ -31,9 +31,16 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Serve uploaded files statically
-  const express = require('express');
-  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+  // Serve uploaded files statically from uploads directory
+  app.get('/uploads/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filePath = path.join(process.cwd(), 'uploads', filename);
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        res.status(404).json({ message: 'File not found' });
+      }
+    });
+  });
   
   // Auth middleware
   setupAuth(app);

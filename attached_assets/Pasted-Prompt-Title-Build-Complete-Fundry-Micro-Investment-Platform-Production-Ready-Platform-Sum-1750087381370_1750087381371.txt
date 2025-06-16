@@ -1,0 +1,249 @@
+Prompt Title:
+🌐 Build Complete Fundry Micro-Investment Platform (Production Ready)
+
+🧭 Platform Summary
+Fundry is a lightweight micro-investment platform designed for early-stage startups to raise up to $5,000 privately from personal networks, using simplified SAFE agreements and invite-only fundraising flows. The platform allows Founders to create campaigns, share private investment links, collect micro-investments, auto-generate SAFE agreements, and track investor commitments. Investors can browse private campaigns, commit funds, digitally sign SAFEs, and manage their investments via dashboards.
+
+🔑 Core Modules to Build
+1️⃣ Authentication & User Onboarding
+Enable Sign Up, Sign In, OAuth Google login.
+
+Distinct user roles: Founder and Investor.
+
+Capture user role during sign-up flow.
+
+Implement secure email verification flow before dashboard access.
+
+2FA (Two-Factor Authentication) support under Security Settings.
+
+Password reset and update flows.
+
+Persist session state properly after login/logout.
+
+2️⃣ Founder Onboarding & Get Started Flow
+After "Get Started" click:
+
+Collect:
+
+Full Name
+
+Business Name
+
+Business Sector (dropdown)
+
+Country of Incorporation
+
+Year of Formation
+
+Business Address
+
+Persist data into Business Profiles table.
+
+Direct to Founder Dashboard after business info is submitted.
+
+3️⃣ Founder Dashboard
+Overview:
+
+Total Raised, Campaign Progress, Investor Count, Pending Payouts.
+
+Active, Paused, Closed, Funded, Cancelled Campaign statuses.
+
+Campaign Management:
+
+Create/Edit Campaign:
+
+Title
+
+Logo/Cover Image
+
+Short Pitch
+
+Full Pitch
+
+Upload Pitch Deck (PDF)
+
+Funding Goal (max $5,000)
+
+Minimum Investment (default: $25)
+
+Deadline (optional)
+
+SAFE template selection.
+
+Generate private campaign link (non-public browsing).
+
+Shareable link generation for each active campaign.
+
+Pause/Resume campaigns.
+
+Export Investor List and signed SAFEs.
+
+Investor Management:
+
+View Investors per campaign:
+
+Name, Email, Amount, Date, Status (Paid, Pledged, Pending Payment).
+
+Export investor data (CSV, PDF).
+
+Investor Updates:
+
+Post campaign updates to investors (text, images, files).
+
+Schedule updates.
+
+Notify investors via email.
+
+Funds & Withdrawals:
+
+View collected funds.
+
+Platform fee calculation.
+
+Withdrawal request module (via connected payment info).
+
+Withdrawal status tracking.
+
+Business & Payment Info:
+
+Edit Business Information.
+
+Update Global Payment Information (country-based fields).
+
+Save and persist all payment & business data.
+
+Team Members:
+
+Invite additional users (Admin, Investor Relations, Finance roles).
+
+4️⃣ Investor Dashboard
+View Active and Closed Investments.
+
+Resume incomplete investments.
+
+Investment Commitments visible.
+
+View and download signed SAFE agreements.
+
+Manage payment methods.
+
+Message Founders (optional).
+
+Notification Preferences management.
+
+Full Account Management module (Personal Info, Security, 2FA, Notifications).
+
+Export full Investment History.
+
+5️⃣ Investment Flow
+Campaign Page (Public Link):
+
+Stable, direct, non-redirecting campaign link.
+
+Full campaign details:
+
+Business Info, Problem/Solution, Pitch Deck Viewer, Funding Goal/Progress.
+
+Investor clicks Invest → Opens Amount Selection Modal.
+
+Commitment Flow:
+
+Investor selects amount (min $25).
+
+Prompts sign-up (if not signed in).
+
+Email verification enforced.
+
+After email verification → proceed directly to:
+
+SAFE Agreement Review (Auto-Populated Module).
+
+Digital signature capture (checkbox + timestamp + IP log).
+
+Proceed to payment page.
+
+Funds held until campaign close (simulated escrow).
+
+SAFE Agreement Auto-Generator:
+
+Populate agreement with:
+
+Startup Info (Business Name, Year, Country, Founder Name).
+
+Investment Amount.
+
+Discount Rate (20%).
+
+Valuation Cap.
+
+Auto-generate unique Agreement ID.
+
+Investor & Founder signature capture.
+
+Store signed PDFs in bucket.
+
+Email copies to both parties.
+
+Make agreement downloadable from dashboards.
+
+6️⃣ Admin Dashboard (Internal Use)
+View all campaigns.
+
+View all users.
+
+View all investments.
+
+View system-wide funds raised.
+
+Export full platform data.
+
+View all generated SAFE agreements.
+
+🔧 Backend & Infrastructure Requirements
+Use Supabase:
+
+Authentication
+
+Database (PostgreSQL)
+
+Storage (Buckets: pitch_decks, safe_agreements, profile_photos)
+
+Row-Level Security (RLS) activated.
+
+Connect Vercel/Netlify for frontend deployment.
+
+Setup domain and SSL (example: fundry.com).
+
+Payment Integration (Stripe or Flutterwave).
+
+Email Delivery Integration (Postmark or SendGrid).
+
+Full error logging, stability, retry logic.
+
+🧪 Data Persistence & Error Recovery
+All investor commitments saved immediately upon amount selection.
+
+Founder dashboard reflects pending commitments even before payment.
+
+Investors may resume investments from their dashboard.
+
+Stabilize all modals to prevent flow loss or modal resets.
+
+Resolve all prior bucket-not-found errors.
+
+🛡 Security Requirements
+SSL Everywhere.
+
+Secure file uploads.
+
+Secure API access.
+
+Secure data encryption for sensitive info.
+
+IP logging for legal signature trails.
+
+Fully compliant with Supabase security layers.
+
+✅ Outcome:
+A fully functional, highly stable, scalable, production-grade Fundry platform suitable for immediate public beta or investor demo use.
+

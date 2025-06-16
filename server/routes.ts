@@ -74,6 +74,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Campaign routes
+  app.put('/api/campaigns/:id', requireAuth, upload.fields([
+    { name: 'logo', maxCount: 1 },
+    { name: 'pitchDeck', maxCount: 1 }
+  ]), async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const campaign = await storage.getCampaign(campaignId);
+      
+      if (!campaign) {
+        return res.status(404).json({ message: 'Campaign not found' });
+      }
+      
+      if (campaign.founderId !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized to edit this campaign' });
+      }
+
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const updateData: any = { ...req.body };
+
+      if (files?.logo?.[0]) {
+        updateData.logoUrl = `/uploads/${files.logo[0].filename}`;
+      }
+      if (files?.pitchDeck?.[0]) {
+        updateData.pitchDeckUrl = `/uploads/${files.pitchDeck[0].filename}`;
+      }
+
+      const updatedCampaign = await storage.updateCampaign(campaignId, updateData);
+      res.json(updatedCampaign);
+    } catch (error) {
+      console.error('Error updating campaign:', error);
+      res.status(500).json({ message: 'Failed to update campaign' });
+    }
+  });
+
   app.post('/api/campaigns', requireAuth, upload.fields([
     { name: 'logo', maxCount: 1 },
     { name: 'pitchDeck', maxCount: 1 }

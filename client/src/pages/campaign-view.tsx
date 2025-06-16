@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import InvestmentModal from "@/components/modals/investment-modal";
+import { ShareCampaignModal } from "@/components/modals/share-campaign-modal";
+import { EditCampaignModal } from "@/components/modals/edit-campaign-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +34,8 @@ export default function CampaignView() {
   const { toast } = useToast();
   const [showInvestmentModal, setShowInvestmentModal] = useState(false);
   const [showPitchDeckModal, setShowPitchDeckModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Get campaign ID from URL params (either /campaign/:id or /c/:privateLink)

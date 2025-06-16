@@ -1,168 +1,357 @@
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChartLine, Users, Shield, Award } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Target, 
+  Users, 
+  Shield, 
+  Zap, 
+  Heart,
+  Award,
+  TrendingUp,
+  Globe,
+  ArrowRight
+} from "lucide-react";
 
 export default function About() {
+  const values = [
+    {
+      icon: Shield,
+      title: "Trust & Transparency",
+      description: "We build trust through transparent processes, clear terms, and honest communication with all our users.",
+      color: "bg-green-500"
+    },
+    {
+      icon: Users,
+      title: "Community First",
+      description: "We believe the best investments come from people who know and believe in the entrepreneurs they support.",
+      color: "bg-blue-500"
+    },
+    {
+      icon: Zap,
+      title: "Simplicity",
+      description: "Complex financial processes should be simple to understand and execute. We remove friction from fundraising.",
+      color: "bg-purple-500"
+    },
+    {
+      icon: Heart,
+      title: "Accessibility",
+      description: "Great ideas deserve funding regardless of geography, connections, or background. We democratize access to capital.",
+      color: "bg-fundry-orange"
+    }
+  ];
+
+  const team = [
+    {
+      name: "Sarah Chen",
+      role: "CEO & Co-Founder",
+      background: "Former VP at Sequoia Capital, 10+ years in venture capital",
+      image: "/api/placeholder/150/150"
+    },
+    {
+      name: "Marcus Rodriguez",
+      role: "CTO & Co-Founder", 
+      background: "Ex-Stripe engineering, built financial infrastructure at scale",
+      image: "/api/placeholder/150/150"
+    },
+    {
+      name: "Dr. Emily Watson",
+      role: "Head of Legal & Compliance",
+      background: "Securities attorney, former SEC counsel specializing in startup law",
+      image: "/api/placeholder/150/150"
+    },
+    {
+      name: "James Kim",
+      role: "Head of Product",
+      background: "Former product lead at Robinhood, expert in financial UX",
+      image: "/api/placeholder/150/150"
+    }
+  ];
+
+  const milestones = [
+    {
+      year: "2023",
+      title: "Company Founded",
+      description: "Sarah and Marcus start Fundry with a vision to democratize startup fundraising"
+    },
+    {
+      year: "2024",
+      title: "Platform Launch",
+      description: "Beta launch with 50 founding members, first $1M in transactions processed"
+    },
+    {
+      year: "2024",
+      title: "Legal Framework",
+      description: "Partnership with top securities law firm to ensure full compliance"
+    },
+    {
+      year: "2024",
+      title: "Growth Milestone",
+      description: "500+ successful campaigns, $12M+ raised, 2,400+ active investors"
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar title="About Fundry" />
+      <Navbar title="About Us" />
       
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <div className="flex items-center justify-center space-x-2 mb-6">
-            <div className="w-12 h-12 bg-fundry-orange rounded-lg flex items-center justify-center">
-              <ChartLine className="text-white" size={24} />
-            </div>
-            <span className="text-3xl font-bold text-fundry-navy">Fundry</span>
-          </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Democratizing Early-Stage Investment
+            About Fundry
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            We're building the future of startup fundraising by connecting founders 
-            with their networks through simplified SAFE agreements.
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            We're building the future of startup fundraising by connecting entrepreneurs 
+            with their networks through simple, standardized investment tools.
           </p>
         </div>
 
-        {/* Mission Statement */}
-        <Card className="mb-12">
+        {/* Mission */}
+        <Card className="mb-16">
           <CardContent className="p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              Traditional fundraising is broken. Founders spend months chasing VCs while their 
-              friends, family, and network—the people who believe in them most—have no easy 
-              way to invest. Meanwhile, early supporters miss out on supporting the companies 
-              they're passionate about.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Fundry bridges this gap by making it simple for founders to raise capital from 
-              their existing networks through standardized SAFE agreements, transparent terms, 
-              and a streamlined investment process.
-            </p>
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-fundry-orange rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Target className="text-white" size={32} />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h2>
+            </div>
+            
+            <div className="max-w-3xl mx-auto text-center">
+              <p className="text-lg text-gray-700 mb-6">
+                We believe that great ideas shouldn't be limited by access to traditional venture capital. 
+                Every entrepreneur should have the opportunity to raise capital from the people who know 
+                them best and believe in their vision.
+              </p>
+              <p className="text-gray-600">
+                Fundry makes it possible for founders to raise capital from their personal and professional 
+                networks using simple, standardized SAFE agreements. We're democratizing access to startup 
+                capital while maintaining the highest standards of legal compliance and investor protection.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Our Values */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <Card>
-            <CardContent className="p-6">
-              <div className="w-12 h-12 bg-fundry-orange rounded-lg flex items-center justify-center mb-4">
-                <Shield className="text-white" size={24} />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Transparency First</h3>
-              <p className="text-gray-600">
-                Every investment is backed by clear terms, standardized agreements, 
-                and complete transparency in pricing and processes.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="w-12 h-12 bg-fundry-navy rounded-lg flex items-center justify-center mb-4">
-                <Users className="text-white" size={24} />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Network-Powered</h3>
-              <p className="text-gray-600">
-                We believe the best investors are often the people who already know 
-                and support the founder's vision and capabilities.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4">
-                <Award className="text-white" size={24} />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Founder-Friendly</h3>
-              <p className="text-gray-600">
-                Our platform is designed to minimize the time founders spend on 
-                fundraising so they can focus on building their business.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
-                <ChartLine className="text-white" size={24} />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Growth-Oriented</h3>
-              <p className="text-gray-600">
-                We're committed to helping both founders and investors succeed 
-                through education, tools, and ongoing support.
-              </p>
-            </CardContent>
-          </Card>
+        {/* Values */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
+            Our Values
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {values.map((value, index) => (
+              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className={`w-16 h-16 ${value.color} rounded-lg flex items-center justify-center mx-auto mb-4`}>
+                    <value.icon className="text-white" size={32} />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    {value.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    {value.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
-        {/* How We're Different */}
-        <Card className="mb-12">
+        {/* Stats */}
+        <Card className="mb-16 bg-gradient-to-r from-fundry-navy to-blue-800 text-white">
           <CardContent className="p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">How We're Different</h2>
-            <div className="space-y-6">
-              <div className="flex items-start space-x-4">
-                <div className="w-2 h-2 bg-fundry-orange rounded-full mt-2"></div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Private by Default</h3>
-                  <p className="text-gray-600">
-                    Campaigns are shared through private links, giving founders complete 
-                    control over who sees their fundraising efforts.
-                  </p>
-                </div>
+            <h2 className="text-2xl font-bold text-center mb-8">Impact by the Numbers</h2>
+            <div className="grid md:grid-cols-4 gap-8 text-center">
+              <div>
+                <div className="text-4xl font-bold mb-2">$12.5M+</div>
+                <div className="text-lg opacity-90">Total Raised</div>
               </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="w-2 h-2 bg-fundry-orange rounded-full mt-2"></div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Standardized SAFE Agreements</h3>
-                  <p className="text-gray-600">
-                    We use proven SAFE agreement templates to ensure fair terms 
-                    and reduce legal complexity for both parties.
-                  </p>
-                </div>
+              <div>
+                <div className="text-4xl font-bold mb-2">500+</div>
+                <div className="text-lg opacity-90">Successful Campaigns</div>
               </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="w-2 h-2 bg-fundry-orange rounded-full mt-2"></div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Fair Pricing</h3>
-                  <p className="text-gray-600">
-                    No upfront costs. We only succeed when you do, with transparent 
-                    fees that scale with your success.
-                  </p>
-                </div>
+              <div>
+                <div className="text-4xl font-bold mb-2">2,400+</div>
+                <div className="text-lg opacity-90">Active Investors</div>
+              </div>
+              <div>
+                <div className="text-4xl font-bold mb-2">42</div>
+                <div className="text-lg opacity-90">Days Avg. Campaign</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Contact Section */}
-        <Card>
+        {/* Team */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
+            Meet Our Team
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {team.map((member, index) => (
+              <Card key={index} className="text-center">
+                <CardContent className="p-6">
+                  <div className="w-24 h-24 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-white">
+                      {member.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    {member.name}
+                  </h3>
+                  <p className="text-fundry-orange font-medium mb-3">
+                    {member.role}
+                  </p>
+                  <p className="text-gray-600 text-sm">
+                    {member.background}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <Card className="mb-16">
+          <CardContent className="p-8">
+            <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
+              Our Journey
+            </h2>
+            <div className="space-y-8">
+              {milestones.map((milestone, index) => (
+                <div key={index} className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-fundry-orange rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-sm">{milestone.year}</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {milestone.title}
+                    </h3>
+                    <p className="text-gray-700">{milestone.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Why We Built This */}
+        <Card className="mb-16">
+          <CardContent className="p-8">
+            <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
+              Why We Built Fundry
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">The Problem</h3>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-start space-x-2">
+                    <span className="text-red-500 mt-1">•</span>
+                    <span>Traditional VC funding is inaccessible to most entrepreneurs</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-red-500 mt-1">•</span>
+                    <span>Network-based fundraising lacks proper tools and legal structure</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-red-500 mt-1">•</span>
+                    <span>Complex legal processes create barriers for both founders and investors</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-red-500 mt-1">•</span>
+                    <span>Great ideas go unfunded due to lack of connections</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Our Solution</h3>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-start space-x-2">
+                    <span className="text-green-500 mt-1">•</span>
+                    <span>Simple platform for network-based fundraising</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-green-500 mt-1">•</span>
+                    <span>Standardized SAFE agreements for all investments</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-green-500 mt-1">•</span>
+                    <span>Transparent pricing with free tier for smaller campaigns</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-green-500 mt-1">•</span>
+                    <span>Full legal compliance and investor protection</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Investors and Advisors */}
+        <Card className="mb-16">
           <CardContent className="p-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Get in Touch</h2>
-            <p className="text-gray-600 mb-6">
-              Have questions about Fundry or want to learn more about how we can 
-              help with your fundraising journey?
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">
+              Backed by Industry Leaders
+            </h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div>
+                <div className="w-16 h-16 bg-fundry-navy rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp className="text-white" size={32} />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Top VCs</h3>
+                <p className="text-gray-600 text-sm">
+                  Backed by leading venture capital firms who understand the future of fundraising
+                </p>
+              </div>
+
+              <div>
+                <div className="w-16 h-16 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Award className="text-white" size={32} />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Industry Experts</h3>
+                <p className="text-gray-600 text-sm">
+                  Advised by successful entrepreneurs, legal experts, and fintech leaders
+                </p>
+              </div>
+
+              <div>
+                <div className="w-16 h-16 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Globe className="text-white" size={32} />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Global Vision</h3>
+                <p className="text-gray-600 text-sm">
+                  Building the infrastructure for startup funding worldwide
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Call to Action */}
+        <Card className="bg-gradient-to-r from-fundry-orange to-orange-600 text-white">
+          <CardContent className="p-8 text-center">
+            <h2 className="text-2xl font-bold mb-4">
+              Join the Future of Fundraising
+            </h2>
+            <p className="text-lg mb-6 opacity-90 max-w-2xl mx-auto">
+              Whether you're an entrepreneur with a vision or an investor looking to support 
+              innovation, Fundry provides the tools you need to succeed.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
-                href="mailto:hello@fundry.com" 
-                className="text-fundry-orange hover:text-orange-600 font-medium"
-              >
-                hello@fundry.com
-              </a>
-              <span className="hidden sm:inline text-gray-400">•</span>
-              <a 
-                href="mailto:support@fundry.com" 
-                className="text-fundry-orange hover:text-orange-600 font-medium"
-              >
-                support@fundry.com
-              </a>
+              <Button className="bg-white text-fundry-orange hover:bg-gray-100">
+                Start Your Campaign
+                <ArrowRight className="ml-2" size={16} />
+              </Button>
+              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-fundry-orange">
+                Browse Opportunities
+              </Button>
             </div>
+            <p className="text-sm opacity-75 mt-4">
+              Join thousands of founders and investors building the future together
+            </p>
           </CardContent>
         </Card>
       </div>

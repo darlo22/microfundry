@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { FundryLogo } from "@/components/ui/fundry-logo";
 
 export default function Footer() {
   return (

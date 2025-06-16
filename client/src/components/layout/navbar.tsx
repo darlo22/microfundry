@@ -9,6 +9,7 @@ import {
 import { ChartLine, Bell, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
+import { FundryLogo } from "@/components/ui/fundry-logo";
 
 interface NavbarProps {
   title?: string;
@@ -51,12 +52,7 @@ export default function Navbar({ title, showNotifications = true, actions }: Nav
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-fundry-orange rounded-lg flex items-center justify-center">
-                <ChartLine className="text-white" size={16} />
-              </div>
-              <span className="text-2xl font-bold text-fundry-navy">Fundry</span>
-            </Link>
+            <FundryLogo className="h-10 w-auto" />
             
             {!title && (
               <div className="hidden md:flex space-x-6">

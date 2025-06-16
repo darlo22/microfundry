@@ -42,6 +42,7 @@ export interface IStorage {
   getCampaign(id: number): Promise<Campaign | undefined>;
   getCampaignByPrivateLink(privateLink: string): Promise<Campaign | undefined>;
   getCampaignsByFounder(founderId: string): Promise<Campaign[]>;
+  getAllActiveCampaigns(): Promise<Campaign[]>;
   updateCampaign(id: number, updates: Partial<InsertCampaign>): Promise<Campaign>;
   getCampaignStats(campaignId: number): Promise<{
     totalRaised: string;
@@ -179,6 +180,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(campaigns)
       .where(eq(campaigns.founderId, founderId))
+      .orderBy(desc(campaigns.createdAt));
+  }
+
+  async getAllActiveCampaigns(): Promise<Campaign[]> {
+    return await db
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.status, "active"))
       .orderBy(desc(campaigns.createdAt));
   }
 

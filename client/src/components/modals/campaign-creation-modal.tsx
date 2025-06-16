@@ -123,7 +123,9 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
         title: "Success",
         description: "Campaign created successfully!",
       });
+      // Invalidate both founder campaigns and public campaigns lists
       queryClient.invalidateQueries({ queryKey: ["/api/campaigns/founder/" + user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/campaigns"] });
       onClose();
       form.reset();
       setLogoFile(null);

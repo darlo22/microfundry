@@ -77,6 +77,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         founderId,
         privateLink,
+        status: "active", // Set status to active so it appears in browse page
         logoUrl: files.logo?.[0]?.path,
         pitchDeckUrl: files.pitchDeck?.[0]?.path,
       };
@@ -87,6 +88,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating campaign:", error);
       res.status(500).json({ message: "Failed to create campaign" });
+    }
+  });
+
+  // Get all active campaigns for browse page
+  app.get('/api/campaigns', async (req, res) => {
+    try {
+      const campaigns = await storage.getAllActiveCampaigns();
+      
+      // Add stats to each campaign
+      const campaignsWithStats = await Promise.all(
+        campaigns.map(async (campaign) => {
+          const stats = await storage.getCampaignStats(campaign.id);
+          return { ...campaign, ...stats };
+        })
+      );
+      
+      res.json(campaignsWithStats);
+    } catch (error) {
+      console.error("Error fetching campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch campaigns" });
     }
   });
 

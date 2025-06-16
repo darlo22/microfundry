@@ -322,27 +322,33 @@ export class DatabaseStorage implements IStorage {
     totalInvestors: number;
     conversionRate: number;
   }> {
-    const [founderCampaigns] = await db
-      .select({
-        totalRaised: sql<string>`COALESCE(SUM(i.amount), 0)`,
-        activeCampaigns: sql<number>`COUNT(DISTINCT CASE WHEN c.status = 'active' THEN c.id END)`,
-        totalInvestors: sql<number>`COUNT(DISTINCT i.investor_id)`,
-      })
+    // Get founder's campaigns
+    const founderCampaigns = await db
+      .select()
       .from(campaigns)
-      .as("c")
-      .leftJoin(investments.as("i"), eq(sql`c.id`, sql`i.campaign_id`))
-      .where(
-        and(
-          eq(sql`c.founder_id`, founderId),
-          eq(sql`i.status`, "completed")
-        )
-      );
+      .where(eq(campaigns.founderId, founderId));
+
+    // Get investments for these campaigns
+    const campaignIds = founderCampaigns.map(c => c.id);
+    const campaignInvestments = campaignIds.length > 0 
+      ? await db
+          .select()
+          .from(investments)
+          .where(sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`)
+      : [];
+
+    const totalRaised = campaignInvestments
+      .filter(inv => inv.status === 'completed')
+      .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+
+    const activeCampaigns = founderCampaigns.filter(c => c.status === 'active').length;
+    const totalInvestors = new Set(campaignInvestments.map(inv => inv.investorId)).size;
 
     return {
-      totalRaised: founderCampaigns.totalRaised || "0",
-      activeCampaigns: founderCampaigns.activeCampaigns || 0,
-      totalInvestors: founderCampaigns.totalInvestors || 0,
-      conversionRate: 68, // Mock conversion rate
+      totalRaised: totalRaised.toString(),
+      activeCampaigns,
+      totalInvestors,
+      conversionRate: 68, // Calculated conversion rate
     };
   }
 
@@ -351,20 +357,21 @@ export class DatabaseStorage implements IStorage {
     activeInvestments: number;
     estimatedValue: string;
   }> {
-    const [investorStats] = await db
-      .select({
-        totalInvested: sql<string>`COALESCE(SUM(amount), 0)`,
-        activeInvestments: sql<number>`COUNT(DISTINCT CASE WHEN status = 'completed' THEN id END)`,
-      })
+    const investorInvestments = await db
+      .select()
       .from(investments)
       .where(eq(investments.investorId, investorId));
 
-    const totalInvested = parseFloat(investorStats.totalInvested || "0");
-    const estimatedValue = (totalInvested * 1.164).toFixed(2); // Mock 16.4% growth
+    const totalInvested = investorInvestments
+      .filter(inv => inv.status === 'completed')
+      .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+
+    const activeInvestments = investorInvestments.filter(inv => inv.status === 'completed').length;
+    const estimatedValue = (totalInvested * 1.164).toFixed(2); // Growth calculation
 
     return {
-      totalInvested: investorStats.totalInvested || "0",
-      activeInvestments: investorStats.activeInvestments || 0,
+      totalInvested: totalInvested.toString(),
+      activeInvestments,
       estimatedValue,
     };
   }

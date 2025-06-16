@@ -91,6 +91,7 @@ The deployment uses:
 - June 16, 2025. Fixed production 404 errors for dashboard routes by adding catch-all handler for client-side routing and simplifying route structure to ensure all pages are accessible regardless of authentication state
 - June 16, 2025. Enhanced Success Stories with custom SVG company logos, optimized startup logo display across campaign components, and implemented comprehensive case study pages with detailed timelines, results tracking, and social media sharing functionality for Twitter, LinkedIn, and Facebook
 - June 16, 2025. Fixed Edit and Share buttons in Active Campaigns section by connecting them to functional modals, resolved $NaN display issue in raised amounts, enhanced team information display to show live campaign data with structured member profiles or text descriptions, and added downloadable SAFE agreement functionality in investment modal with prepopulated terms including investment amount, discount rate, and valuation cap
+- June 16, 2025. Implemented team member photo capture functionality in Create New Campaign modal with file upload, preview, and removal capabilities; updated Success Stories page to comply with $5,000 funding limit across all case studies (TechFlow: $4,800, GreenEnergy: $5,000, HealthBridge: $3,200, EduPlatform: $1,800) maintaining platform consistency
 
 ## User Preferences
 

@@ -18,6 +18,7 @@ import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfUse from "@/pages/terms-of-use";
 import CookiePolicy from "@/pages/cookie-policy";
 import InvestmentDisclaimer from "@/pages/investment-disclaimer";
+import SafeAgreementTemplate from "@/pages/safe-agreement-template";
 import FounderDashboard from "@/pages/founder-dashboard";
 import InvestorDashboard from "@/pages/investor-dashboard";
 import CampaignView from "@/pages/campaign-view";

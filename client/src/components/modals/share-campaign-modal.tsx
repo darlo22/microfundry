@@ -50,7 +50,7 @@ export function ShareCampaignModal({
   };
 
   const handleNativeShare = async () => {
-    if (navigator.share) {
+    if ('share' in navigator && typeof navigator.share === 'function') {
       try {
         await navigator.share({
           title: campaignTitle,
@@ -89,7 +89,7 @@ export function ShareCampaignModal({
         
         <div className="space-y-6">
           {/* Native Share Button (mobile) */}
-          {'share' in navigator && (
+          {typeof window !== 'undefined' && 'share' in navigator && (
             <Button 
               onClick={handleNativeShare} 
               className="w-full flex items-center gap-2"

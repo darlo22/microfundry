@@ -82,8 +82,7 @@ export default function CampaignView() {
   };
 
   const handleEdit = () => {
-    // Navigate to edit campaign page or open edit modal
-    setLocation(`/campaign/${campaign?.id}/edit`);
+    setShowEditModal(true);
   };
 
   const handleShare = async () => {
@@ -681,6 +680,26 @@ export default function CampaignView() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Share Campaign Modal */}
+      {campaign && (
+        <ShareCampaignModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          campaignTitle={campaign.title}
+          campaignUrl={`${window.location.origin}/c/${campaign.privateLink}`}
+          shortPitch={campaign.shortPitch}
+        />
+      )}
+
+      {/* Edit Campaign Modal */}
+      {campaign && user?.id === campaign.founderId && (
+        <EditCampaignModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          campaign={campaign}
+        />
+      )}
 
       <Footer />
     </div>

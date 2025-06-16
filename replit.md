@@ -11,7 +11,7 @@ The application follows a modern full-stack architecture with clear separation b
 - **Frontend**: React 18 with TypeScript, built using Vite for development and production
 - **Backend**: Express.js server with TypeScript support
 - **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
-- **Authentication**: Replit's OAuth-based authentication system
+- **Authentication**: Email/password authentication with Passport.js and PostgreSQL sessions
 - **UI Framework**: Tailwind CSS with shadcn/ui component library
 - **File Uploads**: Multer for handling campaign assets (logos, pitch decks)
 
@@ -84,6 +84,7 @@ The deployment uses:
 - June 16, 2025. Added comprehensive footer with About, Pricing pages and transparent fee structure (5% above $1,000, free below)
 - June 16, 2025. Created extensive page ecosystem including Browse Campaigns, How It Works, Success Stories, Resources, Contact, Blog, Privacy Policy, Terms of Use, Cookie Policy, and Investment Disclaimer pages for professional platform presentation
 - June 16, 2025. Fixed View button 404 errors by updating Browse Campaigns to use real API data instead of mock data, added sample campaigns to database (IDs 4, 5, 6), updated hero section "Learn More" button to navy blue text, and improved stats cards visibility with proper Fundry brand colors
+- June 16, 2025. Complete authentication system overhaul: replaced Replit Auth with email/password authentication using Passport.js, created comprehensive onboarding modal with user type selection (founder/investor), implemented secure password hashing, PostgreSQL session storage, and role-based registration flow
 
 ## User Preferences
 

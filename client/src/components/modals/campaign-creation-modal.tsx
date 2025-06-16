@@ -94,7 +94,11 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
       // Append form fields
       Object.entries(data).forEach(([key, value]) => {
         if (value !== undefined && value !== "") {
-          formData.append(key, value.toString());
+          if (key === 'teamMembers' && Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, value.toString());
+          }
         }
       });
 

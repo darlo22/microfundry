@@ -129,13 +129,21 @@ export default function CampaignView() {
   const renderTeamMembers = () => {
     if (!campaign) return null;
 
+    // Check if we have team data and it's not corrupted
     if (campaign.teamStructure === "team" && campaign.teamMembers) {
       try {
-        const teamData = typeof campaign.teamMembers === 'string' 
-          ? JSON.parse(campaign.teamMembers) 
-          : campaign.teamMembers;
+        let teamData = campaign.teamMembers;
         
-        if (Array.isArray(teamData) && teamData.length > 0) {
+        // Skip if it's the corrupted "[object Object]" string
+        if (typeof teamData === 'string') {
+          if (teamData === '"[object Object]"' || teamData === '[object Object]') {
+            throw new Error('Corrupted team data');
+          }
+          teamData = JSON.parse(teamData);
+        }
+        
+        // Ensure we have a valid array with proper data
+        if (Array.isArray(teamData) && teamData.length > 0 && teamData[0].name) {
           return teamData.map((member: any, index: number) => (
             <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
               <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
@@ -152,10 +160,11 @@ export default function CampaignView() {
           ));
         }
       } catch (error) {
-        console.error("Error parsing team members:", error);
+        // Silently fall through to solo founder display for corrupted data
       }
     }
 
+    // Solo founder display
     return (
       <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
         <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
@@ -592,20 +601,34 @@ export default function CampaignView() {
 
       {/* Pitch Deck Modal */}
       <Dialog open={showPitchDeckModal} onOpenChange={setShowPitchDeckModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden" aria-describedby="pitch-deck-description">
           <DialogHeader>
             <DialogTitle className="flex items-center">
               <FileText className="mr-2" size={20} />
               {campaign?.title} - Pitch Deck
             </DialogTitle>
           </DialogHeader>
+          <div id="pitch-deck-description" className="sr-only">
+            View the pitch deck document for this campaign
+          </div>
           <div className="w-full h-[70vh] bg-gray-100 rounded-lg flex items-center justify-center">
             {campaign?.pitchDeckUrl ? (
-              <iframe
-                src={campaign.pitchDeckUrl}
-                className="w-full h-full rounded-lg"
-                title="Pitch Deck"
-              />
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="text-center text-gray-600">
+                  <FileText className="mx-auto h-20 w-20 mb-4 text-fundry-orange" />
+                  <h3 className="text-xl font-semibold mb-2">Pitch Deck Available</h3>
+                  <p className="mb-4">This campaign has uploaded a pitch deck document</p>
+                  <a 
+                    href={campaign.pitchDeckUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-fundry-orange text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    <FileText className="mr-2" size={16} />
+                    Open Pitch Deck
+                  </a>
+                </div>
+              </div>
             ) : (
               <div className="text-center text-gray-500">
                 <FileText className="mx-auto h-16 w-16 mb-4" />

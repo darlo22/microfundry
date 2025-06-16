@@ -1,8 +1,10 @@
+import { useState } from "react";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import OnboardingModal from "@/components/modals/onboarding-modal";
 import { 
   Check, 
   X, 
@@ -16,6 +18,7 @@ import {
 } from "lucide-react";
 
 export default function Pricing() {
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const plans = [
     {
       name: "Free Tier",
@@ -132,7 +135,7 @@ export default function Pricing() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto">
           {plans.map((plan, index) => (
             <Card key={index} className={`relative ${plan.color} ${plan.featured ? 'ring-2 ring-fundry-orange' : ''}`}>
               {plan.featured && (
@@ -156,7 +159,10 @@ export default function Pricing() {
                   <p className="text-sm text-gray-600">{plan.condition}</p>
                 </div>
                 
-                <Button className={`w-full ${plan.buttonStyle}`}>
+                <Button 
+                  className={`w-full ${plan.buttonStyle}`}
+                  onClick={() => setShowOnboarding(true)}
+                >
                   {plan.buttonText}
                 </Button>
               </CardHeader>
@@ -351,30 +357,7 @@ export default function Pricing() {
           </CardContent>
         </Card>
 
-        {/* Enterprise CTA */}
-        <Card className="mb-16 bg-fundry-navy text-white">
-          <CardContent className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">
-              Need a Custom Solution?
-            </h2>
-            <p className="text-lg mb-6 opacity-90 max-w-2xl mx-auto">
-              Large campaigns, institutional investors, or custom requirements? 
-              Our Enterprise plan offers tailored solutions with dedicated support.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-fundry-orange hover:bg-orange-600">
-                Contact Sales Team
-                <ArrowRight className="ml-2" size={16} />
-              </Button>
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-fundry-navy">
-                Schedule Demo
-              </Button>
-            </div>
-            <p className="text-sm opacity-75 mt-4">
-              Talk to our team about volume discounts and custom integrations
-            </p>
-          </CardContent>
-        </Card>
+
 
         {/* Final CTA */}
         <Card className="bg-gradient-to-r from-fundry-orange to-orange-600 text-white">
@@ -385,7 +368,10 @@ export default function Pricing() {
             <p className="text-lg mb-6 opacity-90">
               Join thousands of founders who have successfully raised capital through their networks.
             </p>
-            <Button className="bg-white text-fundry-orange hover:bg-gray-100 text-lg px-8 py-3">
+            <Button 
+              className="bg-white text-fundry-orange hover:bg-gray-100 text-lg px-8 py-3"
+              onClick={() => setShowOnboarding(true)}
+            >
               Create Your Campaign
             </Button>
             <p className="text-sm opacity-75 mt-4">
@@ -396,6 +382,12 @@ export default function Pricing() {
       </div>
 
       <Footer />
+
+      {/* Onboarding Modal */}
+      <OnboardingModal 
+        isOpen={showOnboarding} 
+        onClose={() => setShowOnboarding(false)} 
+      />
     </div>
   );
 }

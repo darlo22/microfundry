@@ -436,7 +436,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Note: Catch-all routing handled by Vite in development, serveStatic in production
+  // Catch-all handler for client-side routing
+  app.get('*', (req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
+      return next();
+    }
+    
+    // For all other routes, serve the React app
+    if (process.env.NODE_ENV === 'production') {
+      res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
+    } else {
+      // In development, Vite handles this
+      next();
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

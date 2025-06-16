@@ -436,6 +436,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Catch-all handler: send back React's index.html file for client-side routing
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'dist/client/index.html'));
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

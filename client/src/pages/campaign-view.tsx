@@ -523,7 +523,7 @@ export default function CampaignView() {
           {/* Investment Sidebar */}
           <div className="space-y-6">
             {/* Investment Card */}
-            <Card className="sticky top-24">
+            <Card>
               <CardContent className="p-6">
                 <div className="text-center mb-6">
                   <div className="text-4xl font-bold text-gray-900 mb-2">

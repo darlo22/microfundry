@@ -37,47 +37,24 @@ function Router() {
 
   return (
     <Switch>
-      {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/about" component={About} />
-          <Route path="/pricing" component={Pricing} />
-          <Route path="/browse-campaigns" component={BrowseCampaigns} />
-          <Route path="/how-it-works" component={HowItWorks} />
-          <Route path="/success-stories" component={SuccessStories} />
-          <Route path="/resources" component={Resources} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/blog" component={Blog} />
-          <Route path="/privacy-policy" component={PrivacyPolicy} />
-          <Route path="/terms-of-use" component={TermsOfUse} />
-          <Route path="/cookie-policy" component={CookiePolicy} />
-          <Route path="/investment-disclaimer" component={InvestmentDisclaimer} />
-          <Route path="/safe-agreement-template" component={SafeAgreementTemplate} />
-          <Route path="/campaign/:id" component={CampaignView} />
-          <Route path="/c/:privateLink" component={CampaignView} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/about" component={About} />
-          <Route path="/pricing" component={Pricing} />
-          <Route path="/browse-campaigns" component={BrowseCampaigns} />
-          <Route path="/how-it-works" component={HowItWorks} />
-          <Route path="/success-stories" component={SuccessStories} />
-          <Route path="/resources" component={Resources} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/blog" component={Blog} />
-          <Route path="/privacy-policy" component={PrivacyPolicy} />
-          <Route path="/terms-of-use" component={TermsOfUse} />
-          <Route path="/cookie-policy" component={CookiePolicy} />
-          <Route path="/investment-disclaimer" component={InvestmentDisclaimer} />
-          <Route path="/safe-agreement-template" component={SafeAgreementTemplate} />
-          <Route path="/founder/dashboard" component={FounderDashboard} />
-          <Route path="/investor/dashboard" component={InvestorDashboard} />
-          <Route path="/campaign/:id" component={CampaignView} />
-          <Route path="/c/:privateLink" component={CampaignView} />
-        </>
-      )}
+      <Route path="/" component={!isAuthenticated ? Landing : Home} />
+      <Route path="/about" component={About} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/browse-campaigns" component={BrowseCampaigns} />
+      <Route path="/how-it-works" component={HowItWorks} />
+      <Route path="/success-stories" component={SuccessStories} />
+      <Route path="/resources" component={Resources} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/blog" component={Blog} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/terms-of-use" component={TermsOfUse} />
+      <Route path="/cookie-policy" component={CookiePolicy} />
+      <Route path="/investment-disclaimer" component={InvestmentDisclaimer} />
+      <Route path="/safe-agreement-template" component={SafeAgreementTemplate} />
+      <Route path="/founder/dashboard" component={FounderDashboard} />
+      <Route path="/investor/dashboard" component={InvestorDashboard} />
+      <Route path="/campaign/:id" component={CampaignView} />
+      <Route path="/c/:privateLink" component={CampaignView} />
       <Route component={NotFound} />
     </Switch>
   );

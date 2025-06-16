@@ -8,6 +8,8 @@ import Footer from "@/components/layout/footer";
 import StatsCard from "@/components/dashboard/stats-card";
 import CampaignCard from "@/components/campaign/campaign-card";
 import CampaignCreationModal from "@/components/modals/campaign-creation-modal";
+import { ShareCampaignSelectorModal } from "@/components/modals/share-campaign-selector-modal";
+import { SafeTemplatesModal } from "@/components/modals/safe-templates-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Share, FileText, DollarSign, Rocket, Users, BarChart } from "lucide-react";
@@ -17,6 +19,8 @@ export default function FounderDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [showCampaignModal, setShowCampaignModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showSafeTemplatesModal, setShowSafeTemplatesModal] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -129,6 +133,7 @@ export default function FounderDashboard() {
               <Button
                 variant="outline"
                 className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group"
+                onClick={() => setShowShareModal(true)}
               >
                 <div className="w-10 h-10 bg-fundry-navy rounded-lg flex items-center justify-center mr-4">
                   <Share className="text-white" size={20} />
@@ -142,6 +147,7 @@ export default function FounderDashboard() {
               <Button
                 variant="outline"
                 className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group"
+                onClick={() => setShowSafeTemplatesModal(true)}
               >
                 <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4">
                   <FileText className="text-white" size={20} />
@@ -192,6 +198,17 @@ export default function FounderDashboard() {
       <CampaignCreationModal
         isOpen={showCampaignModal}
         onClose={() => setShowCampaignModal(false)}
+      />
+
+      <ShareCampaignSelectorModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        campaigns={campaigns || []}
+      />
+
+      <SafeTemplatesModal
+        isOpen={showSafeTemplatesModal}
+        onClose={() => setShowSafeTemplatesModal(false)}
       />
 
       <Footer />

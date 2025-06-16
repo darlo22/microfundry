@@ -11,6 +11,7 @@ import Pricing from "@/pages/pricing";
 import BrowseCampaigns from "@/pages/browse-campaigns";
 import HowItWorks from "@/pages/how-it-works";
 import SuccessStories from "@/pages/success-stories";
+import CaseStudy from "@/pages/case-study";
 import Resources from "@/pages/resources";
 import Contact from "@/pages/contact";
 import Blog from "@/pages/blog";
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/browse-campaigns" component={BrowseCampaigns} />
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/success-stories" component={SuccessStories} />
+      <Route path="/case-study/:id" component={CaseStudy} />
       <Route path="/resources" component={Resources} />
       <Route path="/contact" component={Contact} />
       <Route path="/blog" component={Blog} />

@@ -93,6 +93,9 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
     if (pitchDeckFile) {
       submitData.append('pitchDeck', pitchDeckFile);
     }
+    if (teamPhotoFile) {
+      submitData.append('teamPhoto', teamPhotoFile);
+    }
 
     updateMutation.mutate(submitData);
   };
@@ -290,6 +293,41 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                 placeholder="Describe how you'll use the funding"
                 rows={3}
               />
+            </div>
+          </div>
+
+          {/* Team Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900">Team Information</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="teamStructure">Team Structure</Label>
+              <Select value={formData.teamStructure} onValueChange={(value) => handleInputChange('teamStructure', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team structure" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Solo Founder">Solo Founder</SelectItem>
+                  <SelectItem value="Co-founders">Co-founders</SelectItem>
+                  <SelectItem value="Small Team (3-5)">Small Team (3-5)</SelectItem>
+                  <SelectItem value="Medium Team (6-15)">Medium Team (6-15)</SelectItem>
+                  <SelectItem value="Large Team (15+)">Large Team (15+)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="teamMembers">Team Members</Label>
+              <Textarea
+                id="teamMembers"
+                value={formData.teamMembers}
+                onChange={(e) => handleInputChange('teamMembers', e.target.value)}
+                placeholder="Describe your team members, their roles, and experience. Include LinkedIn profiles if available."
+                rows={4}
+              />
+              <p className="text-xs text-gray-500">
+                Include names, roles, experience, and LinkedIn profiles. This information will be displayed in the Meet the Team section.
+              </p>
             </div>
           </div>
 

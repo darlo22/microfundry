@@ -38,29 +38,29 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Platform</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/campaigns" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/browse-campaigns" className="text-gray-400 hover:text-white transition-colors">
                   Browse Campaigns
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/founder/dashboard" className="text-gray-400 hover:text-white transition-colors">
                   Dashboard
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/how-it-works" className="text-gray-400 hover:text-white transition-colors">
                   How It Works
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/success-stories" className="text-gray-400 hover:text-white transition-colors">
                   Success Stories
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/resources" className="text-gray-400 hover:text-white transition-colors">
                   Resources
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -80,19 +80,14 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Careers
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
                   Contact
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/blog" className="text-gray-400 hover:text-white transition-colors">
                   Blog
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

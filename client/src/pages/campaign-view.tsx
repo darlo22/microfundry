@@ -107,12 +107,12 @@ export default function CampaignView() {
   const renderTeamMembers = () => {
     if (!campaign) return null;
 
-    // Check if we have team data and it's not corrupted
+    // First, try to display structured team data if available
     if (campaign.teamStructure === "team" && campaign.teamMembers) {
       try {
         let teamData = campaign.teamMembers;
         
-        // Skip if it's the corrupted "[object Object]" string
+        // Handle string-encoded JSON
         if (typeof teamData === 'string') {
           if (teamData === '"[object Object]"' || teamData === '[object Object]') {
             throw new Error('Corrupted team data');
@@ -120,7 +120,7 @@ export default function CampaignView() {
           teamData = JSON.parse(teamData);
         }
         
-        // Ensure we have a valid array with proper data
+        // Display structured team members
         if (Array.isArray(teamData) && teamData.length > 0 && teamData[0].name) {
           return teamData.map((member: any, index: number) => (
             <div key={index} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -152,31 +152,57 @@ export default function CampaignView() {
           ));
         }
       } catch (error) {
-        // Silently fall through to solo founder display for corrupted data
+        // Fall through to check for text-based team description
       }
     }
 
-    // Solo founder display - only show if no team data is available
-    if (campaign.teamStructure === "solo") {
+    // Check for text-based team description as fallback
+    if (campaign.teamMembers && typeof campaign.teamMembers === 'string' && 
+        campaign.teamMembers.trim() && 
+        campaign.teamMembers !== '"[object Object]"' && 
+        campaign.teamMembers !== '[object Object]') {
       return (
-        <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
-          <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
-            <span className="text-white text-xl font-bold">
-              {campaign.title.charAt(0)}
-            </span>
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-lg text-gray-900">Solo Founder</h3>
-            <p className="text-fundry-orange font-medium mb-2">CEO & Founder</p>
-            <p className="text-sm text-gray-600">
-              {campaign.businessSector ? `Experienced in ${campaign.businessSector}` : "Leading this venture"}
-            </p>
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <div className="flex items-start space-x-4">
+            <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xl font-bold">
+                {campaign.title.charAt(0)}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg text-gray-900 mb-3">Team Information</h3>
+              <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                {campaign.teamMembers}
+              </div>
+            </div>
           </div>
         </div>
       );
     }
 
-    // Return null if no valid team data to display
+    // Solo founder display
+    if (campaign.teamStructure === "solo") {
+      return (
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <div className="flex items-start space-x-4">
+            <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
+              <span className="text-white text-xl font-bold">
+                {campaign.title.charAt(0)}
+              </span>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg text-gray-900 mb-1">Solo Founder</h3>
+              <p className="text-fundry-orange font-medium mb-3">CEO & Founder</p>
+              <p className="text-sm text-gray-600">
+                {campaign.businessSector ? `Experienced in ${campaign.businessSector}` : "Leading this venture independently"}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Default message only when no team data exists
     return (
       <div className="text-center text-gray-500 py-8">
         <p>Team information will be displayed once provided by the founder.</p>

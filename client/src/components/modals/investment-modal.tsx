@@ -23,7 +23,8 @@ import {
   Clock,
   Signature,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  Download
 } from "lucide-react";
 import type { CampaignWithStats } from "@/lib/types";
 
@@ -329,11 +330,26 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
             </div>
 
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-              <div className="text-center">
+              <div className="text-center mb-4">
                 <Shield className="mx-auto h-8 w-8 text-blue-500 mb-2" />
                 <p className="text-sm text-gray-600">
                   Your investment will convert to equity upon the next qualifying financing round or liquidity event.
                 </p>
+              </div>
+              
+              <div className="flex justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    // Generate SAFE agreement PDF with current investment details
+                    const safeContent = generateSafeAgreement(campaign, selectedAmount);
+                    downloadSafeAgreement(safeContent, campaign.title, selectedAmount);
+                  }}
+                  className="flex items-center gap-2 border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white"
+                >
+                  <Download className="w-4 h-4" />
+                  Download SAFE Agreement
+                </Button>
               </div>
             </div>
           </div>

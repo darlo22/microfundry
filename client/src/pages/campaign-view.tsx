@@ -1,0 +1,347 @@
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useParams, useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import Navbar from "@/components/layout/navbar";
+import InvestmentModal from "@/components/modals/investment-modal";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { 
+  ArrowLeft, 
+  Share, 
+  FileText, 
+  Calendar, 
+  MapPin, 
+  Building,
+  Clock,
+  Users,
+  DollarSign
+} from "lucide-react";
+import type { CampaignWithStats } from "@/lib/types";
+
+export default function CampaignView() {
+  const params = useParams();
+  const [, setLocation] = useLocation();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const { toast } = useToast();
+  const [showInvestmentModal, setShowInvestmentModal] = useState(false);
+
+  // Get campaign ID from URL params (either /campaign/:id or /c/:privateLink)
+  const campaignId = params.id;
+  const privateLink = params.privateLink;
+
+  // Determine API endpoint based on URL structure
+  const apiUrl = campaignId 
+    ? `/api/campaigns/${campaignId}`
+    : `/api/campaigns/link/${privateLink}`;
+
+  // Fetch campaign data
+  const { data: campaign, isLoading: campaignLoading, error } = useQuery<CampaignWithStats>({
+    queryKey: [apiUrl],
+    retry: false,
+  });
+
+  // Fetch recent investors (mock data for now)
+  const recentInvestors = [
+    { initials: "JD", name: "John Doe", amount: "$250", timeAgo: "2 hours ago" },
+    { initials: "SM", name: "Sarah Miller", amount: "$500", timeAgo: "1 day ago" },
+    { initials: "MJ", name: "Mike Johnson", amount: "$100", timeAgo: "2 days ago" },
+  ];
+
+  const handleBackToDashboard = () => {
+    if (user?.userType === "founder") {
+      setLocation("/founder/dashboard");
+    } else {
+      setLocation("/investor/dashboard");
+    }
+  };
+
+  const handleInvest = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to invest in this campaign.",
+        variant: "destructive",
+      });
+      window.location.href = "/api/login";
+      return;
+    }
+    setShowInvestmentModal(true);
+  };
+
+  const handleShare = () => {
+    if (campaign?.privateLink) {
+      const shareUrl = `${window.location.origin}/c/${campaign.privateLink}`;
+      navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link Copied",
+        description: "Campaign link has been copied to your clipboard.",
+      });
+    }
+  };
+
+  const formatCurrency = (amount: string | number) => {
+    const num = typeof amount === "string" ? parseFloat(amount) : amount;
+    return `$${num.toLocaleString()}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "paused":
+        return "bg-yellow-100 text-yellow-800";
+      case "closed":
+        return "bg-gray-100 text-gray-800";
+      case "funded":
+        return "bg-blue-100 text-blue-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  if (isLoading || campaignLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange"></div>
+      </div>
+    );
+  }
+
+  if (error || !campaign) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Campaign Not Found</h1>
+          <p className="text-gray-600 mb-8">The campaign you're looking for doesn't exist or has been removed.</p>
+          <Button onClick={() => setLocation("/")} className="bg-fundry-orange hover:bg-orange-600">
+            Go Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Campaign Navigation */}
+      <Navbar 
+        title={
+          <Button 
+            variant="ghost" 
+            onClick={handleBackToDashboard}
+            className="flex items-center text-gray-600 hover:text-fundry-orange"
+          >
+            <ArrowLeft className="mr-2" size={16} />
+            Back to Dashboard
+          </Button>
+        }
+        actions={
+          <Button onClick={handleShare} className="bg-fundry-orange hover:bg-orange-600">
+            <Share className="mr-2" size={16} />
+            Share Campaign
+          </Button>
+        }
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Campaign Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Campaign Header */}
+            <Card>
+              <CardContent className="p-8">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <h1 className="text-3xl font-bold text-gray-900">{campaign.title}</h1>
+                      <Badge className={getStatusColor(campaign.status)}>
+                        {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
+                      </Badge>
+                    </div>
+                    <p className="text-xl text-gray-600 mb-6">{campaign.shortPitch}</p>
+                    
+                    <div className="flex items-center space-x-6 text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <Building className="mr-2" size={16} />
+                        <span>Technology</span>
+                      </div>
+                      <div className="flex items-center">
+                        <MapPin className="mr-2" size={16} />
+                        <span>San Francisco, CA</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Calendar className="mr-2" size={16} />
+                        <span>Started {formatDate(campaign.createdAt)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Company Logo */}
+                  <div className="w-20 h-20 bg-fundry-orange-gradient rounded-xl flex items-center justify-center ml-6">
+                    {campaign.logoUrl ? (
+                      <img 
+                        src={campaign.logoUrl} 
+                        alt={campaign.title}
+                        className="w-16 h-16 object-cover rounded-lg"
+                      />
+                    ) : (
+                      <span className="text-white text-2xl font-bold">
+                        {campaign.title.charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Campaign Description */}
+            <Card>
+              <CardContent className="p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">About This Campaign</h2>
+                <div className="prose max-w-none text-gray-700 leading-relaxed">
+                  {campaign.fullPitch.split('\n').map((paragraph, index) => (
+                    <p key={index} className="mb-4">{paragraph}</p>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Pitch Deck Viewer */}
+            <Card>
+              <CardContent className="p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Pitch Deck</h2>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+                  <FileText className="mx-auto h-16 w-16 text-red-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {campaign.title}_PitchDeck.pdf
+                  </h3>
+                  <p className="text-gray-600 mb-6">12 slides • 2.4 MB</p>
+                  <Button className="bg-fundry-orange hover:bg-orange-600">
+                    <FileText className="mr-2" size={16} />
+                    View Pitch Deck
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Investment Sidebar */}
+          <div className="space-y-6">
+            {/* Investment Card */}
+            <Card className="sticky top-24">
+              <CardContent className="p-6">
+                <div className="text-center mb-6">
+                  <div className="text-4xl font-bold text-gray-900 mb-2">
+                    {formatCurrency(campaign.totalRaised)}
+                  </div>
+                  <div className="text-gray-600">
+                    raised of <span className="font-semibold">{formatCurrency(campaign.fundingGoal)}</span> goal
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <Progress value={campaign.progressPercent} className="h-3 mb-2" />
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{campaign.progressPercent}% funded</span>
+                    {campaign.deadline && (
+                      <span>
+                        {Math.ceil((new Date(campaign.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{campaign.investorCount}</div>
+                    <div className="text-sm text-gray-600">Investors</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {campaign.investorCount > 0 
+                        ? formatCurrency(Math.round(parseFloat(campaign.totalRaised) / campaign.investorCount))
+                        : "$0"
+                      }
+                    </div>
+                    <div className="text-sm text-gray-600">Avg. Investment</div>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleInvest}
+                  className="w-full bg-fundry-orange hover:bg-orange-600 text-lg font-semibold py-4 mb-4"
+                >
+                  Invest Now
+                </Button>
+
+                <div className="text-center text-sm text-gray-500">
+                  Minimum investment: <span className="font-medium">{formatCurrency(campaign.minimumInvestment)}</span>
+                </div>
+
+                <div className="mt-6 pt-6 border-t">
+                  <h3 className="font-semibold text-gray-900 mb-3">SAFE Agreement Terms</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Discount Rate:</span>
+                      <span className="font-medium">{campaign.discountRate}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Valuation Cap:</span>
+                      <span className="font-medium">{formatCurrency(campaign.valuationCap || "1000000")}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Investors */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-gray-900 mb-4">Recent Investors</h3>
+                <div className="space-y-3">
+                  {recentInvestors.map((investor, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center">
+                          <span className="text-white text-sm font-semibold">{investor.initials}</span>
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900">{investor.name}</div>
+                          <div className="text-xs text-gray-500">{investor.timeAgo}</div>
+                        </div>
+                      </div>
+                      <div className="font-semibold text-gray-900">{investor.amount}</div>
+                    </div>
+                  ))}
+                </div>
+                
+                <Button variant="link" className="w-full mt-4 text-fundry-orange hover:text-orange-600 text-sm">
+                  View All Investors
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      <InvestmentModal
+        isOpen={showInvestmentModal}
+        onClose={() => setShowInvestmentModal(false)}
+        campaign={campaign}
+      />
+    </div>
+  );
+}

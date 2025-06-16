@@ -93,16 +93,16 @@ export default function BrowseCampaigns() {
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg">
+          <Card className="bg-green-100 text-green-900 shadow-lg border border-green-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-emerald-100 font-medium">Total Investors</p>
-                  <p className="text-3xl font-bold text-white">
+                  <p className="text-green-700 font-medium">Total Investors</p>
+                  <p className="text-3xl font-bold text-green-900">
                     {campaigns.reduce((sum, c) => sum + (c.investorCount || 0), 0)}
                   </p>
                 </div>
-                <Users className="h-8 w-8 text-white" />
+                <Users className="h-8 w-8 text-green-700" />
               </div>
             </CardContent>
           </Card>

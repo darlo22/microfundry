@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, requireAuth } from "./auth";
 import { 
   insertBusinessProfileSchema,
   insertCampaignSchema,
@@ -31,24 +31,12 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
-
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  setupAuth(app);
 
   // Business profile routes
-  app.post('/api/business-profile', isAuthenticated, async (req: any, res) => {
+  app.post('/api/business-profile', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const data = insertBusinessProfileSchema.parse({
         ...req.body,
         userId,
@@ -62,9 +50,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/business-profile', isAuthenticated, async (req: any, res) => {
+  app.get('/api/business-profile', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profile = await storage.getBusinessProfile(userId);
       res.json(profile);
     } catch (error) {
@@ -74,12 +62,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Campaign routes
-  app.post('/api/campaigns', isAuthenticated, upload.fields([
+  app.post('/api/campaigns', requireAuth, upload.fields([
     { name: 'logo', maxCount: 1 },
     { name: 'pitchDeck', maxCount: 1 }
   ]), async (req: any, res) => {
     try {
-      const founderId = req.user.claims.sub;
+      const founderId = req.user.id;
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
       
       // Generate unique private link
@@ -102,10 +90,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/campaigns/founder/:founderId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/campaigns/founder/:founderId', requireAuth, async (req: any, res) => {
     try {
       const { founderId } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Ensure user can only access their own campaigns
       if (founderId !== userId) {
@@ -154,10 +142,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/campaigns/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/campaigns/:id', requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       const campaign = await storage.getCampaign(parseInt(id));
       if (!campaign || campaign.founderId !== userId) {
@@ -173,9 +161,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Investment routes
-  app.post('/api/investments', isAuthenticated, async (req: any, res) => {
+  app.post('/api/investments', requireAuth, async (req: any, res) => {
     try {
-      const investorId = req.user.claims.sub;
+      const investorId = req.user.id;
       const { campaignId, amount } = req.body;
       
       const platformFee = Math.round(amount * 0.025 * 100) / 100;
@@ -216,10 +204,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/investments/investor/:investorId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/investments/investor/:investorId', requireAuth, async (req: any, res) => {
     try {
       const { investorId } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       if (investorId !== userId) {
         return res.status(403).json({ message: "Access denied" });
@@ -233,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/investments/campaign/:campaignId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/investments/campaign/:campaignId', requireAuth, async (req: any, res) => {
     try {
       const { campaignId } = req.params;
       const investments = await storage.getInvestmentsByCampaign(parseInt(campaignId));
@@ -244,11 +232,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/investments/:id/sign', isAuthenticated, async (req: any, res) => {
+  app.put('/api/investments/:id/sign', requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       const { signature } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       const investment = await storage.getInvestment(parseInt(id));
       if (!investment || investment.investorId !== userId) {
@@ -279,10 +267,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Analytics routes
-  app.get('/api/analytics/founder/:founderId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/analytics/founder/:founderId', requireAuth, async (req: any, res) => {
     try {
       const { founderId } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       if (founderId !== userId) {
         return res.status(403).json({ message: "Access denied" });
@@ -296,10 +284,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/analytics/investor/:investorId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/analytics/investor/:investorId', requireAuth, async (req: any, res) => {
     try {
       const { investorId } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       if (investorId !== userId) {
         return res.status(403).json({ message: "Access denied" });

@@ -61,6 +61,59 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
     return amount + calculateFee(amount);
   };
 
+  const generateSafeAgreement = (campaign: CampaignWithStats, amount: number) => {
+    const currentDate = new Date().toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    
+    return `
+SIMPLE AGREEMENT FOR FUTURE EQUITY
+
+THIS CERTIFIES THAT in exchange for the payment by the undersigned investor ("Investor") of $${amount.toLocaleString()} (the "Purchase Amount") on or about ${currentDate}, ${campaign.title} (the "Company"), hereby issues to the Investor the right to certain shares of the Company's Capital Stock, subject to the terms described below.
+
+INVESTMENT TERMS:
+• Investment Amount: $${amount.toLocaleString()}
+• Discount Rate: ${campaign.discountRate}%
+• Valuation Cap: $${parseFloat(campaign.valuationCap || "1000000").toLocaleString()}
+• Date of Agreement: ${currentDate}
+
+CONVERSION EVENTS:
+This investment will automatically convert to equity shares upon:
+1. Next qualifying financing round (Series A or later)
+2. Liquidity event (acquisition, merger, or IPO)
+3. Company dissolution
+
+INVESTOR RIGHTS:
+• Right to receive shares at a discount during conversion
+• Pro-rata rights in future financing rounds
+• Information rights as specified in company bylaws
+
+COMPANY INFORMATION:
+• Legal Name: ${campaign.title}
+• Business Description: ${campaign.shortPitch}
+• Registered Address: [To be completed upon signing]
+
+This agreement is governed by the laws of Delaware and represents a legally binding contract between the Investor and the Company.
+
+Generated on: ${currentDate}
+Platform: Fundry Investment Platform
+    `.trim();
+  };
+
+  const downloadSafeAgreement = (content: string, companyName: string, amount: number) => {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `SAFE_Agreement_${companyName.replace(/[^a-zA-Z0-9]/g, '_')}_$${amount}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
   const createInvestmentMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await apiRequest("POST", "/api/investments", data);

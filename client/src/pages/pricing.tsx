@@ -59,27 +59,6 @@ export default function Pricing() {
         { name: "Investor CRM tools", included: true },
         { name: "Phone support", included: false }
       ]
-    },
-    {
-      name: "Enterprise",
-      description: "For large campaigns and institutional use",
-      price: "Custom",
-      condition: "Contact us for enterprise pricing",
-      color: "border-fundry-navy",
-      buttonText: "Contact Sales",
-      buttonStyle: "bg-fundry-navy hover:bg-blue-800",
-      features: [
-        { name: "Everything in Standard", included: true },
-        { name: "Dedicated account manager", included: true },
-        { name: "Custom fee structure", included: true },
-        { name: "White-label options", included: true },
-        { name: "API access", included: true },
-        { name: "Advanced compliance tools", included: true },
-        { name: "24/7 phone support", included: true },
-        { name: "Custom integrations", included: true },
-        { name: "SLA guarantees", included: true },
-        { name: "On-site training", included: true }
-      ]
     }
   ];
 

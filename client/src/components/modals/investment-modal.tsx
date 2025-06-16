@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { FundryLogo } from "@/components/ui/fundry-logo";
 import { 
   CreditCard, 
   FileText, 
@@ -60,6 +61,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authUsername, setAuthUsername] = useState("");
+  const [selectedUserType, setSelectedUserType] = useState<'founder' | 'investor'>('investor');
   
   // Investor details state
   const [investorDetails, setInvestorDetails] = useState({
@@ -149,12 +151,23 @@ Platform: Fundry Investment Platform
       });
       return response.json();
     },
-    onSuccess: () => {
-      setCurrentStep('investor-details');
-      toast({
-        title: "Successfully signed in",
-        description: "Welcome back! Please complete your investor details.",
-      });
+    onSuccess: (userData) => {
+      if (userData.userType === 'founder') {
+        toast({
+          title: "Successfully signed in",
+          description: "Redirecting to founder dashboard...",
+        });
+        setTimeout(() => {
+          setLocation('/founder/dashboard');
+          onClose();
+        }, 1000);
+      } else {
+        setCurrentStep('investor-details');
+        toast({
+          title: "Successfully signed in",
+          description: "Welcome back! Please complete your investor details.",
+        });
+      }
     },
     onError: (error) => {
       toast({
@@ -166,19 +179,27 @@ Platform: Fundry Investment Platform
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (credentials: { username: string; email: string; password: string }) => {
-      const response = await apiRequest("POST", "/api/register", {
-        ...credentials,
-        userType: 'investor'
-      });
+    mutationFn: async (credentials: { username: string; email: string; password: string; userType: string }) => {
+      const response = await apiRequest("POST", "/api/register", credentials);
       return response.json();
     },
-    onSuccess: () => {
-      setCurrentStep('investor-details');
-      toast({
-        title: "Account created successfully",
-        description: "Welcome to Fundry! Please complete your investor details.",
-      });
+    onSuccess: (userData) => {
+      if (selectedUserType === 'founder') {
+        toast({
+          title: "Account created successfully",
+          description: "Redirecting to founder dashboard...",
+        });
+        setTimeout(() => {
+          setLocation('/founder/dashboard');
+          onClose();
+        }, 1000);
+      } else {
+        setCurrentStep('investor-details');
+        toast({
+          title: "Account created successfully",
+          description: "Welcome to Fundry! Please complete your investor details.",
+        });
+      }
     },
     onError: (error) => {
       toast({
@@ -256,7 +277,12 @@ Platform: Fundry Investment Platform
       }
     } else {
       if (authUsername && authEmail && authPassword) {
-        registerMutation.mutate({ username: authUsername, email: authEmail, password: authPassword });
+        registerMutation.mutate({ 
+          username: authUsername, 
+          email: authEmail, 
+          password: authPassword, 
+          userType: selectedUserType 
+        });
       } else {
         toast({
           title: "Missing Information",
@@ -429,6 +455,247 @@ Platform: Fundry Investment Platform
 
   const renderStepContent = () => {
     switch (currentStep) {
+      case 'auth':
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <FundryLogo className="h-16 w-auto mx-auto mb-6" linkToHome={false} />
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                {authMode === 'signin' ? 'Welcome Back' : 'Join Fundry'}
+              </h3>
+              <p className="text-gray-600">
+                {authMode === 'signin' 
+                  ? 'Sign in to your account'
+                  : 'Create your account to get started'
+                }
+              </p>
+            </div>
+
+            <div className="flex border rounded-lg p-1 bg-gray-100">
+              <button
+                onClick={() => setAuthMode('signin')}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  authMode === 'signin'
+                    ? 'bg-white text-fundry-navy shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => setAuthMode('signup')}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  authMode === 'signup'
+                    ? 'bg-white text-fundry-navy shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Sign Up
+              </button>
+            </div>
+
+            {authMode === 'signup' && (
+              <div>
+                <Label className="text-sm font-medium text-gray-700">I am a:</Label>
+                <div className="flex border rounded-lg p-1 bg-gray-100 mt-2">
+                  <button
+                    onClick={() => setSelectedUserType('investor')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      selectedUserType === 'investor'
+                        ? 'bg-white text-fundry-navy shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Investor
+                  </button>
+                  <button
+                    onClick={() => setSelectedUserType('founder')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      selectedUserType === 'founder'
+                        ? 'bg-white text-fundry-navy shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Founder
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {authMode === 'signup' && (
+                <div>
+                  <Label htmlFor="auth-username">Username</Label>
+                  <Input
+                    id="auth-username"
+                    type="text"
+                    value={authUsername}
+                    onChange={(e) => setAuthUsername(e.target.value)}
+                    placeholder="Enter your username"
+                    required
+                  />
+                </div>
+              )}
+              
+              <div>
+                <Label htmlFor="auth-email">Email</Label>
+                <Input
+                  id="auth-email"
+                  type="email"
+                  value={authEmail}
+                  onChange={(e) => setAuthEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="auth-password">Password</Label>
+                <Input
+                  id="auth-password"
+                  type="password"
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+            </div>
+
+            {authMode === 'signin' && (
+              <div className="text-center">
+                <p className="text-gray-600">
+                  Don't have an account?{' '}
+                  <button 
+                    onClick={() => setAuthMode('signup')}
+                    className="text-fundry-orange hover:text-orange-600 font-medium"
+                  >
+                    Create account
+                  </button>
+                </p>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'investor-details':
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <User className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Investor Information</h3>
+              <p className="text-gray-600">Please provide your details for the investment agreement</p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="full-name">Full Legal Name *</Label>
+                  <Input
+                    id="full-name"
+                    value={investorDetails.fullName}
+                    onChange={(e) => setInvestorDetails({...investorDetails, fullName: e.target.value})}
+                    placeholder="Enter your full legal name"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="investor-email">Email Address *</Label>
+                  <Input
+                    id="investor-email"
+                    type="email"
+                    value={investorDetails.email}
+                    onChange={(e) => setInvestorDetails({...investorDetails, email: e.target.value})}
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="phone">Phone Number *</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={investorDetails.phone}
+                  onChange={(e) => setInvestorDetails({...investorDetails, phone: e.target.value})}
+                  placeholder="Enter your phone number"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="address">Street Address *</Label>
+                <Input
+                  id="address"
+                  value={investorDetails.address}
+                  onChange={(e) => setInvestorDetails({...investorDetails, address: e.target.value})}
+                  placeholder="Enter your street address"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="city">City *</Label>
+                  <Input
+                    id="city"
+                    value={investorDetails.city}
+                    onChange={(e) => setInvestorDetails({...investorDetails, city: e.target.value})}
+                    placeholder="City"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="state">State *</Label>
+                  <Input
+                    id="state"
+                    value={investorDetails.state}
+                    onChange={(e) => setInvestorDetails({...investorDetails, state: e.target.value})}
+                    placeholder="State"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="zip">ZIP Code *</Label>
+                  <Input
+                    id="zip"
+                    value={investorDetails.zipCode}
+                    onChange={(e) => setInvestorDetails({...investorDetails, zipCode: e.target.value})}
+                    placeholder="ZIP"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="accredited"
+                    checked={investorDetails.accreditedInvestor}
+                    onCheckedChange={(checked) => 
+                      setInvestorDetails({...investorDetails, accreditedInvestor: checked as boolean})
+                    }
+                  />
+                  <Label htmlFor="accredited" className="text-sm">
+                    I am an accredited investor (optional)
+                  </Label>
+                </div>
+                
+                <div>
+                  <Label htmlFor="experience">Investment Experience (optional)</Label>
+                  <Input
+                    id="experience"
+                    value={investorDetails.investmentExperience}
+                    onChange={(e) => setInvestorDetails({...investorDetails, investmentExperience: e.target.value})}
+                    placeholder="Brief description of your investment experience"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
       case 'amount':
         return (
           <div className="space-y-6">

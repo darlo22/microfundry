@@ -78,10 +78,8 @@ export default function CampaignView() {
   };
 
   const handleEdit = () => {
-    toast({
-      title: "Edit Feature",
-      description: "Campaign editing will be available soon",
-    });
+    // Navigate to edit campaign page or open edit modal
+    setLocation(`/campaign/${campaign?.id}/edit`);
   };
 
   const handleShare = async () => {
@@ -89,28 +87,45 @@ export default function CampaignView() {
     
     const shareUrl = `${window.location.origin}/c/${campaign.privateLink}`;
     const shareData = {
-      title: campaign.title,
-      text: campaign.shortPitch,
+      title: `${campaign.title} - Investment Opportunity`,
+      text: `Check out this investment opportunity: ${campaign.shortPitch}`,
       url: shareUrl,
     };
 
     try {
-      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      // Try native sharing first (mobile devices)
+      if (navigator.share && window.innerWidth <= 768) {
         await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
+        return;
+      }
+      
+      // For desktop, copy to clipboard
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link Copied!",
+        description: "Campaign sharing link copied to clipboard. Share it with potential investors.",
+      });
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
         toast({
-          title: "Link Copied",
-          description: "Campaign link has been copied to your clipboard.",
+          title: "Link Copied!",
+          description: "Campaign sharing link copied to clipboard.",
+        });
+      } catch (fallbackError) {
+        toast({
+          title: "Copy Failed",
+          description: `Please copy this link manually: ${shareUrl}`,
+          variant: "destructive",
         });
       }
-    } catch (error) {
-      console.error("Error sharing:", error);
-      toast({
-        title: "Share failed",
-        description: "Please try copying the link manually",
-        variant: "destructive",
-      });
+      document.body.removeChild(textArea);
     }
   };
 
@@ -186,15 +201,16 @@ export default function CampaignView() {
 
     const metrics = [];
     
-    if (campaign.currentRevenue) {
+    // Add real metrics from campaign data
+    if (campaign.currentRevenue && campaign.currentRevenue !== "0") {
       metrics.push({
         label: "Monthly Revenue",
-        value: campaign.currentRevenue,
+        value: campaign.currentRevenue.startsWith('$') ? campaign.currentRevenue : `$${campaign.currentRevenue}`,
         color: "text-blue-600"
       });
     }
     
-    if (campaign.customers) {
+    if (campaign.customers && campaign.customers !== "0") {
       metrics.push({
         label: "Active Users",
         value: campaign.customers,
@@ -202,20 +218,38 @@ export default function CampaignView() {
       });
     }
 
-    if (campaign.previousFunding) {
+    if (campaign.previousFunding && campaign.previousFunding !== "0") {
       metrics.push({
         label: "Previous Funding",
-        value: campaign.previousFunding,
+        value: campaign.previousFunding.startsWith('$') ? campaign.previousFunding : `$${campaign.previousFunding}`,
         color: "text-purple-600"
       });
     }
 
-    if (metrics.length === 0) {
-      metrics.push(
-        { label: "Stage", value: campaign.startupStage || "Early Stage", color: "text-blue-600" },
-        { label: "Status", value: "Pre-revenue", color: "text-green-600" },
-        { label: "Growth", value: "25%", color: "text-purple-600" }
-      );
+    // If we have the startup stage, always show it
+    if (campaign.startupStage) {
+      metrics.unshift({
+        label: "Stage",
+        value: campaign.startupStage.charAt(0).toUpperCase() + campaign.startupStage.slice(1),
+        color: "text-blue-600"
+      });
+    }
+
+    // Fill remaining slots with status indicators if needed
+    while (metrics.length < 3) {
+      if (metrics.length === 1) {
+        metrics.push({
+          label: "Status",
+          value: campaign.currentRevenue && campaign.currentRevenue !== "0" ? "Revenue Generating" : "Pre-revenue",
+          color: "text-green-600"
+        });
+      } else if (metrics.length === 2) {
+        metrics.push({
+          label: "Investment Progress",
+          value: `${campaign.progressPercent}%`,
+          color: "text-purple-600"
+        });
+      }
     }
 
     return (
@@ -618,15 +652,20 @@ export default function CampaignView() {
                   <FileText className="mx-auto h-20 w-20 mb-4 text-fundry-orange" />
                   <h3 className="text-xl font-semibold mb-2">Pitch Deck Available</h3>
                   <p className="mb-4">This campaign has uploaded a pitch deck document</p>
-                  <a 
-                    href={campaign.pitchDeckUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 bg-fundry-orange text-white rounded-lg hover:bg-orange-600 transition-colors"
-                  >
-                    <FileText className="mr-2" size={16} />
-                    Open Pitch Deck
-                  </a>
+                  <div className="space-y-3">
+                    <a 
+                      href={campaign.pitchDeckUrl.startsWith('/') ? campaign.pitchDeckUrl : `/${campaign.pitchDeckUrl}`}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-4 py-2 bg-fundry-orange text-white rounded-lg hover:bg-orange-600 transition-colors"
+                    >
+                      <FileText className="mr-2" size={16} />
+                      Open Pitch Deck
+                    </a>
+                    <div className="text-xs text-gray-500">
+                      Opens in new tab for viewing
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (

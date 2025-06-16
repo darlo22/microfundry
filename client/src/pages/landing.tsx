@@ -3,11 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartLine, Rocket, Shield, Users, BarChart, Smartphone, Headphones } from "lucide-react";
 import OnboardingModal from "@/components/modals/onboarding-modal";
+import LearnMoreModal from "@/components/modals/learn-more-modal";
+import InvestorInfoModal from "@/components/modals/investor-info-modal";
 import Footer from "@/components/layout/footer";
+import { Link } from "wouter";
 
 export default function Landing() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [showLearnMoreModal, setShowLearnMoreModal] = useState(false);
+  const [showInvestorModal, setShowInvestorModal] = useState(false);
 
   const handleGetStarted = () => {
     setAuthMode("signup");
@@ -34,8 +39,18 @@ export default function Landing() {
               </div>
               <div className="hidden md:flex space-x-6">
                 <a href="#how-it-works" className="text-gray-700 hover:text-fundry-orange transition-colors">How it Works</a>
-                <a href="#features" className="text-gray-700 hover:text-fundry-orange transition-colors">For Founders</a>
-                <a href="#features" className="text-gray-700 hover:text-fundry-orange transition-colors">For Investors</a>
+                <button 
+                  onClick={() => setShowLearnMoreModal(true)}
+                  className="text-gray-700 hover:text-fundry-orange transition-colors"
+                >
+                  For Founders
+                </button>
+                <button 
+                  onClick={() => setShowInvestorModal(true)}
+                  className="text-gray-700 hover:text-fundry-orange transition-colors"
+                >
+                  For Investors
+                </button>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -80,6 +95,7 @@ export default function Landing() {
                 <Button 
                   variant="outline" 
                   size="lg"
+                  onClick={() => setShowLearnMoreModal(true)}
                   className="border-2 border-white text-fundry-navy bg-white hover:bg-gray-100 hover:text-fundry-navy text-lg px-8 py-4"
                 >
                   Learn More
@@ -246,6 +262,22 @@ export default function Landing() {
         onClose={() => setShowAuthModal(false)}
         mode={authMode}
         onModeChange={setAuthMode}
+      />
+
+      <LearnMoreModal
+        isOpen={showLearnMoreModal}
+        onClose={() => setShowLearnMoreModal(false)}
+        onGetStarted={handleGetStarted}
+      />
+
+      <InvestorInfoModal
+        isOpen={showInvestorModal}
+        onClose={() => setShowInvestorModal(false)}
+        onGetStarted={() => {
+          setShowInvestorModal(false);
+          setAuthMode("signup");
+          setShowAuthModal(true);
+        }}
       />
     </div>
   );

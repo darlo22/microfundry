@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartLine, Rocket, Shield, Users, BarChart, Smartphone, Headphones } from "lucide-react";
 import AuthModal from "@/components/modals/auth-modal";
+import Footer from "@/components/layout/footer";
 
 export default function Landing() {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -237,6 +238,8 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      <Footer />
 
       <AuthModal 
         isOpen={showAuthModal}

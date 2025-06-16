@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import Navbar from "@/components/layout/navbar";
+import Footer from "@/components/layout/footer";
 import StatsCard from "@/components/dashboard/stats-card";
 import CampaignCard from "@/components/campaign/campaign-card";
 import CampaignCreationModal from "@/components/modals/campaign-creation-modal";
@@ -192,6 +193,8 @@ export default function FounderDashboard() {
         isOpen={showCampaignModal}
         onClose={() => setShowCampaignModal(false)}
       />
+
+      <Footer />
     </div>
   );
 }

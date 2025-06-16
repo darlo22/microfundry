@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/layout/navbar";
+import Footer from "@/components/layout/footer";
 import StatsCard from "@/components/dashboard/stats-card";
 import InvestmentCard from "@/components/investment/investment-card";
 import { Button } from "@/components/ui/button";

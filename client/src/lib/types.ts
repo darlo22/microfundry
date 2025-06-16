@@ -23,6 +23,19 @@ export interface CampaignWithStats {
   totalRaised: string;
   investorCount: number;
   progressPercent: number;
+  // Additional campaign creation fields
+  businessSector?: string;
+  startupStage?: string;
+  teamStructure?: string;
+  teamMembers?: string | any[];
+  currentRevenue?: string;
+  customers?: string;
+  previousFunding?: string;
+  businessModel?: string;
+  useOfFunds?: string;
+  marketSize?: string;
+  competitiveLandscape?: string;
+  riskFactors?: string;
 }
 
 export interface InvestmentWithCampaign {

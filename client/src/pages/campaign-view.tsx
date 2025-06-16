@@ -288,8 +288,18 @@ export default function CampaignView() {
               className="flex items-center text-gray-600 hover:text-fundry-orange"
             >
               <ArrowLeft className="mr-2" size={16} />
-              Back to Dashboard
+              Previous
             </Button>
+            {user?.id === campaign?.founderId && (
+              <Button 
+                variant="outline" 
+                onClick={handleEdit}
+                className="flex items-center border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white"
+              >
+                <Edit className="mr-2" size={16} />
+                Edit
+              </Button>
+            )}
             <Button onClick={handleShare} className="bg-fundry-orange hover:bg-orange-600">
               <Share className="mr-2" size={16} />
               Share
@@ -409,34 +419,21 @@ export default function CampaignView() {
             {/* Traction & Metrics */}
             <Card>
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Traction & Key Metrics</h2>
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="text-center p-6 bg-blue-50 rounded-xl">
-                    <div className="text-3xl font-bold text-blue-600 mb-2">$125K</div>
-                    <div className="text-sm text-gray-600">Monthly Revenue</div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Traction & Growth</h2>
+                {renderTractionMetrics()}
+                <div className="space-y-4">
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <h3 className="font-semibold text-lg text-gray-900 mb-2">Business Model</h3>
+                    <p className="text-gray-600">
+                      {campaign.businessModel || "Subscription-based SaaS model with tiered pricing structure"}
+                    </p>
                   </div>
-                  <div className="text-center p-6 bg-green-50 rounded-xl">
-                    <div className="text-3xl font-bold text-green-600 mb-2">15K+</div>
-                    <div className="text-sm text-gray-600">Active Users</div>
-                  </div>
-                  <div className="text-center p-6 bg-purple-50 rounded-xl">
-                    <div className="text-3xl font-bold text-purple-600 mb-2">25%</div>
-                    <div className="text-sm text-gray-600">Monthly Growth</div>
-                  </div>
-                </div>
-                <div className="mt-6 space-y-4">
-                  <div className="flex items-center justify-between py-3 border-b">
-                    <span className="text-gray-600">Customer Acquisition Cost</span>
-                    <span className="font-semibold">$45</span>
-                  </div>
-                  <div className="flex items-center justify-between py-3 border-b">
-                    <span className="text-gray-600">Lifetime Value</span>
-                    <span className="font-semibold">$1,200</span>
-                  </div>
-                  <div className="flex items-center justify-between py-3">
-                    <span className="text-gray-600">Burn Rate</span>
-                    <span className="font-semibold">$35K/month</span>
-                  </div>
+                  {campaign.useOfFunds && (
+                    <div className="p-4 bg-gray-50 rounded-xl">
+                      <h3 className="font-semibold text-lg text-gray-900 mb-2">Use of Funds</h3>
+                      <p className="text-gray-600">{campaign.useOfFunds}</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -446,75 +443,7 @@ export default function CampaignView() {
               <CardContent className="p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Meet the Team</h2>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
-                    <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
-                      <span className="text-white text-xl font-bold">AJ</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-gray-900">Alex Johnson</h3>
-                      <p className="text-fundry-orange font-medium mb-2">CEO & Co-Founder</p>
-                      <p className="text-sm text-gray-600">Former VP at TechCorp with 10+ years in SaaS. MIT Computer Science graduate.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
-                    <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
-                      <span className="text-white text-xl font-bold">SM</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-gray-900">Sarah Martinez</h3>
-                      <p className="text-fundry-orange font-medium mb-2">CTO & Co-Founder</p>
-                      <p className="text-sm text-gray-600">Former Senior Engineer at Google. Stanford CS PhD specializing in AI/ML.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
-                    <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
-                      <span className="text-white text-xl font-bold">DW</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-gray-900">David Wilson</h3>
-                      <p className="text-fundry-orange font-medium mb-2">Head of Marketing</p>
-                      <p className="text-sm text-gray-600">Growth marketing expert with 8+ years scaling startups from 0 to $10M ARR.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
-                    <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
-                      <span className="text-white text-xl font-bold">LK</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-gray-900">Lisa Kim</h3>
-                      <p className="text-fundry-orange font-medium mb-2">Head of Product</p>
-                      <p className="text-sm text-gray-600">Former Product Manager at Uber. Specialist in user experience and product strategy.</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Company Photos */}
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Company Photos</h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden">
-                    <div className="w-full h-full bg-gradient-to-br from-fundry-orange to-orange-600 flex items-center justify-center">
-                      <span className="text-white text-lg font-semibold">Office Space</span>
-                    </div>
-                  </div>
-                  <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden">
-                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
-                      <span className="text-white text-lg font-semibold">Team Meeting</span>
-                    </div>
-                  </div>
-                  <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden">
-                    <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
-                      <span className="text-white text-lg font-semibold">Product Demo</span>
-                    </div>
-                  </div>
-                  <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden">
-                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
-                      <span className="text-white text-lg font-semibold">Company Event</span>
-                    </div>
-                  </div>
+                  {renderTeamMembers()}
                 </div>
               </CardContent>
             </Card>
@@ -523,17 +452,30 @@ export default function CampaignView() {
             <Card>
               <CardContent className="p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Pitch Deck</h2>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-                  <FileText className="mx-auto h-16 w-16 text-red-400 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {campaign.title}_PitchDeck.pdf
-                  </h3>
-                  <p className="text-gray-600 mb-6">12 slides • 2.4 MB</p>
-                  <Button className="bg-fundry-orange hover:bg-orange-600">
-                    <FileText className="mr-2" size={16} />
-                    View Pitch Deck
-                  </Button>
-                </div>
+                {campaign.pitchDeckUrl ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+                    <FileText className="mx-auto h-16 w-16 text-fundry-orange mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {campaign.title}_PitchDeck.pdf
+                    </h3>
+                    <p className="text-gray-600 mb-6">Pitch deck available for viewing</p>
+                    <Button 
+                      onClick={handleViewPitchDeck}
+                      className="bg-fundry-orange hover:bg-orange-600"
+                    >
+                      <FileText className="mr-2" size={16} />
+                      View Pitch Deck
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-gray-200 rounded-lg p-12 text-center">
+                    <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-500 mb-2">
+                      No pitch deck uploaded
+                    </h3>
+                    <p className="text-gray-400">This campaign hasn't uploaded a pitch deck yet</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

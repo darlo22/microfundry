@@ -139,21 +139,23 @@ export default function CampaignView() {
     <div className="min-h-screen bg-gray-50">
       {/* Campaign Navigation */}
       <Navbar 
-        title={
-          <Button 
-            variant="ghost" 
-            onClick={handleBackToDashboard}
-            className="flex items-center text-gray-600 hover:text-fundry-orange"
-          >
-            <ArrowLeft className="mr-2" size={16} />
-            Back to Dashboard
-          </Button>
-        }
+        title={campaign.title}
+        showNotifications={false}
         actions={
-          <Button onClick={handleShare} className="bg-fundry-orange hover:bg-orange-600">
-            <Share className="mr-2" size={16} />
-            Share Campaign
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Button 
+              variant="ghost" 
+              onClick={handleBackToDashboard}
+              className="flex items-center text-gray-600 hover:text-fundry-orange"
+            >
+              <ArrowLeft className="mr-2" size={16} />
+              Back to Dashboard
+            </Button>
+            <Button onClick={handleShare} className="bg-fundry-orange hover:bg-orange-600">
+              <Share className="mr-2" size={16} />
+              Share
+            </Button>
+          </div>
         }
       />
 

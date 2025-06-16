@@ -4,10 +4,56 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Quote, TrendingUp, Users, Award, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 
 export default function SuccessStories() {
+  // Company Logo Components
+  const TechFlowLogo = () => (
+    <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <path d="M8 12H16L20 20L16 28H8L12 20L8 12Z" fill="white"/>
+        <path d="M24 12H32L28 20L32 28H24L20 20L24 12Z" fill="white" fillOpacity="0.8"/>
+        <circle cx="20" cy="20" r="2" fill="white"/>
+      </svg>
+    </div>
+  );
+
+  const GreenEnergyLogo = () => (
+    <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <path d="M20 8L24 16H16L20 8Z" fill="white"/>
+        <rect x="19" y="16" width="2" height="12" fill="white"/>
+        <path d="M12 22C12 17 16 16 20 16C24 16 28 17 28 22" stroke="white" strokeWidth="1.5" fill="none"/>
+        <circle cx="14" cy="24" r="1.5" fill="white"/>
+        <circle cx="26" cy="24" r="1.5" fill="white"/>
+      </svg>
+    </div>
+  );
+
+  const HealthBridgeLogo = () => (
+    <div className="w-16 h-16 bg-red-600 rounded-xl flex items-center justify-center">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <path d="M20 8V16H28V24H20V32H12V24H4V16H12V8H20Z" fill="white"/>
+        <rect x="16" y="16" width="8" height="1.5" fill="#EF4444"/>
+        <rect x="16" y="22.5" width="8" height="1.5" fill="#EF4444"/>
+      </svg>
+    </div>
+  );
+
+  const EduPlatformLogo = () => (
+    <div className="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <path d="M8 16L20 8L32 16V28L20 36L8 28V16Z" fill="white"/>
+        <path d="M20 12L28 18V26L20 32L12 26V18L20 12Z" fill="#8B5CF6"/>
+        <circle cx="20" cy="20" r="3" fill="white"/>
+        <path d="M18 19L22 21M18 21L22 19" stroke="#8B5CF6" strokeWidth="1"/>
+      </svg>
+    </div>
+  );
+
   const successStories = [
     {
+      id: "techflow-solutions",
       company: "TechFlow Solutions",
       founder: "Sarah Chen",
       industry: "SaaS",
@@ -17,9 +63,10 @@ export default function SuccessStories() {
       description: "AI-powered workflow automation platform that raised seed funding to expand their engineering team and accelerate product development.",
       quote: "Fundry allowed us to raise from people who truly understood our vision. Our investors became our biggest advocates.",
       outcome: "Grew from 5 to 25 employees, launched enterprise features, acquired 150+ customers",
-      image: "/api/placeholder/300/200"
+      logo: TechFlowLogo
     },
     {
+      id: "greenenergy-innovations",
       company: "GreenEnergy Innovations",
       founder: "Marcus Rodriguez",
       industry: "CleanTech",
@@ -29,9 +76,10 @@ export default function SuccessStories() {
       description: "Renewable energy storage solutions targeting residential and commercial markets through innovative battery technology.",
       quote: "The private nature of Fundry let us share sensitive IP details with trusted investors in our network.",
       outcome: "Secured partnerships with 3 major utility companies, filed 4 patents, started pilot programs",
-      image: "/api/placeholder/300/200"
+      logo: GreenEnergyLogo
     },
     {
+      id: "healthbridge-analytics",
       company: "HealthBridge Analytics",
       founder: "Dr. Emily Watson",
       industry: "HealthTech",
@@ -41,9 +89,10 @@ export default function SuccessStories() {
       description: "Medical data analytics platform helping hospitals reduce readmission rates through predictive modeling.",
       quote: "Our medical colleagues became investors because they understood the problem we're solving firsthand.",
       outcome: "Deployed in 12 hospitals, reduced readmissions by 23%, preparing for Series A",
-      image: "/api/placeholder/300/200"
+      logo: HealthBridgeLogo
     },
     {
+      id: "eduplatform",
       company: "EduPlatform",
       founder: "James Kim",
       industry: "EdTech",
@@ -53,7 +102,7 @@ export default function SuccessStories() {
       description: "Virtual learning platform connecting students with expert tutors for personalized STEM education.",
       quote: "Fundry's educator network became our investor base. They brought connections and credibility.",
       outcome: "Reached 10,000 students, partnered with 5 school districts, 95% customer satisfaction",
-      image: "/api/placeholder/300/200"
+      logo: EduPlatformLogo
     }
   ];
 
@@ -102,14 +151,14 @@ export default function SuccessStories() {
               <CardContent className="p-0">
                 <div className="grid md:grid-cols-5 gap-0">
                   {/* Image */}
-                  <div className="md:col-span-2 bg-gradient-to-br from-fundry-orange to-orange-600 p-8 flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span className="text-2xl font-bold">{story.company.charAt(0)}</span>
+                  <div className="md:col-span-2 bg-gradient-to-br from-gray-100 to-gray-200 p-8 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="mx-auto mb-4">
+                        <story.logo />
                       </div>
-                      <h3 className="text-xl font-bold mb-2">{story.company}</h3>
-                      <p className="opacity-90">{story.founder}</p>
-                      <Badge className="bg-white text-fundry-orange mt-2">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{story.company}</h3>
+                      <p className="text-gray-600">{story.founder}</p>
+                      <Badge className="bg-fundry-orange text-white mt-2">
                         {story.industry}
                       </Badge>
                     </div>
@@ -146,10 +195,12 @@ export default function SuccessStories() {
                       <p className="text-gray-700">{story.outcome}</p>
                     </div>
 
-                    <Button variant="outline" className="text-fundry-orange border-fundry-orange hover:bg-fundry-orange hover:text-white">
-                      Read Full Case Study
-                      <ArrowRight className="ml-2" size={16} />
-                    </Button>
+                    <Link href={`/case-study/${story.id}`}>
+                      <Button variant="outline" className="text-fundry-orange border-fundry-orange hover:bg-fundry-orange hover:text-white">
+                        Read Full Case Study
+                        <ArrowRight className="ml-2" size={16} />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </CardContent>

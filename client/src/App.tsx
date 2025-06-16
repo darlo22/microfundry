@@ -51,6 +51,8 @@ function Router() {
           <Route path="/terms-of-use" component={TermsOfUse} />
           <Route path="/cookie-policy" component={CookiePolicy} />
           <Route path="/investment-disclaimer" component={InvestmentDisclaimer} />
+          <Route path="/campaign/:id" component={CampaignView} />
+          <Route path="/c/:privateLink" component={CampaignView} />
         </>
       ) : (
         <>

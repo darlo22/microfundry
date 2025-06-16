@@ -313,6 +313,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Seed sample campaigns for demo purposes
+  app.post('/api/seed-campaigns', async (req, res) => {
+    try {
+      const sampleCampaigns = [
+        {
+          title: "GreenTech Solutions",
+          shortPitch: "Revolutionizing renewable energy storage with advanced battery technology",
+          fullPitch: "Our proprietary battery technology uses revolutionary lithium-silicon compounds to achieve 3x energy density compared to traditional batteries. We're targeting the growing renewable energy storage market, which is expected to reach $120B by 2026. Our team includes former Tesla engineers and we have preliminary partnerships with major solar installers.",
+          fundingGoal: "250000",
+          minimumInvestment: "25",
+          status: "active",
+          discountRate: "20",
+          valuationCap: "5000000",
+          privateLink: "greentech-2024",
+          founderId: "demo-founder-1",
+          deadline: "2025-07-15"
+        },
+        {
+          title: "HealthAI Platform", 
+          shortPitch: "AI-powered diagnostics for early disease detection in primary care",
+          fullPitch: "Our AI platform analyzes medical data including lab results, imaging, and patient history to detect early signs of diseases like diabetes, heart disease, and cancer. We've achieved 94% accuracy in clinical trials and are partnered with 15 medical centers. The global AI healthcare market is projected to reach $148B by 2029.",
+          fundingGoal: "500000",
+          minimumInvestment: "50",
+          status: "active", 
+          discountRate: "15",
+          valuationCap: "8000000",
+          privateLink: "healthai-series-a",
+          founderId: "demo-founder-2",
+          deadline: "2025-08-30"
+        },
+        {
+          title: "EduSpace",
+          shortPitch: "Virtual reality learning environments for immersive education",
+          fullPitch: "EduSpace creates virtual classrooms that transport students to ancient Rome, inside the human body, or to distant planets. Our VR education platform increases student engagement by 85% and retention by 67% compared to traditional methods. We're working with 50+ schools and have content partnerships with National Geographic and Discovery.",
+          fundingGoal: "150000", 
+          minimumInvestment: "25",
+          status: "active",
+          discountRate: "25", 
+          valuationCap: "3000000",
+          privateLink: "eduspace-vr",
+          founderId: "demo-founder-3",
+          deadline: "2025-06-20"
+        }
+      ];
+
+      const createdCampaigns = [];
+      for (const campaignData of sampleCampaigns) {
+        try {
+          const data = insertCampaignSchema.parse(campaignData);
+          const campaign = await storage.createCampaign(data);
+          createdCampaigns.push(campaign);
+        } catch (error) {
+          console.log(`Campaign ${campaignData.title} may already exist, skipping...`);
+        }
+      }
+
+      res.json({ 
+        message: "Sample campaigns seeded successfully",
+        campaigns: createdCampaigns
+      });
+    } catch (error) {
+      console.error("Error seeding campaigns:", error);
+      res.status(500).json({ message: "Failed to seed campaigns" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

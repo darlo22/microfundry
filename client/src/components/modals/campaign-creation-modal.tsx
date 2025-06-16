@@ -26,6 +26,7 @@ const teamMemberSchema = z.object({
   role: z.string().min(1, "Role is required"),
   bio: z.string().optional(),
   linkedin: z.string().optional(),
+  photo: z.string().optional(), // Will store base64 encoded image data
 });
 
 const campaignSchema = z.object({
@@ -64,6 +65,7 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
   const queryClient = useQueryClient();
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [pitchDeckFile, setPitchDeckFile] = useState<File | null>(null);
+  const [teamMemberPhotos, setTeamMemberPhotos] = useState<{[key: number]: string}>({});
 
   const form = useForm<CampaignFormData>({
     resolver: zodResolver(campaignSchema),
@@ -134,6 +136,7 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
       form.reset();
       setLogoFile(null);
       setPitchDeckFile(null);
+      setTeamMemberPhotos({});
     },
     onError: (error) => {
       console.error("Error creating campaign:", error);
@@ -160,6 +163,28 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
     const file = event.target.files?.[0];
     if (file && file.type === "application/pdf") {
       setPitchDeckFile(file);
+    }
+  };
+
+  const handleTeamMemberPhotoUpload = (memberIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        setTeamMemberPhotos(prev => ({
+          ...prev,
+          [memberIndex]: base64String
+        }));
+        
+        // Update the form data with the photo
+        const currentTeamMembers = form.getValues("teamMembers") || [];
+        if (currentTeamMembers[memberIndex]) {
+          currentTeamMembers[memberIndex].photo = base64String;
+          form.setValue("teamMembers", currentTeamMembers);
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -536,6 +561,54 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                               </FormItem>
                             )}
                           />
+
+                          {/* Photo Upload */}
+                          <div className="space-y-2">
+                            <Label>Photo (Optional)</Label>
+                            <div className="flex flex-col space-y-3">
+                              {teamMemberPhotos[index] && (
+                                <div className="flex items-center space-x-3">
+                                  <img 
+                                    src={teamMemberPhotos[index]} 
+                                    alt={`Team member ${index + 1}`}
+                                    className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                                  />
+                                  <div className="text-sm text-gray-600">
+                                    Photo uploaded successfully
+                                  </div>
+                                </div>
+                              )}
+                              <div className="flex items-center space-x-2">
+                                <Input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleTeamMemberPhotoUpload(index, e)}
+                                  className="text-sm"
+                                />
+                                {teamMemberPhotos[index] && (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setTeamMemberPhotos(prev => {
+                                        const updated = { ...prev };
+                                        delete updated[index];
+                                        return updated;
+                                      });
+                                      const currentMembers = form.getValues("teamMembers") || [];
+                                      if (currentMembers[index]) {
+                                        currentMembers[index].photo = "";
+                                        form.setValue("teamMembers", currentMembers);
+                                      }
+                                    }}
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
 
                           <div className="flex justify-end">
                             <Button

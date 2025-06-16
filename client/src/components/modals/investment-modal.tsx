@@ -14,6 +14,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   CreditCard, 
   FileText, 
@@ -24,7 +25,11 @@ import {
   Signature,
   ArrowRight,
   ArrowLeft,
-  Download
+  Download,
+  User,
+  Mail,
+  Phone,
+  MapPin
 } from "lucide-react";
 import type { CampaignWithStats } from "@/lib/types";
 
@@ -34,12 +39,13 @@ interface InvestmentModalProps {
   campaign: CampaignWithStats;
 }
 
-type InvestmentStep = 'amount' | 'safe-review' | 'terms' | 'signature' | 'payment' | 'confirmation';
+type InvestmentStep = 'auth' | 'investor-details' | 'amount' | 'safe-review' | 'terms' | 'signature' | 'payment' | 'confirmation';
 
 export default function InvestmentModal({ isOpen, onClose, campaign }: InvestmentModalProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const [currentStep, setCurrentStep] = useState<InvestmentStep>('amount');
+  const { user, isAuthenticated } = useAuth();
+  const [currentStep, setCurrentStep] = useState<InvestmentStep>(isAuthenticated ? 'investor-details' : 'auth');
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
   const [customAmount, setCustomAmount] = useState<string>("");
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -48,6 +54,26 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'stripe' | 'budpay' | 'commitment'>('stripe');
   const [investmentData, setInvestmentData] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Authentication state
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authUsername, setAuthUsername] = useState("");
+  
+  // Investor details state
+  const [investorDetails, setInvestorDetails] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "United States",
+    accreditedInvestor: false,
+    investmentExperience: ""
+  });
 
   const presetAmounts = [25, 50, 100, 250, 500, 1000];
   const minimumInvestment = parseFloat(campaign.minimumInvestment);
@@ -114,6 +140,55 @@ Platform: Fundry Investment Platform
     window.URL.revokeObjectURL(url);
   };
 
+  // Authentication mutations
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: { email: string; password: string }) => {
+      const response = await apiRequest("POST", "/api/login", {
+        username: credentials.email,
+        password: credentials.password
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      setCurrentStep('investor-details');
+      toast({
+        title: "Successfully signed in",
+        description: "Welcome back! Please complete your investor details.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Sign in failed",
+        description: "Invalid email or password. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: async (credentials: { username: string; email: string; password: string }) => {
+      const response = await apiRequest("POST", "/api/register", {
+        ...credentials,
+        userType: 'investor'
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      setCurrentStep('investor-details');
+      toast({
+        title: "Account created successfully",
+        description: "Welcome to Fundry! Please complete your investor details.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Registration failed",
+        description: "Unable to create account. Email may already be in use.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const createInvestmentMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await apiRequest("POST", "/api/investments", data);
@@ -168,8 +243,55 @@ Platform: Fundry Investment Platform
     return true;
   };
 
+  const handleAuth = () => {
+    if (authMode === 'signin') {
+      if (authEmail && authPassword) {
+        loginMutation.mutate({ email: authEmail, password: authPassword });
+      } else {
+        toast({
+          title: "Missing Information",
+          description: "Please enter your email and password.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      if (authUsername && authEmail && authPassword) {
+        registerMutation.mutate({ username: authUsername, email: authEmail, password: authPassword });
+      } else {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in all required fields.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const validateInvestorDetails = () => {
+    const required = ['fullName', 'email', 'phone', 'address', 'city', 'state', 'zipCode'];
+    const missing = required.filter(field => !investorDetails[field as keyof typeof investorDetails]);
+    
+    if (missing.length > 0) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
   const handleNextStep = () => {
     switch (currentStep) {
+      case 'auth':
+        handleAuth();
+        break;
+      case 'investor-details':
+        if (validateInvestorDetails()) {
+          setCurrentStep('amount');
+        }
+        break;
       case 'amount':
         if (validateAmount()) {
           setCurrentStep('safe-review');
@@ -208,6 +330,12 @@ Platform: Fundry Investment Platform
 
   const handlePrevStep = () => {
     switch (currentStep) {
+      case 'investor-details':
+        setCurrentStep('auth');
+        break;
+      case 'amount':
+        setCurrentStep('investor-details');
+        break;
       case 'safe-review':
         setCurrentStep('amount');
         break;
@@ -287,6 +415,8 @@ Platform: Fundry Investment Platform
 
   const getStepTitle = () => {
     switch (currentStep) {
+      case 'auth': return 'Sign In or Create Account';
+      case 'investor-details': return 'Investor Information';
       case 'amount': return 'Investment Amount';
       case 'safe-review': return 'SAFE Agreement Review';
       case 'terms': return 'Terms & Conditions';

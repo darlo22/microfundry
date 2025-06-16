@@ -76,7 +76,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const campaignData = {
         ...req.body,
         founderId,
-        privateLink,
         status: "active", // Set status to active so it appears in browse page
         logoUrl: files.logo?.[0]?.path,
         pitchDeckUrl: files.pitchDeck?.[0]?.path,
@@ -84,10 +83,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deadline: req.body.deadline ? new Date(req.body.deadline) : null,
       };
 
-      // Parse with a more permissive approach to include privateLink
-      const { privateLink: _, ...dataWithoutPrivateLink } = campaignData;
-      const validatedData = insertCampaignSchema.parse(dataWithoutPrivateLink);
-      const campaign = await storage.createCampaign({ ...validatedData, privateLink });
+      const validatedData = insertCampaignSchema.parse(campaignData);
+      const campaign = await storage.createCampaign(validatedData, privateLink);
       res.json(campaign);
     } catch (error) {
       console.error("Error creating campaign:", error);
@@ -374,8 +371,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const createdCampaigns = [];
       for (const campaignData of sampleCampaigns) {
         try {
-          const data = insertCampaignSchema.parse(campaignData);
-          const campaign = await storage.createCampaign(data);
+          const { privateLink, ...dataWithoutPrivateLink } = campaignData as any;
+          const data = insertCampaignSchema.parse(dataWithoutPrivateLink);
+          const campaign = await storage.createCampaign(data, privateLink);
           createdCampaigns.push(campaign);
         } catch (error) {
           console.log(`Campaign ${campaignData.title} may already exist, skipping...`);

@@ -38,7 +38,7 @@ export interface IStorage {
   updateBusinessProfile(userId: string, updates: Partial<InsertBusinessProfile>): Promise<BusinessProfile>;
 
   // Campaign operations
-  createCampaign(campaign: InsertCampaign): Promise<Campaign>;
+  createCampaign(campaign: InsertCampaign, privateLink: string): Promise<Campaign>;
   getCampaign(id: number): Promise<Campaign | undefined>;
   getCampaignByPrivateLink(privateLink: string): Promise<Campaign | undefined>;
   getCampaignsByFounder(founderId: string): Promise<Campaign[]>;
@@ -151,10 +151,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Campaign operations
-  async createCampaign(campaign: InsertCampaign & { privateLink: string }): Promise<Campaign> {
+  async createCampaign(campaign: InsertCampaign, privateLink: string): Promise<Campaign> {
     const [newCampaign] = await db
       .insert(campaigns)
-      .values(campaign)
+      .values({ ...campaign, privateLink })
       .returning();
     return newCampaign;
   }

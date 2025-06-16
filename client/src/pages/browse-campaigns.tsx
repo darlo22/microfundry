@@ -67,42 +67,42 @@ export default function BrowseCampaigns() {
 
         {/* Stats Banner */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-fundry-orange to-orange-600 text-white">
+          <Card className="bg-fundry-orange text-white shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-orange-100">Active Campaigns</p>
-                  <p className="text-3xl font-bold">{campaigns.length}</p>
+                  <p className="text-orange-100 font-medium">Active Campaigns</p>
+                  <p className="text-3xl font-bold text-white">{campaigns.length}</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-orange-200" />
+                <TrendingUp className="h-8 w-8 text-white" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-r from-fundry-navy to-blue-900 text-white">
+          <Card className="bg-fundry-navy text-white shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-100">Total Raised</p>
-                  <p className="text-3xl font-bold">
+                  <p className="text-blue-100 font-medium">Total Raised</p>
+                  <p className="text-3xl font-bold text-white">
                     ${campaigns.reduce((sum, c) => sum + parseFloat(c.totalRaised || '0'), 0).toLocaleString()}
                   </p>
                 </div>
-                <Clock className="h-8 w-8 text-blue-200" />
+                <Clock className="h-8 w-8 text-white" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+          <Card className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-100">Total Investors</p>
-                  <p className="text-3xl font-bold">
+                  <p className="text-emerald-100 font-medium">Total Investors</p>
+                  <p className="text-3xl font-bold text-white">
                     {campaigns.reduce((sum, c) => sum + (c.investorCount || 0), 0)}
                   </p>
                 </div>
-                <Users className="h-8 w-8 text-green-200" />
+                <Users className="h-8 w-8 text-white" />
               </div>
             </CardContent>
           </Card>

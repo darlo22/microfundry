@@ -175,6 +175,8 @@ export default function InvestorDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <Footer />
     </div>
   );
 }

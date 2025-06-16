@@ -81,6 +81,7 @@ The deployment uses:
 ## Changelog
 
 - June 16, 2025. Initial setup
+- June 16, 2025. Added comprehensive footer with About, Pricing pages and transparent fee structure (5% above $1,000, free below)
 
 ## User Preferences
 

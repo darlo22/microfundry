@@ -4,6 +4,7 @@ import { useParams, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/layout/navbar";
+import Footer from "@/components/layout/footer";
 import InvestmentModal from "@/components/modals/investment-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -342,6 +343,8 @@ export default function CampaignView() {
         onClose={() => setShowInvestmentModal(false)}
         campaign={campaign}
       />
+
+      <Footer />
     </div>
   );
 }

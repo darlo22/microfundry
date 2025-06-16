@@ -6,6 +6,7 @@ import OnboardingModal from "@/components/modals/onboarding-modal";
 import LearnMoreModal from "@/components/modals/learn-more-modal";
 import InvestorInfoModal from "@/components/modals/investor-info-modal";
 import Footer from "@/components/layout/footer";
+import { FundryLogo } from "@/components/ui/fundry-logo";
 import { Link } from "wouter";
 
 export default function Landing() {
@@ -31,12 +32,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-fundry-orange rounded-lg flex items-center justify-center">
-                  <ChartLine className="text-white" size={16} />
-                </div>
-                <span className="text-2xl font-bold text-fundry-navy">Fundry</span>
-              </div>
+              <FundryLogo className="h-10 w-auto" />
               <div className="hidden md:flex space-x-6">
                 <a href="#how-it-works" className="text-gray-700 hover:text-fundry-orange transition-colors">How it Works</a>
                 <button 

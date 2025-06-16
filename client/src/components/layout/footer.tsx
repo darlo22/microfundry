@@ -8,11 +8,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">F</span>
-              </div>
-              <span className="text-xl font-bold">Fundry</span>
+            <div className="mb-4">
+              <FundryLogo className="h-8 w-auto brightness-0 invert" />
             </div>
             <p className="text-gray-400 mb-4 max-w-md">
               Empowering early-stage startups with simplified equity crowdfunding through SAFE agreements. 

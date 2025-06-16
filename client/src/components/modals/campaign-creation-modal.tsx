@@ -16,10 +16,17 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { CloudUpload, FileText, Info } from "lucide-react";
+import { CloudUpload, FileText, Info, Users, Plus, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
+
+const teamMemberSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  role: z.string().min(1, "Role is required"),
+  bio: z.string().optional(),
+  linkedin: z.string().optional(),
+});
 
 const campaignSchema = z.object({
   title: z.string().min(1, "Campaign title is required"),
@@ -31,6 +38,17 @@ const campaignSchema = z.object({
   deadline: z.string().optional(),
   discountRate: z.number().min(0).max(50, "Discount rate must be between 0% and 50%"),
   valuationCap: z.number().min(10000, "Valuation cap must be at least $10,000"),
+  
+  // Traction & Stage
+  startupStage: z.string().min(1, "Startup stage is required"),
+  currentRevenue: z.string().optional(),
+  customers: z.string().optional(),
+  previousFunding: z.string().optional(),
+  keyMilestones: z.string().optional(),
+  
+  // Team Information
+  teamStructure: z.enum(["solo", "team"]),
+  teamMembers: z.array(teamMemberSchema).optional(),
 });
 
 type CampaignFormData = z.infer<typeof campaignSchema>;
@@ -59,6 +77,13 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
       deadline: "",
       discountRate: 20,
       valuationCap: 1000000,
+      startupStage: "",
+      currentRevenue: "",
+      customers: "",
+      previousFunding: "",
+      keyMilestones: "",
+      teamStructure: "solo",
+      teamMembers: [],
     },
   });
 
@@ -265,6 +290,248 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                     </label>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Traction & Startup Stage */}
+            <div className="border-b pb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Traction & Startup Stage</h3>
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="startupStage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Startup Stage</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select your current stage" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="idea">Idea Stage</SelectItem>
+                          <SelectItem value="prototype">Prototype/MVP</SelectItem>
+                          <SelectItem value="beta">Beta Testing</SelectItem>
+                          <SelectItem value="launched">Launched Product</SelectItem>
+                          <SelectItem value="revenue">Generating Revenue</SelectItem>
+                          <SelectItem value="scaling">Scaling</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="currentRevenue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Current Monthly Revenue (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., $5,000 or $0 (pre-revenue)" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="customers"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Current Customers/Users (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., 150 paying customers, 1,000 users" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="previousFunding"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Previous Funding (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., $10,000 friends & family, bootstrapped" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="keyMilestones"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Key Milestones & Achievements (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          rows={3} 
+                          placeholder="e.g., Product launched, first 100 customers acquired, partnership with XYZ Corp..."
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Team Information */}
+            <div className="border-b pb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Team Information</h3>
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="teamStructure"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Team Structure</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="solo">Solo Founder</SelectItem>
+                          <SelectItem value="team">Team (Co-founders/Key Members)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch("teamStructure") === "team" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label>Team Members</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const currentMembers = form.getValues("teamMembers") || [];
+                          form.setValue("teamMembers", [
+                            ...currentMembers,
+                            { name: "", role: "", bio: "", linkedin: "" }
+                          ]);
+                        }}
+                      >
+                        Add Team Member
+                      </Button>
+                    </div>
+                    
+                    {(form.watch("teamMembers") || []).map((_, index) => (
+                      <Card key={index} className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name={`teamMembers.${index}.name`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Full name" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name={`teamMembers.${index}.role`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Role</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="e.g., Co-founder & CTO" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="md:col-span-2">
+                            <FormField
+                              control={form.control}
+                              name={`teamMembers.${index}.bio`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Bio (Optional)</FormLabel>
+                                  <FormControl>
+                                    <Textarea 
+                                      rows={2} 
+                                      placeholder="Brief background and relevant experience..."
+                                      {...field} 
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <FormField
+                            control={form.control}
+                            name={`teamMembers.${index}.linkedin`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>LinkedIn URL (Optional)</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="https://linkedin.com/in/username" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="flex justify-end">
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                const currentMembers = form.getValues("teamMembers") || [];
+                                const updatedMembers = currentMembers.filter((_, i) => i !== index);
+                                form.setValue("teamMembers", updatedMembers);
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+
+                    {(!form.watch("teamMembers") || form.watch("teamMembers")?.length === 0) && (
+                      <p className="text-sm text-gray-500 text-center py-4">
+                        No team members added yet. Click "Add Team Member" to include co-founders and key team members.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {form.watch("teamStructure") === "solo" && (
+                  <Card className="p-4 bg-blue-50 border-blue-200">
+                    <p className="text-sm text-blue-800">
+                      <strong>Solo Founder:</strong> You're building this venture independently. 
+                      This shows investors you're taking full ownership and responsibility for the business.
+                    </p>
+                  </Card>
+                )}
               </div>
             </div>
 

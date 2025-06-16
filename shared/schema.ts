@@ -72,6 +72,18 @@ export const campaigns = pgTable("campaigns", {
   discountRate: decimal("discount_rate", { precision: 5, scale: 2 }).notNull().default("20"),
   valuationCap: decimal("valuation_cap", { precision: 15, scale: 2 }),
   privateLink: varchar("private_link").unique().notNull(),
+  
+  // Traction & Stage Information
+  startupStage: varchar("startup_stage"),
+  currentRevenue: varchar("current_revenue"),
+  customers: varchar("customers"),
+  previousFunding: varchar("previous_funding"),
+  keyMilestones: text("key_milestones"),
+  
+  // Team Information
+  teamStructure: varchar("team_structure").notNull().default("solo"), // solo, team
+  teamMembers: jsonb("team_members"), // Array of team member objects
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -8,9 +8,11 @@ import type { CampaignWithStats } from "@/lib/types";
 interface CampaignCardProps {
   campaign: CampaignWithStats;
   isFounder?: boolean;
+  onEdit?: (campaign: CampaignWithStats) => void;
+  onShare?: (campaign: CampaignWithStats) => void;
 }
 
-export default function CampaignCard({ campaign, isFounder = false }: CampaignCardProps) {
+export default function CampaignCard({ campaign, isFounder = false, onEdit, onShare }: CampaignCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":

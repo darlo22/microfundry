@@ -220,6 +220,164 @@ export default function CampaignView() {
               </CardContent>
             </Card>
 
+            {/* Investment Details */}
+            <Card>
+              <CardContent className="p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Investment Details</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center py-3 border-b">
+                      <span className="text-gray-600">Funding Goal</span>
+                      <span className="font-semibold text-lg">{formatCurrency(campaign.fundingGoal)}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-3 border-b">
+                      <span className="text-gray-600">Amount Raised</span>
+                      <span className="font-semibold text-lg text-green-600">{formatCurrency(campaign.totalRaised)}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-3 border-b">
+                      <span className="text-gray-600">Minimum Investment</span>
+                      <span className="font-semibold text-lg">{formatCurrency(campaign.minimumInvestment)}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-3">
+                      <span className="text-gray-600">Maximum Ask</span>
+                      <span className="font-semibold text-lg">$5,000</span>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center py-3 border-b">
+                      <span className="text-gray-600">Discount Rate</span>
+                      <span className="font-semibold text-lg">{campaign.discountRate}%</span>
+                    </div>
+                    <div className="flex justify-between items-center py-3 border-b">
+                      <span className="text-gray-600">Valuation Cap</span>
+                      <span className="font-semibold text-lg">{formatCurrency(campaign.valuationCap || "1000000")}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-3 border-b">
+                      <span className="text-gray-600">Total Investors</span>
+                      <span className="font-semibold text-lg">{campaign.investorCount}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-3">
+                      <span className="text-gray-600">Progress</span>
+                      <span className="font-semibold text-lg">{campaign.progressPercent}%</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Traction & Metrics */}
+            <Card>
+              <CardContent className="p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Traction & Key Metrics</h2>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="text-center p-6 bg-blue-50 rounded-xl">
+                    <div className="text-3xl font-bold text-blue-600 mb-2">$125K</div>
+                    <div className="text-sm text-gray-600">Monthly Revenue</div>
+                  </div>
+                  <div className="text-center p-6 bg-green-50 rounded-xl">
+                    <div className="text-3xl font-bold text-green-600 mb-2">15K+</div>
+                    <div className="text-sm text-gray-600">Active Users</div>
+                  </div>
+                  <div className="text-center p-6 bg-purple-50 rounded-xl">
+                    <div className="text-3xl font-bold text-purple-600 mb-2">25%</div>
+                    <div className="text-sm text-gray-600">Monthly Growth</div>
+                  </div>
+                </div>
+                <div className="mt-6 space-y-4">
+                  <div className="flex items-center justify-between py-3 border-b">
+                    <span className="text-gray-600">Customer Acquisition Cost</span>
+                    <span className="font-semibold">$45</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-b">
+                    <span className="text-gray-600">Lifetime Value</span>
+                    <span className="font-semibold">$1,200</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3">
+                    <span className="text-gray-600">Burn Rate</span>
+                    <span className="font-semibold">$35K/month</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Team Information */}
+            <Card>
+              <CardContent className="p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Meet the Team</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
+                    <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
+                      <span className="text-white text-xl font-bold">AJ</span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg text-gray-900">Alex Johnson</h3>
+                      <p className="text-fundry-orange font-medium mb-2">CEO & Co-Founder</p>
+                      <p className="text-sm text-gray-600">Former VP at TechCorp with 10+ years in SaaS. MIT Computer Science graduate.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
+                    <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
+                      <span className="text-white text-xl font-bold">SM</span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg text-gray-900">Sarah Martinez</h3>
+                      <p className="text-fundry-orange font-medium mb-2">CTO & Co-Founder</p>
+                      <p className="text-sm text-gray-600">Former Senior Engineer at Google. Stanford CS PhD specializing in AI/ML.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
+                    <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
+                      <span className="text-white text-xl font-bold">DW</span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg text-gray-900">David Wilson</h3>
+                      <p className="text-fundry-orange font-medium mb-2">Head of Marketing</p>
+                      <p className="text-sm text-gray-600">Growth marketing expert with 8+ years scaling startups from 0 to $10M ARR.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
+                    <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center">
+                      <span className="text-white text-xl font-bold">LK</span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg text-gray-900">Lisa Kim</h3>
+                      <p className="text-fundry-orange font-medium mb-2">Head of Product</p>
+                      <p className="text-sm text-gray-600">Former Product Manager at Uber. Specialist in user experience and product strategy.</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Company Photos */}
+            <Card>
+              <CardContent className="p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Company Photos</h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden">
+                    <div className="w-full h-full bg-gradient-to-br from-fundry-orange to-orange-600 flex items-center justify-center">
+                      <span className="text-white text-lg font-semibold">Office Space</span>
+                    </div>
+                  </div>
+                  <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden">
+                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+                      <span className="text-white text-lg font-semibold">Team Meeting</span>
+                    </div>
+                  </div>
+                  <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden">
+                    <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
+                      <span className="text-white text-lg font-semibold">Product Demo</span>
+                    </div>
+                  </div>
+                  <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden">
+                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
+                      <span className="text-white text-lg font-semibold">Company Event</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Pitch Deck Viewer */}
             <Card>
               <CardContent className="p-8">

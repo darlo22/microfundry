@@ -39,11 +39,11 @@ export default function CampaignCard({ campaign, isFounder = false }: CampaignCa
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-4 flex-1">
           {campaign.logoUrl && (
-            <div className="w-12 h-12 bg-gradient-to-br from-fundry-orange to-orange-400 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-16 h-16 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
               <img 
                 src={campaign.logoUrl} 
                 alt={campaign.title}
-                className="w-8 h-8 object-cover rounded"
+                className="w-full h-full object-contain p-2"
               />
             </div>
           )}

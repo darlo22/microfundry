@@ -140,11 +140,12 @@ export function ShareCampaignSelectorModal({
                         </div>
 
                         {campaign.logoUrl && (
-                          <div className="w-16 h-16 bg-white border border-gray-200 rounded-lg flex items-center justify-center ml-4 overflow-hidden">
+                          <div className="w-20 h-20 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center ml-4 overflow-hidden shadow-sm">
                             <img 
                               src={campaign.logoUrl} 
                               alt={campaign.title}
-                              className="w-full h-full object-contain p-1"
+                              className="w-full h-full object-contain p-2"
+                              style={{ maxWidth: '100%', maxHeight: '100%' }}
                             />
                           </div>
                         )}

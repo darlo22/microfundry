@@ -23,7 +23,10 @@ import {
   Clock,
   Users,
   DollarSign,
-  Edit
+  Edit,
+  ExternalLink,
+  Download,
+  ZoomIn
 } from "lucide-react";
 import type { CampaignWithStats } from "@/lib/types";
 
@@ -370,15 +373,16 @@ export default function CampaignView() {
                   </div>
                   
                   {/* Company Logo */}
-                  <div className="w-20 h-20 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center ml-6 overflow-hidden">
+                  <div className="w-24 h-24 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center ml-6 overflow-hidden shadow-sm">
                     {campaign.logoUrl ? (
                       <img 
                         src={campaign.logoUrl} 
                         alt={campaign.title}
-                        className="w-full h-full object-contain p-2"
+                        className="w-full h-full object-contain p-3"
+                        style={{ maxWidth: '100%', maxHeight: '100%' }}
                       />
                     ) : (
-                      <span className="text-white text-2xl font-bold">
+                      <span className="text-gray-400 text-2xl font-bold">
                         {campaign.title.charAt(0)}
                       </span>
                     )}
@@ -632,46 +636,124 @@ export default function CampaignView() {
 
       {/* Pitch Deck Modal */}
       <Dialog open={showPitchDeckModal} onOpenChange={setShowPitchDeckModal}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden" aria-describedby="pitch-deck-description">
+        <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden" aria-describedby="pitch-deck-description">
           <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <FileText className="mr-2" size={20} />
-              {campaign?.title} - Pitch Deck
+            <DialogTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <FileText className="mr-2" size={20} />
+                {campaign?.title} - Pitch Deck
+              </div>
+              {campaign?.pitchDeckUrl && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const url = campaign.pitchDeckUrl.startsWith('/') ? campaign.pitchDeckUrl : `/${campaign.pitchDeckUrl}`;
+                      window.open(url, '_blank');
+                    }}
+                    className="flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Open in New Tab
+                  </Button>
+                </div>
+              )}
             </DialogTitle>
           </DialogHeader>
           <div id="pitch-deck-description" className="sr-only">
-            View the pitch deck document for this campaign
+            Live preview of the pitch deck document for this campaign
           </div>
-          <div className="w-full h-[70vh] bg-gray-100 rounded-lg flex items-center justify-center">
+          <div className="w-full h-[75vh] bg-gray-50 rounded-lg overflow-hidden border">
             {campaign?.pitchDeckUrl ? (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center text-gray-600">
-                  <FileText className="mx-auto h-20 w-20 mb-4 text-fundry-orange" />
-                  <h3 className="text-xl font-semibold mb-2">Pitch Deck Available</h3>
-                  <p className="mb-4">This campaign has uploaded a pitch deck document</p>
-                  <div className="space-y-3">
-                    <a 
-                      href={campaign.pitchDeckUrl.startsWith('/') ? campaign.pitchDeckUrl : `/${campaign.pitchDeckUrl}`}
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center px-4 py-2 bg-fundry-orange text-white rounded-lg hover:bg-orange-600 transition-colors"
-                    >
-                      <FileText className="mr-2" size={16} />
-                      Open Pitch Deck
-                    </a>
-                    <div className="text-xs text-gray-500">
-                      Opens in new tab for viewing
+              <div className="w-full h-full relative">
+                {/* PDF Viewer */}
+                <iframe
+                  src={`${campaign.pitchDeckUrl.startsWith('/') ? campaign.pitchDeckUrl : `/${campaign.pitchDeckUrl}`}#toolbar=1&navpanes=1&scrollbar=1`}
+                  className="w-full h-full border-0"
+                  title="Pitch Deck Preview"
+                  onError={(e) => {
+                    // Fallback if iframe fails to load
+                    const fallbackDiv = e.currentTarget.parentElement?.querySelector('.fallback-content');
+                    if (fallbackDiv) {
+                      e.currentTarget.style.display = 'none';
+                      fallbackDiv.style.display = 'flex';
+                    }
+                  }}
+                />
+                
+                {/* Fallback content */}
+                <div className="fallback-content absolute inset-0 bg-gray-100 flex-col items-center justify-center hidden">
+                  <div className="text-center text-gray-600 p-8">
+                    <FileText className="mx-auto h-20 w-20 mb-4 text-fundry-orange" />
+                    <h3 className="text-xl font-semibold mb-2">Preview Not Available</h3>
+                    <p className="mb-6 text-gray-500">
+                      The pitch deck cannot be previewed in the browser. You can download or open it in a new tab.
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                      <a 
+                        href={campaign.pitchDeckUrl.startsWith('/') ? campaign.pitchDeckUrl : `/${campaign.pitchDeckUrl}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 bg-fundry-orange text-white rounded-lg hover:bg-orange-600 transition-colors"
+                      >
+                        <ExternalLink className="mr-2" size={16} />
+                        Open in New Tab
+                      </a>
+                      <a 
+                        href={campaign.pitchDeckUrl.startsWith('/') ? campaign.pitchDeckUrl : `/${campaign.pitchDeckUrl}`}
+                        download
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <Download className="mr-2" size={16} />
+                        Download
+                      </a>
                     </div>
+                  </div>
+                </div>
+
+                {/* Loading overlay */}
+                <div className="absolute inset-0 bg-gray-100 flex items-center justify-center loading-overlay">
+                  <div className="text-center">
+                    <div className="animate-spin w-8 h-8 border-4 border-fundry-orange border-t-transparent rounded-full mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading pitch deck...</p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="text-center text-gray-500">
-                <FileText className="mx-auto h-16 w-16 mb-4" />
-                <p>Pitch deck not available</p>
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <FileText className="mx-auto h-16 w-16 mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No Pitch Deck Available</h3>
+                  <p>This campaign hasn't uploaded a pitch deck yet.</p>
+                </div>
               </div>
             )}
           </div>
+          
+          {campaign?.pitchDeckUrl && (
+            <div className="flex items-center justify-between pt-4 border-t bg-gray-50 -mx-6 px-6 -mb-6 pb-6">
+              <div className="text-sm text-gray-500">
+                Use the controls above to navigate through the presentation
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const iframe = document.querySelector('iframe[title="Pitch Deck Preview"]') as HTMLIFrameElement;
+                    if (iframe) {
+                      iframe.style.transform = iframe.style.transform === 'scale(1.2)' ? 'scale(1)' : 'scale(1.2)';
+                    }
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <ZoomIn className="w-4 h-4" />
+                  Zoom
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

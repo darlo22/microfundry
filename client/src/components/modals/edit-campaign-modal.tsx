@@ -31,10 +31,17 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
     currentRevenue: campaign.currentRevenue || '',
     customers: campaign.customers || '',
     useOfFunds: campaign.useOfFunds || '',
+    teamStructure: campaign.teamStructure || '',
+    teamMembers: typeof campaign.teamMembers === 'string' 
+      ? campaign.teamMembers 
+      : Array.isArray(campaign.teamMembers) 
+        ? JSON.stringify(campaign.teamMembers) 
+        : '',
   });
   
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [pitchDeckFile, setPitchDeckFile] = useState<File | null>(null);
+  const [teamPhotoFile, setTeamPhotoFile] = useState<File | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

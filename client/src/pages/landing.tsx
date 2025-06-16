@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartLine, Rocket, Shield, Users, BarChart, Smartphone, Headphones } from "lucide-react";
-import AuthModal from "@/components/modals/auth-modal";
+import OnboardingModal from "@/components/modals/onboarding-modal";
 import Footer from "@/components/layout/footer";
 
 export default function Landing() {
@@ -241,7 +241,7 @@ export default function Landing() {
 
       <Footer />
 
-      <AuthModal 
+      <OnboardingModal 
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         mode={authMode}

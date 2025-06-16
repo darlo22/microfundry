@@ -5,9 +5,9 @@ export function useAuth() {
   const [authChecked, setAuthChecked] = useState(false);
   
   const { data: user, isLoading, error } = useQuery({
-    queryKey: ["/api/auth/user"],
+    queryKey: ["/api/user"],
     queryFn: async () => {
-      const res = await fetch("/api/auth/user", {
+      const res = await fetch("/api/user", {
         credentials: "include",
       });
       

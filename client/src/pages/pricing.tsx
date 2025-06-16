@@ -19,6 +19,7 @@ import {
 
 export default function Pricing() {
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingMode, setOnboardingMode] = useState<'register' | 'login'>('register');
   const plans = [
     {
       name: "Free Tier",
@@ -386,7 +387,9 @@ export default function Pricing() {
       {/* Onboarding Modal */}
       <OnboardingModal 
         isOpen={showOnboarding} 
-        onClose={() => setShowOnboarding(false)} 
+        onClose={() => setShowOnboarding(false)}
+        mode={onboardingMode}
+        onModeChange={setOnboardingMode}
       />
     </div>
   );

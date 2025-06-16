@@ -524,10 +524,15 @@ export default function CampaignView() {
 
                 <Button 
                   onClick={handleInvest}
+                  disabled={isProcessing}
                   className="w-full bg-fundry-orange hover:bg-orange-600 text-lg font-semibold py-4 mb-4"
                 >
-                  Invest Now
+                  <DollarSign className="mr-2" size={20} />
+                  {isProcessing ? "Processing..." : "Commit to Invest"}
                 </Button>
+                <p className="text-xs text-gray-500 text-center mb-4">
+                  Commit now, complete payment later via dashboard
+                </p>
 
                 <div className="text-center text-sm text-gray-500">
                   Minimum investment: <span className="font-medium">{formatCurrency(campaign.minimumInvestment)}</span>
@@ -584,6 +589,32 @@ export default function CampaignView() {
         onClose={() => setShowInvestmentModal(false)}
         campaign={campaign}
       />
+
+      {/* Pitch Deck Modal */}
+      <Dialog open={showPitchDeckModal} onOpenChange={setShowPitchDeckModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <FileText className="mr-2" size={20} />
+              {campaign?.title} - Pitch Deck
+            </DialogTitle>
+          </DialogHeader>
+          <div className="w-full h-[70vh] bg-gray-100 rounded-lg flex items-center justify-center">
+            {campaign?.pitchDeckUrl ? (
+              <iframe
+                src={campaign.pitchDeckUrl}
+                className="w-full h-full rounded-lg"
+                title="Pitch Deck"
+              />
+            ) : (
+              <div className="text-center text-gray-500">
+                <FileText className="mx-auto h-16 w-16 mb-4" />
+                <p>Pitch deck not available</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

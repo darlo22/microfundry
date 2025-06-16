@@ -230,6 +230,17 @@ export default function FounderDashboard() {
         onClose={() => setShowSafeTemplatesModal(false)}
       />
 
+      {selectedCampaign && (
+        <EditCampaignModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedCampaign(null);
+          }}
+          campaign={selectedCampaign}
+        />
+      )}
+
       <Footer />
     </div>
   );

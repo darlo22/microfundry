@@ -202,11 +202,44 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="technology">Technology</SelectItem>
-                          <SelectItem value="healthcare">Healthcare</SelectItem>
+                          <SelectItem value="agriculture">Agriculture & Food</SelectItem>
+                          <SelectItem value="ai-ml">AI & Machine Learning</SelectItem>
+                          <SelectItem value="automotive">Automotive & Transportation</SelectItem>
+                          <SelectItem value="biotechnology">Biotechnology</SelectItem>
+                          <SelectItem value="blockchain">Blockchain & Crypto</SelectItem>
+                          <SelectItem value="cleantech">CleanTech & Sustainability</SelectItem>
+                          <SelectItem value="construction">Construction & Real Estate</SelectItem>
+                          <SelectItem value="consumer-goods">Consumer Products</SelectItem>
+                          <SelectItem value="cybersecurity">Cybersecurity</SelectItem>
+                          <SelectItem value="data-analytics">Data & Analytics</SelectItem>
+                          <SelectItem value="ecommerce">E-commerce & Retail</SelectItem>
+                          <SelectItem value="education">Education & EdTech</SelectItem>
+                          <SelectItem value="energy">Energy & Utilities</SelectItem>
+                          <SelectItem value="entertainment">Entertainment & Media</SelectItem>
+                          <SelectItem value="fashion">Fashion & Beauty</SelectItem>
                           <SelectItem value="fintech">FinTech</SelectItem>
-                          <SelectItem value="ecommerce">E-commerce</SelectItem>
-                          <SelectItem value="cleantech">CleanTech</SelectItem>
+                          <SelectItem value="fitness">Fitness & Wellness</SelectItem>
+                          <SelectItem value="gaming">Gaming & Sports</SelectItem>
+                          <SelectItem value="government">Government & Public Sector</SelectItem>
+                          <SelectItem value="hardware">Hardware & IoT</SelectItem>
+                          <SelectItem value="healthcare">Healthcare & Medical</SelectItem>
+                          <SelectItem value="hospitality">Hospitality & Travel</SelectItem>
+                          <SelectItem value="hr-recruiting">HR & Recruiting</SelectItem>
+                          <SelectItem value="insurance">Insurance</SelectItem>
+                          <SelectItem value="legal">Legal & Compliance</SelectItem>
+                          <SelectItem value="logistics">Logistics & Supply Chain</SelectItem>
+                          <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                          <SelectItem value="marketing">Marketing & Advertising</SelectItem>
+                          <SelectItem value="mobility">Mobility & Transportation</SelectItem>
+                          <SelectItem value="nonprofit">Non-profit & Social Impact</SelectItem>
+                          <SelectItem value="pets">Pets & Animals</SelectItem>
+                          <SelectItem value="productivity">Productivity & Tools</SelectItem>
+                          <SelectItem value="robotics">Robotics & Automation</SelectItem>
+                          <SelectItem value="saas">SaaS & Enterprise Software</SelectItem>
+                          <SelectItem value="security">Security & Safety</SelectItem>
+                          <SelectItem value="social-networking">Social Networking</SelectItem>
+                          <SelectItem value="space">Space & Aerospace</SelectItem>
+                          <SelectItem value="telecommunications">Telecommunications</SelectItem>
                           <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>

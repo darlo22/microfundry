@@ -80,10 +80,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "active", // Set status to active so it appears in browse page
         logoUrl: files.logo?.[0]?.path,
         pitchDeckUrl: files.pitchDeck?.[0]?.path,
+        // Convert deadline string to Date object if provided
+        deadline: req.body.deadline ? new Date(req.body.deadline) : null,
       };
 
-      const data = insertCampaignSchema.parse(campaignData);
-      const campaign = await storage.createCampaign({ ...data, privateLink });
+      // Parse with a more permissive approach to include privateLink
+      const { privateLink: _, ...dataWithoutPrivateLink } = campaignData;
+      const validatedData = insertCampaignSchema.parse(dataWithoutPrivateLink);
+      const campaign = await storage.createCampaign({ ...validatedData, privateLink });
       res.json(campaign);
     } catch (error) {
       console.error("Error creating campaign:", error);

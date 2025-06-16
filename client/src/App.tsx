@@ -52,6 +52,7 @@ function Router() {
           <Route path="/terms-of-use" component={TermsOfUse} />
           <Route path="/cookie-policy" component={CookiePolicy} />
           <Route path="/investment-disclaimer" component={InvestmentDisclaimer} />
+          <Route path="/safe-agreement-template" component={SafeAgreementTemplate} />
           <Route path="/campaign/:id" component={CampaignView} />
           <Route path="/c/:privateLink" component={CampaignView} />
         </>
@@ -70,6 +71,7 @@ function Router() {
           <Route path="/terms-of-use" component={TermsOfUse} />
           <Route path="/cookie-policy" component={CookiePolicy} />
           <Route path="/investment-disclaimer" component={InvestmentDisclaimer} />
+          <Route path="/safe-agreement-template" component={SafeAgreementTemplate} />
           <Route path="/founder/dashboard" component={FounderDashboard} />
           <Route path="/investor/dashboard" component={InvestorDashboard} />
           <Route path="/campaign/:id" component={CampaignView} />

@@ -85,51 +85,8 @@ export default function CampaignView() {
     setShowEditModal(true);
   };
 
-  const handleShare = async () => {
-    if (!campaign?.privateLink) return;
-    
-    const shareUrl = `${window.location.origin}/c/${campaign.privateLink}`;
-    const shareData = {
-      title: `${campaign.title} - Investment Opportunity`,
-      text: `Check out this investment opportunity: ${campaign.shortPitch}`,
-      url: shareUrl,
-    };
-
-    try {
-      // Try native sharing first (mobile devices)
-      if (navigator.share && window.innerWidth <= 768) {
-        await navigator.share(shareData);
-        return;
-      }
-      
-      // For desktop, copy to clipboard
-      await navigator.clipboard.writeText(shareUrl);
-      toast({
-        title: "Link Copied!",
-        description: "Campaign sharing link copied to clipboard. Share it with potential investors.",
-      });
-    } catch (error) {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = shareUrl;
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        toast({
-          title: "Link Copied!",
-          description: "Campaign sharing link copied to clipboard.",
-        });
-      } catch (fallbackError) {
-        toast({
-          title: "Copy Failed",
-          description: `Please copy this link manually: ${shareUrl}`,
-          variant: "destructive",
-        });
-      }
-      document.body.removeChild(textArea);
-    }
+  const handleShare = () => {
+    setShowShareModal(true);
   };
 
   const handleViewPitchDeck = () => {

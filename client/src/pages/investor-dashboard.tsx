@@ -7,10 +7,13 @@ import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import StatsCard from "@/components/dashboard/stats-card";
 import InvestmentCard from "@/components/investment/investment-card";
+import CampaignCard from "@/components/campaign/campaign-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter } from "lucide-react";
 import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 
 export default function InvestorDashboard() {
@@ -18,6 +21,8 @@ export default function InvestorDashboard() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -48,12 +53,46 @@ export default function InvestorDashboard() {
     retry: false,
   });
 
-  // Fetch active campaigns for discovery
-  const { data: activeCampaigns } = useQuery({
-    queryKey: ["/api/campaigns/active"],
+  // Fetch all campaigns for discovery
+  const { data: allCampaigns, isLoading: campaignsLoading } = useQuery({
+    queryKey: ["/api/campaigns"],
     enabled: !!user?.id,
     retry: false,
   });
+
+  // Categories for filtering
+  const categories = [
+    "All Categories",
+    "Technology",
+    "Healthcare", 
+    "Education",
+    "FinTech",
+    "Sustainability",
+    "Manufacturing",
+    "AI/ML",
+    "E-commerce",
+    "Gaming"
+  ];
+
+  // Filter campaigns based on search term and category
+  const filteredCampaigns = Array.isArray(allCampaigns) ? allCampaigns.filter((campaign: any) => {
+    const matchesSearch = !searchTerm || 
+      campaign.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      campaign.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      campaign.businessSector?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = selectedCategory === "All Categories" || 
+      campaign.businessSector === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  }) : [];
+
+  // Get category counts
+  const getCategoryCount = (category: string) => {
+    if (!Array.isArray(allCampaigns)) return 0;
+    if (category === "All Categories") return allCampaigns.length;
+    return allCampaigns.filter((campaign: any) => campaign.businessSector === category).length;
+  };
 
   // Quick action handlers
   const handleDiscoverCampaigns = () => {
@@ -247,15 +286,81 @@ export default function InvestorDashboard() {
                   Discover Investment Opportunities
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <p className="text-gray-600 mb-4">Explore active campaigns and find your next investment opportunity</p>
-                  <Button 
-                    className="bg-fundry-orange hover:bg-orange-600"
-                    onClick={handleDiscoverCampaigns}
-                  >
-                    Browse All Campaigns
-                  </Button>
+              <CardContent className="space-y-6">
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search campaigns by name or industry..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+
+                {/* Category Tabs */}
+                <div className="flex flex-wrap gap-2">
+                  {categories.slice(0, 6).map((category) => (
+                    <Button
+                      key={category}
+                      variant={selectedCategory === category ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedCategory(category)}
+                      className={`${
+                        selectedCategory === category
+                          ? "bg-fundry-orange hover:bg-orange-600"
+                          : "hover:border-fundry-orange"
+                      }`}
+                    >
+                      {category}
+                      <Badge variant="secondary" className="ml-2">
+                        {getCategoryCount(category)}
+                      </Badge>
+                    </Button>
+                  ))}
+                </div>
+
+                {/* Campaign Results */}
+                <div className="space-y-4">
+                  {campaignsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange"></div>
+                    </div>
+                  ) : filteredCampaigns.length > 0 ? (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-gray-600">
+                          {filteredCampaigns.length} campaign{filteredCampaigns.length !== 1 ? 's' : ''} found
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleDiscoverCampaigns}
+                        >
+                          View All Campaigns
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {filteredCampaigns.slice(0, 4).map((campaign: any) => (
+                          <CampaignCard key={campaign.id} campaign={campaign} />
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500 mb-4">
+                        {searchTerm || selectedCategory !== "All Categories"
+                          ? "No campaigns match your search criteria"
+                          : "No active campaigns available"}
+                      </p>
+                      <Button 
+                        className="bg-fundry-orange hover:bg-orange-600"
+                        onClick={handleDiscoverCampaigns}
+                      >
+                        Browse All Campaigns
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

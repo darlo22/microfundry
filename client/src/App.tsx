@@ -39,6 +39,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={!isAuthenticated ? Landing : Home} />
+      <Route path="/landing" component={Landing} />
       <Route path="/about" component={About} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/browse-campaigns" component={BrowseCampaigns} />

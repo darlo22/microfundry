@@ -6,7 +6,7 @@ interface FundryLogoProps {
   linkToHome?: boolean;
 }
 
-export function FundryLogo({ className = "h-10 w-auto", linkToHome = true }: FundryLogoProps) {
+export function FundryLogo({ className = "h-20 w-auto", linkToHome = true }: FundryLogoProps) {
   const logoImg = (
     <img 
       src={fundryLogoImg}
@@ -17,7 +17,7 @@ export function FundryLogo({ className = "h-10 w-auto", linkToHome = true }: Fun
 
   if (linkToHome) {
     return (
-      <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+      <Link href="/landing" className="flex items-center hover:opacity-80 transition-opacity">
         {logoImg}
       </Link>
     );

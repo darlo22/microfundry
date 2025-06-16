@@ -93,6 +93,7 @@ The deployment uses:
 - June 16, 2025. Fixed Edit and Share buttons in Active Campaigns section by connecting them to functional modals, resolved $NaN display issue in raised amounts, enhanced team information display to show live campaign data with structured member profiles or text descriptions, and added downloadable SAFE agreement functionality in investment modal with prepopulated terms including investment amount, discount rate, and valuation cap
 - June 16, 2025. Implemented team member photo capture functionality in Create New Campaign modal with file upload, preview, and removal capabilities; updated Success Stories page to comply with $5,000 funding limit across all case studies (TechFlow: $4,800, GreenEnergy: $5,000, HealthBridge: $3,200, EduPlatform: $1,800) maintaining platform consistency
 - June 16, 2025. Integrated official Fundry logo across all platform pages with clickable navigation to home page: created reusable FundryLogo component using actual brand image, updated navbar, footer, and landing page for consistent branding throughout the application
+- June 16, 2025. Enhanced Fundry logo implementation: increased logo size by 100% (h-10 to h-20) for better visibility and prominence, configured logo to always redirect to platform landing page (/landing route) regardless of user authentication status
 
 ## User Preferences
 

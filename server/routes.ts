@@ -2,7 +2,7 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, requireAuth } from "./auth";
+import { setupAuth, requireAuth, hashPassword, comparePasswords } from "./auth";
 import { 
   insertBusinessProfileSchema,
   insertCampaignSchema,
@@ -162,8 +162,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.upsertUser({
         id: userId,
         email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
         userType: user.userType,
         password: hashedNewPassword,
+        profileImageUrl: user.profileImageUrl,
+        phone: user.phone,
+        country: user.country,
+        state: user.state,
+        bio: user.bio,
       });
 
       res.json({ message: "Password changed successfully" });

@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { apiRequest } from "@/lib/queryClient";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import StatsCard from "@/components/dashboard/stats-card";
@@ -13,16 +17,145 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign } from "lucide-react";
 import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
+import { COUNTRIES_AND_STATES } from "@/data/countries-states";
+
+// Edit Profile Form Schema
+const editProfileSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().optional(),
+  country: z.string().optional(),
+  state: z.string().optional(),
+  bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
+  dateOfBirth: z.string().optional(),
+  occupation: z.string().optional(),
+  annualIncome: z.string().optional(),
+  investmentExperience: z.string().optional(),
+});
+
+type EditProfileFormData = z.infer<typeof editProfileSchema>;
 
 export default function InvestorDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState("");
+
+  // Initialize form with user data
+  const form = useForm<EditProfileFormData>({
+    resolver: zodResolver(editProfileSchema),
+    defaultValues: {
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      country: user?.country || "",
+      state: user?.state || "",
+      bio: user?.bio || "",
+      dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : "",
+      occupation: user?.occupation || "",
+      annualIncome: user?.annualIncome || "",
+      investmentExperience: user?.investmentExperience || "",
+    },
+  });
+
+  // Update form when user data changes
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        country: user.country || "",
+        state: user.state || "",
+        bio: user.bio || "",
+        dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : "",
+        occupation: user.occupation || "",
+        annualIncome: user.annualIncome || "",
+        investmentExperience: user.investmentExperience || "",
+      });
+      setSelectedCountry(user.country || "");
+    }
+  }, [user, form]);
+
+  // Edit Profile Mutation
+  const editProfileMutation = useMutation({
+    mutationFn: async (data: EditProfileFormData) => {
+      return apiRequest("PUT", `/api/user/profile`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      setIsEditProfileOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle download SAFE agreement
+  const handleDownloadSafe = async (investmentId: number, campaignTitle: string) => {
+    try {
+      const response = await fetch(`/api/investments/${investmentId}/safe-agreement`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to download SAFE agreement');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `SAFE_Agreement_${campaignTitle.replace(/\s+/g, '_')}_${investmentId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Download Started",
+        description: "Your SAFE agreement is downloading.",
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Failed to download SAFE agreement. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle form submission
+  const onSubmit = (data: EditProfileFormData) => {
+    editProfileMutation.mutate(data);
+  };
+
+  // Get states for selected country
+  const selectedCountryData = COUNTRIES_AND_STATES.find(c => c.code === selectedCountry);
+  const availableStates = selectedCountryData?.states || [];
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -387,7 +520,11 @@ export default function InvestorDashboard() {
                             <p className="font-medium">{investment.campaign?.title || 'Investment Document'}</p>
                             <p className="text-sm text-gray-500">Investment: ${investment.amount}</p>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDownloadSafe(investment.id, investment.campaign?.title || 'Investment')}
+                          >
                             <Download className="h-4 w-4 mr-2" />
                             Download
                           </Button>
@@ -412,27 +549,361 @@ export default function InvestorDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <p className="text-gray-900">{user?.email}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Personal Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Personal Information</h3>
+                    
+                    <div className="flex items-center gap-3">
+                      <User className="h-4 w-4 text-gray-500" />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                        <p className="text-gray-900">{user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'Not set'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Settings className="h-4 w-4 text-gray-500" />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Email</label>
+                        <p className="text-gray-900">{user?.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Phone className="h-4 w-4 text-gray-500" />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Phone</label>
+                        <p className="text-gray-900">{user?.phone || 'Not set'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Calendar className="h-4 w-4 text-gray-500" />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                        <p className="text-gray-900">{user?.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : 'Not set'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <MapPin className="h-4 w-4 text-gray-500" />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Location</label>
+                        <p className="text-gray-900">
+                          {user?.country && user?.state ? `${user.state}, ${user.country}` : 
+                           user?.country ? user.country : 'Not set'}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                    <p className="text-gray-900">{user?.firstName || 'Not set'}</p>
+
+                  {/* Professional Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Professional Information</h3>
+                    
+                    <div className="flex items-center gap-3">
+                      <Briefcase className="h-4 w-4 text-gray-500" />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Occupation</label>
+                        <p className="text-gray-900">{user?.occupation || 'Not set'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <DollarSign className="h-4 w-4 text-gray-500" />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Annual Income</label>
+                        <p className="text-gray-900">{user?.annualIncome || 'Not set'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <TrendingUp className="h-4 w-4 text-gray-500" />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Investment Experience</label>
+                        <p className="text-gray-900">{user?.investmentExperience || 'Not set'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <User className="h-4 w-4 text-gray-500" />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">User Type</label>
+                        <p className="text-gray-900 capitalize">{user?.userType || 'Investor'}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                    <p className="text-gray-900">{user?.lastName || 'Not set'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">User Type</label>
-                    <p className="text-gray-900 capitalize">{user?.userType || 'Investor'}</p>
-                  </div>
-                  <Button variant="outline" className="mt-4">
-                    Edit Profile
-                  </Button>
                 </div>
+
+                {/* Bio Section */}
+                {user?.bio && (
+                  <div className="mt-6 pt-6 border-t">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">About</h3>
+                    <p className="text-gray-700 leading-relaxed">{user.bio}</p>
+                  </div>
+                )}
+
+                <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="mt-6 bg-fundry-orange hover:bg-orange-600">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Edit Profile</DialogTitle>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Personal Information */}
+                          <div className="space-y-4">
+                            <h3 className="text-lg font-semibold border-b pb-2">Personal Information</h3>
+                            
+                            <FormField
+                              control={form.control}
+                              name="firstName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>First Name</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Enter your first name" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="lastName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Last Name</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Enter your last name" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="email"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Email</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Enter your email" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="phone"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Phone</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Enter your phone number" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="dateOfBirth"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Date of Birth</FormLabel>
+                                  <FormControl>
+                                    <Input type="date" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          {/* Location & Professional */}
+                          <div className="space-y-4">
+                            <h3 className="text-lg font-semibold border-b pb-2">Location & Professional</h3>
+                            
+                            <FormField
+                              control={form.control}
+                              name="country"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Country</FormLabel>
+                                  <Select 
+                                    onValueChange={(value) => {
+                                      field.onChange(value);
+                                      setSelectedCountry(value);
+                                      form.setValue("state", ""); // Reset state when country changes
+                                    }} 
+                                    defaultValue={field.value}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select your country" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {COUNTRIES_AND_STATES.map((country) => (
+                                        <SelectItem key={country.code} value={country.code}>
+                                          {country.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="state"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>State/Province</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder={
+                                          availableStates.length > 0 
+                                            ? "Select your state/province" 
+                                            : "Select country first"
+                                        } />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {availableStates.map((state) => (
+                                        <SelectItem key={state.code} value={state.code}>
+                                          {state.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="occupation"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Occupation</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Enter your occupation" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="annualIncome"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Annual Income</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select income range" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="under-25k">Under $25,000</SelectItem>
+                                      <SelectItem value="25k-50k">$25,000 - $50,000</SelectItem>
+                                      <SelectItem value="50k-75k">$50,000 - $75,000</SelectItem>
+                                      <SelectItem value="75k-100k">$75,000 - $100,000</SelectItem>
+                                      <SelectItem value="100k-150k">$100,000 - $150,000</SelectItem>
+                                      <SelectItem value="150k-250k">$150,000 - $250,000</SelectItem>
+                                      <SelectItem value="over-250k">Over $250,000</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="investmentExperience"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Investment Experience</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select experience level" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="beginner">Beginner (0-2 years)</SelectItem>
+                                      <SelectItem value="intermediate">Intermediate (3-5 years)</SelectItem>
+                                      <SelectItem value="experienced">Experienced (6-10 years)</SelectItem>
+                                      <SelectItem value="expert">Expert (10+ years)</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Bio Section */}
+                        <FormField
+                          control={form.control}
+                          name="bio"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>About You</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Tell us about yourself, your investment interests, and goals..."
+                                  className="min-h-[100px]"
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex justify-end space-x-4 pt-6 border-t">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={() => setIsEditProfileOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            className="bg-fundry-orange hover:bg-orange-600"
+                            disabled={editProfileMutation.isPending}
+                          >
+                            {editProfileMutation.isPending ? "Saving..." : "Save Changes"}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </CardContent>
             </Card>
           </TabsContent>

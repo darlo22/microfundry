@@ -134,6 +134,7 @@ The deployment uses:
 - June 17, 2025. Connected investor dashboard top navigation to Quick Actions functionality: linked Discover menu item to browse campaigns navigation, connected Documents tab to investment documents with SAFE agreement downloads, integrated Profile navigation with account management settings, restructured tab system with proper handlers for seamless navigation between dashboard sections
 - June 17, 2025. Restored Portfolio and Updates pages to investor dashboard: created comprehensive 5-tab navigation system (Portfolio, Discover, Updates, Documents, Profile), restored Portfolio as default landing page with investment overview and Quick Actions, maintained Updates tab with live founder communication data, ensured seamless navigation between all dashboard sections
 - June 17, 2025. Fixed Documents page to display live SAFE agreement data: enhanced Documents tab with professional investment document cards showing real investment data, implemented filtering for committed/paid/completed investments, added Download and View functionality for SAFE agreements, created document summary statistics with total agreements and invested amounts, replaced empty state with authentic signed investment documents
+- June 17, 2025. Removed top navigation menu items from investor dashboard: deleted Portfolio, Discover, Documents, and Profile navigation links from navbar header while preserving tab functionality within dashboard content area, maintaining clean header with only Fundry logo and user actions
 
 ## User Preferences
 

@@ -42,12 +42,7 @@ export default function Navbar({ title, showNotifications = true, actions }: Nav
         { href: "/founder/analytics", label: "Analytics", active: location.startsWith("/founder/analytics") },
       ];
     } else {
-      return [
-        { href: "/investor/dashboard", label: "Portfolio", active: location === "/investor/dashboard" },
-        { href: "/investor/discover", label: "Discover", active: location.startsWith("/investor/discover") },
-        { href: "/investor/documents", label: "Documents", active: location.startsWith("/investor/documents") },
-        { href: "/investor/profile", label: "Profile", active: location.startsWith("/investor/profile") },
-      ];
+      return [];
     }
   };
 

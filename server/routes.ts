@@ -401,6 +401,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Store KYC submission in memory (in production, this would be in database)
+      kycSubmissions.set(userId, {
+        status: "pending",
+        submittedAt: new Date(),
+        data: kycData
+      });
+
       // Store KYC data and update status to "Under Review"
       await storage.updateUserKycStatus(userId, {
         status: "pending",

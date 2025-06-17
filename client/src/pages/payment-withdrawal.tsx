@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   ArrowLeft, 
@@ -243,6 +243,9 @@ export default function PaymentWithdrawal() {
         description: "Your KYC information has been submitted for review.",
       });
       setKycModalOpen(false);
+      
+      // Invalidate KYC status cache to refresh the data immediately
+      queryClient.invalidateQueries({ queryKey: ["/api/kyc-status"] });
     },
     onError: (error: any) => {
       toast({

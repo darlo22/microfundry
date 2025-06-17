@@ -40,13 +40,13 @@ interface InvestmentModalProps {
   campaign: CampaignWithStats;
 }
 
-type InvestmentStep = 'auth' | 'investor-details' | 'amount' | 'safe-review' | 'terms' | 'signature' | 'payment' | 'confirmation';
+type InvestmentStep = 'amount' | 'auth' | 'safe-review' | 'terms' | 'signature' | 'payment' | 'confirmation';
 
 export default function InvestmentModal({ isOpen, onClose, campaign }: InvestmentModalProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const { user, isAuthenticated } = useAuth();
-  const [currentStep, setCurrentStep] = useState<InvestmentStep>(isAuthenticated ? 'investor-details' : 'auth');
+  const [currentStep, setCurrentStep] = useState<InvestmentStep>('amount');
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
   const [customAmount, setCustomAmount] = useState<string>("");
   const [termsAccepted, setTermsAccepted] = useState(false);

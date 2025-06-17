@@ -9,6 +9,11 @@ interface InvestmentCardProps {
 }
 
 export default function InvestmentCard({ investment }: InvestmentCardProps) {
+  // Guard against null/undefined investment or campaign data
+  if (!investment || !investment.campaign) {
+    return null;
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
@@ -35,28 +40,28 @@ export default function InvestmentCard({ investment }: InvestmentCardProps) {
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-4 flex-1">
           <div className="w-12 h-12 bg-gradient-to-br from-fundry-orange to-orange-400 rounded-lg flex items-center justify-center">
-            {investment.campaign.logoUrl ? (
+            {investment.campaign?.logoUrl ? (
               <img 
                 src={investment.campaign.logoUrl} 
-                alt={investment.campaign.title}
+                alt={investment.campaign?.title || 'Campaign'}
                 className="w-8 h-8 object-cover rounded"
               />
             ) : (
               <span className="text-white font-semibold">
-                {investment.campaign.title.charAt(0)}
+                {investment.campaign?.title?.charAt(0) || 'C'}
               </span>
             )}
           </div>
           
           <div className="flex-1">
             <div className="flex items-center space-x-3 mb-2">
-              <h3 className="text-lg font-semibold text-gray-900">{investment.campaign.title}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{investment.campaign?.title || 'Unknown Campaign'}</h3>
               <Badge className={getStatusColor(investment.status)}>
                 {investment.status === "completed" ? "Confirmed" : investment.status.charAt(0).toUpperCase() + investment.status.slice(1)}
               </Badge>
             </div>
             
-            <p className="text-gray-600 mb-3">{investment.campaign.shortPitch}</p>
+            <p className="text-gray-600 mb-3">{investment.campaign?.shortPitch || 'No description available'}</p>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
@@ -66,7 +71,7 @@ export default function InvestmentCard({ investment }: InvestmentCardProps) {
               <div>
                 <p className="text-sm text-gray-500">Campaign Status</p>
                 <p className="font-semibold text-gray-900">
-                  {investment.campaign.status.charAt(0).toUpperCase() + investment.campaign.status.slice(1)}
+                  {investment.campaign?.status?.charAt(0).toUpperCase() + investment.campaign?.status?.slice(1) || 'Unknown'}
                 </p>
               </div>
               <div>
@@ -86,7 +91,7 @@ export default function InvestmentCard({ investment }: InvestmentCardProps) {
         </div>
 
         <div className="ml-6 flex flex-col space-y-2">
-          {investment.campaign.status !== "cancelled" && (
+          {investment.campaign?.status !== "cancelled" && investment.campaign?.id && (
             <Link href={`/campaign/${investment.campaign.id}`}>
               <Button className="bg-fundry-orange hover:bg-orange-600 text-sm">
                 <Eye className="mr-2" size={16} />

@@ -85,7 +85,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const minimumInvestment = 50;
+  const minimumInvestment = 25;
   const maximumInvestment = 5000;
   const presetAmounts = [100, 250, 500, 1000, 2500];
 

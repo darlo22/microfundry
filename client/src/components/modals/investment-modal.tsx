@@ -91,10 +91,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
   const createInvestmentMutation = useMutation({
     mutationFn: async (investmentData: any) => {
-      return await apiRequest('/api/investments', {
-        method: 'POST',
-        body: JSON.stringify(investmentData)
-      });
+      return await apiRequest('POST', '/api/investments', investmentData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
@@ -208,22 +205,17 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const handleSignIn = async () => {
     setIsAuthenticating(true);
     try {
-      const response = await apiRequest('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({
-          email: authData.email,
-          password: authData.password
-        })
+      const response = await apiRequest('POST', '/api/auth/login', {
+        email: authData.email,
+        password: authData.password
       });
       
-      if (response.success) {
-        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-        toast({
-          title: "Signed In Successfully",
-          description: "Welcome back! Proceeding with your investment.",
-        });
-        setCurrentStep('safe-review');
-      }
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      toast({
+        title: "Signed In Successfully",
+        description: "Welcome back! Proceeding with your investment.",
+      });
+      setCurrentStep('safe-review');
     } catch (error: any) {
       toast({
         title: "Sign In Failed",
@@ -247,25 +239,20 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
     setIsAuthenticating(true);
     try {
-      const response = await apiRequest('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify({
-          email: authData.email,
-          password: authData.password,
-          firstName: authData.firstName,
-          lastName: authData.lastName,
-          userType: 'investor'
-        })
+      const response = await apiRequest('POST', '/api/auth/register', {
+        email: authData.email,
+        password: authData.password,
+        firstName: authData.firstName,
+        lastName: authData.lastName,
+        userType: 'investor'
       });
       
-      if (response.success) {
-        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-        toast({
-          title: "Account Created Successfully",
-          description: "Welcome to Fundry! Proceeding with your investment.",
-        });
-        setCurrentStep('safe-review');
-      }
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      toast({
+        title: "Account Created Successfully",
+        description: "Welcome to Fundry! Proceeding with your investment.",
+      });
+      setCurrentStep('safe-review');
     } catch (error: any) {
       toast({
         title: "Registration Failed",

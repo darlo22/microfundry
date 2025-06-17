@@ -502,20 +502,48 @@ export default function FounderInvestors() {
             </Button>
             <Button 
               onClick={() => {
+                // Ensure we have valid investor profiles
+                const profiles = investorProfiles || [];
+                
+                let recipientEmails: string[] = [];
+                
+                if (messageForm.recipients === "all") {
+                  recipientEmails = profiles.map(p => p.email);
+                } else if (messageForm.recipients === "active") {
+                  recipientEmails = profiles.filter(p => p.status === "active").map(p => p.email);
+                } else if (messageForm.recipients === "committed") {
+                  recipientEmails = profiles.filter(p => p.status === "committed").map(p => p.email);
+                } else {
+                  recipientEmails = selectedInvestors || [];
+                }
+                
+                // Validate recipients before sending
+                if (recipientEmails.length === 0) {
+                  toast({
+                    title: "No Recipients",
+                    description: "Please select recipients or ensure you have investors to message.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+
                 const messageData = {
-                  ...messageForm,
-                  founderId: user?.id,
-                  recipients: messageForm.recipients === "all" 
-                    ? investorProfiles.map(p => p.email)
-                    : messageForm.recipients === "active"
-                    ? investorProfiles.filter(p => p.status === "active").map(p => p.email)
-                    : messageForm.recipients === "committed"
-                    ? investorProfiles.filter(p => p.status === "committed").map(p => p.email)
-                    : selectedInvestors
+                  subject: messageForm.subject.trim(),
+                  content: messageForm.content.trim(),
+                  messageType: messageForm.messageType,
+                  recipients: recipientEmails
                 };
+                
+                console.log('Sending message with data:', messageData);
                 sendMessageMutation.mutate(messageData);
               }}
-              disabled={!messageForm.subject || !messageForm.content || sendMessageMutation.isPending}
+              disabled={
+                !messageForm.subject || 
+                !messageForm.content || 
+                !messageForm.recipients ||
+                sendMessageMutation.isPending ||
+                (investorProfiles && investorProfiles.length === 0)
+              }
               className="bg-fundry-orange hover:bg-orange-600"
             >
               {sendMessageMutation.isPending ? (

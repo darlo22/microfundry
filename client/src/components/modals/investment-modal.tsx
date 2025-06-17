@@ -1,38 +1,33 @@
 import { useState, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useLocation } from "wouter";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { FundryLogo } from "@/components/ui/fundry-logo";
 import { 
-  CreditCard, 
-  FileText, 
-  CheckCircle, 
   DollarSign, 
+  User, 
+  FileText, 
   Shield, 
-  Clock,
-  Signature,
-  ArrowRight,
-  ArrowLeft,
+  PenTool, 
+  CreditCard, 
+  CheckCircle, 
   Download,
-  User,
-  Mail,
-  Phone,
-  MapPin
+  LogIn,
+  UserPlus
 } from "lucide-react";
-import type { CampaignWithStats } from "@/lib/types";
+import type { Campaign } from "@shared/schema";
+import FundryLogo from "@/components/ui/fundry-logo";
+
+interface CampaignWithStats extends Campaign {
+  totalRaised: string;
+  investorCount: number;
+  progressPercent: number;
+}
 
 interface InvestmentModalProps {
   isOpen: boolean;
@@ -42,666 +37,385 @@ interface InvestmentModalProps {
 
 type InvestmentStep = 'amount' | 'auth' | 'safe-review' | 'terms' | 'signature' | 'payment' | 'confirmation';
 
+interface InvestorDetails {
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  investmentExperience: string;
+  accreditedInvestor: boolean;
+}
+
+interface AuthFormData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  confirmPassword: string;
+}
+
 export default function InvestmentModal({ isOpen, onClose, campaign }: InvestmentModalProps) {
-  const { toast } = useToast();
-  const [, setLocation] = useLocation();
-  const { user, isAuthenticated } = useAuth();
   const [currentStep, setCurrentStep] = useState<InvestmentStep>('amount');
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
-  const [customAmount, setCustomAmount] = useState<string>("");
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [riskDisclosureAccepted, setRiskDisclosureAccepted] = useState(false);
-  const [digitalSignature, setDigitalSignature] = useState("");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'stripe' | 'budpay' | 'commitment'>('stripe');
-  const [investmentData, setInvestmentData] = useState<any>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  
-  // Authentication state
+  const [customAmount, setCustomAmount] = useState<string>('');
+  const [investorDetails, setInvestorDetails] = useState<InvestorDetails>({
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    investmentExperience: '',
+    accreditedInvestor: false
+  });
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [authEmail, setAuthEmail] = useState("");
-  const [authPassword, setAuthPassword] = useState("");
-  const [authUsername, setAuthUsername] = useState("");
-  const [selectedUserType, setSelectedUserType] = useState<'founder' | 'investor'>('investor');
-  
-  // Investor details state
-  const [investorDetails, setInvestorDetails] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    country: "United States",
-    accreditedInvestor: false,
-    investmentExperience: ""
+  const [authData, setAuthData] = useState<AuthFormData>({
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    confirmPassword: ''
+  });
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [signatureData, setSignatureData] = useState<string>('');
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const minimumInvestment = 50;
+  const maximumInvestment = 5000;
+  const presetAmounts = [100, 250, 500, 1000, 2500];
+
+  const createInvestmentMutation = useMutation({
+    mutationFn: async (investmentData: any) => {
+      return await apiRequest('/api/investments', {
+        method: 'POST',
+        body: JSON.stringify(investmentData)
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
+      setCurrentStep('confirmation');
+    },
+    onError: (error) => {
+      toast({
+        title: "Investment Failed",
+        description: error.message || "Failed to process investment",
+        variant: "destructive",
+      });
+    }
   });
 
-  const presetAmounts = [25, 50, 100, 250, 500, 1000];
-  const minimumInvestment = parseFloat(campaign.minimumInvestment);
-  const maximumInvestment = 5000;
+  const handleAmountSelection = (amount: number) => {
+    setSelectedAmount(amount);
+    setCustomAmount('');
+  };
+
+  const handleCustomAmountChange = (value: string) => {
+    const numValue = parseFloat(value) || 0;
+    setCustomAmount(value);
+    setSelectedAmount(numValue);
+  };
 
   const calculateFee = (amount: number) => {
-    return amount > 1000 ? Math.round(amount * 0.05 * 100) / 100 : 0;
+    return amount > 1000 ? Math.round(amount * 0.05) : 0;
   };
 
   const calculateTotal = (amount: number) => {
     return amount + calculateFee(amount);
   };
 
-  const generateSafeAgreement = (campaign: CampaignWithStats, amount: number) => {
-    const currentDate = new Date().toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+  const handleNextStep = () => {
+    const stepOrder: InvestmentStep[] = ['amount', 'auth', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'];
+    const currentIndex = stepOrder.indexOf(currentStep);
     
-    return `
-SIMPLE AGREEMENT FOR FUTURE EQUITY
-
-THIS CERTIFIES THAT in exchange for the payment by the undersigned investor ("Investor") of $${amount.toLocaleString()} (the "Purchase Amount") on or about ${currentDate}, ${campaign.title} (the "Company"), hereby issues to the Investor the right to certain shares of the Company's Capital Stock, subject to the terms described below.
-
-INVESTMENT TERMS:
-• Investment Amount: $${amount.toLocaleString()}
-• Discount Rate: ${campaign.discountRate}%
-• Valuation Cap: $${parseFloat(campaign.valuationCap || "1000000").toLocaleString()}
-• Date of Agreement: ${currentDate}
-
-CONVERSION EVENTS:
-This investment will automatically convert to equity shares upon:
-1. Next qualifying financing round (Series A or later)
-2. Liquidity event (acquisition, merger, or IPO)
-3. Company dissolution
-
-INVESTOR RIGHTS:
-• Right to receive shares at a discount during conversion
-• Pro-rata rights in future financing rounds
-• Information rights as specified in company bylaws
-
-COMPANY INFORMATION:
-• Legal Name: ${campaign.title}
-• Business Description: ${campaign.shortPitch}
-• Registered Address: [To be completed upon signing]
-
-This agreement is governed by the laws of Delaware and represents a legally binding contract between the Investor and the Company.
-
-Generated on: ${currentDate}
-Platform: Fundry Investment Platform
-    `.trim();
-  };
-
-  const downloadSafeAgreement = (content: string, companyName: string, amount: number) => {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `SAFE_Agreement_${companyName.replace(/[^a-zA-Z0-9]/g, '_')}_$${amount}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  };
-
-  // Authentication mutations
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: { email: string; password: string }) => {
-      const response = await apiRequest("POST", "/api/login", {
-        username: credentials.email,
-        password: credentials.password
-      });
-      return response.json();
-    },
-    onSuccess: (userData) => {
-      if (userData.userType === 'founder') {
-        toast({
-          title: "Successfully signed in",
-          description: "Redirecting to founder dashboard...",
-        });
-        setTimeout(() => {
-          setLocation('/founder/dashboard');
-          onClose();
-        }, 1000);
-      } else {
-        setCurrentStep('safe-review');
-        toast({
-          title: "Successfully signed in",
-          description: "Welcome back! Let's review your investment agreement.",
-        });
-      }
-    },
-    onError: (error) => {
-      toast({
-        title: "Sign in failed",
-        description: "Invalid email or password. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const registerMutation = useMutation({
-    mutationFn: async (credentials: { username: string; email: string; password: string; userType: string }) => {
-      const response = await apiRequest("POST", "/api/register", credentials);
-      return response.json();
-    },
-    onSuccess: (userData) => {
-      if (selectedUserType === 'founder') {
-        toast({
-          title: "Account created successfully",
-          description: "Redirecting to founder dashboard...",
-        });
-        setTimeout(() => {
-          setLocation('/founder/dashboard');
-          onClose();
-        }, 1000);
-      } else {
-        setCurrentStep('safe-review');
-        toast({
-          title: "Account created successfully",
-          description: "Welcome to Fundry! Let's review your investment agreement.",
-        });
-      }
-    },
-    onError: (error) => {
-      toast({
-        title: "Registration failed",
-        description: "Unable to create account. Email may already be in use.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const createInvestmentMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", "/api/investments", data);
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setInvestmentData(data);
-      if (selectedPaymentMethod === 'commitment') {
-        setCurrentStep('confirmation');
-      } else {
-        setCurrentStep('payment');
-      }
-    },
-    onError: (error) => {
-      toast({
-        title: "Investment Error",
-        description: "Failed to process investment. Please try again.",
-        variant: "destructive",
-      });
-      setIsProcessing(false);
-    },
-  });
-
-  const handleAmountSelection = (amount: number) => {
-    setSelectedAmount(amount);
-    setCustomAmount(amount.toString());
-  };
-
-  const handleCustomAmountChange = (value: string) => {
-    setCustomAmount(value);
-    const amount = parseFloat(value) || 0;
-    setSelectedAmount(amount);
-  };
-
-  const validateAmount = () => {
-    if (selectedAmount < minimumInvestment) {
+    if (currentStep === 'amount' && selectedAmount < minimumInvestment) {
       toast({
         title: "Invalid Amount",
         description: `Minimum investment is $${minimumInvestment}`,
         variant: "destructive",
       });
-      return false;
+      return;
     }
-    if (selectedAmount > maximumInvestment) {
+
+    if (currentStep === 'amount' && selectedAmount > maximumInvestment) {
       toast({
         title: "Invalid Amount",
         description: `Maximum investment is $${maximumInvestment}`,
         variant: "destructive",
       });
-      return false;
+      return;
     }
-    return true;
-  };
 
-  const handleAuth = () => {
-    if (authMode === 'signin') {
-      if (authEmail && authPassword) {
-        loginMutation.mutate({ email: authEmail, password: authPassword });
-      } else {
-        toast({
-          title: "Missing Information",
-          description: "Please enter your email and password.",
-          variant: "destructive",
-        });
-      }
-    } else {
-      if (authUsername && authEmail && authPassword) {
-        registerMutation.mutate({ 
-          username: authUsername, 
-          email: authEmail, 
-          password: authPassword, 
-          userType: selectedUserType 
-        });
-      } else {
-        toast({
-          title: "Missing Information",
-          description: "Please fill in all required fields.",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const validateInvestorDetails = () => {
-    const required = ['fullName', 'email', 'phone', 'address', 'city', 'state', 'zipCode'];
-    const missing = required.filter(field => !investorDetails[field as keyof typeof investorDetails]);
-    
-    if (missing.length > 0) {
+    if (currentStep === 'auth' && !isAuthenticated) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
+        title: "Authentication Required",
+        description: "Please sign in or create an account to continue",
         variant: "destructive",
       });
-      return false;
+      return;
     }
-    return true;
-  };
 
-  const handleNextStep = () => {
-    switch (currentStep) {
-      case 'auth':
-        handleAuth();
-        break;
-      case 'amount':
-        if (validateAmount()) {
-          if (!isAuthenticated) {
-            setCurrentStep('auth');
-          } else {
-            setCurrentStep('safe-review');
-          }
-        }
-        break;
-      case 'safe-review':
-        setCurrentStep('terms');
-        break;
-      case 'terms':
-        if (termsAccepted && riskDisclosureAccepted) {
-          setCurrentStep('signature');
-        } else {
-          toast({
-            title: "Terms Required",
-            description: "Please accept all terms and conditions to proceed.",
-            variant: "destructive",
-          });
-        }
-        break;
-      case 'signature':
-        if (digitalSignature.trim()) {
-          processInvestment();
-        } else {
-          toast({
-            title: "Signature Required",
-            description: "Please provide your digital signature.",
-            variant: "destructive",
-          });
-        }
-        break;
-      case 'payment':
-        handlePayment();
-        break;
+    if (currentStep === 'terms' && !agreedToTerms) {
+      toast({
+        title: "Terms Required",
+        description: "Please agree to the terms and conditions",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (currentStep === 'signature' && !signatureData.trim()) {
+      toast({
+        title: "Signature Required",
+        description: "Please provide your digital signature",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (currentStep === 'payment') {
+      handlePayment();
+      return;
+    }
+
+    if (currentIndex < stepOrder.length - 1) {
+      setCurrentStep(stepOrder[currentIndex + 1]);
     }
   };
 
   const handlePrevStep = () => {
-    switch (currentStep) {
-      case 'auth':
-        setCurrentStep('amount');
-        break;
-      case 'safe-review':
-        if (!isAuthenticated) {
-          setCurrentStep('auth');
-        } else {
-          setCurrentStep('amount');
-        }
-        break;
-      case 'terms':
+    const stepOrder: InvestmentStep[] = ['amount', 'auth', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'];
+    const currentIndex = stepOrder.indexOf(currentStep);
+    
+    if (currentIndex > 0) {
+      setCurrentStep(stepOrder[currentIndex - 1]);
+    }
+  };
+
+  const handleAuth = async () => {
+    if (authMode === 'signin') {
+      await handleSignIn();
+    } else {
+      await handleSignUp();
+    }
+  };
+
+  const handleSignIn = async () => {
+    setIsAuthenticating(true);
+    try {
+      const response = await apiRequest('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: authData.email,
+          password: authData.password
+        })
+      });
+      
+      if (response.success) {
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+        toast({
+          title: "Signed In Successfully",
+          description: "Welcome back! Proceeding with your investment.",
+        });
         setCurrentStep('safe-review');
-        break;
-      case 'signature':
-        setCurrentStep('terms');
-        break;
-      case 'payment':
-        setCurrentStep('signature');
-        break;
-    }
-  };
-
-  const processInvestment = () => {
-    setIsProcessing(true);
-    createInvestmentMutation.mutate({
-      campaignId: campaign.id,
-      amount: selectedAmount,
-      paymentMethod: selectedPaymentMethod,
-      digitalSignature,
-      termsAccepted,
-      riskDisclosureAccepted,
-    });
-  };
-
-  const handlePayment = () => {
-    setIsProcessing(true);
-    if (selectedPaymentMethod === 'stripe') {
+      }
+    } catch (error: any) {
       toast({
-        title: "Processing Payment",
-        description: "Redirecting to Stripe for secure payment...",
+        title: "Sign In Failed",
+        description: error.message || "Invalid credentials",
+        variant: "destructive",
       });
-      setTimeout(() => {
-        setCurrentStep('confirmation');
-        setIsProcessing(false);
-      }, 2000);
-    } else if (selectedPaymentMethod === 'budpay') {
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (authData.password !== authData.confirmPassword) {
       toast({
-        title: "Processing Payment",
-        description: "Redirecting to Budpay for secure payment...",
+        title: "Password Mismatch",
+        description: "Passwords do not match",
+        variant: "destructive",
       });
-      setTimeout(() => {
-        setCurrentStep('confirmation');
-        setIsProcessing(false);
-      }, 2000);
+      return;
+    }
+
+    setIsAuthenticating(true);
+    try {
+      const response = await apiRequest('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: authData.email,
+          password: authData.password,
+          firstName: authData.firstName,
+          lastName: authData.lastName,
+          userType: 'investor'
+        })
+      });
+      
+      if (response.success) {
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+        toast({
+          title: "Account Created Successfully",
+          description: "Welcome to Fundry! Proceeding with your investment.",
+        });
+        setCurrentStep('safe-review');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Registration Failed",
+        description: error.message || "Failed to create account",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
-  const handleComplete = () => {
-    toast({
-      title: "Investment Successful",
-      description: "Your investment has been processed successfully!",
-    });
-    onClose();
-    setLocation('/investor/dashboard');
-  };
+  const handlePayment = async () => {
+    setIsProcessingPayment(true);
+    try {
+      const investmentData = {
+        campaignId: campaign.id,
+        amount: selectedAmount.toString(),
+        status: 'committed',
+        investorDetails: {
+          ...investorDetails,
+          signature: signatureData,
+          agreedToTerms,
+          investmentDate: new Date().toISOString()
+        }
+      };
 
-  const resetModal = () => {
-    setCurrentStep('amount');
-    setSelectedAmount(0);
-    setCustomAmount('');
-    setTermsAccepted(false);
-    setRiskDisclosureAccepted(false);
-    setDigitalSignature('');
-    setSelectedPaymentMethod('stripe');
-    setInvestmentData(null);
-    setIsProcessing(false);
-  };
-
-  useEffect(() => {
-    if (!isOpen) {
-      resetModal();
+      await createInvestmentMutation.mutateAsync(investmentData);
+      
+      toast({
+        title: "Investment Successful!",
+        description: `You have successfully committed $${selectedAmount} to ${campaign.title}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process payment",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingPayment(false);
     }
-  }, [isOpen]);
+  };
 
-  const getStepTitle = () => {
-    switch (currentStep) {
-      case 'auth': return 'Sign In or Create Account';
+  const generateSafeAgreement = (campaign: CampaignWithStats, amount: number) => {
+    return `SIMPLE AGREEMENT FOR FUTURE EQUITY
+
+Company: ${campaign.title}
+Investor: ${user?.firstName} ${user?.lastName}
+Email: ${user?.email}
+Investment Amount: $${amount}
+Discount Rate: ${campaign.discountRate}%
+Valuation Cap: $${campaign.valuationCap}
+Date: ${new Date().toLocaleDateString()}
+
+This agreement represents the investor's commitment to invest in ${campaign.title} under the terms of a Simple Agreement for Future Equity (SAFE).
+
+Investment Terms:
+- Investment Amount: $${amount}
+- Discount Rate: ${campaign.discountRate}%
+- Valuation Cap: $${campaign.valuationCap || 'Not applicable'}
+- Pro Rata Rights: Included
+
+The investment will convert to equity shares upon the next qualifying financing round or liquidity event.
+
+Investor Signature: ${signatureData}
+Date: ${new Date().toLocaleDateString()}
+
+This is a legally binding agreement. Please consult with legal counsel before proceeding.`;
+  };
+
+  const downloadSafeAgreement = (content: string, companyName: string, amount: number) => {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `SAFE_Agreement_${companyName}_$${amount}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const getStepIcon = (step: InvestmentStep) => {
+    switch (step) {
+      case 'amount': return DollarSign;
+      case 'auth': return User;
+      case 'safe-review': return FileText;
+      case 'terms': return Shield;
+      case 'signature': return PenTool;
+      case 'payment': return CreditCard;
+      case 'confirmation': return CheckCircle;
+      default: return DollarSign;
+    }
+  };
+
+  const getStepTitle = (step: InvestmentStep) => {
+    switch (step) {
       case 'amount': return 'Investment Amount';
+      case 'auth': return 'Authentication';
       case 'safe-review': return 'SAFE Agreement Review';
       case 'terms': return 'Terms & Conditions';
       case 'signature': return 'Digital Signature';
-      case 'payment': return 'Payment Method';
-      case 'confirmation': return 'Investment Confirmed';
-      default: return 'Investment';
+      case 'payment': return 'Payment';
+      case 'confirmation': return 'Confirmation';
+      default: return '';
     }
   };
 
+  const getStepNumber = (step: InvestmentStep) => {
+    const steps: InvestmentStep[] = ['amount', 'auth', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'];
+    return steps.indexOf(step) + 1;
+  };
+
+  const renderProgressIndicator = () => {
+    const steps = ['amount', 'auth', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'];
+    const currentStepIndex = steps.indexOf(currentStep);
+
+    return (
+      <div className="flex justify-center mb-6">
+        <div className="flex items-center space-x-4">
+          {steps.map((step, index) => (
+            <div key={step} className="flex items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                index <= currentStepIndex ? 'bg-fundry-orange text-white' : 'bg-gray-200 text-gray-600'
+              }`}>
+                {index + 1}
+              </div>
+              {index < steps.length - 1 && <div className="w-8 h-0.5 bg-gray-300 mx-2" />}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const renderStepContent = () => {
+    const Icon = getStepIcon(currentStep);
+    const stepNumber = getStepNumber(currentStep);
+
     switch (currentStep) {
-      case 'auth':
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <FundryLogo className="h-16 w-auto mx-auto mb-6" linkToHome={false} />
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {authMode === 'signin' ? 'Welcome Back' : 'Join Fundry'}
-              </h3>
-              <p className="text-gray-600">
-                {authMode === 'signin' 
-                  ? 'Sign in to your account'
-                  : 'Create your account to get started'
-                }
-              </p>
-            </div>
-
-            <div className="flex border rounded-lg p-1 bg-gray-100">
-              <button
-                onClick={() => setAuthMode('signin')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                  authMode === 'signin'
-                    ? 'bg-white text-fundry-navy shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => setAuthMode('signup')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                  authMode === 'signup'
-                    ? 'bg-white text-fundry-navy shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Sign Up
-              </button>
-            </div>
-
-            {authMode === 'signup' && (
-              <div>
-                <Label className="text-sm font-medium text-gray-700">I am a:</Label>
-                <div className="flex border rounded-lg p-1 bg-gray-100 mt-2">
-                  <button
-                    onClick={() => setSelectedUserType('investor')}
-                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                      selectedUserType === 'investor'
-                        ? 'bg-white text-fundry-navy shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    Investor
-                  </button>
-                  <button
-                    onClick={() => setSelectedUserType('founder')}
-                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                      selectedUserType === 'founder'
-                        ? 'bg-white text-fundry-navy shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    Founder
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              {authMode === 'signup' && (
-                <div>
-                  <Label htmlFor="auth-username">Username</Label>
-                  <Input
-                    id="auth-username"
-                    type="text"
-                    value={authUsername}
-                    onChange={(e) => setAuthUsername(e.target.value)}
-                    placeholder="Enter your username"
-                    required
-                  />
-                </div>
-              )}
-              
-              <div>
-                <Label htmlFor="auth-email">Email</Label>
-                <Input
-                  id="auth-email"
-                  type="email"
-                  value={authEmail}
-                  onChange={(e) => setAuthEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="auth-password">Password</Label>
-                <Input
-                  id="auth-password"
-                  type="password"
-                  value={authPassword}
-                  onChange={(e) => setAuthPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                />
-              </div>
-            </div>
-
-            {authMode === 'signin' && (
-              <div className="text-center">
-                <p className="text-gray-600">
-                  Don't have an account?{' '}
-                  <button 
-                    onClick={() => setAuthMode('signup')}
-                    className="text-fundry-orange hover:text-orange-600 font-medium"
-                  >
-                    Create account
-                  </button>
-                </p>
-              </div>
-            )}
-          </div>
-        );
-
-      case 'investor-details':
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <User className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Investor Information</h3>
-              <p className="text-gray-600">Please provide your details for the investment agreement</p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="full-name">Full Legal Name *</Label>
-                  <Input
-                    id="full-name"
-                    value={investorDetails.fullName}
-                    onChange={(e) => setInvestorDetails({...investorDetails, fullName: e.target.value})}
-                    placeholder="Enter your full legal name"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="investor-email">Email Address *</Label>
-                  <Input
-                    id="investor-email"
-                    type="email"
-                    value={investorDetails.email}
-                    onChange={(e) => setInvestorDetails({...investorDetails, email: e.target.value})}
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="phone">Phone Number *</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={investorDetails.phone}
-                  onChange={(e) => setInvestorDetails({...investorDetails, phone: e.target.value})}
-                  placeholder="Enter your phone number"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="address">Street Address *</Label>
-                <Input
-                  id="address"
-                  value={investorDetails.address}
-                  onChange={(e) => setInvestorDetails({...investorDetails, address: e.target.value})}
-                  placeholder="Enter your street address"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="city">City *</Label>
-                  <Input
-                    id="city"
-                    value={investorDetails.city}
-                    onChange={(e) => setInvestorDetails({...investorDetails, city: e.target.value})}
-                    placeholder="City"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="state">State *</Label>
-                  <Input
-                    id="state"
-                    value={investorDetails.state}
-                    onChange={(e) => setInvestorDetails({...investorDetails, state: e.target.value})}
-                    placeholder="State"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="zip">ZIP Code *</Label>
-                  <Input
-                    id="zip"
-                    value={investorDetails.zipCode}
-                    onChange={(e) => setInvestorDetails({...investorDetails, zipCode: e.target.value})}
-                    placeholder="ZIP"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="accredited"
-                    checked={investorDetails.accreditedInvestor}
-                    onCheckedChange={(checked) => 
-                      setInvestorDetails({...investorDetails, accreditedInvestor: checked as boolean})
-                    }
-                  />
-                  <Label htmlFor="accredited" className="text-sm">
-                    I am an accredited investor (optional)
-                  </Label>
-                </div>
-                
-                <div>
-                  <Label htmlFor="experience">Investment Experience (optional)</Label>
-                  <Input
-                    id="experience"
-                    value={investorDetails.investmentExperience}
-                    onChange={(e) => setInvestorDetails({...investorDetails, investmentExperience: e.target.value})}
-                    placeholder="Brief description of your investment experience"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
       case 'amount':
         return (
           <div className="space-y-6">
             <div className="text-center">
+              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose Investment Amount</h3>
-              <p className="text-gray-600">Min: ${minimumInvestment} • Max: ${maximumInvestment}</p>
+              <p className="text-gray-600">Step {stepNumber} of 7: Select how much you'd like to invest</p>
             </div>
+            
+            {renderProgressIndicator()}
             
             <div className="grid grid-cols-3 gap-3">
               {presetAmounts.map((amount) => (
@@ -748,13 +462,164 @@ Platform: Fundry Investment Platform
           </div>
         );
 
+      case 'auth':
+        if (isAuthenticated) {
+          return (
+            <div className="space-y-6">
+              <div className="text-center">
+                <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Already Authenticated</h3>
+                <p className="text-gray-600">Step {stepNumber} of 7: You're signed in as {user?.email}</p>
+              </div>
+              
+              {renderProgressIndicator()}
+              
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-green-800">
+                  Welcome back, {user?.firstName}! You can proceed with your investment.
+                </p>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Authentication Required</h3>
+              <p className="text-gray-600">Step {stepNumber} of 7: Sign in or create an account to continue</p>
+            </div>
+            
+            {renderProgressIndicator()}
+            
+            <div className="flex justify-center mb-6">
+              <FundryLogo className="h-8" />
+            </div>
+
+            <div className="flex justify-center space-x-4 mb-6">
+              <Button
+                variant={authMode === 'signin' ? 'default' : 'outline'}
+                onClick={() => setAuthMode('signin')}
+                className={authMode === 'signin' ? 'bg-fundry-orange hover:bg-orange-600' : ''}
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+              <Button
+                variant={authMode === 'signup' ? 'default' : 'outline'}
+                onClick={() => setAuthMode('signup')}
+                className={authMode === 'signup' ? 'bg-fundry-orange hover:bg-orange-600' : ''}
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Sign Up
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {authMode === 'signup' && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        value={authData.firstName}
+                        onChange={(e) => setAuthData({...authData, firstName: e.target.value})}
+                        placeholder="Enter your first name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        value={authData.lastName}
+                        onChange={(e) => setAuthData({...authData, lastName: e.target.value})}
+                        placeholder="Enter your last name"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+              
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={authData.email}
+                  onChange={(e) => setAuthData({...authData, email: e.target.value})}
+                  placeholder="Enter your email"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={authData.password}
+                  onChange={(e) => setAuthData({...authData, password: e.target.value})}
+                  placeholder="Enter your password"
+                />
+              </div>
+              
+              {authMode === 'signup' && (
+                <div>
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={authData.confirmPassword}
+                    onChange={(e) => setAuthData({...authData, confirmPassword: e.target.value})}
+                    placeholder="Confirm your password"
+                  />
+                </div>
+              )}
+
+              <Button
+                onClick={handleAuth}
+                disabled={isAuthenticating}
+                className="w-full bg-fundry-orange hover:bg-orange-600"
+              >
+                {isAuthenticating ? 'Processing...' : (authMode === 'signin' ? 'Sign In' : 'Create Account')}
+              </Button>
+            </div>
+          </div>
+        );
+
       case 'safe-review':
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <FileText className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
+              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">SAFE Agreement Review</h3>
-              <p className="text-gray-600">Please review the investment terms</p>
+              <p className="text-gray-600">Step {stepNumber} of 7: Review your investment terms with populated investor details</p>
+            </div>
+            
+            {renderProgressIndicator()}
+            
+            {/* Investor Details Populated in SAFE Agreement */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <h4 className="font-semibold text-blue-900 mb-2">Investor Information</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-blue-700">Full Name:</span>
+                  <span className="ml-2 font-medium">{user?.firstName} {user?.lastName}</span>
+                </div>
+                <div>
+                  <span className="text-blue-700">Email:</span>
+                  <span className="ml-2 font-medium">{user?.email}</span>
+                </div>
+                <div>
+                  <span className="text-blue-700">Investment Amount:</span>
+                  <span className="ml-2 font-medium">${selectedAmount}</span>
+                </div>
+                <div>
+                  <span className="text-blue-700">Date:</span>
+                  <span className="ml-2 font-medium">{new Date().toLocaleDateString()}</span>
+                </div>
+              </div>
             </div>
             
             <div className="bg-gray-50 p-6 rounded-lg space-y-4">
@@ -790,7 +655,6 @@ Platform: Fundry Investment Platform
                 <Button
                   variant="outline"
                   onClick={() => {
-                    // Generate SAFE agreement PDF with current investment details
                     const safeContent = generateSafeAgreement(campaign, selectedAmount);
                     downloadSafeAgreement(safeContent, campaign.title, selectedAmount);
                   }}
@@ -808,54 +672,56 @@ Platform: Fundry Investment Platform
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <CheckCircle className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
+              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Terms & Conditions</h3>
-              <p className="text-gray-600">Please accept the following terms to continue</p>
+              <p className="text-gray-600">Step {stepNumber} of 7: Review and accept the investment terms</p>
             </div>
             
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="terms"
-                  checked={termsAccepted}
-                  onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-                  className="mt-1"
-                />
-                <div className="text-sm">
-                  <Label htmlFor="terms" className="font-medium">
-                    I accept the Terms of Service and Privacy Policy
-                  </Label>
-                  <p className="text-gray-600 mt-1">
-                    By investing, you agree to Fundry's terms and the specific SAFE agreement terms for this campaign.
-                  </p>
+            {renderProgressIndicator()}
+            
+            <div className="bg-gray-50 p-6 rounded-lg max-h-96 overflow-y-auto">
+              <h4 className="font-semibold mb-4">Investment Terms and Conditions</h4>
+              <div className="space-y-4 text-sm">
+                <p>By proceeding with this investment, you acknowledge and agree to the following:</p>
+                
+                <div className="space-y-2">
+                  <h5 className="font-medium">1. Investment Risk</h5>
+                  <p>You understand that investing in early-stage companies involves significant risk and may result in total loss of your investment.</p>
                 </div>
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="risk-disclosure"
-                  checked={riskDisclosureAccepted}
-                  onCheckedChange={(checked) => setRiskDisclosureAccepted(checked as boolean)}
-                  className="mt-1"
-                />
-                <div className="text-sm">
-                  <Label htmlFor="risk-disclosure" className="font-medium">
-                    I acknowledge the Investment Risk Disclosure
-                  </Label>
-                  <p className="text-gray-600 mt-1">
-                    I understand that investing in startups involves risk, including potential total loss of investment.
-                  </p>
+                
+                <div className="space-y-2">
+                  <h5 className="font-medium">2. SAFE Agreement</h5>
+                  <p>This investment is structured as a Simple Agreement for Future Equity (SAFE) and will convert to equity upon qualifying events.</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <h5 className="font-medium">3. Liquidity</h5>
+                  <p>Your investment may be illiquid and you may not be able to sell or transfer your interest for an extended period.</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <h5 className="font-medium">4. Platform Fees</h5>
+                  <p>Fundry charges a 5% platform fee for investments over $1,000. No fees apply to investments under $1,000.</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <h5 className="font-medium">5. Regulatory Compliance</h5>
+                  <p>You represent that you meet all applicable investor qualifications and regulatory requirements.</p>
                 </div>
               </div>
             </div>
-
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <Clock className="h-5 w-5 text-yellow-600 mr-2" />
-                <p className="text-sm text-yellow-800">
-                  This investment is subject to a 48-hour cooling-off period during which you may cancel.
-                </p>
-              </div>
+            
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="agree-terms"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                className="w-4 h-4 text-fundry-orange border-gray-300 rounded focus:ring-fundry-orange"
+              />
+              <Label htmlFor="agree-terms" className="text-sm">
+                I have read, understood, and agree to the terms and conditions
+              </Label>
             </div>
           </div>
         );
@@ -864,26 +730,34 @@ Platform: Fundry Investment Platform
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <Signature className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
+              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Digital Signature</h3>
-              <p className="text-gray-600">Please provide your digital signature to finalize the agreement</p>
+              <p className="text-gray-600">Step {stepNumber} of 7: Provide your digital signature to finalize the agreement</p>
             </div>
+            
+            {renderProgressIndicator()}
             
             <div className="space-y-4">
               <div>
-                <Label htmlFor="signature">Type your full legal name as your digital signature</Label>
+                <Label htmlFor="signature">Digital Signature</Label>
                 <Input
                   id="signature"
-                  value={digitalSignature}
-                  onChange={(e) => setDigitalSignature(e.target.value)}
-                  placeholder="Enter your full legal name"
-                  className="mt-2"
+                  value={signatureData}
+                  onChange={(e) => setSignatureData(e.target.value)}
+                  placeholder="Type your full name as your digital signature"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  By typing your name, you are providing a legally binding digital signature
+                </p>
               </div>
               
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-900 mb-2">Signature Preview</h4>
                 <p className="text-sm text-blue-800">
-                  By typing your name above, you are providing a legally binding electronic signature under the Electronic Signatures in Global and National Commerce Act.
+                  Digitally signed by: <span className="font-medium">{signatureData || '[Your signature will appear here]'}</span>
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  Date: {new Date().toLocaleDateString()}
                 </p>
               </div>
             </div>
@@ -894,130 +768,88 @@ Platform: Fundry Investment Platform
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <CreditCard className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Method</h3>
-              <p className="text-gray-600">Choose how you'd like to complete your investment</p>
+              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Processing</h3>
+              <p className="text-gray-600">Step {stepNumber} of 7: Complete your investment commitment</p>
             </div>
-
-            <div className="space-y-4">
-              <div 
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                  selectedPaymentMethod === 'stripe' ? 'border-fundry-orange bg-orange-50' : 'border-gray-200'
-                }`}
-                onClick={() => setSelectedPaymentMethod('stripe')}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <CreditCard className="h-6 w-6 text-blue-600" />
-                    <div>
-                      <p className="font-medium">Credit Card (Stripe)</p>
-                      <p className="text-sm text-gray-600">Instant processing via Stripe</p>
-                    </div>
-                  </div>
-                  <div className="w-4 h-4 rounded-full border-2 border-fundry-orange">
-                    {selectedPaymentMethod === 'stripe' && (
-                      <div className="w-2 h-2 bg-fundry-orange rounded-full m-0.5"></div>
-                    )}
-                  </div>
+            
+            {renderProgressIndicator()}
+            
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <h4 className="font-semibold mb-4">Investment Summary</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Company:</span>
+                  <span className="font-medium">{campaign.title}</span>
                 </div>
-              </div>
-
-              <div 
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                  selectedPaymentMethod === 'budpay' ? 'border-fundry-orange bg-orange-50' : 'border-gray-200'
-                }`}
-                onClick={() => setSelectedPaymentMethod('budpay')}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <DollarSign className="h-6 w-6 text-green-600" />
-                    <div>
-                      <p className="font-medium">Bank Transfer (Budpay)</p>
-                      <p className="text-sm text-gray-600">Direct bank transfer via Budpay</p>
-                    </div>
-                  </div>
-                  <div className="w-4 h-4 rounded-full border-2 border-fundry-orange">
-                    {selectedPaymentMethod === 'budpay' && (
-                      <div className="w-2 h-2 bg-fundry-orange rounded-full m-0.5"></div>
-                    )}
-                  </div>
+                <div className="flex justify-between">
+                  <span>Investment Amount:</span>
+                  <span className="font-medium">${selectedAmount}</span>
                 </div>
-              </div>
-
-              <div 
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                  selectedPaymentMethod === 'commitment' ? 'border-fundry-orange bg-orange-50' : 'border-gray-200'
-                }`}
-                onClick={() => setSelectedPaymentMethod('commitment')}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Shield className="h-6 w-6 text-purple-600" />
-                    <div>
-                      <p className="font-medium">Investment Commitment</p>
-                      <p className="text-sm text-gray-600">Commit now, pay later when called</p>
-                    </div>
-                  </div>
-                  <div className="w-4 h-4 rounded-full border-2 border-fundry-orange">
-                    {selectedPaymentMethod === 'commitment' && (
-                      <div className="w-2 h-2 bg-fundry-orange rounded-full m-0.5"></div>
-                    )}
-                  </div>
+                <div className="flex justify-between">
+                  <span>Platform Fee:</span>
+                  <span className="font-medium">${calculateFee(selectedAmount)}</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold border-t pt-2">
+                  <span>Total:</span>
+                  <span>${calculateTotal(selectedAmount)}</span>
                 </div>
               </div>
             </div>
-
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="flex justify-between items-center text-lg font-bold">
-                <span>Total to Pay:</span>
-                <span>${selectedPaymentMethod === 'commitment' ? '0 (Commitment)' : calculateTotal(selectedAmount)}</span>
-              </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-900 mb-2">Investment Commitment</h4>
+              <p className="text-sm text-blue-800">
+                By proceeding, you are committing to invest ${selectedAmount} in {campaign.title}. 
+                This creates a binding commitment that will be processed through our secure payment system.
+              </p>
             </div>
           </div>
         );
 
       case 'confirmation':
         return (
-          <div className="space-y-6 text-center">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckCircle className="h-10 w-10 text-green-600" />
+          <div className="space-y-6">
+            <div className="text-center">
+              <Icon className="mx-auto h-12 w-12 text-green-500 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Investment Successful!</h3>
+              <p className="text-gray-600">Step {stepNumber} of 7: Your investment has been processed</p>
             </div>
             
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Investment Confirmed!</h3>
-              <p className="text-gray-600">
-                {selectedPaymentMethod === 'commitment' 
-                  ? 'Your investment commitment has been recorded successfully.'
-                  : 'Your payment has been processed and investment is confirmed.'
-                }
+            {renderProgressIndicator()}
+            
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <h4 className="font-semibold text-green-900 mb-4">Congratulations!</h4>
+              <p className="text-green-800 mb-4">
+                You have successfully committed ${selectedAmount} to {campaign.title}. Your investment is now active and you will receive updates on the company's progress.
               </p>
-            </div>
-
-            <div className="bg-gray-50 p-6 rounded-lg space-y-3">
-              <div className="flex justify-between">
-                <span>Campaign:</span>
-                <span className="font-semibold">{campaign.title}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Investment Amount:</span>
-                <span className="font-semibold">${selectedAmount}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Payment Method:</span>
-                <span className="font-semibold capitalize">{selectedPaymentMethod}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Status:</span>
-                <span className="font-semibold text-green-600">
-                  {selectedPaymentMethod === 'commitment' ? 'Committed' : 'Paid'}
-                </span>
+              
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Investment ID:</span>
+                  <span className="font-medium">#{Date.now().toString().slice(-6)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Date:</span>
+                  <span className="font-medium">{new Date().toLocaleDateString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Status:</span>
+                  <span className="font-medium text-green-600">Committed</span>
+                </div>
               </div>
             </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
-                You will receive a confirmation email with your investment details and SAFE agreement documents.
+            
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-4">
+                You can track your investment progress in your investor dashboard.
               </p>
+              <Button
+                onClick={onClose}
+                className="bg-fundry-orange hover:bg-orange-600"
+              >
+                Go to Dashboard
+              </Button>
             </div>
           </div>
         );
@@ -1027,98 +859,95 @@ Platform: Fundry Investment Platform
     }
   };
 
+  const canProceed = () => {
+    switch (currentStep) {
+      case 'amount':
+        return selectedAmount >= minimumInvestment && selectedAmount <= maximumInvestment;
+      case 'auth':
+        return isAuthenticated;
+      case 'safe-review':
+        return true;
+      case 'terms':
+        return agreedToTerms;
+      case 'signature':
+        return signatureData.trim().length > 0;
+      case 'payment':
+        return true;
+      case 'confirmation':
+        return false;
+      default:
+        return false;
+    }
+  };
+
+  const handleClose = () => {
+    setCurrentStep('amount');
+    setSelectedAmount(0);
+    setCustomAmount('');
+    setInvestorDetails({
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      investmentExperience: '',
+      accreditedInvestor: false
+    });
+    setAuthData({
+      email: '',
+      password: '',
+      firstName: '',
+      lastName: '',
+      confirmPassword: ''
+    });
+    setAuthMode('signin');
+    setAgreedToTerms(false);
+    setSignatureData('');
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-center">
-            {getStepTitle()}
+          <DialogTitle className="text-center">
+            {getStepTitle(currentStep)}
           </DialogTitle>
         </DialogHeader>
-
+        
         <div className="py-6">
-          {/* Progress Indicator */}
-          <div className="mb-8">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              {['amount', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'].map((step, index) => {
-                const stepOrder = ['amount', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'];
-                const currentIndex = stepOrder.indexOf(currentStep);
-                const isActive = index <= currentIndex;
-                const isCurrent = step === currentStep;
-                
-                return (
-                  <div key={step} className="flex items-center">
-                    <div 
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                        isActive 
-                          ? 'bg-fundry-orange text-white' 
-                          : 'bg-gray-200 text-gray-600'
-                      } ${isCurrent ? 'ring-2 ring-fundry-orange ring-offset-2' : ''}`}
-                    >
-                      {index + 1}
-                    </div>
-                    {index < 5 && (
-                      <div 
-                        className={`w-8 h-0.5 ${
-                          index < currentIndex ? 'bg-fundry-orange' : 'bg-gray-200'
-                        }`}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <p className="text-center text-sm text-gray-600">
-              Step {['amount', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'].indexOf(currentStep) + 1} of 6
-            </p>
-          </div>
-
-          {/* Step Content */}
-          <div className="min-h-[400px]">
-            {renderStepContent()}
-          </div>
-
-          {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8 pt-6 border-t">
+          {renderStepContent()}
+        </div>
+        
+        <div className="flex justify-between">
+          <Button
+            variant="outline"
+            onClick={handlePrevStep}
+            disabled={currentStep === 'amount' || currentStep === 'confirmation'}
+          >
+            Previous
+          </Button>
+          
+          <div className="flex space-x-2">
             <Button
               variant="outline"
-              onClick={handlePrevStep}
-              disabled={currentStep === 'amount' || currentStep === 'confirmation' || isProcessing}
-              className="flex items-center"
+              onClick={handleClose}
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Previous
+              Cancel
             </Button>
-
-            <div className="flex space-x-3">
-              {currentStep === 'confirmation' ? (
-                <Button
-                  onClick={handleComplete}
-                  className="bg-fundry-orange hover:bg-orange-600 flex items-center"
-                >
-                  Go to Dashboard
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleNextStep}
-                  disabled={isProcessing || (currentStep === 'amount' && selectedAmount < minimumInvestment)}
-                  className="bg-fundry-orange hover:bg-orange-600 flex items-center"
-                >
-                  {isProcessing ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      {currentStep === 'payment' ? 'Complete Payment' : 'Continue'}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
+            
+            {currentStep !== 'confirmation' && (
+              <Button
+                onClick={handleNextStep}
+                disabled={!canProceed() || isProcessingPayment || createInvestmentMutation.isPending}
+                className="bg-fundry-orange hover:bg-orange-600"
+              >
+                {currentStep === 'payment' ? 
+                  (isProcessingPayment ? 'Processing...' : 'Commit Investment') : 
+                  'Next'
+                }
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>

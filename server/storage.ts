@@ -94,10 +94,6 @@ export interface IStorage {
 
   // Account management operations
   deactivateUser(userId: string, reason: string): Promise<void>;
-  getBusinessProfileByUserId(userId: string): Promise<BusinessProfile | undefined>;
-  updateUserPassword(userId: string, hashedPassword: string): Promise<void>;
-  updateUser2FA(userId: string, enabled: boolean): Promise<void>;
-  getUserNotifications(userId: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -602,37 +598,6 @@ export class DatabaseStorage implements IStorage {
           updated_at = NOW()
       WHERE id = ${userId}
     `);
-  }
-
-  async getBusinessProfileByUserId(userId: string): Promise<BusinessProfile | undefined> {
-    return this.getBusinessProfile(userId);
-  }
-
-  async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
-    await db.execute(sql`
-      UPDATE users 
-      SET password = ${hashedPassword}, 
-          updated_at = NOW() 
-      WHERE id = ${userId}
-    `);
-  }
-
-  async updateUser2FA(userId: string, enabled: boolean): Promise<void> {
-    await db.execute(sql`
-      UPDATE users 
-      SET two_factor_enabled = ${enabled}, 
-          updated_at = NOW() 
-      WHERE id = ${userId}
-    `);
-  }
-
-  async getUserNotifications(userId: string): Promise<any[]> {
-    const result = await db.execute(sql`
-      SELECT * FROM notifications 
-      WHERE user_id = ${userId} 
-      ORDER BY created_at DESC
-    `);
-    return result.rows || [];
   }
 }
 

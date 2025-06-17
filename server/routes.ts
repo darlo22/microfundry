@@ -1538,7 +1538,6 @@ Generated on: ${new Date().toLocaleDateString()}
         campaigns: campaigns?.map(campaign => ({
           id: campaign.id,
           title: campaign.title,
-          description: campaign.description,
           businessSector: campaign.businessSector,
           fundingGoal: campaign.fundingGoal,
           minimumInvestment: campaign.minimumInvestment,

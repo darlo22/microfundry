@@ -46,7 +46,7 @@ export default function FounderUpdates() {
   const [updateForm, setUpdateForm] = useState({
     title: "",
     content: "",
-    type: "progress" as const,
+    type: "progress" as "milestone" | "progress" | "announcement" | "financial",
     campaignId: "",
   });
 
@@ -281,8 +281,8 @@ export default function FounderUpdates() {
 
   // Filter updates by selected campaign
   const filteredUpdates = selectedCampaign && selectedCampaign !== "all"
-    ? updates.filter((update: CampaignUpdate) => update.campaignId.toString() === selectedCampaign)
-    : updates;
+    ? (updates || []).filter((update: CampaignUpdate) => update.campaignId.toString() === selectedCampaign)
+    : (updates || []);
 
   if (campaignsLoading || updatesLoading) {
     return (
@@ -363,7 +363,7 @@ export default function FounderUpdates() {
                     <SelectValue placeholder="Select a campaign" />
                   </SelectTrigger>
                   <SelectContent>
-                    {campaigns.map((campaign: any) => (
+                    {(campaigns || []).map((campaign: any) => (
                       <SelectItem key={campaign.id} value={campaign.id.toString()}>
                         {campaign.title}
                       </SelectItem>

@@ -476,7 +476,7 @@ export class DatabaseStorage implements IStorage {
       FROM notifications 
       WHERE user_id = ${userId} AND is_read = false
     `);
-    return parseInt(result.rows[0]?.count || '0');
+    return parseInt(String(result.rows[0]?.count || '0'));
   }
 
   async createNotification(userId: string, type: string, title: string, message: string, metadata?: string): Promise<any> {
@@ -493,7 +493,7 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(users)
       .set({ 
-        hashedPassword,
+        password: hashedPassword,
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));

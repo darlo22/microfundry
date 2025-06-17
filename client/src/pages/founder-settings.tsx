@@ -12,12 +12,15 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Building2, Bell, Shield, CreditCard, Key, Mail, Phone, MapPin, Save, AlertTriangle } from "lucide-react";
+import { User, Building2, Bell, Shield, CreditCard, Key, Mail, Phone, MapPin, Save, AlertTriangle, ArrowLeft, LogOut } from "lucide-react";
+import { useLocation } from "wouter";
+import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
 
 export default function FounderSettings() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   // Fetch user profile and business profile
   const { data: userProfile, isLoading: userLoading } = useQuery({

@@ -11,7 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Edit, Send, Calendar, Users, TrendingUp, MessageSquare, Eye, Trash2 } from "lucide-react";
+import { Plus, Edit, Send, Calendar, Users, TrendingUp, MessageSquare, Eye, Trash2, ArrowLeft, LogOut } from "lucide-react";
+import { useLocation } from "wouter";
+import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
 
 interface CampaignUpdate {
   id: number;
@@ -29,6 +31,7 @@ export default function FounderUpdates() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [selectedCampaign, setSelectedCampaign] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingUpdate, setEditingUpdate] = useState<CampaignUpdate | null>(null);
@@ -204,12 +207,54 @@ export default function FounderUpdates() {
   }
 
   return (
-    <div className="container mx-auto px-6 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Campaign Updates</h1>
-          <p className="text-gray-600">Keep your investors informed with regular updates</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between h-16">
+            {/* Left: Back Button */}
+            <Button
+              variant="ghost"
+              onClick={() => setLocation("/founder-dashboard")}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+
+            {/* Center: Fundry Logo */}
+            <div 
+              className="flex items-center cursor-pointer"
+              onClick={() => setLocation("/landing")}
+            >
+              <img 
+                src={fundryLogoNew} 
+                alt="Fundry" 
+                className="h-12 w-auto"
+              />
+            </div>
+
+            {/* Right: Logout Button */}
+            <Button
+              variant="ghost"
+              onClick={() => {
+                window.location.href = "/api/logout";
+              }}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Campaign Updates</h1>
+            <p className="text-gray-600">Keep your investors informed with regular updates</p>
+          </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button 
@@ -454,6 +499,7 @@ export default function FounderUpdates() {
             </Card>
           ))
         )}
+      </div>
       </div>
     </div>
   );

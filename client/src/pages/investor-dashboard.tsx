@@ -956,7 +956,7 @@ export default function InvestorDashboard() {
                                   {new Intl.NumberFormat('en-US', {
                                     style: 'currency',
                                     currency: 'USD'
-                                  }).format(investment.amount)}
+                                  }).format(Number(investment.amount))}
                                 </p>
                               </div>
                               <div>
@@ -1050,16 +1050,17 @@ export default function InvestorDashboard() {
                           </div>
                           <div>
                             <p className="text-2xl font-bold text-fundry-navy">
-                              {new Intl.NumberFormat('en-US', {
-                                style: 'currency',
-                                currency: 'USD',
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0
-                              }).format(
-                                investments
+                              {(() => {
+                                const totalAmount = investments
                                   .filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed')
-                                  .reduce((sum, inv) => sum + inv.amount, 0)
-                              )}
+                                  .reduce((sum, inv) => sum + Number(inv.amount), 0);
+                                return new Intl.NumberFormat('en-US', {
+                                  style: 'currency',
+                                  currency: 'USD',
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 0
+                                }).format(totalAmount);
+                              })()}
                             </p>
                             <p className="text-xs text-gray-600">Total Invested</p>
                           </div>

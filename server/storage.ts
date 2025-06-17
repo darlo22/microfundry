@@ -83,6 +83,13 @@ export interface IStorage {
     activeInvestments: number;
     estimatedValue: string;
   }>;
+
+  // KYC operations
+  updateUserKycStatus(userId: string, kycData: {
+    status: string;
+    submittedAt: Date;
+    data: any;
+  }): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -423,6 +430,17 @@ export class DatabaseStorage implements IStorage {
       activeInvestments,
       estimatedValue,
     };
+  }
+
+  // KYC operations
+  async updateUserKycStatus(userId: string, kycData: {
+    status: string;
+    submittedAt: Date;
+    data: any;
+  }): Promise<void> {
+    // In a real implementation, this would update a KYC table
+    // For now, we'll simulate storing the KYC status
+    console.log(`Updating KYC status for user ${userId}:`, kycData);
   }
 }
 

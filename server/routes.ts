@@ -13,6 +13,9 @@ import { nanoid } from "nanoid";
 import multer from "multer";
 import path from "path";
 
+// Simple in-memory store for KYC submissions (in production, this would be in database)
+const kycSubmissions = new Map<string, any>();
+
 // Configure multer for file uploads
 const upload = multer({
   dest: 'uploads/',
@@ -358,25 +361,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Simulate KYC status based on profile completeness
-      const hasBasicInfo = user.firstName && user.lastName && user.email;
-      const hasAddressInfo = user.country && user.state;
+      // Check if user has submitted KYC data
+      const kycSubmission = kycSubmissions.get(userId);
       
       let status = "not_started";
       let lastUpdated = null;
+      let completionPercentage = 0;
 
-      if (hasBasicInfo && hasAddressInfo) {
-        status = "verified";
-        lastUpdated = user.updatedAt || user.createdAt;
-      } else if (hasBasicInfo) {
-        status = "pending";
-        lastUpdated = user.updatedAt || user.createdAt;
+      if (kycSubmission) {
+        status = kycSubmission.status;
+        lastUpdated = kycSubmission.submittedAt;
+        completionPercentage = status === "verified" ? 100 : status === "pending" ? 85 : 0;
       }
 
       res.json({
         status,
         lastUpdated,
-        completionPercentage: hasBasicInfo && hasAddressInfo ? 100 : hasBasicInfo ? 60 : 0
+        completionPercentage
       });
     } catch (error) {
       console.error("Error fetching KYC status:", error);
@@ -400,13 +401,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // In a real implementation, this would:
-      // 1. Store KYC data securely
-      // 2. Process uploaded documents
-      // 3. Submit to KYC verification service
-      // 4. Update user's KYC status
+      // Store KYC data and update status to "Under Review"
+      await storage.updateUserKycStatus(userId, {
+        status: "pending",
+        submittedAt: new Date(),
+        data: kycData
+      });
 
-      // For now, we'll simulate successful submission
       res.json({ 
         message: "KYC information submitted successfully",
         status: "pending",

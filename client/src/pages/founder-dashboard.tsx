@@ -54,14 +54,14 @@ export default function FounderDashboard() {
 
   // Fetch founder stats
   const { data: stats } = useQuery<UserStats>({
-    queryKey: ["/api/analytics/founder/" + user?.id],
+    queryKey: ["/api/analytics/founder", user?.id],
     enabled: !!user?.id,
     retry: false,
   });
 
   // Fetch founder campaigns
   const { data: campaigns, isLoading: campaignsLoading } = useQuery<CampaignWithStats[]>({
-    queryKey: ["/api/campaigns/founder/" + user?.id],
+    queryKey: ["/api/campaigns/founder", user?.id],
     enabled: !!user?.id,
     retry: false,
   });
@@ -117,11 +117,19 @@ export default function FounderDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
             title="Total Raised"
-            value={`$${stats?.totalRaised || "0"}`}
+            value={new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 2,
+            }).format(parseFloat(stats?.totalRaised || "0"))}
             icon={DollarSign}
             iconBgColor="bg-green-100"
             iconColor="text-green-600"
-            trend={{ value: "+12%", color: "text-green-600" }}
+            trend={{ 
+              value: stats?.totalRaised && parseFloat(stats.totalRaised) > 0 ? "+12%" : "No change", 
+              color: stats?.totalRaised && parseFloat(stats.totalRaised) > 0 ? "text-green-600" : "text-gray-500" 
+            }}
             subtitle="from last month"
           />
           <StatsCard
@@ -130,7 +138,7 @@ export default function FounderDashboard() {
             icon={Rocket}
             iconBgColor="bg-fundry-orange-light"
             iconColor="text-fundry-orange"
-            subtitle="1 closing soon"
+            subtitle={campaigns && campaigns.length > 0 ? `${campaigns.length} total campaign${campaigns.length > 1 ? 's' : ''}` : "No campaigns yet"}
           />
           <StatsCard
             title="Total Investors"
@@ -138,7 +146,10 @@ export default function FounderDashboard() {
             icon={Users}
             iconBgColor="bg-blue-100"
             iconColor="text-fundry-navy"
-            trend={{ value: "+5 this week", color: "text-blue-600" }}
+            trend={{ 
+              value: stats?.totalInvestors && stats.totalInvestors > 0 ? "+5 this week" : "No investors yet", 
+              color: stats?.totalInvestors && stats.totalInvestors > 0 ? "text-blue-600" : "text-gray-500" 
+            }}
           />
           <StatsCard
             title="Conversion Rate"
@@ -146,7 +157,7 @@ export default function FounderDashboard() {
             icon={BarChart}
             iconBgColor="bg-purple-100"
             iconColor="text-purple-600"
-            subtitle="Above average"
+            subtitle={stats?.conversionRate && stats.conversionRate > 50 ? "Above average" : "Building momentum"}
           />
         </div>
 

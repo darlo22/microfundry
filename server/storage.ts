@@ -398,17 +398,25 @@ export class DatabaseStorage implements IStorage {
       : [];
 
     const totalRaised = campaignInvestments
-      .filter(inv => inv.status === 'completed')
+      .filter(inv => inv.status === 'completed' || inv.status === 'committed' || inv.status === 'paid')
       .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
 
     const activeCampaigns = founderCampaigns.filter(c => c.status === 'active').length;
-    const totalInvestors = new Set(campaignInvestments.map(inv => inv.investorId)).size;
+    const validInvestments = campaignInvestments.filter(inv => 
+      inv.status === 'completed' || inv.status === 'committed' || inv.status === 'paid'
+    );
+    const totalInvestors = new Set(validInvestments.map(inv => inv.investorId)).size;
+    
+    // Calculate conversion rate based on campaigns and investments
+    const conversionRate = founderCampaigns.length > 0 
+      ? Math.round((validInvestments.length / founderCampaigns.length) * 100) 
+      : 0;
 
     return {
       totalRaised: totalRaised.toString(),
       activeCampaigns,
       totalInvestors,
-      conversionRate: 68, // Calculated conversion rate
+      conversionRate: Math.min(conversionRate, 100), // Cap at 100%
     };
   }
 

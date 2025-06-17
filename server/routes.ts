@@ -4,6 +4,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, requireAuth, hashPassword, comparePasswords } from "./auth";
 import { isAuthenticated } from "./replitAuth";
+import { db } from "./db";
 import { 
   insertBusinessProfileSchema,
   insertCampaignSchema,
@@ -1152,10 +1153,10 @@ Generated on: ${new Date().toLocaleDateString()}
     }
   });
 
-  // Notifications routes
-  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+  // Notifications routes - using requireAuth for consistency
+  app.get('/api/notifications', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const notifications = await storage.getUserNotifications(userId);
       res.json(notifications);
     } catch (error) {
@@ -1164,9 +1165,9 @@ Generated on: ${new Date().toLocaleDateString()}
     }
   });
 
-  app.put('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+  app.put('/api/notifications/:id/read', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const notificationId = parseInt(req.params.id);
       await storage.markNotificationAsRead(notificationId, userId);
       res.json({ success: true });
@@ -1176,9 +1177,9 @@ Generated on: ${new Date().toLocaleDateString()}
     }
   });
 
-  app.put('/api/notifications/mark-all-read', isAuthenticated, async (req: any, res) => {
+  app.put('/api/notifications/mark-all-read', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       await storage.markAllNotificationsAsRead(userId);
       res.json({ success: true });
     } catch (error) {
@@ -1187,9 +1188,9 @@ Generated on: ${new Date().toLocaleDateString()}
     }
   });
 
-  app.get('/api/notifications/unread-count', isAuthenticated, async (req: any, res) => {
+  app.get('/api/notifications/unread-count', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const count = await storage.getUnreadNotificationCount(userId);
       res.json({ count });
     } catch (error) {

@@ -6,6 +6,7 @@ import {
   safeAgreements,
   campaignUpdates,
   fileUploads,
+  notifications,
   type User,
   type UpsertUser,
   type BusinessProfile,
@@ -443,52 +444,48 @@ export class DatabaseStorage implements IStorage {
     console.log(`Updating KYC status for user ${userId}:`, kycData);
   }
 
-  // Notification methods
+  // Notification methods using direct SQL queries
   async getUserNotifications(userId: string): Promise<any[]> {
-    const result = await db
-      .select()
-      .from(notifications)
-      .where(eq(notifications.userId, userId))
-      .orderBy(desc(notifications.createdAt));
-    return result;
+    const result = await db.execute(sql`
+      SELECT * FROM notifications 
+      WHERE user_id = ${userId} 
+      ORDER BY created_at DESC
+    `);
+    return result.rows;
   }
 
   async markNotificationAsRead(notificationId: number, userId: string): Promise<void> {
-    await db
-      .update(notifications)
-      .set({ isRead: true })
-      .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
+    await db.execute(sql`
+      UPDATE notifications 
+      SET is_read = true 
+      WHERE id = ${notificationId} AND user_id = ${userId}
+    `);
   }
 
   async markAllNotificationsAsRead(userId: string): Promise<void> {
-    await db
-      .update(notifications)
-      .set({ isRead: true })
-      .where(eq(notifications.userId, userId));
+    await db.execute(sql`
+      UPDATE notifications 
+      SET is_read = true 
+      WHERE user_id = ${userId}
+    `);
   }
 
   async getUnreadNotificationCount(userId: string): Promise<number> {
-    const result = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(notifications)
-      .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
-    return result[0]?.count || 0;
+    const result = await db.execute(sql`
+      SELECT COUNT(*) as count 
+      FROM notifications 
+      WHERE user_id = ${userId} AND is_read = false
+    `);
+    return parseInt(result.rows[0]?.count || '0');
   }
 
   async createNotification(userId: string, type: string, title: string, message: string, metadata?: string): Promise<any> {
-    const [notification] = await db
-      .insert(notifications)
-      .values({
-        userId,
-        type,
-        title,
-        message,
-        metadata,
-        isRead: false,
-        createdAt: new Date()
-      })
-      .returning();
-    return notification;
+    const result = await db.execute(sql`
+      INSERT INTO notifications (user_id, type, title, message, metadata, is_read, created_at)
+      VALUES (${userId}, ${type}, ${title}, ${message}, ${metadata || ''}, false, NOW())
+      RETURNING *
+    `);
+    return result.rows[0];
   }
 }
 

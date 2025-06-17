@@ -57,7 +57,7 @@ export default function CampaignView() {
   });
 
   // Fetch investments for this campaign
-  const { data: campaignInvestments = [] } = useQuery({
+  const { data: campaignInvestments = [] } = useQuery<any[]>({
     queryKey: [`/api/investments/campaign/${campaign?.id}`],
     enabled: !!campaign?.id,
   });
@@ -91,15 +91,13 @@ export default function CampaignView() {
   };
 
   // Process recent investors from actual investment data
-  const recentInvestors = Array.isArray(campaignInvestments) 
-    ? campaignInvestments.slice(0, 3).map((investment: any) => ({
-        id: investment.id,
-        name: `${investment.investor.firstName} ${investment.investor.lastName}`,
-        initials: getInitials(`${investment.investor.firstName} ${investment.investor.lastName}`),
-        amount: formatCurrency(investment.amount),
-        timeAgo: getTimeAgo(investment.createdAt),
-      }))
-    : [];
+  const recentInvestors = campaignInvestments.slice(0, 3).map((investment: any) => ({
+    id: investment.id,
+    name: `${investment.investor.firstName} ${investment.investor.lastName}`,
+    initials: getInitials(`${investment.investor.firstName} ${investment.investor.lastName}`),
+    amount: formatCurrency(investment.amount),
+    timeAgo: getTimeAgo(investment.createdAt),
+  }));
 
   const handleBackToDashboard = () => {
     if (user?.userType === "founder") {
@@ -663,26 +661,40 @@ export default function CampaignView() {
             <Card>
               <CardContent className="p-6">
                 <h3 className="font-semibold text-gray-900 mb-4">Recent Investors</h3>
-                <div className="space-y-3">
-                  {recentInvestors.map((investor, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center">
-                          <span className="text-white text-sm font-semibold">{investor.initials}</span>
+                {recentInvestors.length > 0 ? (
+                  <>
+                    <div className="space-y-3">
+                      {recentInvestors.map((investor: any, index: number) => (
+                        <div key={investor.id} className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center">
+                              <span className="text-white text-sm font-semibold">{investor.initials}</span>
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">{investor.name}</div>
+                              <div className="text-xs text-gray-500">{investor.timeAgo}</div>
+                            </div>
+                          </div>
+                          <div className="font-semibold text-gray-900">{investor.amount}</div>
                         </div>
-                        <div>
-                          <div className="font-medium text-gray-900">{investor.name}</div>
-                          <div className="text-xs text-gray-500">{investor.timeAgo}</div>
-                        </div>
-                      </div>
-                      <div className="font-semibold text-gray-900">{investor.amount}</div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                
-                <Button variant="link" className="w-full mt-4 text-fundry-orange hover:text-orange-600 text-sm">
-                  View All Investors
-                </Button>
+                    
+                    {campaignInvestments.length > 3 && (
+                      <Button variant="link" className="w-full mt-4 text-fundry-orange hover:text-orange-600 text-sm">
+                        View All {campaignInvestments.length} Investors
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <p className="text-gray-500">No investors yet</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Be the first to invest in this campaign
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

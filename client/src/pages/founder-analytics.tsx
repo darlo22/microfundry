@@ -6,11 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Users, Eye, Calendar, Download, RefreshCw, Target, Award, Clock } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Users, Eye, Calendar, Download, RefreshCw, Target, Award, Clock, ArrowLeft, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
+import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
 
 export default function FounderAnalytics() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const [timeRange, setTimeRange] = useState("30d");
   const [selectedCampaign, setSelectedCampaign] = useState("all");
 
@@ -88,12 +91,54 @@ export default function FounderAnalytics() {
   const conversionRate = founderStats?.conversionRate || 0;
 
   return (
-    <div className="container mx-auto px-6 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics</h1>
-          <p className="text-gray-600">Track your fundraising performance and growth</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between h-16">
+            {/* Left: Back Button */}
+            <Button
+              variant="ghost"
+              onClick={() => setLocation("/founder-dashboard")}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+
+            {/* Center: Fundry Logo */}
+            <div 
+              className="flex items-center cursor-pointer"
+              onClick={() => setLocation("/landing")}
+            >
+              <img 
+                src={fundryLogoNew} 
+                alt="Fundry" 
+                className="h-12 w-auto"
+              />
+            </div>
+
+            {/* Right: Logout Button */}
+            <Button
+              variant="ghost"
+              onClick={() => {
+                window.location.href = "/api/logout";
+              }}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics</h1>
+            <p className="text-gray-600">Track your fundraising performance and growth</p>
+          </div>
         <div className="flex gap-3">
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-[140px]">
@@ -386,6 +431,7 @@ export default function FounderAnalytics() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }

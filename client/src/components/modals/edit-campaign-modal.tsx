@@ -8,8 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Edit, Upload, X } from "lucide-react";
+import { Edit, Upload, X, Plus, User, Trash2 } from "lucide-react";
 import { CampaignWithStats } from "@/lib/types";
+
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  experience: string;
+  linkedinProfile: string;
+  photo?: File | string;
+}
 
 interface EditCampaignModalProps {
   isOpen: boolean;
@@ -18,6 +27,52 @@ interface EditCampaignModalProps {
 }
 
 export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignModalProps) {
+  // Parse existing team members from campaign data
+  const parseTeamMembers = (): TeamMember[] => {
+    try {
+      if (typeof campaign.teamMembers === 'string' && campaign.teamMembers) {
+        const parsed = JSON.parse(campaign.teamMembers);
+        if (Array.isArray(parsed)) {
+          return parsed.map((member: any, index: number) => ({
+            id: member.id || `member-${index}`,
+            name: member.name || '',
+            role: member.role || '',
+            experience: member.experience || '',
+            linkedinProfile: member.linkedinProfile || '',
+            photo: member.photoUrl || ''
+          }));
+        }
+      }
+    } catch (e) {
+      // If parsing fails, try to extract from text format
+      if (typeof campaign.teamMembers === 'string' && campaign.teamMembers) {
+        const lines = campaign.teamMembers.split('\n').filter(line => line.trim());
+        return lines.map((line, index) => {
+          const match = line.match(/^(.+?)\s*\((.+?)\)\s*-?\s*(.*)$/);
+          if (match) {
+            return {
+              id: `member-${index}`,
+              name: match[1].trim(),
+              role: match[2].trim(),
+              experience: '',
+              linkedinProfile: match[3].trim(),
+              photo: ''
+            };
+          }
+          return {
+            id: `member-${index}`,
+            name: line.trim(),
+            role: '',
+            experience: '',
+            linkedinProfile: '',
+            photo: ''
+          };
+        });
+      }
+    }
+    return [];
+  };
+
   const [formData, setFormData] = useState({
     title: campaign.title,
     shortPitch: campaign.shortPitch,
@@ -32,18 +87,38 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
     customers: campaign.customers || '',
     useOfFunds: campaign.useOfFunds || '',
     teamStructure: campaign.teamStructure || '',
-    teamMembers: typeof campaign.teamMembers === 'string' 
-      ? campaign.teamMembers 
-      : Array.isArray(campaign.teamMembers) 
-        ? JSON.stringify(campaign.teamMembers) 
-        : '',
   });
   
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(parseTeamMembers());
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [pitchDeckFile, setPitchDeckFile] = useState<File | null>(null);
-  const [teamPhotoFile, setTeamPhotoFile] = useState<File | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Team member management functions
+  const addTeamMember = () => {
+    const newMember: TeamMember = {
+      id: `member-${Date.now()}`,
+      name: '',
+      role: '',
+      experience: '',
+      linkedinProfile: '',
+      photo: ''
+    };
+    setTeamMembers([...teamMembers, newMember]);
+  };
+
+  const updateTeamMember = (id: string, field: keyof TeamMember, value: string | File) => {
+    setTeamMembers(members => 
+      members.map(member => 
+        member.id === id ? { ...member, [field]: value } : member
+      )
+    );
+  };
+
+  const removeTeamMember = (id: string) => {
+    setTeamMembers(members => members.filter(member => member.id !== id));
+  };
 
   const updateMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -86,6 +161,9 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
       }
     });
 
+    // Append structured team members data
+    submitData.append('teamMembers', JSON.stringify(teamMembers));
+
     // Append files if selected
     if (logoFile) {
       submitData.append('logo', logoFile);
@@ -93,9 +171,13 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
     if (pitchDeckFile) {
       submitData.append('pitchDeck', pitchDeckFile);
     }
-    if (teamPhotoFile) {
-      submitData.append('teamPhoto', teamPhotoFile);
-    }
+
+    // Append team member photos
+    teamMembers.forEach((member, index) => {
+      if (member.photo instanceof File) {
+        submitData.append(`teamMemberPhoto_${member.id}`, member.photo);
+      }
+    });
 
     updateMutation.mutate(submitData);
   };
@@ -316,17 +398,122 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="teamMembers">Team Members</Label>
-              <Textarea
-                id="teamMembers"
-                value={formData.teamMembers}
-                onChange={(e) => handleInputChange('teamMembers', e.target.value)}
-                placeholder="Describe your team members, their roles, and experience. Include LinkedIn profiles if available."
-                rows={4}
-              />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label>Team Members</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addTeamMember}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Member
+                </Button>
+              </div>
+              
+              {teamMembers.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                  <User className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                  <p>No team members added yet</p>
+                  <p className="text-sm">Click "Add Member" to add your first team member</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {teamMembers.map((member, index) => (
+                    <div key={member.id} className="border border-gray-200 rounded-lg p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium text-gray-900">Team Member #{index + 1}</h4>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeTeamMember(member.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`name-${member.id}`}>Full Name</Label>
+                          <Input
+                            id={`name-${member.id}`}
+                            value={member.name}
+                            onChange={(e) => updateTeamMember(member.id, 'name', e.target.value)}
+                            placeholder="John Doe"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor={`role-${member.id}`}>Role/Title</Label>
+                          <Input
+                            id={`role-${member.id}`}
+                            value={member.role}
+                            onChange={(e) => updateTeamMember(member.id, 'role', e.target.value)}
+                            placeholder="CEO, CTO, Designer, etc."
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor={`experience-${member.id}`}>Experience & Background</Label>
+                        <Textarea
+                          id={`experience-${member.id}`}
+                          value={member.experience}
+                          onChange={(e) => updateTeamMember(member.id, 'experience', e.target.value)}
+                          placeholder="Brief description of their background and experience"
+                          rows={2}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor={`linkedin-${member.id}`}>LinkedIn Profile</Label>
+                        <Input
+                          id={`linkedin-${member.id}`}
+                          value={member.linkedinProfile}
+                          onChange={(e) => updateTeamMember(member.id, 'linkedinProfile', e.target.value)}
+                          placeholder="https://www.linkedin.com/in/username"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor={`photo-${member.id}`}>Profile Photo</Label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                          <input
+                            id={`photo-${member.id}`}
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                updateTeamMember(member.id, 'photo', file);
+                              }
+                            }}
+                            className="hidden"
+                          />
+                          <label htmlFor={`photo-${member.id}`} className="cursor-pointer flex flex-col items-center gap-2">
+                            <Upload className="w-6 h-6 text-gray-400" />
+                            <span className="text-sm text-gray-600">
+                              {member.photo instanceof File 
+                                ? member.photo.name 
+                                : member.photo && typeof member.photo === 'string' && member.photo !== ''
+                                  ? 'Current photo uploaded'
+                                  : 'Upload profile photo'
+                              }
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
               <p className="text-xs text-gray-500">
-                Include names, roles, experience, and LinkedIn profiles. This information will be displayed in the Meet the Team section.
+                Add individual team members with their photos and information. This will be displayed in the Meet the Team section.
               </p>
             </div>
           </div>

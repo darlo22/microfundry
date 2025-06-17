@@ -225,7 +225,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(investments.campaignId, campaignId),
-          eq(investments.status, "completed")
+          sql`${investments.status} IN ('completed', 'committed', 'paid')`
         )
       );
 

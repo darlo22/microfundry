@@ -500,7 +500,7 @@ export default function CampaignView() {
                     </div>
                     <div className="flex justify-between items-center py-3">
                       <span className="text-gray-600">Maximum Ask</span>
-                      <span className="font-semibold text-lg">$5,000</span>
+                      <span className="font-semibold text-lg">{formatCurrency(campaign.fundingGoal)}</span>
                     </div>
                   </div>
                   <div className="space-y-4">

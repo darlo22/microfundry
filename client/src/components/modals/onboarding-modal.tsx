@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChartLine, Rocket, TrendingUp, X, Briefcase, ArrowLeft } from "lucide-react";
+import { ChartLine, Rocket, TrendingUp, X, Briefcase, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +42,8 @@ interface OnboardingModalProps {
 export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, defaultUserType }: OnboardingModalProps) {
   const [selectedUserType, setSelectedUserType] = useState<"founder" | "investor" | null>(defaultUserType || null);
   const [currentStep, setCurrentStep] = useState<"userType" | "form">(defaultUserType ? "form" : "userType");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
 
   // Reset modal state when defaultUserType changes
@@ -305,12 +307,21 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
 
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                {...registrationForm.register("password")}
-                className={registrationForm.formState.errors.password ? "border-red-500" : ""}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  {...registrationForm.register("password")}
+                  className={registrationForm.formState.errors.password ? "border-red-500 pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {registrationForm.formState.errors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {registrationForm.formState.errors.password.message}
@@ -320,12 +331,21 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
 
             <div>
               <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                {...registrationForm.register("confirmPassword")}
-                className={registrationForm.formState.errors.confirmPassword ? "border-red-500" : ""}
-              />
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  {...registrationForm.register("confirmPassword")}
+                  className={registrationForm.formState.errors.confirmPassword ? "border-red-500 pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {registrationForm.formState.errors.confirmPassword && (
                 <p className="text-red-500 text-sm mt-1">
                   {registrationForm.formState.errors.confirmPassword.message}
@@ -452,12 +472,21 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
 
             <div>
               <Label htmlFor="loginPassword">Password</Label>
-              <Input
-                id="loginPassword"
-                type="password"
-                {...loginForm.register("password")}
-                className={loginForm.formState.errors.password ? "border-red-500" : ""}
-              />
+              <div className="relative">
+                <Input
+                  id="loginPassword"
+                  type={showPassword ? "text" : "password"}
+                  {...loginForm.register("password")}
+                  className={loginForm.formState.errors.password ? "border-red-500 pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {loginForm.formState.errors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {loginForm.formState.errors.password.message}

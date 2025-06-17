@@ -50,7 +50,7 @@ export default function InvestorDashboard() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("discover");
+  const [activeTab, setActiveTab] = useState("portfolio");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -553,11 +553,154 @@ export default function InvestorDashboard() {
 
         {/* Tab Navigation */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
+            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="discover">Discover</TabsTrigger>
+            <TabsTrigger value="updates">Updates</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
+
+          {/* Portfolio Tab */}
+          <TabsContent value="portfolio" className="space-y-8">
+            {/* Portfolio Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div 
+                className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-fundry-orange transition-colors"
+                onClick={() => setActiveTab('portfolio')}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Invested</p>
+                    <p className="text-3xl font-bold text-gray-900">${stats?.totalInvested || "0"}</p>
+                    <p className="text-sm text-green-600 mt-1">+15% this quarter</p>
+                  </div>
+                  <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Wallet className="h-6 w-6 text-fundry-orange" />
+                  </div>
+                </div>
+              </div>
+
+              <div 
+                className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-fundry-orange transition-colors"
+                onClick={() => setActiveTab('documents')}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Active Investments</p>
+                    <p className="text-3xl font-bold text-gray-900">{stats?.activeInvestments || 0}</p>
+                    <p className="text-sm text-gray-500 mt-1">3 campaigns closing soon</p>
+                  </div>
+                  <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <PieChart className="h-6 w-6 text-fundry-navy" />
+                  </div>
+                </div>
+              </div>
+
+              <div 
+                className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-fundry-orange transition-colors"
+                onClick={() => setActiveTab('profile')}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Portfolio Value</p>
+                    <p className="text-3xl font-bold text-gray-900">${stats?.estimatedValue || "0.00"}</p>
+                    <p className="text-sm text-green-600 mt-1">+16.4% growth</p>
+                  </div>
+                  <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-green-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Investment Portfolio */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Your Investments</CardTitle>
+                <div className="flex space-x-2">
+                  <Button variant="outline" size="sm">All</Button>
+                  <Button variant="outline" size="sm">Active</Button>
+                  <Button variant="outline" size="sm">Completed</Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {investmentsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-fundry-orange"></div>
+                  </div>
+                ) : investments && investments.length > 0 ? (
+                  <div className="space-y-4">
+                    {investments.map((investment) => (
+                      <InvestmentCard key={investment.id} investment={investment} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No investments yet. Discover campaigns to get started!</p>
+                    <Button 
+                      className="mt-4 bg-fundry-orange hover:bg-orange-600"
+                      onClick={handleDiscoverCampaigns}
+                    >
+                      Discover Campaigns
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button
+                    variant="outline"
+                    className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group"
+                    onClick={handleDiscoverCampaigns}
+                  >
+                    <div className="w-10 h-10 bg-fundry-orange rounded-lg flex items-center justify-center mr-4">
+                      <Search className="text-white" size={20} />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold text-gray-900 group-hover:text-fundry-orange">Discover Campaigns</div>
+                      <div className="text-sm text-gray-500">Find new investment opportunities</div>
+                    </div>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group"
+                    onClick={handleDownloadDocuments}
+                  >
+                    <div className="w-10 h-10 bg-fundry-navy rounded-lg flex items-center justify-center mr-4">
+                      <Download className="text-white" size={20} />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold text-gray-900 group-hover:text-fundry-orange">Download Documents</div>
+                      <div className="text-sm text-gray-500">Get your SAFE agreements</div>
+                    </div>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group"
+                    onClick={handleManageProfile}
+                  >
+                    <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                      <Settings className="text-white" size={20} />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold text-gray-900 group-hover:text-fundry-orange">Manage Profile</div>
+                      <div className="text-sm text-gray-500">Update account settings</div>
+                    </div>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="discover" className="space-y-8">
             {/* Search and Filter Section */}

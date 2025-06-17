@@ -47,6 +47,9 @@ export const users = pgTable("users", {
   isEmailVerified: boolean("is_email_verified").default(false),
   onboardingCompleted: boolean("onboarding_completed").default(false),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  twoFactorSecret: varchar("two_factor_secret"), // TOTP secret for authenticator apps
+  twoFactorMethod: varchar("two_factor_method", { enum: ["app", "email"] }), // Preferred 2FA method
+  twoFactorBackupCodes: jsonb("two_factor_backup_codes"), // Array of backup codes
   passwordLastChanged: timestamp("password_last_changed").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -255,6 +258,27 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+// OTP codes table for email-based 2FA
+export const otpCodes = pgTable("otp_codes", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  code: varchar("code").notNull(),
+  type: varchar("type", { enum: ["email_2fa", "email_verification", "password_reset"] }).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const otpCodesRelations = relations(otpCodes, ({ one }) => ({
+  user: one(users, {
+    fields: [otpCodes.userId],
+    references: [users.id],
+  }),
+}));
+
+export type OtpCode = typeof otpCodes.$inferSelect;
+export type InsertOtpCode = typeof otpCodes.$inferInsert;
 
 export const insertBusinessProfileSchema = createInsertSchema(businessProfiles).omit({
   id: true,

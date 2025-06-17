@@ -508,6 +508,82 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(users.id, userId));
   }
+
+  // Enhanced 2FA methods
+  async updateUser2FASettings(userId: string, settings: {
+    twoFactorEnabled: boolean;
+    twoFactorMethod: string | null;
+    twoFactorSecret: string | null;
+    twoFactorBackupCodes: string[] | null;
+  }): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        twoFactorEnabled: settings.twoFactorEnabled,
+        twoFactorMethod: settings.twoFactorMethod,
+        twoFactorSecret: settings.twoFactorSecret,
+        twoFactorBackupCodes: settings.twoFactorBackupCodes,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserBackupCodes(userId: string, backupCodes: string[]): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        twoFactorBackupCodes: backupCodes,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  // OTP code management
+  async createOTPCode(data: {
+    userId: string;
+    code: string;
+    type: string;
+    expiresAt: Date;
+    used: boolean;
+  }): Promise<any> {
+    const result = await db.execute(sql`
+      INSERT INTO otp_codes (user_id, code, type, expires_at, used, created_at)
+      VALUES (${data.userId}, ${data.code}, ${data.type}, ${data.expiresAt}, ${data.used}, NOW())
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async getValidOTPCode(userId: string, code: string, type: string): Promise<any> {
+    const result = await db.execute(sql`
+      SELECT * FROM otp_codes 
+      WHERE user_id = ${userId} 
+        AND code = ${code} 
+        AND type = ${type} 
+        AND used = false 
+        AND expires_at > NOW()
+      ORDER BY created_at DESC
+      LIMIT 1
+    `);
+    return result.rows[0] || null;
+  }
+
+  async markOTPAsUsed(otpId: number): Promise<void> {
+    await db.execute(sql`
+      UPDATE otp_codes 
+      SET used = true 
+      WHERE id = ${otpId}
+    `);
+  }
+
+  async cleanupExpiredOTP(userId: string, type: string): Promise<void> {
+    await db.execute(sql`
+      DELETE FROM otp_codes 
+      WHERE user_id = ${userId} 
+        AND type = ${type} 
+        AND (expires_at < NOW() OR used = true)
+    `);
+  }
 }
 
 export const storage = new DatabaseStorage();

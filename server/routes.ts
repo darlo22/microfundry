@@ -209,6 +209,199 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payment withdrawal endpoints
+  app.get('/api/withdrawal-info/:userId', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.params.userId;
+      
+      // Ensure user can only access their own withdrawal info
+      if (userId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to access this information" });
+      }
+
+      // Get user's investment data to calculate balances
+      const investments = await storage.getInvestmentsByInvestor(userId);
+      const userFounderStats = await storage.getFounderStats(userId);
+      
+      // Calculate available balance from successful investments as founder
+      const availableBalance = parseFloat(userFounderStats.totalRaised) * 0.95; // 5% platform fee
+      const pendingWithdrawals = 0; // Would track pending withdrawal requests
+      const totalEarnings = parseFloat(userFounderStats.totalRaised);
+
+      res.json({
+        availableBalance: availableBalance.toFixed(2),
+        pendingWithdrawals: pendingWithdrawals.toFixed(2),
+        totalEarnings: totalEarnings.toFixed(2),
+      });
+    } catch (error) {
+      console.error("Error fetching withdrawal info:", error);
+      res.status(500).json({ message: "Failed to fetch withdrawal information" });
+    }
+  });
+
+  app.post('/api/withdrawal-request', requireAuth, async (req: any, res) => {
+    try {
+      const { amount, bankAccount, routingNumber, accountType, memo } = req.body;
+      const userId = req.user.id;
+
+      if (!amount || !bankAccount || !routingNumber) {
+        return res.status(400).json({ message: "Amount, bank account, and routing number are required" });
+      }
+
+      // Validate withdrawal amount against available balance
+      const userFounderStats = await storage.getFounderStats(userId);
+      const availableBalance = parseFloat(userFounderStats.totalRaised) * 0.95;
+      
+      if (parseFloat(amount) > availableBalance) {
+        return res.status(400).json({ message: "Insufficient funds for withdrawal" });
+      }
+
+      // In a real implementation, this would create a withdrawal request record
+      // For now, we'll simulate the process
+      
+      res.json({ 
+        message: "Withdrawal request submitted successfully",
+        withdrawalId: Date.now().toString(),
+        amount,
+        status: "pending"
+      });
+    } catch (error) {
+      console.error("Error processing withdrawal request:", error);
+      res.status(500).json({ message: "Failed to process withdrawal request" });
+    }
+  });
+
+  app.get('/api/transactions/:userId', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.params.userId;
+      
+      // Ensure user can only access their own transactions
+      if (userId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to access this information" });
+      }
+
+      // Get user's investments and create transaction history
+      const investments = await storage.getInvestmentsByInvestor(userId);
+      const campaigns = await storage.getCampaignsByFounder(userId);
+      
+      const transactions = [];
+
+      // Add investment transactions
+      for (const investment of investments) {
+        if (investment.status === 'committed' || investment.status === 'paid') {
+          transactions.push({
+            type: 'investment',
+            description: `Investment in Campaign #${investment.campaignId}`,
+            amount: investment.amount,
+            date: investment.createdAt,
+            status: 'completed'
+          });
+        }
+      }
+
+      // Add funding received transactions for founders
+      for (const campaign of campaigns) {
+        const campaignInvestments = await storage.getInvestmentsByCampaign(campaign.id);
+        const totalRaised = campaignInvestments
+          .filter(inv => inv.status === 'committed' || inv.status === 'paid')
+          .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+        
+        if (totalRaised > 0) {
+          transactions.push({
+            type: 'funding',
+            description: `Funding received for ${campaign.title}`,
+            amount: totalRaised.toFixed(2),
+            date: campaign.createdAt,
+            status: 'completed'
+          });
+        }
+      }
+
+      // Sort by date (most recent first)
+      transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      res.json(transactions.slice(0, 10)); // Return last 10 transactions
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // KYC endpoints
+  app.get('/api/kyc-status/:userId', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.params.userId;
+      
+      // Ensure user can only access their own KYC status
+      if (userId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to access this information" });
+      }
+
+      // In a real implementation, this would fetch KYC status from database
+      // For now, we'll simulate based on user profile completeness
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Simulate KYC status based on profile completeness
+      const hasBasicInfo = user.firstName && user.lastName && user.email;
+      const hasAddressInfo = user.country && user.state;
+      
+      let status = "not_started";
+      let lastUpdated = null;
+
+      if (hasBasicInfo && hasAddressInfo) {
+        status = "verified";
+        lastUpdated = user.updatedAt || user.createdAt;
+      } else if (hasBasicInfo) {
+        status = "pending";
+        lastUpdated = user.updatedAt || user.createdAt;
+      }
+
+      res.json({
+        status,
+        lastUpdated,
+        completionPercentage: hasBasicInfo && hasAddressInfo ? 100 : hasBasicInfo ? 60 : 0
+      });
+    } catch (error) {
+      console.error("Error fetching KYC status:", error);
+      res.status(500).json({ message: "Failed to fetch KYC status" });
+    }
+  });
+
+  app.post('/api/kyc-submit', requireAuth, upload.any(), async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const kycData = req.body;
+
+      // Validate required KYC fields
+      const requiredFields = ['dateOfBirth', 'ssn', 'address', 'city', 'state', 'zipCode', 'employmentStatus', 'annualIncome', 'investmentExperience', 'riskTolerance'];
+      
+      for (const field of requiredFields) {
+        if (!kycData[field]) {
+          return res.status(400).json({ message: `${field} is required` });
+        }
+      }
+
+      // In a real implementation, this would:
+      // 1. Store KYC data securely
+      // 2. Process uploaded documents
+      // 3. Submit to KYC verification service
+      // 4. Update user's KYC status
+
+      // For now, we'll simulate successful submission
+      res.json({ 
+        message: "KYC information submitted successfully",
+        status: "pending",
+        submittedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error submitting KYC:", error);
+      res.status(500).json({ message: "Failed to submit KYC information" });
+    }
+  });
+
   // Campaign routes
   app.put('/api/campaigns/:id', requireAuth, upload.any(), async (req: any, res) => {
     try {

@@ -26,6 +26,7 @@ import FounderInvestors from "@/pages/founder-investors";
 import FounderAnalytics from "@/pages/founder-analytics";
 import FounderSettings from "@/pages/founder-settings";
 import FounderUpdates from "@/pages/founder-updates";
+import PaymentWithdrawal from "@/pages/payment-withdrawal";
 import InvestorDashboard from "@/pages/investor-dashboard";
 import CampaignView from "@/pages/campaign-view";
 import NotFound from "@/pages/not-found";
@@ -73,6 +74,7 @@ function Router() {
           <Route path="/founder/analytics" component={FounderAnalytics} />
           <Route path="/founder/settings" component={FounderSettings} />
           <Route path="/founder/updates" component={FounderUpdates} />
+          <Route path="/payment-withdrawal" component={PaymentWithdrawal} />
           <Route path="/investor-dashboard" component={InvestorDashboard} />
           <Route path="/investor/dashboard" component={InvestorDashboard} />
         </>

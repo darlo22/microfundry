@@ -74,36 +74,14 @@ export default function CampaignView() {
     }).format(num);
   };
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
 
-  const getTimeAgo = (date: string) => {
-    const now = new Date();
-    const past = new Date(date);
-    const diffInMs = now.getTime() - past.getTime();
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInDays = Math.floor(diffInHours / 24);
-
-    if (diffInHours < 1) return 'Less than 1 hour ago';
-    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-    if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-    return past.toLocaleDateString();
-  };
 
   // Filter investments to only show committed/paid ones (not just pending)
   const committedInvestments = campaignInvestments.filter((investment: any) => 
     investment.status === 'committed' || investment.status === 'paid' || investment.status === 'completed'
   );
 
-  // Process recent investors from actual committed investment data
-  const recentInvestors = committedInvestments.slice(0, 3).map((investment: any) => ({
-    id: investment.id,
-    name: `${investment.investor.firstName} ${investment.investor.lastName}`,
-    initials: getInitials(`${investment.investor.firstName} ${investment.investor.lastName}`),
-    amount: formatCurrency(investment.amount),
-    timeAgo: getTimeAgo(investment.createdAt),
-  }));
+
 
   const handleBackToDashboard = () => {
     if (user?.userType === "founder") {
@@ -722,50 +700,7 @@ export default function CampaignView() {
               </CardContent>
             </Card>
 
-            {/* Recent Investors */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Recent Investors</h3>
-                {recentInvestors.length > 0 ? (
-                  <>
-                    <div className="space-y-3">
-                      {recentInvestors.map((investor: any, index: number) => (
-                        <div key={investor.id} className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center">
-                              <span className="text-white text-sm font-semibold">{investor.initials}</span>
-                            </div>
-                            <div>
-                              <div className="font-medium text-gray-900">{investor.name}</div>
-                              <div className="text-xs text-gray-500">{investor.timeAgo}</div>
-                            </div>
-                          </div>
-                          <div className="font-semibold text-gray-900">{investor.amount}</div>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {committedInvestments.length > 3 && (
-                      <Button 
-                        variant="link" 
-                        className="w-full mt-4 text-fundry-orange hover:text-orange-600 text-sm"
-                        onClick={() => setShowAllInvestorsModal(true)}
-                      >
-                        View All {committedInvestments.length} Investors
-                      </Button>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-8">
-                    <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-gray-500">No investors yet</p>
-                    <p className="text-sm text-gray-400 mt-1">
-                      Be the first to invest in this campaign
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+
           </div>
         </div>
       </div>
@@ -934,7 +869,7 @@ export default function CampaignView() {
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-fundry-orange rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold">
-                      {getInitials(`${investment.investor.firstName} ${investment.investor.lastName}`)}
+                      {`${investment.investor.firstName} ${investment.investor.lastName}`.split(' ').map(n => n[0]).join('').toUpperCase()}
                     </span>
                   </div>
                   <div>
@@ -942,7 +877,7 @@ export default function CampaignView() {
                       {investment.investor.firstName} {investment.investor.lastName}
                     </div>
                     <div className="text-sm text-gray-500">
-                      Invested {getTimeAgo(investment.createdAt)}
+                      Invested {new Date(investment.createdAt).toLocaleDateString()}
                     </div>
                     <div className="text-xs text-gray-400 capitalize">
                       Status: {investment.status}

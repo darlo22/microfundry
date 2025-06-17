@@ -93,6 +93,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle logo file
       const logoFile = files.find(file => file.fieldname === 'logo');
       if (logoFile) {
+        // Check file size (2MB limit)
+        if (logoFile.size > 2 * 1024 * 1024) {
+          return res.status(400).json({ message: 'Logo file size must be under 2MB' });
+        }
         updateData.logoUrl = `/uploads/${logoFile.filename}`;
       }
 
@@ -119,6 +123,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
             
             if (photoFile) {
+              // Check file size (2MB limit)
+              if (photoFile.size > 2 * 1024 * 1024) {
+                throw new Error(`Team member photo for ${member.name || member.id} must be under 2MB`);
+              }
               member.photoUrl = `/uploads/${photoFile.filename}`;
               console.log(`Set new photoUrl for ${member.id}:`, member.photoUrl);
               // Remove the File object reference
@@ -161,6 +169,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique private link
       const privateLink = nanoid(16);
       
+      // Validate file sizes (2MB limit)
+      if (files.logo?.[0] && files.logo[0].size > 2 * 1024 * 1024) {
+        return res.status(400).json({ message: 'Logo file size must be under 2MB' });
+      }
+
       const campaignData = {
         ...req.body,
         founderId,

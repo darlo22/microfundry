@@ -680,6 +680,7 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                                   onChange={(e) => handleTeamMemberPhotoUpload(index, e)}
                                   className="text-sm"
                                 />
+                                <span className="text-xs text-gray-400">Max size: 2MB</span>
                                 {teamMemberPhotos[index] && (
                                   <Button
                                     type="button"

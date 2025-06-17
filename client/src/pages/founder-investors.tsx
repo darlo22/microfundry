@@ -124,7 +124,7 @@ export default function FounderInvestors() {
 
   // Fetch all investments for founder's campaigns
   const { data: investments = [], isLoading } = useQuery({
-    queryKey: ["/api/investments/founder", user?.id],
+    queryKey: [`/api/investments/founder/${user?.id}`],
     enabled: !!user?.id,
   });
 
@@ -178,7 +178,9 @@ export default function FounderInvestors() {
 
   // Process investments to create investor profiles
   const investorProfiles: InvestorProfile[] = Array.isArray(investments) 
-    ? (investments as any[]).reduce((profiles: InvestorProfile[], investment: any) => {
+    ? (investments as any[])
+        .filter(investment => investment.status === 'committed' || investment.status === 'paid' || investment.status === 'completed')
+        .reduce((profiles: InvestorProfile[], investment: any) => {
         const existingProfile = profiles.find(p => p.email === investment.investor.email);
         
         if (existingProfile) {
@@ -195,7 +197,7 @@ export default function FounderInvestors() {
             totalInvested: investment.amount,
             investmentCount: 1,
             firstInvestment: investment.createdAt,
-            status: investment.status === "paid" ? "active" : investment.status,
+            status: investment.status === "paid" || investment.status === "completed" ? "active" : investment.status,
             riskProfile: parseFloat(investment.amount) > 5000 ? "Aggressive" : parseFloat(investment.amount) > 1000 ? "Moderate" : "Conservative",
             location: "Not provided",
           });
@@ -255,6 +257,17 @@ export default function FounderInvestors() {
   const totalInvested = investorProfiles.reduce((sum, investor) => sum + parseFloat(investor.totalInvested), 0);
   const activeInvestors = investorProfiles.filter(i => i.status === "active").length;
   const averageInvestment = totalInvestors > 0 ? totalInvested / totalInvestors : 0;
+
+  // Debug log to see actual data
+  console.log('Investment Data Debug:', {
+    totalInvestments: investments?.length,
+    investmentStatuses: Array.isArray(investments) ? investments.map(inv => inv.status) : [],
+    filteredInvestments: Array.isArray(investments) ? investments.filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed').length : 0,
+    investorProfiles: investorProfiles.length,
+    totalInvested,
+    activeInvestors,
+    rawInvestments: investments
+  });
 
   if (isLoading) {
     return (

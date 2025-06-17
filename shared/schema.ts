@@ -32,7 +32,6 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique().notNull(),
   password: varchar("password"),
-  hashedPassword: varchar("hashed_password"),
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
   userType: varchar("user_type", { enum: ["founder", "investor"] }).notNull(),

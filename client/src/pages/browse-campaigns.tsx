@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import CampaignCard from "@/components/campaign/campaign-card";
@@ -7,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, TrendingUp, Clock, Users } from "lucide-react";
+import { Search, Filter, TrendingUp, Clock, Users, ArrowLeft } from "lucide-react";
 import type { CampaignWithStats } from "@/lib/types";
 
 export default function BrowseCampaigns() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [, setLocation] = useLocation();
 
   // Fetch campaigns from API
   const { data: campaigns = [], isLoading } = useQuery<CampaignWithStats[]>({
@@ -67,6 +69,19 @@ export default function BrowseCampaigns() {
       <Navbar title="Browse Campaigns" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Navigation Header */}
+        <div className="flex items-center mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation("/investor-dashboard")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">

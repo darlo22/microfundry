@@ -399,8 +399,8 @@ export default function FounderInvestors() {
 
       {/* Compose Message Modal */}
       <Dialog open={showComposeModal} onOpenChange={setShowComposeModal}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center">
               <Mail className="mr-2 h-5 w-5 text-fundry-orange" />
               Compose Message to Investors
@@ -410,7 +410,7 @@ export default function FounderInvestors() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto flex-1 pr-2">
             {/* Message Type */}
             <div className="space-y-2">
               <Label htmlFor="messageType">Message Type</Label>
@@ -496,7 +496,7 @@ export default function FounderInvestors() {
             )}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex-shrink-0 mt-4">
             <Button variant="outline" onClick={() => setShowComposeModal(false)}>
               Cancel
             </Button>

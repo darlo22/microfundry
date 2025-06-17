@@ -10,10 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Building2, Bell, Shield, CreditCard, Key, Mail, Phone, MapPin, Save, AlertTriangle, ArrowLeft, LogOut } from "lucide-react";
+import { User, Building2, Bell, Shield, CreditCard, Key, Mail, Phone, MapPin, Save, AlertTriangle, ArrowLeft, LogOut, Eye, EyeOff, Monitor, Smartphone, Tablet } from "lucide-react";
 import { useLocation } from "wouter";
 import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
 import { COUNTRIES_AND_STATES, type Country } from "@/data/countries-states";
@@ -73,6 +74,49 @@ export default function FounderSettings() {
     passwordLastChanged: "2024-01-15",
   });
 
+  // Security modal states
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [viewSessionsOpen, setViewSessionsOpen] = useState(false);
+  const [enable2FAOpen, setEnable2FAOpen] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Password change form
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  // Mock session data
+  const [sessions] = useState([
+    {
+      id: 1,
+      device: "Chrome on Windows",
+      location: "New York, US",
+      lastActive: "2 minutes ago",
+      current: true,
+      deviceType: "desktop",
+    },
+    {
+      id: 2,
+      device: "Safari on iPhone",
+      location: "New York, US", 
+      lastActive: "1 hour ago",
+      current: false,
+      deviceType: "mobile",
+    },
+    {
+      id: 3,
+      device: "Chrome on MacBook",
+      location: "San Francisco, US",
+      lastActive: "2 days ago",
+      current: false,
+      deviceType: "desktop",
+    },
+  ]);
+
   // Update mutations
   const updateProfileMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -128,6 +172,50 @@ export default function FounderSettings() {
       toast({
         title: "Update Failed",
         description: "Failed to update notification settings. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Security mutations
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest("PUT", "/api/user/change-password", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Password changed successfully!",
+      });
+      setChangePasswordOpen(false);
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setSecurity(prev => ({ ...prev, passwordLastChanged: new Date().toISOString().split('T')[0] }));
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to change password. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const toggle2FAMutation = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      return apiRequest("PUT", "/api/user/2fa", { enabled });
+    },
+    onSuccess: (_, enabled) => {
+      toast({
+        title: "Success",
+        description: `Two-factor authentication ${enabled ? 'enabled' : 'disabled'} successfully!`,
+      });
+      setSecurity(prev => ({ ...prev, twoFactorEnabled: enabled }));
+      setEnable2FAOpen(false);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update two-factor authentication. Please try again.",
         variant: "destructive",
       });
     },
@@ -584,9 +672,57 @@ export default function FounderSettings() {
                     <Badge variant={security.twoFactorEnabled ? "default" : "secondary"}>
                       {security.twoFactorEnabled ? "Enabled" : "Disabled"}
                     </Badge>
-                    <Button variant="outline" size="sm">
-                      {security.twoFactorEnabled ? "Disable" : "Enable"}
-                    </Button>
+                    <Dialog open={enable2FAOpen} onOpenChange={setEnable2FAOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          {security.twoFactorEnabled ? "Disable" : "Enable"}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>
+                            {security.twoFactorEnabled ? "Disable" : "Enable"} Two-Factor Authentication
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          {!security.twoFactorEnabled ? (
+                            <div className="space-y-4">
+                              <p className="text-sm text-gray-600">
+                                Two-factor authentication adds an extra layer of security to your account by requiring a verification code from your phone in addition to your password.
+                              </p>
+                              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <p className="text-sm text-yellow-800">
+                                  <strong>Note:</strong> You'll need an authenticator app like Google Authenticator or Authy to use 2FA.
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              <p className="text-sm text-gray-600">
+                                Are you sure you want to disable two-factor authentication? This will make your account less secure.
+                              </p>
+                              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                <p className="text-sm text-red-800">
+                                  <strong>Warning:</strong> Disabling 2FA will reduce your account security.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                          <div className="flex gap-3 justify-end">
+                            <Button variant="outline" onClick={() => setEnable2FAOpen(false)}>
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={() => toggle2FAMutation.mutate(!security.twoFactorEnabled)}
+                              disabled={toggle2FAMutation.isPending}
+                              variant={security.twoFactorEnabled ? "destructive" : "default"}
+                            >
+                              {toggle2FAMutation.isPending ? "Processing..." : (security.twoFactorEnabled ? "Disable 2FA" : "Enable 2FA")}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
 
@@ -597,10 +733,122 @@ export default function FounderSettings() {
                       Last changed on {new Date(security.passwordLastChanged).toLocaleDateString()}
                     </p>
                   </div>
-                  <Button variant="outline" size="sm">
-                    <Key className="mr-2 h-4 w-4" />
-                    Change Password
-                  </Button>
+                  <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Key className="mr-2 h-4 w-4" />
+                        Change Password
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Change Password</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        if (passwordData.newPassword !== passwordData.confirmPassword) {
+                          toast({
+                            title: "Error",
+                            description: "New passwords do not match.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        if (passwordData.newPassword.length < 8) {
+                          toast({
+                            title: "Error",
+                            description: "Password must be at least 8 characters long.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        changePasswordMutation.mutate(passwordData);
+                      }} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="currentPassword">Current Password</Label>
+                          <div className="relative">
+                            <Input
+                              id="currentPassword"
+                              type={showCurrentPassword ? "text" : "password"}
+                              value={passwordData.currentPassword}
+                              onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                              placeholder="Enter current password"
+                              required
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
+                              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            >
+                              {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="newPassword">New Password</Label>
+                          <div className="relative">
+                            <Input
+                              id="newPassword"
+                              type={showNewPassword ? "text" : "password"}
+                              value={passwordData.newPassword}
+                              onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                              placeholder="Enter new password"
+                              required
+                              minLength={8}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
+                              onClick={() => setShowNewPassword(!showNewPassword)}
+                            >
+                              {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                          <div className="relative">
+                            <Input
+                              id="confirmPassword"
+                              type={showConfirmPassword ? "text" : "password"}
+                              value={passwordData.confirmPassword}
+                              onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                              placeholder="Confirm new password"
+                              required
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-3 justify-end pt-4">
+                          <Button type="button" variant="outline" onClick={() => setChangePasswordOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            disabled={changePasswordMutation.isPending}
+                            className="bg-fundry-orange hover:bg-orange-600"
+                          >
+                            {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
+                          </Button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -608,9 +856,82 @@ export default function FounderSettings() {
                     <p className="font-medium">Active Sessions</p>
                     <p className="text-sm text-gray-600">Manage devices that are logged into your account</p>
                   </div>
-                  <Button variant="outline" size="sm">
-                    View Sessions
-                  </Button>
+                  <Dialog open={viewSessionsOpen} onOpenChange={setViewSessionsOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        View Sessions
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Active Sessions</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <p className="text-sm text-gray-600">
+                          These are the devices that are currently logged into your account. If you see any suspicious activity, you can log out from specific devices.
+                        </p>
+                        <div className="space-y-3">
+                          {sessions.map((session) => (
+                            <div key={session.id} className="flex items-center justify-between p-4 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-gray-100 rounded-lg">
+                                  {session.deviceType === "mobile" ? (
+                                    <Smartphone className="h-4 w-4 text-gray-600" />
+                                  ) : session.deviceType === "tablet" ? (
+                                    <Tablet className="h-4 w-4 text-gray-600" />
+                                  ) : (
+                                    <Monitor className="h-4 w-4 text-gray-600" />
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-sm">
+                                    {session.device}
+                                    {session.current && (
+                                      <Badge variant="secondary" className="ml-2 text-xs">
+                                        Current
+                                      </Badge>
+                                    )}
+                                  </p>
+                                  <p className="text-xs text-gray-600">
+                                    {session.location} • Last active {session.lastActive}
+                                  </p>
+                                </div>
+                              </div>
+                              {!session.current && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => {
+                                    toast({
+                                      title: "Session Terminated",
+                                      description: "Device has been logged out successfully.",
+                                    });
+                                  }}
+                                >
+                                  Log Out
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="pt-4 border-t">
+                          <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => {
+                              toast({
+                                title: "All Sessions Terminated",
+                                description: "All other devices have been logged out. You'll need to log in again on those devices.",
+                              });
+                              setViewSessionsOpen(false);
+                            }}
+                          >
+                            Log Out All Other Sessions
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </CardContent>

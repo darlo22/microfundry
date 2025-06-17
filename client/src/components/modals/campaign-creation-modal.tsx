@@ -29,6 +29,13 @@ const teamMemberSchema = z.object({
   photo: z.string().optional(), // Will store base64 encoded image data
 });
 
+const fundAllocationSchema = z.object({
+  id: z.string(),
+  category: z.string().min(1, "Category is required"),
+  percentage: z.number().min(1).max(100),
+  description: z.string().optional(),
+});
+
 const campaignSchema = z.object({
   title: z.string().min(1, "Campaign title is required"),
   businessSector: z.string().min(1, "Business sector is required"),
@@ -50,6 +57,17 @@ const campaignSchema = z.object({
   // Team Information
   teamStructure: z.enum(["solo", "team"]),
   teamMembers: z.array(teamMemberSchema).optional(),
+  
+  // Use of Funds
+  useOfFunds: z.array(fundAllocationSchema).refine(
+    (allocations) => {
+      const totalPercentage = allocations.reduce((sum, allocation) => sum + allocation.percentage, 0);
+      return totalPercentage === 100;
+    },
+    {
+      message: "Total percentage must equal 100%",
+    }
+  ),
 });
 
 type CampaignFormData = z.infer<typeof campaignSchema>;
@@ -66,6 +84,36 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [pitchDeckFile, setPitchDeckFile] = useState<File | null>(null);
   const [teamMemberPhotos, setTeamMemberPhotos] = useState<{[key: number]: string}>({});
+
+  // Use of Funds management functions
+  const addFundAllocation = () => {
+    const currentAllocations = form.getValues("useOfFunds");
+    const newAllocation = {
+      id: Date.now().toString(),
+      category: "",
+      percentage: 0,
+      description: ""
+    };
+    form.setValue("useOfFunds", [...currentAllocations, newAllocation]);
+  };
+
+  const removeFundAllocation = (id: string) => {
+    const currentAllocations = form.getValues("useOfFunds");
+    form.setValue("useOfFunds", currentAllocations.filter(allocation => allocation.id !== id));
+  };
+
+  const updateFundAllocation = (id: string, field: keyof typeof fundAllocationSchema._type, value: any) => {
+    const currentAllocations = form.getValues("useOfFunds");
+    const updatedAllocations = currentAllocations.map(allocation =>
+      allocation.id === id ? { ...allocation, [field]: value } : allocation
+    );
+    form.setValue("useOfFunds", updatedAllocations);
+  };
+
+  const getTotalPercentage = () => {
+    const allocations = form.watch("useOfFunds");
+    return allocations.reduce((sum, allocation) => sum + (allocation.percentage || 0), 0);
+  };
 
   const form = useForm<CampaignFormData>({
     resolver: zodResolver(campaignSchema),
@@ -86,6 +134,32 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
       keyMilestones: "",
       teamStructure: "solo",
       teamMembers: [],
+      useOfFunds: [
+        {
+          id: "1",
+          category: "Product Development",
+          percentage: 40,
+          description: "Building and improving our core product"
+        },
+        {
+          id: "2", 
+          category: "Marketing & Sales",
+          percentage: 30,
+          description: "Customer acquisition and marketing campaigns"
+        },
+        {
+          id: "3",
+          category: "Operations",
+          percentage: 20,
+          description: "General business operations and overhead"
+        },
+        {
+          id: "4",
+          category: "Legal & Compliance",
+          percentage: 10,
+          description: "Legal fees and regulatory compliance"
+        }
+      ],
     },
   });
 
@@ -782,6 +856,102 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                   </Card>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Use of Funds */}
+            <div className="border-b pb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Use of Funds</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Break down how you plan to use the funding. Total must equal 100%.
+              </p>
+              
+              <div className="space-y-4">
+                {(form.watch("useOfFunds") || []).map((allocation, index) => (
+                  <Card key={allocation.id} className="p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                      <div className="md:col-span-4">
+                        <Label htmlFor={`category-${index}`}>Category</Label>
+                        <Input
+                          id={`category-${index}`}
+                          placeholder="e.g., Product Development"
+                          value={allocation.category}
+                          onChange={(e) => updateFundAllocation(allocation.id, "category", e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                      
+                      <div className="md:col-span-2">
+                        <Label htmlFor={`percentage-${index}`}>Percentage</Label>
+                        <div className="relative mt-1">
+                          <Input
+                            id={`percentage-${index}`}
+                            type="number"
+                            min="0"
+                            max="100"
+                            placeholder="0"
+                            value={allocation.percentage || ""}
+                            onChange={(e) => updateFundAllocation(allocation.id, "percentage", parseInt(e.target.value) || 0)}
+                            className="pr-8"
+                          />
+                          <span className="absolute right-3 top-3 text-gray-500">%</span>
+                        </div>
+                      </div>
+                      
+                      <div className="md:col-span-5">
+                        <Label htmlFor={`description-${index}`}>Description (Optional)</Label>
+                        <Input
+                          id={`description-${index}`}
+                          placeholder="Brief description of this allocation"
+                          value={allocation.description || ""}
+                          onChange={(e) => updateFundAllocation(allocation.id, "description", e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                      
+                      <div className="md:col-span-1 flex justify-end">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFundAllocation(allocation.id)}
+                          className="text-red-600 hover:text-red-800 mt-6"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                
+                <div className="flex justify-between items-center">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addFundAllocation}
+                    className="flex items-center"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Category
+                  </Button>
+                  
+                  <div className="text-right">
+                    <div className={`text-lg font-semibold ${
+                      getTotalPercentage() === 100 ? 'text-green-600' : 
+                      getTotalPercentage() > 100 ? 'text-red-600' : 'text-orange-600'
+                    }`}>
+                      Total: {getTotalPercentage()}%
+                    </div>
+                    {getTotalPercentage() !== 100 && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        {getTotalPercentage() < 100 ? 
+                          `${100 - getTotalPercentage()}% remaining` : 
+                          `${getTotalPercentage() - 100}% over limit`
+                        }
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Action Buttons */}

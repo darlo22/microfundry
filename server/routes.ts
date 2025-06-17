@@ -384,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/kyc-submit', requireAuth, upload.any(), async (req: any, res) => {
+  app.post('/api/kyc-submit', requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const kycData = req.body;
@@ -395,7 +395,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const requiredFields = ['dateOfBirth', 'ssn', 'address', 'city', 'state', 'zipCode', 'employmentStatus', 'annualIncome', 'investmentExperience', 'riskTolerance'];
       
       for (const field of requiredFields) {
-        if (!kycData[field] || kycData[field].trim() === '') {
+        if (!kycData[field] || (typeof kycData[field] === 'string' && kycData[field].trim() === '')) {
           return res.status(400).json({ message: `${field} is required` });
         }
       }

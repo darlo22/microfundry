@@ -168,7 +168,9 @@ export default function PaymentWithdrawal() {
     annualIncome: "",
     investmentExperience: "",
     riskTolerance: "",
-    documents: [] as File[],
+    governmentId: [] as File[],
+    utilityBill: [] as File[],
+    otherDocuments: [] as File[],
   });
 
   // Modal states
@@ -231,22 +233,9 @@ export default function PaymentWithdrawal() {
   const kycMutation = useMutation({
     mutationFn: async (data: any) => {
       console.log('KYC data being submitted:', data); // Debug log
-      const formData = new FormData();
-      Object.keys(data).forEach(key => {
-        if (key === 'documents') {
-          data[key].forEach((file: File) => formData.append('documents', file));
-        } else {
-          formData.append(key, data[key]);
-        }
-      });
       
-      // Log FormData contents for debugging
-      console.log('FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value);
-      }
-      
-      return apiRequest("POST", "/api/kyc-submit", formData);
+      // Always send as JSON for now to fix the parsing issue
+      return apiRequest("POST", "/api/kyc-submit", data);
     },
     onSuccess: () => {
       toast({
@@ -373,10 +362,24 @@ export default function PaymentWithdrawal() {
                   </div>
                 </div>
                 
-                <div className="mt-6 flex justify-center">
+                <div className="mt-6 flex flex-col items-center gap-3">
+                  {kycStatus?.status !== "verified" && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+                      <p className="text-yellow-800 text-sm font-medium">
+                        KYC verification required to request withdrawals
+                      </p>
+                      <p className="text-yellow-700 text-xs mt-1">
+                        Complete your identity verification below to access withdrawal features
+                      </p>
+                    </div>
+                  )}
+                  
                   <Dialog open={withdrawalModalOpen} onOpenChange={setWithdrawalModalOpen}>
                     <DialogTrigger asChild>
-                      <Button className="bg-fundry-orange hover:bg-orange-600">
+                      <Button 
+                        className="bg-fundry-orange hover:bg-orange-600"
+                        disabled={kycStatus?.status !== "verified"}
+                      >
                         <CreditCard className="mr-2 h-4 w-4" />
                         Request Withdrawal
                       </Button>
@@ -774,22 +777,58 @@ export default function PaymentWithdrawal() {
                           </div>
                         </div>
 
-                        <div>
-                          <Label htmlFor="documents">Required Documents</Label>
-                          <Input
-                            id="documents"
-                            type="file"
-                            multiple
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            onChange={(e) => setKycData(prev => ({ 
-                              ...prev, 
-                              documents: Array.from(e.target.files || []) 
-                            }))}
-                            className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-fundry-orange file:text-white hover:file:bg-orange-600"
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            Upload ID, proof of address, and income verification (PDF, JPG, PNG)
-                          </p>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="governmentId">Government Issued ID</Label>
+                            <Input
+                              id="governmentId"
+                              type="file"
+                              accept=".pdf,.jpg,.jpeg,.png"
+                              onChange={(e) => {
+                                const files = Array.from(e.target.files || []);
+                                setKycData(prev => ({ ...prev, governmentId: files }));
+                              }}
+                              className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-fundry-orange file:text-white hover:file:bg-orange-600"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Upload driver's license, passport, or state ID (Max size: 2MB)
+                            </p>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="utilityBill">Utility Bill / Proof of Address</Label>
+                            <Input
+                              id="utilityBill"
+                              type="file"
+                              accept=".pdf,.jpg,.jpeg,.png"
+                              onChange={(e) => {
+                                const files = Array.from(e.target.files || []);
+                                setKycData(prev => ({ ...prev, utilityBill: files }));
+                              }}
+                              className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-fundry-orange file:text-white hover:file:bg-orange-600"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Upload recent utility bill or bank statement (Max size: 2MB)
+                            </p>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="otherDocuments">Other Documents (Optional)</Label>
+                            <Input
+                              id="otherDocuments"
+                              type="file"
+                              multiple
+                              accept=".pdf,.jpg,.jpeg,.png"
+                              onChange={(e) => {
+                                const files = Array.from(e.target.files || []);
+                                setKycData(prev => ({ ...prev, otherDocuments: files }));
+                              }}
+                              className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-fundry-orange file:text-white hover:file:bg-orange-600"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Additional supporting documents (Max size: 2MB each)
+                            </p>
+                          </div>
                         </div>
 
                         <div className="flex gap-3 justify-end pt-4">

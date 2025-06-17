@@ -20,6 +20,13 @@ interface TeamMember {
   photo?: File | string;
 }
 
+interface FundAllocation {
+  id: string;
+  category: string;
+  percentage: number;
+  description: string;
+}
+
 interface EditCampaignModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -27,6 +34,48 @@ interface EditCampaignModalProps {
 }
 
 export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignModalProps) {
+  // Parse existing fund allocations from campaign data
+  const parseFundAllocations = (): FundAllocation[] => {
+    try {
+      if (campaign.useOfFunds && Array.isArray(campaign.useOfFunds)) {
+        return campaign.useOfFunds.map((allocation: any, index: number) => ({
+          id: allocation.id || `allocation-${index}`,
+          category: allocation.category || '',
+          percentage: allocation.percentage || 0,
+          description: allocation.description || ''
+        }));
+      }
+    } catch (e) {
+      console.error('Error parsing fund allocations:', e);
+    }
+    return [
+      {
+        id: "1",
+        category: "Product Development",
+        percentage: 40,
+        description: "Building and improving our core product"
+      },
+      {
+        id: "2",
+        category: "Marketing & Sales",
+        percentage: 30,
+        description: "Customer acquisition and marketing campaigns"
+      },
+      {
+        id: "3",
+        category: "Operations",
+        percentage: 20,
+        description: "General business operations and overhead"
+      },
+      {
+        id: "4",
+        category: "Legal & Compliance",
+        percentage: 10,
+        description: "Legal fees and regulatory compliance"
+      }
+    ];
+  };
+
   // Parse existing team members from campaign data
   const parseTeamMembers = (): TeamMember[] => {
     try {
@@ -85,15 +134,40 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
     startupStage: campaign.startupStage || '',
     currentRevenue: campaign.currentRevenue || '',
     customers: campaign.customers || '',
-    useOfFunds: campaign.useOfFunds || '',
     teamStructure: campaign.teamStructure || '',
   });
   
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(parseTeamMembers());
+  const [fundAllocations, setFundAllocations] = useState<FundAllocation[]>(parseFundAllocations());
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [pitchDeckFile, setPitchDeckFile] = useState<File | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fund allocation management functions
+  const addFundAllocation = () => {
+    const newAllocation: FundAllocation = {
+      id: `allocation-${Date.now()}`,
+      category: '',
+      percentage: 0,
+      description: ''
+    };
+    setFundAllocations([...fundAllocations, newAllocation]);
+  };
+
+  const removeFundAllocation = (id: string) => {
+    setFundAllocations(fundAllocations.filter(allocation => allocation.id !== id));
+  };
+
+  const updateFundAllocation = (id: string, field: keyof FundAllocation, value: any) => {
+    setFundAllocations(fundAllocations.map(allocation =>
+      allocation.id === id ? { ...allocation, [field]: value } : allocation
+    ));
+  };
+
+  const getTotalPercentage = () => {
+    return fundAllocations.reduce((sum, allocation) => sum + (allocation.percentage || 0), 0);
+  };
 
   // Team member management functions
   const addTeamMember = () => {
@@ -163,6 +237,9 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
 
     // Append structured team members data
     submitData.append('teamMembers', JSON.stringify(teamMembers));
+    
+    // Append structured fund allocations data
+    submitData.append('useOfFunds', JSON.stringify(fundAllocations));
 
     // Append files if selected
     if (logoFile) {
@@ -366,15 +443,100 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="useOfFunds">Use of Funds</Label>
-              <Textarea
-                id="useOfFunds"
-                value={formData.useOfFunds}
-                onChange={(e) => handleInputChange('useOfFunds', e.target.value)}
-                placeholder="Describe how you'll use the funding"
-                rows={3}
-              />
+            {/* Use of Funds */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-lg font-medium text-gray-900">Use of Funds</h4>
+                  <p className="text-sm text-gray-600">Break down how you plan to use the funding. Total must equal 100%.</p>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                {fundAllocations.map((allocation, index) => (
+                  <div key={allocation.id} className="grid grid-cols-12 gap-3 items-start p-3 border rounded-lg">
+                    <div className="col-span-4">
+                      <Label htmlFor={`category-${index}`} className="text-sm font-medium">Category</Label>
+                      <Input
+                        id={`category-${index}`}
+                        placeholder="e.g., Product Development"
+                        value={allocation.category}
+                        onChange={(e) => updateFundAllocation(allocation.id, "category", e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div className="col-span-2">
+                      <Label htmlFor={`percentage-${index}`} className="text-sm font-medium">Percentage</Label>
+                      <div className="relative mt-1">
+                        <Input
+                          id={`percentage-${index}`}
+                          type="number"
+                          min="0"
+                          max="100"
+                          placeholder="0"
+                          value={allocation.percentage || ""}
+                          onChange={(e) => updateFundAllocation(allocation.id, "percentage", parseInt(e.target.value) || 0)}
+                          className="pr-8"
+                        />
+                        <span className="absolute right-3 top-3 text-gray-500 text-sm">%</span>
+                      </div>
+                    </div>
+                    
+                    <div className="col-span-5">
+                      <Label htmlFor={`description-${index}`} className="text-sm font-medium">Description (Optional)</Label>
+                      <Input
+                        id={`description-${index}`}
+                        placeholder="Brief description"
+                        value={allocation.description || ""}
+                        onChange={(e) => updateFundAllocation(allocation.id, "description", e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div className="col-span-1 flex justify-end">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFundAllocation(allocation.id)}
+                        className="text-red-600 hover:text-red-800 mt-6"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                
+                <div className="flex justify-between items-center pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addFundAllocation}
+                    className="flex items-center"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Category
+                  </Button>
+                  
+                  <div className="text-right">
+                    <div className={`text-lg font-semibold ${
+                      getTotalPercentage() === 100 ? 'text-green-600' : 
+                      getTotalPercentage() > 100 ? 'text-red-600' : 'text-orange-600'
+                    }`}>
+                      Total: {getTotalPercentage()}%
+                    </div>
+                    {getTotalPercentage() !== 100 && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        {getTotalPercentage() < 100 ? 
+                          `${100 - getTotalPercentage()}% remaining` : 
+                          `${getTotalPercentage() - 100}% over limit`
+                        }
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

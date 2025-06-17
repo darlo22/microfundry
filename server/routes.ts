@@ -1490,6 +1490,113 @@ Generated on: ${new Date().toLocaleDateString()}
     }
   });
 
+  // Export user data endpoint
+  app.get('/api/user/export-data', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Get user profile
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get user's investments
+      const investments = await storage.getInvestmentsByInvestor(userId);
+      
+      // Get user's business profile if they're a founder
+      const businessProfile = await storage.getBusinessProfile(userId);
+      
+      // Get user's campaigns if they're a founder
+      const campaigns = await storage.getCampaignsByFounder(userId);
+      
+      // Get user's notifications
+      const notifications = await storage.getUserNotifications(userId);
+      
+      // Prepare export data
+      const exportData = {
+        profile: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          country: user.country,
+          state: user.state,
+          bio: user.bio,
+          createdAt: user.createdAt,
+        },
+        businessProfile: businessProfile || null,
+        investments: investments.map(inv => ({
+          id: inv.id,
+          campaignId: inv.campaignId,
+          amount: inv.amount,
+          status: inv.status,
+          paymentStatus: inv.paymentStatus,
+          createdAt: inv.createdAt,
+        })),
+        campaigns: campaigns?.map(campaign => ({
+          id: campaign.id,
+          title: campaign.title,
+          description: campaign.description,
+          businessSector: campaign.businessSector,
+          fundingGoal: campaign.fundingGoal,
+          minimumInvestment: campaign.minimumInvestment,
+          status: campaign.status,
+          createdAt: campaign.createdAt,
+        })) || [],
+        notifications: notifications.map(notif => ({
+          id: notif.id,
+          type: notif.type,
+          title: notif.title,
+          message: notif.message,
+          isRead: notif.isRead,
+          createdAt: notif.createdAt,
+        })),
+        exportedAt: new Date().toISOString(),
+        platformInfo: {
+          name: "Fundry",
+          version: "1.0.0",
+          description: "Equity crowdfunding platform data export",
+        }
+      };
+      
+      res.json(exportData);
+    } catch (error) {
+      console.error("Error exporting user data:", error);
+      res.status(500).json({ message: "Failed to export user data" });
+    }
+  });
+
+  // Deactivate user account endpoint
+  app.post('/api/user/deactivate', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { reason } = req.body;
+      
+      // Update user status to deactivated
+      await storage.deactivateUser(userId, reason || 'No reason provided');
+      
+      // Log deactivation for audit purposes
+      console.log(`User ${userId} deactivated account. Reason: ${reason || 'Not specified'}`);
+      
+      // Destroy the session
+      req.session.destroy((err: any) => {
+        if (err) {
+          console.error("Error destroying session:", err);
+        }
+      });
+      
+      res.json({ 
+        message: "Account deactivated successfully",
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error deactivating account:", error);
+      res.status(500).json({ message: "Failed to deactivate account" });
+    }
+  });
+
   // Notifications routes - using requireAuth for consistency
   app.get('/api/notifications', requireAuth, async (req: any, res) => {
     try {

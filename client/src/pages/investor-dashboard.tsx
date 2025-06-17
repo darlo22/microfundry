@@ -1912,6 +1912,93 @@ export default function InvestorDashboard() {
         </Tabs>
       </div>
 
+      {/* Deactivation Confirmation Modal */}
+      <Dialog open={isDeactivateModalOpen} onOpenChange={setIsDeactivateModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-900">Deactivate Account</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-red-900">Account Deactivation Warning</h4>
+                  <p className="text-sm text-red-700 mt-1">
+                    Deactivating your account will temporarily disable access to all Fundry services. 
+                    Your investment data will be preserved, but you won't be able to access your portfolio 
+                    or receive updates until you reactivate your account.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="deactivation-reason">Reason for deactivation (optional)</Label>
+              <Select value={deactivationReason} onValueChange={setDeactivationReason}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="privacy_concerns">Privacy concerns</SelectItem>
+                  <SelectItem value="too_many_emails">Too many emails</SelectItem>
+                  <SelectItem value="not_using_platform">Not using the platform</SelectItem>
+                  <SelectItem value="found_alternative">Found alternative service</SelectItem>
+                  <SelectItem value="temporary_break">Taking a temporary break</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="confirm-deactivation">
+                Type "DEACTIVATE" to confirm (case sensitive)
+              </Label>
+              <Input
+                id="confirm-deactivation"
+                value={confirmDeactivation}
+                onChange={(e) => setConfirmDeactivation(e.target.value)}
+                placeholder="Type DEACTIVATE to confirm"
+                className="font-mono"
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsDeactivateModalOpen(false);
+                  setDeactivationReason("");
+                  setConfirmDeactivation("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={() => {
+                  if (confirmDeactivation === "DEACTIVATE") {
+                    deactivateAccountMutation.mutate({ reason: deactivationReason });
+                    setIsDeactivateModalOpen(false);
+                    setDeactivationReason("");
+                    setConfirmDeactivation("");
+                  } else {
+                    toast({
+                      title: "Confirmation Required",
+                      description: "Please type 'DEACTIVATE' exactly to confirm",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                disabled={deactivateAccountMutation.isPending || confirmDeactivation !== "DEACTIVATE"}
+              >
+                {deactivateAccountMutation.isPending ? "Deactivating..." : "Deactivate Account"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );

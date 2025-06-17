@@ -389,11 +389,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const kycData = req.body;
 
+      console.log('KYC Data received:', kycData); // Debug log
+
       // Validate required KYC fields
       const requiredFields = ['dateOfBirth', 'ssn', 'address', 'city', 'state', 'zipCode', 'employmentStatus', 'annualIncome', 'investmentExperience', 'riskTolerance'];
       
       for (const field of requiredFields) {
-        if (!kycData[field]) {
+        if (!kycData[field] || kycData[field].trim() === '') {
           return res.status(400).json({ message: `${field} is required` });
         }
       }

@@ -230,6 +230,7 @@ export default function PaymentWithdrawal() {
 
   const kycMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log('KYC data being submitted:', data); // Debug log
       const formData = new FormData();
       Object.keys(data).forEach(key => {
         if (key === 'documents') {
@@ -238,6 +239,13 @@ export default function PaymentWithdrawal() {
           formData.append(key, data[key]);
         }
       });
+      
+      // Log FormData contents for debugging
+      console.log('FormData contents:');
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+      
       return apiRequest("POST", "/api/kyc-submit", formData);
     },
     onSuccess: () => {
@@ -593,6 +601,35 @@ export default function PaymentWithdrawal() {
                       <form
                         onSubmit={(e) => {
                           e.preventDefault();
+                          
+                          // Validate required fields
+                          if (!kycData.dateOfBirth) {
+                            toast({
+                              title: "Validation Error",
+                              description: "Date of birth is required",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          
+                          if (!kycData.ssn || kycData.ssn.length < 4) {
+                            toast({
+                              title: "Validation Error", 
+                              description: "SSN (last 4 digits) is required",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          
+                          if (!kycData.address || !kycData.city || !kycData.state || !kycData.zipCode) {
+                            toast({
+                              title: "Validation Error",
+                              description: "Complete address information is required",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          
                           kycMutation.mutate(kycData);
                         }}
                         className="space-y-4"

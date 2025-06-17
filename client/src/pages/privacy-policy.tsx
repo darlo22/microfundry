@@ -14,12 +14,12 @@ export default function PrivacyPolicy() {
           <div className="w-16 h-16 bg-fundry-orange rounded-lg flex items-center justify-center mx-auto mb-4">
             <Shield className="text-white" size={32} />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">🔐 Fundry Privacy Policy</h1>
           <p className="text-lg text-gray-600">
-            Last updated: December 16, 2024
+            Effective Date: June 17, 2025
           </p>
           <p className="text-gray-600 mt-2">
-            This Privacy Policy describes how Fundry collects, uses, and protects your information.
+            Fundry ("we," "our," or "us") respects your privacy and is committed to protecting the personal information that you share with us when you use our platform ("Service").
           </p>
         </div>
 
@@ -62,229 +62,216 @@ export default function PrivacyPolicy() {
         <div className="space-y-8">
           <Card>
             <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Information We Collect</h2>
-              
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Account Information</h3>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">1️⃣ Introduction</h2>
               <p className="text-gray-700 mb-4">
-                When you create an account, we collect basic information including your name, email address, 
-                and user type (founder or investor). This information is provided through Replit's authentication system.
+                Fundry ("we," "our," or "us") respects your privacy and is committed to protecting the personal information that you share with us when you use our platform ("Service"). This Privacy Policy explains how we collect, use, store, protect, and disclose your information.
               </p>
-
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Campaign Information</h3>
-              <p className="text-gray-700 mb-4">
-                For founders creating campaigns, we collect business information including company details, 
-                funding goals, pitch materials, and SAFE agreement terms. This information is used to 
-                create and manage your fundraising campaign.
-              </p>
-
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Investment Information</h3>
-              <p className="text-gray-700 mb-4">
-                For investors, we collect investment amounts, payment information (processed securely through 
-                third-party payment processors), and signed agreement documents.
-              </p>
-
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Usage Data</h3>
               <p className="text-gray-700">
-                We automatically collect information about how you use our platform, including pages visited, 
-                features used, and time spent on the platform. This helps us improve our services.
+                By using Fundry, you consent to the practices described in this Privacy Policy.
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">2. How We Use Your Information</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">2️⃣ Information We Collect</h2>
               
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Platform Operations</h3>
-                  <p className="text-gray-700">
-                    We use your information to provide and maintain our platform services, including 
-                    campaign management, investment processing, and user support.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Communication</h3>
-                  <p className="text-gray-700">
-                    We send important updates about your campaigns, investments, and account security. 
-                    You may also receive educational content and platform updates.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Legal Compliance</h3>
-                  <p className="text-gray-700">
-                    We use information to comply with legal requirements, including securities regulations 
-                    and anti-money laundering laws.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Platform Improvement</h3>
-                  <p className="text-gray-700">
-                    We analyze usage patterns to improve our platform features and user experience.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Information Sharing</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Campaign Visibility</h3>
-                  <p className="text-gray-700">
-                    Campaign information is only shared with investors who have access to the private 
-                    campaign link. We do not publicly list campaigns or share them without your consent.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Service Providers</h3>
-                  <p className="text-gray-700">
-                    We share information with trusted service providers who help us operate our platform, 
-                    including payment processors, cloud hosting providers, and email services.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Legal Requirements</h3>
-                  <p className="text-gray-700">
-                    We may disclose information when required by law, such as in response to court orders, 
-                    subpoenas, or regulatory requests.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Business Transfers</h3>
-                  <p className="text-gray-700">
-                    In the event of a merger, acquisition, or sale of assets, user information may be 
-                    transferred as part of the business transaction.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Data Security</h2>
-              
-              <p className="text-gray-700 mb-4">
-                We implement industry-standard security measures to protect your information:
-              </p>
-
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">A. Information You Provide to Us</h3>
               <ul className="space-y-2 text-gray-700 mb-4">
-                <li>• <strong>Encryption:</strong> All data is encrypted in transit and at rest</li>
-                <li>• <strong>Access Controls:</strong> Strict access controls limit who can view your information</li>
-                <li>• <strong>Regular Audits:</strong> We conduct regular security audits and assessments</li>
-                <li>• <strong>Payment Security:</strong> Payment information is processed by PCI-compliant providers</li>
-                <li>• <strong>Monitoring:</strong> Continuous monitoring for suspicious activity and security threats</li>
+                <li>• Full name</li>
+                <li>• Email address</li>
+                <li>• Password (encrypted)</li>
+                <li>• Phone number (optional)</li>
+                <li>• Country of residence</li>
+                <li>• Business or startup information (for Founders)</li>
+                <li>• Investment preferences</li>
+                <li>• Payment information (limited to what is required for payment processors)</li>
+                <li>• KYC (Know Your Customer) information (when required)</li>
+                <li>• Uploaded documents (pitch decks, SAFE agreements, etc.)</li>
+                <li>• IP address and device information</li>
               </ul>
 
-              <p className="text-gray-700">
-                While we take extensive measures to protect your information, no system is completely secure. 
-                We encourage you to use strong passwords and keep your account information confidential.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Your Rights and Choices</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Access and Updates</h3>
-                  <p className="text-gray-700">
-                    You can access and update your account information through your dashboard at any time.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Data Deletion</h3>
-                  <p className="text-gray-700">
-                    You can request deletion of your account and associated data. Note that some information 
-                    may be retained for legal compliance purposes.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Communication Preferences</h3>
-                  <p className="text-gray-700">
-                    You can manage your email preferences and opt out of non-essential communications.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Data Portability</h3>
-                  <p className="text-gray-700">
-                    You can request a copy of your data in a machine-readable format.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Cookies and Tracking</h2>
-              
-              <p className="text-gray-700 mb-4">
-                We use cookies and similar technologies to enhance your experience on our platform:
-              </p>
-
-              <ul className="space-y-2 text-gray-700 mb-4">
-                <li>• <strong>Essential Cookies:</strong> Required for platform functionality and security</li>
-                <li>• <strong>Analytics Cookies:</strong> Help us understand how you use our platform</li>
-                <li>• <strong>Preference Cookies:</strong> Remember your settings and preferences</li>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">B. Information We Collect Automatically</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Login and usage data</li>
+                <li>• Browser type and device information</li>
+                <li>• Cookies and tracking data for session management and platform analytics</li>
               </ul>
-
-              <p className="text-gray-700">
-                You can control cookie settings through your browser, though disabling certain cookies 
-                may affect platform functionality.
-              </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">7. International Users</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">3️⃣ How We Use Your Information</h2>
+              
+              <p className="text-gray-700 mb-4">We use your information to:</p>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Create and maintain your account</li>
+                <li>• Facilitate fundraising campaigns and investments</li>
+                <li>• Generate and store legal investment agreements (e.g., SAFE)</li>
+                <li>• Process payments and withdrawals via third-party payment processors</li>
+                <li>• Provide customer support</li>
+                <li>• Ensure compliance with applicable laws</li>
+                <li>• Improve and personalize our platform and services</li>
+                <li>• Send important notifications (transaction confirmations, legal documents, platform updates)</li>
+                <li>• Administer security and fraud prevention measures</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">4️⃣ Legal Basis for Processing</h2>
               
               <p className="text-gray-700 mb-4">
-                Fundry is based in the United States. If you are accessing our services from outside the US, 
-                your information may be transferred to and processed in the United States.
+                Depending on your jurisdiction, we may process your information based on:
               </p>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Your consent</li>
+                <li>• Performance of a contract</li>
+                <li>• Legal obligations</li>
+                <li>• Legitimate business interests (platform operation, fraud prevention, security, customer support, etc.)</li>
+              </ul>
+            </CardContent>
+          </Card>
 
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">5️⃣ How We Share Your Information</h2>
+              
+              <p className="text-gray-700 mb-4 font-semibold">We do not sell your personal information.</p>
+              
+              <p className="text-gray-700 mb-4">We may share your information with:</p>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Founders you invest in (investment and SAFE details only)</li>
+                <li>• Third-party payment processors (for payment processing purposes)</li>
+                <li>• Service providers who assist with technology, customer support, or platform operations</li>
+                <li>• Legal or regulatory authorities where required by law, legal process, or to enforce our Terms of Service</li>
+                <li>• Parties involved in a merger, acquisition, or sale of platform assets</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">6️⃣ Third-Party Payment Processors</h2>
+              
               <p className="text-gray-700">
-                We comply with applicable data protection laws and implement appropriate safeguards for 
-                international data transfers.
+                Fundry works with third-party payment processors to facilitate payments and withdrawals. We do not store full credit card numbers or full bank account details on our servers. Payment processors operate under their own privacy policies and security standards.
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Changes to This Policy</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">7️⃣ Data Retention</h2>
+              
+              <p className="text-gray-700 mb-4">We retain personal information:</p>
+              <ul className="space-y-2 text-gray-700">
+                <li>• For as long as necessary to provide the service</li>
+                <li>• To comply with legal and tax obligations</li>
+                <li>• To enforce platform agreements and resolve disputes</li>
+              </ul>
+              
+              <p className="text-gray-700 mt-4">
+                Data may be anonymized or deleted upon your request, subject to legal requirements.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">8️⃣ Your Privacy Rights</h2>
               
               <p className="text-gray-700 mb-4">
-                We may update this Privacy Policy from time to time. We will notify you of significant 
-                changes by email or through platform notifications.
+                Depending on your jurisdiction, you may have rights to:
               </p>
-
+              <ul className="space-y-2 text-gray-700 mb-4">
+                <li>• Access your personal information</li>
+                <li>• Correct inaccurate information</li>
+                <li>• Delete certain personal information</li>
+                <li>• Object to or restrict processing</li>
+                <li>• Withdraw consent where processing is based on consent</li>
+              </ul>
+              
               <p className="text-gray-700">
-                Continued use of our platform after changes constitutes acceptance of the updated policy.
+                You may exercise these rights by contacting us at privacy@fundry.com.
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Contact Us</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">9️⃣ Data Security</h2>
+              
+              <p className="text-gray-700 mb-4">
+                We implement technical, administrative, and physical safeguards to protect your information, including:
+              </p>
+              <ul className="space-y-2 text-gray-700 mb-4">
+                <li>• SSL encryption</li>
+                <li>• Secure storage of legal documents and SAFE agreements</li>
+                <li>• Secure authentication for account access</li>
+                <li>• Restricted internal access to sensitive data</li>
+              </ul>
+              
+              <p className="text-gray-700">
+                While we take reasonable measures to protect your information, no system is 100% secure.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">🔟 International Data Transfers</h2>
+              
+              <p className="text-gray-700">
+                If you are located outside of the country where Fundry operates, your information may be transferred to servers in other jurisdictions that may not have the same data protection laws. By using Fundry, you consent to such transfers.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">1️⃣1️⃣ Cookies & Tracking</h2>
+              
+              <p className="text-gray-700 mb-4">We may use cookies and similar technologies for:</p>
+              <ul className="space-y-2 text-gray-700 mb-4">
+                <li>• Session management</li>
+                <li>• Platform functionality</li>
+                <li>• Security</li>
+                <li>• Performance monitoring</li>
+                <li>• User behavior analytics (non-personalized)</li>
+              </ul>
+              
+              <p className="text-gray-700">
+                You can manage cookie preferences through your browser settings.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">1️⃣2️⃣ Children's Privacy</h2>
+              
+              <p className="text-gray-700">
+                Fundry is not intended for use by individuals under the age of 18. We do not knowingly collect personal data from children.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">1️⃣3️⃣ Changes to This Privacy Policy</h2>
+              
+              <p className="text-gray-700">
+                We may update this Privacy Policy from time to time. We will notify users of significant changes via email or platform notifications. Continued use of the platform after updates constitutes acceptance of the revised policy.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Us</h2>
               
               <p className="text-gray-700 mb-4">
                 If you have questions about this Privacy Policy or our data practices, please contact us:

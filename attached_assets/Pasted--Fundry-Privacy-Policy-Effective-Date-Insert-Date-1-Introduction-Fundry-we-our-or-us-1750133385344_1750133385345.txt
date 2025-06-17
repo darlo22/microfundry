@@ -1,0 +1,154 @@
+🔐 Fundry Privacy Policy
+Effective Date: [Insert Date]
+
+1️⃣ Introduction
+Fundry (“we,” “our,” or “us”) respects your privacy and is committed to protecting the personal information that you share with us when you use our platform (“Service”). This Privacy Policy explains how we collect, use, store, protect, and disclose your information.
+
+By using Fundry, you consent to the practices described in this Privacy Policy.
+
+2️⃣ Information We Collect
+We collect the following categories of information:
+
+A. Information You Provide to Us
+Full name
+
+Email address
+
+Password (encrypted)
+
+Phone number (optional)
+
+Country of residence
+
+Business or startup information (for Founders)
+
+Investment preferences
+
+Payment information (limited to what is required for payment processors)
+
+KYC (Know Your Customer) information (when required)
+
+Uploaded documents (pitch decks, SAFE agreements, etc.)
+
+IP address and device information
+
+B. Information We Collect Automatically
+Login and usage data
+
+Browser type and device information
+
+Cookies and tracking data for session management and platform analytics
+
+3️⃣ How We Use Your Information
+We use your information to:
+
+Create and maintain your account.
+
+Facilitate fundraising campaigns and investments.
+
+Generate and store legal investment agreements (e.g., SAFE).
+
+Process payments and withdrawals via third-party payment processors.
+
+Provide customer support.
+
+Ensure compliance with applicable laws.
+
+Improve and personalize our platform and services.
+
+Send important notifications (transaction confirmations, legal documents, platform updates).
+
+Administer security and fraud prevention measures.
+
+4️⃣ Legal Basis for Processing (Where Applicable)
+Depending on your jurisdiction, we may process your information based on:
+
+Your consent.
+
+Performance of a contract.
+
+Legal obligations.
+
+Legitimate business interests (platform operation, fraud prevention, security, customer support, etc.).
+
+5️⃣ How We Share Your Information
+We do not sell your personal information.
+
+We may share your information with:
+
+Founders you invest in (investment and SAFE details only).
+
+Third-party payment processors (for payment processing purposes).
+
+Service providers who assist with technology, customer support, or platform operations.
+
+Legal or regulatory authorities where required by law, legal process, or to enforce our Terms of Service.
+
+Parties involved in a merger, acquisition, or sale of platform assets.
+
+6️⃣ Third-Party Payment Processors
+Fundry works with third-party payment processors to facilitate payments and withdrawals. We do not store full credit card numbers or full bank account details on our servers. Payment processors operate under their own privacy policies and security standards.
+
+7️⃣ Data Retention
+We retain personal information:
+
+For as long as necessary to provide the service.
+
+To comply with legal and tax obligations.
+
+To enforce platform agreements and resolve disputes.
+
+Data may be anonymized or deleted upon your request, subject to legal requirements.
+
+8️⃣ Your Privacy Rights
+Depending on your jurisdiction, you may have rights to:
+
+Access your personal information.
+
+Correct inaccurate information.
+
+Delete certain personal information.
+
+Object to or restrict processing.
+
+Withdraw consent where processing is based on consent.
+
+You may exercise these rights by contacting us at [Insert Contact Email].
+
+9️⃣ Data Security
+We implement technical, administrative, and physical safeguards to protect your information, including:
+
+SSL encryption.
+
+Secure storage of legal documents and SAFE agreements.
+
+Secure authentication for account access.
+
+Restricted internal access to sensitive data.
+
+While we take reasonable measures to protect your information, no system is 100% secure.
+
+🔟 International Data Transfers
+If you are located outside of the country where Fundry operates, your information may be transferred to servers in other jurisdictions that may not have the same data protection laws. By using Fundry, you consent to such transfers.
+
+1️⃣1️⃣ Cookies & Tracking
+We may use cookies and similar technologies for:
+
+Session management
+
+Platform functionality
+
+Security
+
+Performance monitoring
+
+User behavior analytics (non-personalized)
+
+You can manage cookie preferences through your browser settings.
+
+1️⃣2️⃣ Children’s Privacy
+Fundry is not intended for use by individuals under the age of 18. We do not knowingly collect personal data from children.
+
+1️⃣3️⃣ Changes to This Privacy Policy
+We may update this Privacy Policy from time to time. We will notify users of significant changes via email or platform notifications. Continued use of the platform after updates constitutes acceptance of the revised policy.
+

@@ -105,6 +105,7 @@ The deployment uses:
 - June 17, 2025. Fixed logout functionality to properly redirect users to landing page after session termination instead of returning JSON response
 - June 17, 2025. Resolved 404 error after logout by restructuring route configuration: made public routes always accessible, conditionally rendered authenticated routes, and improved fallback routing to show landing page for unauthenticated users instead of 404 errors
 - June 17, 2025. Fixed text visibility issue in Learn More modal pricing section by enhancing background contrast and ensuring all text is properly visible with dark card backgrounds and white text throughout the pricing structure and examples table
+- June 17, 2025. Implemented structured team member system in Edit Campaign modal: replaced textarea with individual team member cards supporting name, role, experience, LinkedIn profile, and photo uploads; fixed MulterError by updating server multer configuration to handle dynamic team member photo fields
 
 ## User Preferences
 

@@ -22,7 +22,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     if (file.fieldname === 'pitchDeck') {
       cb(null, file.mimetype === 'application/pdf');
-    } else if (file.fieldname === 'logo') {
+    } else if (file.fieldname === 'logo' || file.fieldname.startsWith('teamMemberPhoto_')) {
       cb(null, file.mimetype.startsWith('image/'));
     } else {
       cb(null, true);
@@ -74,10 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Campaign routes
-  app.put('/api/campaigns/:id', requireAuth, upload.fields([
-    { name: 'logo', maxCount: 1 },
-    { name: 'pitchDeck', maxCount: 1 }
-  ]), async (req: any, res) => {
+  app.put('/api/campaigns/:id', requireAuth, upload.any(), async (req: any, res) => {
     try {
       const campaignId = parseInt(req.params.id);
       const campaign = await storage.getCampaign(campaignId);
@@ -90,14 +87,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Not authorized to edit this campaign' });
       }
 
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const files = req.files as Express.Multer.File[];
       const updateData: any = { ...req.body };
 
-      if (files?.logo?.[0]) {
-        updateData.logoUrl = `/uploads/${files.logo[0].filename}`;
+      // Handle logo file
+      const logoFile = files.find(file => file.fieldname === 'logo');
+      if (logoFile) {
+        updateData.logoUrl = `/uploads/${logoFile.filename}`;
       }
-      if (files?.pitchDeck?.[0]) {
-        updateData.pitchDeckUrl = `/uploads/${files.pitchDeck[0].filename}`;
+
+      // Handle pitch deck file
+      const pitchDeckFile = files.find(file => file.fieldname === 'pitchDeck');
+      if (pitchDeckFile) {
+        updateData.pitchDeckUrl = `/uploads/${pitchDeckFile.filename}`;
+      }
+
+      // Handle team member photos and update teamMembers JSON
+      if (updateData.teamMembers) {
+        try {
+          const teamMembers = JSON.parse(updateData.teamMembers);
+          
+          // Process team member photos
+          teamMembers.forEach((member: any) => {
+            const photoFile = files.find(file => file.fieldname === `teamMemberPhoto_${member.id}`);
+            if (photoFile) {
+              member.photoUrl = `/uploads/${photoFile.filename}`;
+              // Remove the File object reference
+              delete member.photo;
+            }
+          });
+          
+          updateData.teamMembers = JSON.stringify(teamMembers);
+        } catch (e) {
+          console.error('Error processing team members:', e);
+        }
       }
 
       const updatedCampaign = await storage.updateCampaign(campaignId, updateData);

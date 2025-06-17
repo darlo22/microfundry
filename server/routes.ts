@@ -150,6 +150,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pitchDeckUrl: files.pitchDeck?.[0]?.path,
         // Convert deadline string to Date object if provided
         deadline: req.body.deadline ? new Date(req.body.deadline) : null,
+        // Handle JSON fields
+        teamMembers: req.body.teamMembers ? JSON.parse(req.body.teamMembers) : null,
+        useOfFunds: req.body.useOfFunds ? JSON.parse(req.body.useOfFunds) : null,
       };
 
       const validatedData = insertCampaignSchema.parse(campaignData);

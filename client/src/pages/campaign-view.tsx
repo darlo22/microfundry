@@ -543,10 +543,35 @@ export default function CampaignView() {
                       <p className="text-gray-600">{campaign.businessModel}</p>
                     </div>
                   )}
-                  {campaign.useOfFunds && (
+                  {campaign.useOfFunds && Array.isArray(campaign.useOfFunds) && campaign.useOfFunds.length > 0 && (
                     <div className="p-4 bg-gray-50 rounded-xl">
-                      <h3 className="font-semibold text-lg text-gray-900 mb-2">Use of Funds</h3>
-                      <p className="text-gray-600">{campaign.useOfFunds}</p>
+                      <h3 className="font-semibold text-lg text-gray-900 mb-4">Use of Funds</h3>
+                      <div className="space-y-3">
+                        {campaign.useOfFunds.map((allocation: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900">{allocation.category}</div>
+                              {allocation.description && (
+                                <div className="text-sm text-gray-600 mt-1">{allocation.description}</div>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <div className="text-right">
+                                <div className="font-semibold text-fundry-orange">{allocation.percentage}%</div>
+                                <div className="text-xs text-gray-500">
+                                  {formatCurrency((parseFloat(campaign.fundingGoal) * allocation.percentage / 100).toString())}
+                                </div>
+                              </div>
+                              <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-fundry-orange transition-all duration-300"
+                                  style={{ width: `${allocation.percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                   {campaign.marketSize && (

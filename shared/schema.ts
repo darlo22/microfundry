@@ -84,6 +84,9 @@ export const campaigns = pgTable("campaigns", {
   teamStructure: varchar("team_structure").notNull().default("solo"), // solo, team
   teamMembers: jsonb("team_members"), // Array of team member objects
   
+  // Use of Funds breakdown
+  useOfFunds: jsonb("use_of_funds"), // Array of fund allocation objects with category, percentage, description
+  
   // Business sector for categorization
   businessSector: varchar("business_sector"),
   

@@ -88,6 +88,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
+      // Parse date of birth if provided
+      if (updateData.dateOfBirth) {
+        updateData.dateOfBirth = new Date(updateData.dateOfBirth);
+      }
+      
       // Update user profile data while preserving required fields
       const updatedUser = await storage.upsertUser({
         id: userId,
@@ -966,6 +971,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting campaign update:', error);
       res.status(500).json({ message: 'Failed to delete update' });
+    }
+  });
+
+  // Download SAFE agreement endpoint
+  app.get('/api/investments/:investmentId/safe-agreement', requireAuth, async (req: any, res) => {
+    try {
+      const investmentId = parseInt(req.params.investmentId);
+      const userId = req.user.id;
+      
+      // Get the investment to verify ownership and get details
+      const investment = await storage.getInvestment(investmentId);
+      if (!investment) {
+        return res.status(404).json({ message: 'Investment not found' });
+      }
+      
+      // Verify the user owns this investment
+      if (investment.investorId !== userId) {
+        return res.status(403).json({ message: 'Not authorized to access this investment' });
+      }
+      
+      // Get campaign details for the SAFE agreement
+      const campaign = await storage.getCampaign(investment.campaignId);
+      if (!campaign) {
+        return res.status(404).json({ message: 'Campaign not found' });
+      }
+      
+      // Get investor details
+      const investor = await storage.getUser(userId);
+      if (!investor) {
+        return res.status(404).json({ message: 'Investor not found' });
+      }
+      
+      // Generate SAFE agreement content
+      const safeContent = `
+SAFE AGREEMENT
+
+INVESTMENT DETAILS:
+- Investment Amount: $${investment.amount}
+- Investment Date: ${new Date(investment.createdAt).toLocaleDateString()}
+- Campaign: ${campaign.title}
+- Discount Rate: ${campaign.discountRate || 20}%
+- Valuation Cap: $${campaign.valuationCap || 1000000}
+
+INVESTOR INFORMATION:
+- Name: ${investor.firstName} ${investor.lastName}
+- Email: ${investor.email}
+- Investment ID: ${investment.id}
+
+COMPANY INFORMATION:
+- Company: ${campaign.title}
+- Founder ID: ${campaign.founderId}
+
+This SAFE (Simple Agreement for Future Equity) represents an investment in ${campaign.title}.
+The investor will receive equity when the company raises its next qualifying round.
+
+Terms:
+- Discount Rate: ${campaign.discountRate || 20}%
+- Valuation Cap: $${campaign.valuationCap || 1000000}
+- Investment Amount: $${investment.amount}
+
+Generated on: ${new Date().toLocaleDateString()}
+      `;
+      
+      // Set headers for file download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="SAFE_Agreement_${campaign.title.replace(/\s+/g, '_')}_${investmentId}.txt"`);
+      
+      // For now, return as text. In production, you'd generate a proper PDF
+      res.send(safeContent);
+      
+    } catch (error) {
+      console.error('Error generating SAFE agreement:', error);
+      res.status(500).json({ message: 'Failed to generate SAFE agreement' });
     }
   });
 

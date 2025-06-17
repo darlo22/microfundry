@@ -22,7 +22,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle } from "lucide-react";
+import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle, Eye, EyeOff, Smartphone, Tablet } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 
@@ -53,6 +54,53 @@ export default function InvestorDashboard() {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState("");
+  
+  // Security modal states
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isViewSessionsOpen, setIsViewSessionsOpen] = useState(false);
+  const [isEnable2FAOpen, setIsEnable2FAOpen] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  // Mock session data
+  const [sessions] = useState([
+    {
+      id: 1,
+      device: "Chrome on Windows",
+      location: "New York, US",
+      lastActive: "2 minutes ago",
+      current: true,
+      deviceType: "desktop",
+    },
+    {
+      id: 2,
+      device: "Safari on iPhone",
+      location: "New York, US", 
+      lastActive: "1 hour ago",
+      current: false,
+      deviceType: "mobile",
+    },
+    {
+      id: 3,
+      device: "Chrome on MacBook",
+      location: "San Francisco, US",
+      lastActive: "2 days ago",
+      current: false,
+      deviceType: "desktop",
+    },
+  ]);
+
+  const [security, setSecurity] = useState({
+    twoFactorEnabled: false,
+    passwordLastChanged: "2024-05-18T00:00:00Z",
+  });
 
   // Initialize form with user data
   const form = useForm<EditProfileFormData>({
@@ -111,6 +159,53 @@ export default function InvestorDashboard() {
       toast({
         title: "Update Failed",
         description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Change Password Mutation
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: typeof passwordData) => {
+      return apiRequest("PUT", "/api/user/change-password", {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password Changed",
+        description: "Your password has been updated successfully.",
+      });
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setIsChangePasswordOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Password Change Failed",
+        description: error.message || "Failed to change password",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Toggle 2FA Mutation
+  const toggle2FAMutation = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      return apiRequest("PUT", "/api/user/2fa", { enabled });
+    },
+    onSuccess: (_, enabled) => {
+      toast({
+        title: "Success",
+        description: `Two-factor authentication ${enabled ? 'enabled' : 'disabled'} successfully!`,
+      });
+      setSecurity(prev => ({ ...prev, twoFactorEnabled: enabled }));
+      setIsEnable2FAOpen(false);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update two-factor authentication. Please try again.",
         variant: "destructive",
       });
     },
@@ -883,12 +978,127 @@ export default function InvestorDashboard() {
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <h3 className="font-semibold text-gray-900">Password</h3>
-                      <p className="text-sm text-gray-600">Last changed 30 days ago</p>
+                      <p className="text-sm text-gray-600">
+                        Last changed {new Date(security.passwordLastChanged).toLocaleDateString()}
+                      </p>
                     </div>
-                    <Button variant="outline" size="sm">
-                      <Key className="h-4 w-4 mr-2" />
-                      Change Password
-                    </Button>
+                    <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Key className="h-4 w-4 mr-2" />
+                          Change Password
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Change Password</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={(e) => {
+                          e.preventDefault();
+                          if (passwordData.newPassword !== passwordData.confirmPassword) {
+                            toast({
+                              title: "Error",
+                              description: "New passwords do not match.",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          if (passwordData.newPassword.length < 8) {
+                            toast({
+                              title: "Error",
+                              description: "Password must be at least 8 characters long.",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          changePasswordMutation.mutate(passwordData);
+                        }} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="currentPassword">Current Password</Label>
+                            <div className="relative">
+                              <Input
+                                id="currentPassword"
+                                type={showCurrentPassword ? "text" : "password"}
+                                value={passwordData.currentPassword}
+                                onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                                placeholder="Enter current password"
+                                required
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
+                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                              >
+                                {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="newPassword">New Password</Label>
+                            <div className="relative">
+                              <Input
+                                id="newPassword"
+                                type={showNewPassword ? "text" : "password"}
+                                value={passwordData.newPassword}
+                                onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                                placeholder="Enter new password"
+                                required
+                                minLength={8}
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                              >
+                                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                            <div className="relative">
+                              <Input
+                                id="confirmPassword"
+                                type={showConfirmPassword ? "text" : "password"}
+                                value={passwordData.confirmPassword}
+                                onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                                placeholder="Confirm new password"
+                                required
+                                minLength={8}
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              >
+                                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-3 justify-end pt-4">
+                            <Button variant="outline" type="button" onClick={() => setIsChangePasswordOpen(false)}>
+                              Cancel
+                            </Button>
+                            <Button 
+                              type="submit" 
+                              disabled={changePasswordMutation.isPending}
+                              className="bg-fundry-orange hover:bg-orange-600"
+                            >
+                              {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
+                            </Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
 
@@ -900,11 +1110,62 @@ export default function InvestorDashboard() {
                       <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge variant="secondary" className="text-red-600">Disabled</Badge>
-                      <Button variant="outline" size="sm">
-                        <Settings className="h-4 w-4 mr-2" />
-                        Enable 2FA
-                      </Button>
+                      <Badge variant={security.twoFactorEnabled ? "default" : "secondary"} className={security.twoFactorEnabled ? "" : "text-red-600"}>
+                        {security.twoFactorEnabled ? "Enabled" : "Disabled"}
+                      </Badge>
+                      <Dialog open={isEnable2FAOpen} onOpenChange={setIsEnable2FAOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Settings className="h-4 w-4 mr-2" />
+                            {security.twoFactorEnabled ? "Disable" : "Enable"} 2FA
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>
+                              {security.twoFactorEnabled ? "Disable" : "Enable"} Two-Factor Authentication
+                            </DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            {!security.twoFactorEnabled ? (
+                              <div className="space-y-4">
+                                <p className="text-sm text-gray-600">
+                                  Two-factor authentication adds an extra layer of security to your account by requiring a verification code from your phone in addition to your password.
+                                </p>
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                  <p className="text-sm text-yellow-800">
+                                    <strong>Note:</strong> You'll need an authenticator app like Google Authenticator or Authy to use 2FA.
+                                  </p>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                <p className="text-sm text-gray-600">
+                                  Are you sure you want to disable two-factor authentication? This will make your account less secure.
+                                </p>
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                  <p className="text-sm text-red-800">
+                                    <strong>Warning:</strong> Disabling 2FA will reduce your account security.
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                            <div className="flex gap-3 justify-end">
+                              <Button variant="outline" onClick={() => setIsEnable2FAOpen(false)}>
+                                Cancel
+                              </Button>
+                              <Button 
+                                onClick={() => toggle2FAMutation.mutate(!security.twoFactorEnabled)}
+                                disabled={toggle2FAMutation.isPending}
+                                variant={security.twoFactorEnabled ? "destructive" : "default"}
+                                className={!security.twoFactorEnabled ? "bg-fundry-orange hover:bg-orange-600" : ""}
+                              >
+                                {toggle2FAMutation.isPending ? "Processing..." : (security.twoFactorEnabled ? "Disable 2FA" : "Enable 2FA")}
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 </div>
@@ -916,10 +1177,83 @@ export default function InvestorDashboard() {
                       <h3 className="font-semibold text-gray-900">Active Sessions</h3>
                       <p className="text-sm text-gray-600">Manage your active login sessions</p>
                     </div>
-                    <Button variant="outline" size="sm">
-                      <Monitor className="h-4 w-4 mr-2" />
-                      View Sessions
-                    </Button>
+                    <Dialog open={isViewSessionsOpen} onOpenChange={setIsViewSessionsOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Monitor className="h-4 w-4 mr-2" />
+                          View Sessions
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Active Sessions</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <p className="text-sm text-gray-600">
+                            These are the devices that are currently logged into your account. If you see any suspicious activity, you can log out from specific devices.
+                          </p>
+                          <div className="space-y-3">
+                            {sessions.map((session) => (
+                              <div key={session.id} className="flex items-center justify-between p-4 border rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-gray-100 rounded-lg">
+                                    {session.deviceType === "mobile" ? (
+                                      <Smartphone className="h-4 w-4 text-gray-600" />
+                                    ) : session.deviceType === "tablet" ? (
+                                      <Tablet className="h-4 w-4 text-gray-600" />
+                                    ) : (
+                                      <Monitor className="h-4 w-4 text-gray-600" />
+                                    )}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-sm">
+                                      {session.device}
+                                      {session.current && (
+                                        <Badge variant="secondary" className="ml-2 text-xs">
+                                          Current
+                                        </Badge>
+                                      )}
+                                    </p>
+                                    <p className="text-xs text-gray-600">
+                                      {session.location} • Last active {session.lastActive}
+                                    </p>
+                                  </div>
+                                </div>
+                                {!session.current && (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                      toast({
+                                        title: "Session Terminated",
+                                        description: "Device has been logged out successfully.",
+                                      });
+                                    }}
+                                  >
+                                    Log Out
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          <div className="pt-4 border-t">
+                            <Button 
+                              variant="outline" 
+                              className="w-full"
+                              onClick={() => {
+                                toast({
+                                  title: "All Sessions Terminated",
+                                  description: "All other devices have been logged out. You'll need to log in again on those devices.",
+                                });
+                                setIsViewSessionsOpen(false);
+                              }}
+                            >
+                              Log Out All Other Sessions
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               </CardContent>

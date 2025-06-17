@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { FundryLogo } from "@/components/ui/fundry-logo";
 import { queryClient } from "@/lib/queryClient";
+import NotificationDropdown from "@/components/notifications/notification-dropdown";
 
 interface NavbarProps {
   title?: string;
@@ -83,11 +84,7 @@ export default function Navbar({ title, showNotifications = true, actions }: Nav
           <div className="flex items-center space-x-4">
             {actions}
             
-            {showNotifications && (
-              <Button variant="ghost" size="sm" className="p-2">
-                <Bell className="h-4 w-4 text-gray-400" />
-              </Button>
-            )}
+            {showNotifications && <NotificationDropdown />}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

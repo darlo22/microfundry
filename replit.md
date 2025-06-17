@@ -102,6 +102,7 @@ The deployment uses:
 - June 17, 2025. Connected Recent Investors section to live database data: replaced mock data with actual investment records, filtered to only show committed/paid investments (not pending), implemented functional "View All Investors" modal with complete investor list, added proper empty states, and enhanced storage method to include investor names with firstName/lastName fields
 - June 17, 2025. Completed comprehensive legal documentation suite: created Cookie Policy, Investment Disclaimer, SAFE Agreement Template, and Investor Accreditation pages with professional content, proper routing, and footer navigation integration; all legal pages now stable and persistent with detailed risk disclosures, regulatory information, and professional legal frameworks
 - June 17, 2025. Implemented complete 7-step investment flow with proper authentication and data capture: created comprehensive investment process (Amount → Auth → SAFE Review → Terms → Signature → Payment → Confirmation) with progress indicators, investor authentication modal for step 2, real user data integration into SAFE Agreement preview, downloadable SAFE Agreement with populated investor information, and $25 minimum investment threshold
+- June 17, 2025. Fixed logout functionality to properly redirect users to landing page after session termination instead of returning JSON response
 
 ## User Preferences
 

@@ -144,10 +144,10 @@ export function setupAuth(app: Express) {
   });
 
   // Logout endpoint
-  app.post("/api/logout", (req, res, next) => {
+  app.get("/api/logout", (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);
-      res.json({ message: "Logout successful" });
+      res.redirect("/landing");
     });
   });
 

@@ -143,8 +143,8 @@ export default function LearnMoreModal({ isOpen, onClose, onGetStarted }: LearnM
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto">
                   <span className="text-2xl font-bold">FREE</span>
                 </div>
-                <h4 className="text-lg font-semibold">Under $1,000</h4>
-                <p className="text-blue-100">
+                <h4 className="text-lg font-semibold text-white">Under $1,000</h4>
+                <p className="text-white/90">
                   No platform fees for campaigns raising less than $1,000. 
                   Perfect for testing and small rounds.
                 </p>
@@ -154,8 +154,8 @@ export default function LearnMoreModal({ isOpen, onClose, onGetStarted }: LearnM
                 <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center mx-auto">
                   <span className="text-2xl font-bold">5%</span>
                 </div>
-                <h4 className="text-lg font-semibold">Above $1,000</h4>
-                <p className="text-blue-100">
+                <h4 className="text-lg font-semibold text-white">Above $1,000</h4>
+                <p className="text-white/90">
                   Simple 5% fee on successful campaigns above $1,000. 
                   Only pay when you successfully raise funds.
                 </p>

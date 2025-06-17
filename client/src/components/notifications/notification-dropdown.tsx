@@ -230,7 +230,7 @@ export default function NotificationDropdown() {
           )}
         </ScrollArea>
         
-        {notifications.length > 0 && (
+        {(notifications as Notification[]).length > 0 && (
           <>
             <DropdownMenuSeparator />
             <div className="p-2">

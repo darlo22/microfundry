@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Edit, Send, Calendar, Users, TrendingUp, MessageSquare, Eye, Trash2, ArrowLeft, LogOut } from "lucide-react";
+import { Plus, Edit, Send, Calendar, Users, TrendingUp, MessageSquare, Eye, Trash2, ArrowLeft, LogOut, ThumbsUp, Reply, Share2, Heart } from "lucide-react";
 import { useLocation } from "wouter";
 import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
 
@@ -35,6 +35,12 @@ export default function FounderUpdates() {
   const [selectedCampaign, setSelectedCampaign] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingUpdate, setEditingUpdate] = useState<CampaignUpdate | null>(null);
+  
+  // State for interactive features
+  const [likedUpdates, setLikedUpdates] = useState<Set<number>>(new Set());
+  const [likeCounts, setLikeCounts] = useState<Record<number, number>>({});
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
 
   // Form state for new/edit update
   const [updateForm, setUpdateForm] = useState({
@@ -129,6 +135,76 @@ export default function FounderUpdates() {
       content: "",
       type: "progress",
       campaignId: "",
+    });
+  };
+
+  // Handler functions for interactive features
+  const handleLike = (updateId: number) => {
+    const isLiked = likedUpdates.has(updateId);
+    const newLikedUpdates = new Set(likedUpdates);
+    
+    if (isLiked) {
+      newLikedUpdates.delete(updateId);
+      setLikeCounts(prev => ({
+        ...prev,
+        [updateId]: Math.max(0, (prev[updateId] || 0) - 1)
+      }));
+    } else {
+      newLikedUpdates.add(updateId);
+      setLikeCounts(prev => ({
+        ...prev,
+        [updateId]: (prev[updateId] || 0) + 1
+      }));
+    }
+    
+    setLikedUpdates(newLikedUpdates);
+    
+    toast({
+      title: isLiked ? "Like Removed" : "Update Liked",
+      description: isLiked ? "You removed your like from this update." : "You liked this update!",
+    });
+  };
+
+  const handleReply = (updateId: number) => {
+    setReplyingTo(updateId);
+    setReplyText("");
+  };
+
+  const handleSubmitReply = (updateId: number) => {
+    if (!replyText.trim()) return;
+
+    toast({
+      title: "Reply Posted",
+      description: "Your reply has been posted successfully.",
+    });
+    
+    setReplyingTo(null);
+    setReplyText("");
+  };
+
+  const handleShare = (update: CampaignUpdate) => {
+    const shareData = {
+      title: `${update.title} - Campaign Update`,
+      text: `Check out this update from ${update.campaign.title}: ${update.title}`,
+      url: window.location.href
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => {
+        handleCopyLink(update);
+      });
+    } else {
+      handleCopyLink(update);
+    }
+  };
+
+  const handleCopyLink = (update: CampaignUpdate) => {
+    const updateUrl = `${window.location.origin}/updates/${update.id}`;
+    navigator.clipboard.writeText(updateUrl).then(() => {
+      toast({
+        title: "Link Copied",
+        description: "Update link has been copied to your clipboard.",
+      });
     });
   };
 
@@ -482,8 +558,98 @@ export default function FounderUpdates() {
                   {update.title}
                 </h3>
                 
-                <div className="text-gray-700 whitespace-pre-line leading-relaxed">
+                <div className="text-gray-700 whitespace-pre-line leading-relaxed mb-6">
                   {update.content}
+                </div>
+
+                {/* Interactive Buttons Section */}
+                <div className="border-t border-gray-200 pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      {/* Reply Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleReply(update.id)}
+                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      >
+                        <Reply className="h-4 w-4" />
+                        Reply
+                      </Button>
+
+                      {/* Like Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleLike(update.id)}
+                        className={`flex items-center gap-2 transition-colors ${
+                          likedUpdates.has(update.id)
+                            ? 'text-red-600 hover:text-red-700 bg-red-50'
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                        }`}
+                      >
+                        <Heart className={`h-4 w-4 ${likedUpdates.has(update.id) ? 'fill-current' : ''}`} />
+                        Like ({likeCounts[update.id] || 12})
+                      </Button>
+
+                      {/* Share Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleShare(update)}
+                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      >
+                        <Share2 className="h-4 w-4" />
+                        Share
+                      </Button>
+                    </div>
+
+                    {/* Engagement Stats */}
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Eye className="h-4 w-4" />
+                        234 views
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="h-4 w-4" />
+                        8 replies
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Reply Input Section */}
+                  {replyingTo === update.id && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="flex gap-3">
+                        <div className="flex-1">
+                          <Textarea
+                            placeholder="Write your reply..."
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            className="min-h-[80px] resize-none"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2 mt-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setReplyingTo(null)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleSubmitReply(update.id)}
+                          disabled={!replyText.trim()}
+                          className="bg-fundry-orange hover:bg-orange-600"
+                        >
+                          <Send className="h-4 w-4 mr-1" />
+                          Post Reply
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

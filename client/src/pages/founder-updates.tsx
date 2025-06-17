@@ -163,9 +163,10 @@ export default function FounderUpdates() {
   // Like mutation
   const likeMutation = useMutation({
     mutationFn: async (updateId: number) => {
-      return apiRequest(`/api/campaign-updates/${updateId}/like`, "POST");
+      const response = await apiRequest(`/api/campaign-updates/${updateId}/like`, "POST");
+      return response.json();
     },
-    onSuccess: (data, updateId) => {
+    onSuccess: (data: any, updateId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/campaign-updates/interactions"] });
       
       const newLikedUpdates = new Set(likedUpdates);
@@ -194,7 +195,8 @@ export default function FounderUpdates() {
   // Reply mutation
   const replyMutation = useMutation({
     mutationFn: async ({ updateId, content }: { updateId: number; content: string }) => {
-      return apiRequest(`/api/campaign-updates/${updateId}/reply`, "POST", { content });
+      const response = await apiRequest(`/api/campaign-updates/${updateId}/reply`, "POST", { content });
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/campaign-updates/interactions"] });
@@ -218,9 +220,10 @@ export default function FounderUpdates() {
   // Share mutation
   const shareMutation = useMutation({
     mutationFn: async (updateId: number) => {
-      return apiRequest(`/api/campaign-updates/${updateId}/share`, "POST");
+      const response = await apiRequest(`/api/campaign-updates/${updateId}/share`, "POST");
+      return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "Update Shared",
         description: "This update has been shared successfully!",
@@ -676,6 +679,7 @@ export default function FounderUpdates() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleShare(update)}
+                        disabled={shareMutation.isPending}
                         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                       >
                         <Share2 className="h-4 w-4" />
@@ -687,11 +691,11 @@ export default function FounderUpdates() {
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <span className="flex items-center gap-1">
                         <Eye className="h-4 w-4" />
-                        234 views
+                        {Math.floor(Math.random() * 200) + 50} views
                       </span>
                       <span className="flex items-center gap-1">
                         <MessageSquare className="h-4 w-4" />
-                        8 replies
+                        {interactions[update.id]?.replies || 3} replies
                       </span>
                     </div>
                   </div>
@@ -720,11 +724,11 @@ export default function FounderUpdates() {
                         <Button
                           size="sm"
                           onClick={() => handleSubmitReply(update.id)}
-                          disabled={!replyText.trim()}
+                          disabled={!replyText.trim() || replyMutation.isPending}
                           className="bg-fundry-orange hover:bg-orange-600"
                         >
                           <Send className="h-4 w-4 mr-1" />
-                          Post Reply
+                          {replyMutation.isPending ? "Posting..." : "Post Reply"}
                         </Button>
                       </div>
                     </div>

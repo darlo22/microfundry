@@ -266,10 +266,9 @@ export default function InvestorDashboard() {
 
         {/* Tab Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="discover">Discover</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="overview">Portfolio</TabsTrigger>
+            <TabsTrigger value="updates">Updates</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
 
@@ -413,129 +412,100 @@ export default function InvestorDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Discover Tab */}
-          <TabsContent value="discover" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Search className="h-5 w-5" />
-                  Discover Investment Opportunities
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Search Bar */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search campaigns by name or industry..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-
-                {/* Category Tabs */}
-                <div className="flex flex-wrap gap-2">
-                  {categories.slice(0, 6).map((category) => (
-                    <Button
-                      key={category}
-                      variant={selectedCategory === category ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedCategory(category)}
-                      className={`${
-                        selectedCategory === category
-                          ? "bg-fundry-orange hover:bg-orange-600"
-                          : "hover:border-fundry-orange"
-                      }`}
-                    >
-                      {category}
-                      <Badge variant="secondary" className="ml-2">
-                        {getCategoryCount(category)}
-                      </Badge>
-                    </Button>
-                  ))}
-                </div>
-
-                {/* Campaign Results */}
-                <div className="space-y-4">
-                  {campaignsLoading ? (
-                    <div className="flex justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange"></div>
-                    </div>
-                  ) : filteredCampaigns.length > 0 ? (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-600">
-                          {filteredCampaigns.length} campaign{filteredCampaigns.length !== 1 ? 's' : ''} found
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleDiscoverCampaigns}
-                        >
-                          View All Campaigns
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {filteredCampaigns.slice(0, 4).map((campaign: any) => (
-                          <CampaignCard key={campaign.id} campaign={campaign} />
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500 mb-4">
-                        {searchTerm || selectedCategory !== "All Categories"
-                          ? "No campaigns match your search criteria"
-                          : "No active campaigns available"}
-                      </p>
-                      <Button 
-                        className="bg-fundry-orange hover:bg-orange-600"
-                        onClick={handleDiscoverCampaigns}
-                      >
-                        Browse All Campaigns
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Documents Tab */}
-          <TabsContent value="documents" className="space-y-6">
+          {/* Updates Tab */}
+          <TabsContent value="updates" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
-                  Investment Documents
+                  Founder Updates
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <p className="text-gray-600 mb-4">Download your SAFE agreements and investment documents</p>
-                  {investments && investments.length > 0 ? (
-                    <div className="space-y-4">
-                      {investments.map((investment) => (
-                        <div key={investment.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="text-left">
-                            <p className="font-medium">{investment.campaign?.title || 'Investment Document'}</p>
-                            <p className="text-sm text-gray-500">Investment: ${investment.amount}</p>
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDownloadSafe(investment.id, investment.campaign?.title || 'Investment')}
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            Download
-                          </Button>
-                        </div>
-                      ))}
+                <div className="space-y-6">
+                  {/* Sample updates from portfolio companies */}
+                  <div className="border-l-4 border-fundry-orange bg-orange-50 p-6 rounded-r-lg">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">TechFlow Solutions - Product Milestone</h3>
+                        <p className="text-sm text-gray-600">2 days ago</p>
+                      </div>
+                      <Badge variant="secondary">Milestone</Badge>
                     </div>
-                  ) : (
-                    <p className="text-gray-500">No investment documents available</p>
-                  )}
+                    <p className="text-gray-700 mb-4">
+                      Exciting news! We've successfully launched our beta version and onboarded our first 1,000 users. 
+                      The response has been overwhelming, with 92% user satisfaction rate. We're on track for our Q4 launch.
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <Button variant="outline" size="sm">
+                        Reply
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        👍 Like (12)
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        Share
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="border-l-4 border-blue-500 bg-blue-50 p-6 rounded-r-lg">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">GreenTech Innovations - Financial Update</h3>
+                        <p className="text-sm text-gray-600">1 week ago</p>
+                      </div>
+                      <Badge variant="secondary">Financial</Badge>
+                    </div>
+                    <p className="text-gray-700 mb-4">
+                      Q3 revenue exceeded our projections by 45%! We've secured three major enterprise clients and 
+                      our monthly recurring revenue is now at $85,000. Thank you for believing in our vision.
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <Button variant="outline" size="sm">
+                        Reply
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        👍 Like (18)
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        Share
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="border-l-4 border-green-500 bg-green-50 p-6 rounded-r-lg">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">HealthBridge - Team Expansion</h3>
+                        <p className="text-sm text-gray-600">2 weeks ago</p>
+                      </div>
+                      <Badge variant="secondary">Team</Badge>
+                    </div>
+                    <p className="text-gray-700 mb-4">
+                      We're thrilled to announce that we've hired our first VP of Engineering! Dr. Sarah Chen joins us 
+                      from Google Health and brings 15 years of healthcare technology experience.
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <Button variant="outline" size="sm">
+                        Reply
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        👍 Like (25)
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        Share
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="text-center py-8 border border-dashed border-gray-300 rounded-lg">
+                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">You're all caught up! New updates will appear here.</p>
+                    <Button variant="outline" className="mt-3" onClick={handleDiscoverCampaigns}>
+                      Discover More Companies
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -543,19 +513,18 @@ export default function InvestorDashboard() {
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
+            {/* Personal Information Section */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5" />
-                  Profile Settings
+                  Personal Information
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Personal Information */}
+                  {/* Personal Details */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Personal Information</h3>
-                    
                     <div className="flex items-center gap-3">
                       <User className="h-4 w-4 text-gray-500" />
                       <div>
@@ -587,7 +556,10 @@ export default function InvestorDashboard() {
                         <p className="text-gray-900">{user?.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : 'Not set'}</p>
                       </div>
                     </div>
+                  </div>
 
+                  {/* Professional Information */}
+                  <div className="space-y-4">
                     <div className="flex items-center gap-3">
                       <MapPin className="h-4 w-4 text-gray-500" />
                       <div>
@@ -598,12 +570,7 @@ export default function InvestorDashboard() {
                         </p>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Professional Information */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Professional Information</h3>
-                    
                     <div className="flex items-center gap-3">
                       <Briefcase className="h-4 w-4 text-gray-500" />
                       <div>
@@ -625,14 +592,6 @@ export default function InvestorDashboard() {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Investment Experience</label>
                         <p className="text-gray-900">{user?.investmentExperience || 'Not set'}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <User className="h-4 w-4 text-gray-500" />
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">User Type</label>
-                        <p className="text-gray-900 capitalize">{user?.userType || 'Investor'}</p>
                       </div>
                     </div>
                   </div>

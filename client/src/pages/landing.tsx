@@ -271,9 +271,13 @@ export default function Landing() {
 
       <OnboardingModal 
         isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
+        onClose={() => {
+          setShowAuthModal(false);
+          setDefaultUserType(undefined);
+        }}
         mode={authMode}
         onModeChange={setAuthMode}
+        defaultUserType={defaultUserType}
       />
 
       <LearnMoreModal

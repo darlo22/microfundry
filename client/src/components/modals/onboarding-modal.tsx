@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -43,6 +43,12 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
   const [selectedUserType, setSelectedUserType] = useState<"founder" | "investor" | null>(defaultUserType || null);
   const [currentStep, setCurrentStep] = useState<"userType" | "form">(defaultUserType ? "form" : "userType");
   const { toast } = useToast();
+
+  // Reset modal state when defaultUserType changes
+  useEffect(() => {
+    setSelectedUserType(defaultUserType || null);
+    setCurrentStep(defaultUserType ? "form" : "userType");
+  }, [defaultUserType]);
 
   const registrationForm = useForm<RegistrationData>({
     resolver: zodResolver(registrationSchema),

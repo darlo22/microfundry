@@ -234,8 +234,15 @@ export default function PaymentWithdrawal() {
     mutationFn: async (data: any) => {
       console.log('KYC data being submitted:', data); // Debug log
       
-      // Always send as JSON for now to fix the parsing issue
-      return apiRequest("POST", "/api/kyc-submit", data);
+      // Create a clean data object without File objects for JSON submission
+      const cleanData = {
+        ...data,
+        governmentId: data.governmentId?.length > 0 ? `${data.governmentId.length} file(s)` : [],
+        utilityBill: data.utilityBill?.length > 0 ? `${data.utilityBill.length} file(s)` : [],
+        otherDocuments: data.otherDocuments?.length > 0 ? `${data.otherDocuments.length} file(s)` : []
+      };
+      
+      return apiRequest("POST", "/api/kyc-submit", cleanData);
     },
     onSuccess: () => {
       toast({

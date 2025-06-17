@@ -512,7 +512,7 @@ export class DatabaseStorage implements IStorage {
   // Enhanced 2FA methods
   async updateUser2FASettings(userId: string, settings: {
     twoFactorEnabled: boolean;
-    twoFactorMethod: string | null;
+    twoFactorMethod: 'app' | 'email' | null;
     twoFactorSecret: string | null;
     twoFactorBackupCodes: string[] | null;
   }): Promise<void> {
@@ -520,7 +520,7 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({
         twoFactorEnabled: settings.twoFactorEnabled,
-        twoFactorMethod: settings.twoFactorMethod,
+        twoFactorMethod: settings.twoFactorMethod as any,
         twoFactorSecret: settings.twoFactorSecret,
         twoFactorBackupCodes: settings.twoFactorBackupCodes,
         updatedAt: new Date()

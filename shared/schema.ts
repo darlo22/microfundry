@@ -280,6 +280,51 @@ export const otpCodesRelations = relations(otpCodes, ({ one }) => ({
 export type OtpCode = typeof otpCodes.$inferSelect;
 export type InsertOtpCode = typeof otpCodes.$inferInsert;
 
+// Update interactions table for likes and shares
+export const updateInteractions = pgTable("update_interactions", {
+  id: serial("id").primaryKey(),
+  updateId: integer("update_id").references(() => campaignUpdates.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  type: varchar("type", { enum: ["like", "share"] }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const updateInteractionsRelations = relations(updateInteractions, ({ one }) => ({
+  update: one(campaignUpdates, {
+    fields: [updateInteractions.updateId],
+    references: [campaignUpdates.id],
+  }),
+  user: one(users, {
+    fields: [updateInteractions.userId],
+    references: [users.id],
+  }),
+}));
+
+// Update replies table
+export const updateReplies = pgTable("update_replies", {
+  id: serial("id").primaryKey(),
+  updateId: integer("update_id").references(() => campaignUpdates.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const updateRepliesRelations = relations(updateReplies, ({ one }) => ({
+  update: one(campaignUpdates, {
+    fields: [updateReplies.updateId],
+    references: [campaignUpdates.id],
+  }),
+  user: one(users, {
+    fields: [updateReplies.userId],
+    references: [users.id],
+  }),
+}));
+
+export type UpdateInteraction = typeof updateInteractions.$inferSelect;
+export type InsertUpdateInteraction = typeof updateInteractions.$inferInsert;
+export type UpdateReply = typeof updateReplies.$inferSelect;
+export type InsertUpdateReply = typeof updateReplies.$inferInsert;
+
 export const insertBusinessProfileSchema = createInsertSchema(businessProfiles).omit({
   id: true,
   createdAt: true,

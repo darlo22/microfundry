@@ -1260,6 +1260,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update interaction endpoints (likes, shares)
+  app.post('/api/campaign-updates/:id/like', requireAuth, async (req: any, res) => {
+    try {
+      const updateId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      // Simple in-memory storage for likes (would be database in production)
+      const likeKey = `like_${updateId}_${userId}`;
+      const countKey = `like_count_${updateId}`;
+      
+      // Toggle like status
+      const isLiked = global.updateLikes?.[likeKey] || false;
+      if (!global.updateLikes) global.updateLikes = {};
+      if (!global.updateLikeCounts) global.updateLikeCounts = {};
+      
+      global.updateLikes[likeKey] = !isLiked;
+      
+      // Update count
+      const currentCount = global.updateLikeCounts[countKey] || 12; // Start with base count
+      global.updateLikeCounts[countKey] = isLiked ? currentCount - 1 : currentCount + 1;
+      
+      res.json({ 
+        liked: !isLiked, 
+        count: global.updateLikeCounts[countKey] 
+      });
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      res.status(500).json({ message: 'Failed to toggle like' });
+    }
+  });
+
+  app.get('/api/campaign-updates/:id/interactions', async (req, res) => {
+    try {
+      const updateId = parseInt(req.params.id);
+      const countKey = `like_count_${updateId}`;
+      
+      if (!global.updateLikeCounts) global.updateLikeCounts = {};
+      
+      const likeCount = global.updateLikeCounts[countKey] || 12;
+      
+      res.json({
+        likes: likeCount,
+        replies: 3, // Static for now
+        shares: 5   // Static for now
+      });
+    } catch (error) {
+      console.error('Error fetching interactions:', error);
+      res.status(500).json({ message: 'Failed to fetch interactions' });
+    }
+  });
+
+  app.post('/api/campaign-updates/:id/reply', requireAuth, async (req: any, res) => {
+    try {
+      const updateId = parseInt(req.params.id);
+      const userId = req.user.id;
+      const { content } = req.body;
+      
+      if (!content || !content.trim()) {
+        return res.status(400).json({ message: 'Reply content is required' });
+      }
+      
+      // Simple in-memory storage for replies (would be database in production)
+      if (!global.updateReplies) global.updateReplies = {};
+      if (!global.updateReplies[updateId]) global.updateReplies[updateId] = [];
+      
+      const reply = {
+        id: Date.now(),
+        updateId,
+        userId,
+        content: content.trim(),
+        createdAt: new Date().toISOString(),
+        user: {
+          firstName: req.user.firstName,
+          lastName: req.user.lastName
+        }
+      };
+      
+      global.updateReplies[updateId].push(reply);
+      
+      res.json(reply);
+    } catch (error) {
+      console.error('Error creating reply:', error);
+      res.status(500).json({ message: 'Failed to create reply' });
+    }
+  });
+
+  app.get('/api/campaign-updates/:id/replies', async (req, res) => {
+    try {
+      const updateId = parseInt(req.params.id);
+      
+      if (!global.updateReplies) global.updateReplies = {};
+      const replies = global.updateReplies[updateId] || [];
+      
+      res.json(replies);
+    } catch (error) {
+      console.error('Error fetching replies:', error);
+      res.status(500).json({ message: 'Failed to fetch replies' });
+    }
+  });
+
+  app.post('/api/campaign-updates/:id/share', requireAuth, async (req: any, res) => {
+    try {
+      const updateId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      // Simple tracking of shares
+      if (!global.updateShares) global.updateShares = {};
+      const shareKey = `share_${updateId}`;
+      
+      global.updateShares[shareKey] = (global.updateShares[shareKey] || 0) + 1;
+      
+      res.json({ 
+        shared: true, 
+        shareCount: global.updateShares[shareKey] 
+      });
+    } catch (error) {
+      console.error('Error recording share:', error);
+      res.status(500).json({ message: 'Failed to record share' });
+    }
+  });
+
   // Download SAFE agreement endpoint
   app.get('/api/investments/:investmentId/safe-agreement', requireAuth, async (req: any, res) => {
     try {

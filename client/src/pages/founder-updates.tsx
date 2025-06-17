@@ -62,6 +62,28 @@ export default function FounderUpdates() {
     enabled: !!user?.id,
   });
 
+  // Fetch interactions for each update
+  const { data: interactions = {} } = useQuery<Record<number, any>>({
+    queryKey: ["/api/campaign-updates/interactions", updates.map(u => u.id)],
+    enabled: updates.length > 0,
+    queryFn: async () => {
+      const interactionData: Record<number, any> = {};
+      await Promise.all(
+        updates.map(async (update) => {
+          try {
+            const response = await fetch(`/api/campaign-updates/${update.id}/interactions`);
+            if (response.ok) {
+              interactionData[update.id] = await response.json();
+            }
+          } catch (error) {
+            console.error(`Failed to fetch interactions for update ${update.id}:`, error);
+          }
+        })
+      );
+      return interactionData;
+    },
+  });
+
   // Create update mutation
   const createUpdateMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -138,55 +160,97 @@ export default function FounderUpdates() {
     });
   };
 
+  // Like mutation
+  const likeMutation = useMutation({
+    mutationFn: async (updateId: number) => {
+      return apiRequest(`/api/campaign-updates/${updateId}/like`, "POST");
+    },
+    onSuccess: (data, updateId) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/campaign-updates/interactions"] });
+      
+      const newLikedUpdates = new Set(likedUpdates);
+      if (data.liked) {
+        newLikedUpdates.add(updateId);
+      } else {
+        newLikedUpdates.delete(updateId);
+      }
+      setLikedUpdates(newLikedUpdates);
+      setLikeCounts(prev => ({ ...prev, [updateId]: data.count }));
+      
+      toast({
+        title: data.liked ? "Update Liked" : "Like Removed",
+        description: data.liked ? "You liked this update!" : "You removed your like from this update.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update like status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Reply mutation
+  const replyMutation = useMutation({
+    mutationFn: async ({ updateId, content }: { updateId: number; content: string }) => {
+      return apiRequest(`/api/campaign-updates/${updateId}/reply`, "POST", { content });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/campaign-updates/interactions"] });
+      setReplyingTo(null);
+      setReplyText("");
+      
+      toast({
+        title: "Reply Posted",
+        description: "Your reply has been posted successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to post reply. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Share mutation
+  const shareMutation = useMutation({
+    mutationFn: async (updateId: number) => {
+      return apiRequest(`/api/campaign-updates/${updateId}/share`, "POST");
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Update Shared",
+        description: "This update has been shared successfully!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to record share. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Handler functions for interactive features
   const handleLike = (updateId: number) => {
-    console.log('Like button clicked for update:', updateId);
-    const isLiked = likedUpdates.has(updateId);
-    const newLikedUpdates = new Set(likedUpdates);
-    
-    if (isLiked) {
-      newLikedUpdates.delete(updateId);
-      setLikeCounts(prev => ({
-        ...prev,
-        [updateId]: Math.max(0, (prev[updateId] || 0) - 1)
-      }));
-    } else {
-      newLikedUpdates.add(updateId);
-      setLikeCounts(prev => ({
-        ...prev,
-        [updateId]: (prev[updateId] || 0) + 1
-      }));
-    }
-    
-    setLikedUpdates(newLikedUpdates);
-    
-    toast({
-      title: isLiked ? "Like Removed" : "Update Liked",
-      description: isLiked ? "You removed your like from this update." : "You liked this update!",
-    });
+    likeMutation.mutate(updateId);
   };
 
   const handleReply = (updateId: number) => {
-    console.log('Reply button clicked for update:', updateId);
     setReplyingTo(updateId);
     setReplyText("");
   };
 
   const handleSubmitReply = (updateId: number) => {
-    console.log('Submit reply clicked for update:', updateId);
     if (!replyText.trim()) return;
-
-    toast({
-      title: "Reply Posted",
-      description: "Your reply has been posted successfully.",
-    });
-    
-    setReplyingTo(null);
-    setReplyText("");
+    replyMutation.mutate({ updateId, content: replyText });
   };
 
   const handleShare = (update: CampaignUpdate) => {
-    console.log('Share button clicked for update:', update.id);
     const shareData = {
       title: `${update.title} - Campaign Update`,
       text: `Check out this update from ${update.campaign.title}: ${update.title}`,
@@ -194,7 +258,9 @@ export default function FounderUpdates() {
     };
 
     if (navigator.share) {
-      navigator.share(shareData).catch(() => {
+      navigator.share(shareData).then(() => {
+        shareMutation.mutate(update.id);
+      }).catch(() => {
         handleCopyLink(update);
       });
     } else {
@@ -594,6 +660,7 @@ export default function FounderUpdates() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleLike(update.id)}
+                        disabled={likeMutation.isPending}
                         className={`flex items-center gap-2 transition-colors ${
                           likedUpdates.has(update.id)
                             ? 'text-red-600 hover:text-red-700 bg-red-50'
@@ -601,7 +668,7 @@ export default function FounderUpdates() {
                         }`}
                       >
                         <Heart className={`h-4 w-4 ${likedUpdates.has(update.id) ? 'fill-current' : ''}`} />
-                        Like ({likeCounts[update.id] || 12})
+                        Like ({interactions[update.id]?.likes || likeCounts[update.id] || 12})
                       </Button>
 
                       {/* Share Button */}

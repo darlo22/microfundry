@@ -371,13 +371,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (kycSubmission) {
         status = kycSubmission.status;
         lastUpdated = kycSubmission.submittedAt;
-        completionPercentage = status === "verified" ? 100 : status === "pending" ? 85 : 0;
+        completionPercentage = status === "verified" ? 100 : (status === "pending" || status === "under_review") ? 85 : 0;
       }
 
       res.json({
         status,
         lastUpdated,
-        completionPercentage
+        completionPercentage,
+        submittedData: kycSubmission?.data || null
       });
     } catch (error) {
       console.error("Error fetching KYC status:", error);

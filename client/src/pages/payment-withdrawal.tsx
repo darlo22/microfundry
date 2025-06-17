@@ -601,13 +601,13 @@ export default function PaymentWithdrawal() {
                 </div>
 
                 {/* Display submitted KYC information if available */}
-                {(kycStatus?.status === "pending" || kycStatus?.status === "under_review") && (
+                {(kycStatus?.status === "pending" || kycStatus?.status === "under_review") && kycStatus?.submittedData && (
                   <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <h3 className="font-semibold text-yellow-800 mb-3">Submitted KYC Information</h3>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="font-medium text-gray-700">Date of Birth:</span>
-                        <span className="ml-2 text-gray-600">Provided</span>
+                        <span className="ml-2 text-gray-600">{kycStatus.submittedData.dateOfBirth}</span>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">SSN:</span>
@@ -615,19 +615,35 @@ export default function PaymentWithdrawal() {
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Address:</span>
-                        <span className="ml-2 text-gray-600">Provided</span>
+                        <span className="ml-2 text-gray-600">{kycStatus.submittedData.address}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">City:</span>
+                        <span className="ml-2 text-gray-600">{kycStatus.submittedData.city}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">State:</span>
+                        <span className="ml-2 text-gray-600">{kycStatus.submittedData.state}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">ZIP Code:</span>
+                        <span className="ml-2 text-gray-600">{kycStatus.submittedData.zipCode}</span>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Employment Status:</span>
-                        <span className="ml-2 text-gray-600">Provided</span>
+                        <span className="ml-2 text-gray-600 capitalize">{kycStatus.submittedData.employmentStatus?.replace('-', ' ')}</span>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Annual Income:</span>
-                        <span className="ml-2 text-gray-600">Provided</span>
+                        <span className="ml-2 text-gray-600">{kycStatus.submittedData.annualIncome}</span>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700">Investment Experience:</span>
-                        <span className="ml-2 text-gray-600">Provided</span>
+                        <span className="ml-2 text-gray-600 capitalize">{kycStatus.submittedData.investmentExperience}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Risk Tolerance:</span>
+                        <span className="ml-2 text-gray-600 capitalize">{kycStatus.submittedData.riskTolerance}</span>
                       </div>
                     </div>
                     
@@ -636,16 +652,18 @@ export default function PaymentWithdrawal() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-sm text-gray-600">Government Issued ID - Uploaded</span>
+                          <span className="text-sm text-gray-600">Government Issued ID - {kycStatus.submittedData.governmentId || 'Uploaded'}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-sm text-gray-600">Utility Bill - Uploaded</span>
+                          <span className="text-sm text-gray-600">Utility Bill - {kycStatus.submittedData.utilityBill || 'Uploaded'}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-sm text-gray-600">Additional Documents - Uploaded</span>
-                        </div>
+                        {kycStatus.submittedData.otherDocuments && kycStatus.submittedData.otherDocuments.length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span className="text-sm text-gray-600">Additional Documents - {kycStatus.submittedData.otherDocuments}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     

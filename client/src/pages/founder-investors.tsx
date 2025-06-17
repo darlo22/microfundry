@@ -258,16 +258,7 @@ export default function FounderInvestors() {
   const activeInvestors = investorProfiles.filter(i => i.status === "active").length;
   const averageInvestment = totalInvestors > 0 ? totalInvested / totalInvestors : 0;
 
-  // Debug log to see actual data
-  console.log('Investment Data Debug:', {
-    totalInvestments: investments?.length,
-    investmentStatuses: Array.isArray(investments) ? investments.map(inv => inv.status) : [],
-    filteredInvestments: Array.isArray(investments) ? investments.filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed').length : 0,
-    investorProfiles: investorProfiles.length,
-    totalInvested,
-    activeInvestors,
-    rawInvestments: investments
-  });
+
 
   if (isLoading) {
     return (

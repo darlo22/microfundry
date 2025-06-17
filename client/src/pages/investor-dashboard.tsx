@@ -50,7 +50,7 @@ export default function InvestorDashboard() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("discover");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -520,6 +520,15 @@ export default function InvestorDashboard() {
     setActiveTab('profile');
   };
 
+  // Handle tab changes with special behavior for Discover
+  const handleTabChange = (value: string) => {
+    if (value === 'discover') {
+      handleDiscoverCampaigns();
+    } else {
+      setActiveTab(value);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -542,14 +551,14 @@ export default function InvestorDashboard() {
         </div>
 
         {/* Tab Navigation */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="overview">Portfolio</TabsTrigger>
-            <TabsTrigger value="updates">Updates</TabsTrigger>
+            <TabsTrigger value="discover">Discover</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-8">
+          <TabsContent value="discover" className="space-y-8">
             {/* Portfolio Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div 
@@ -776,6 +785,70 @@ export default function InvestorDashboard() {
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Documents Tab */}
+          <TabsContent value="documents" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Investment Documents
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {investments && investments.length > 0 ? (
+                  <div className="space-y-4">
+                    {investments.map((investment) => (
+                      <div key={investment.id} className="border rounded-lg p-4 hover:border-fundry-orange transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{investment.campaign?.title}</h3>
+                            <p className="text-sm text-gray-600">Investment Amount: ${investment.amount}</p>
+                            <p className="text-sm text-gray-500">Date: {new Date(investment.createdAt).toLocaleDateString()}</p>
+                            <Badge variant="secondary" className="mt-2">
+                              {investment.status}
+                            </Badge>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                // Download SAFE agreement for this investment
+                                const link = document.createElement('a');
+                                link.href = `/api/investments/${investment.id}/safe-agreement`;
+                                link.download = `SAFE_Agreement_${investment.campaign?.title?.replace(/\s+/g, '_')}_${investment.id}.pdf`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              }}
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              SAFE Agreement
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 mb-2">No investment documents yet.</p>
+                    <p className="text-sm text-gray-400 mb-4">
+                      Your SAFE agreements and investment documents will appear here after you invest in campaigns.
+                    </p>
+                    <Button 
+                      className="bg-fundry-orange hover:bg-orange-600"
+                      onClick={handleDiscoverCampaigns}
+                    >
+                      Discover Investment Opportunities
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

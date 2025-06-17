@@ -342,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Sort by date (most recent first)
-      transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      transactions.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
 
       res.json(transactions.slice(0, 10)); // Return last 10 transactions
     } catch (error) {
@@ -941,7 +941,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Sort by creation date, newest first
-      allUpdates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      allUpdates.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
       
       res.json(allUpdates);
     } catch (error) {
@@ -1011,7 +1011,7 @@ SAFE AGREEMENT
 
 INVESTMENT DETAILS:
 - Investment Amount: $${investment.amount}
-- Investment Date: ${new Date(investment.createdAt).toLocaleDateString()}
+- Investment Date: ${new Date(investment.createdAt || 0).toLocaleDateString()}
 - Campaign: ${campaign.title}
 - Discount Rate: ${campaign.discountRate || 20}%
 - Valuation Cap: $${campaign.valuationCap || 1000000}
@@ -1173,7 +1173,7 @@ Generated on: ${new Date().toLocaleDateString()}
       }
       
       // Verify current password
-      const isValidPassword = await comparePasswords(currentPassword, user.hashedPassword);
+      const isValidPassword = await comparePasswords(currentPassword, user.password || '');
       if (!isValidPassword) {
         return res.status(400).json({ message: "Current password is incorrect" });
       }

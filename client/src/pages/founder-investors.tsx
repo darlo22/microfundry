@@ -174,7 +174,7 @@ export default function FounderInvestors() {
   });
 
   // Process investments to create investor profiles
-  const investorProfiles: InvestorProfile[] = investments.reduce((profiles: InvestorProfile[], investment: Investment) => {
+  const investorProfiles: InvestorProfile[] = (investments || []).reduce((profiles: InvestorProfile[], investment: Investment) => {
     const existingProfile = profiles.find(p => p.email === investment.investor.email);
     
     if (existingProfile) {
@@ -684,8 +684,7 @@ export default function FounderInvestors() {
               disabled={
                 !messageForm.subject.trim() || 
                 !messageForm.content.trim() || 
-                sendMessageMutation.isPending ||
-                (!investorProfiles || investorProfiles.length === 0)
+                sendMessageMutation.isPending
               }
               className="bg-fundry-orange hover:bg-orange-600"
             >

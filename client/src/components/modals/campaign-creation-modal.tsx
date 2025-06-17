@@ -229,6 +229,16 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith("image/")) {
+      // Check file size (2MB limit)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Company logo must be under 2MB. Please choose a smaller image.",
+          variant: "destructive",
+        });
+        event.target.value = ''; // Clear the input
+        return;
+      }
       setLogoFile(file);
     }
   };
@@ -243,6 +253,17 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
   const handleTeamMemberPhotoUpload = (memberIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith("image/")) {
+      // Check file size (2MB limit)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Team member photo must be under 2MB. Please choose a smaller image.",
+          variant: "destructive",
+        });
+        event.target.value = ''; // Clear the input
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onload = () => {
         const base64String = reader.result as string;
@@ -404,7 +425,7 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                       <p className="text-gray-600">
                         {logoFile ? logoFile.name : "Click to upload or drag and drop"}
                       </p>
-                      <p className="text-sm text-gray-500 mt-2">PNG, JPG up to 10MB</p>
+                      <p className="text-sm text-gray-500 mt-2">PNG, JPG up to 2MB</p>
                     </label>
                   </div>
                 </div>

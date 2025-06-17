@@ -681,6 +681,16 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
+                                  // Check file size (2MB limit)
+                                  if (file.size > 2 * 1024 * 1024) {
+                                    toast({
+                                      title: "File too large",
+                                      description: "Team member photo must be under 2MB. Please choose a smaller image.",
+                                      variant: "destructive",
+                                    });
+                                    e.target.value = ''; // Clear the input
+                                    return;
+                                  }
                                   updateTeamMember(member.id, 'photo', file);
                                 }
                               }}
@@ -696,6 +706,7 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                                     : 'Upload profile photo'
                                 }
                               </span>
+                              <span className="text-xs text-gray-400">Max size: 2MB</span>
                             </label>
                           </div>
                         </div>
@@ -723,7 +734,24 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                     id="logo"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        // Check file size (2MB limit)
+                        if (file.size > 2 * 1024 * 1024) {
+                          toast({
+                            title: "File too large",
+                            description: "Company logo must be under 2MB. Please choose a smaller image.",
+                            variant: "destructive",
+                          });
+                          e.target.value = ''; // Clear the input
+                          return;
+                        }
+                        setLogoFile(file);
+                      } else {
+                        setLogoFile(null);
+                      }
+                    }}
                     className="hidden"
                   />
                   <label htmlFor="logo" className="cursor-pointer flex flex-col items-center gap-2">
@@ -731,6 +759,7 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                     <span className="text-sm text-gray-600">
                       {logoFile ? logoFile.name : 'Upload new logo'}
                     </span>
+                    <span className="text-xs text-gray-400">Max size: 2MB</span>
                   </label>
                 </div>
               </div>

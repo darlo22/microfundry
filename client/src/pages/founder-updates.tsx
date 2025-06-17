@@ -140,6 +140,7 @@ export default function FounderUpdates() {
 
   // Handler functions for interactive features
   const handleLike = (updateId: number) => {
+    console.log('Like button clicked for update:', updateId);
     const isLiked = likedUpdates.has(updateId);
     const newLikedUpdates = new Set(likedUpdates);
     
@@ -166,11 +167,13 @@ export default function FounderUpdates() {
   };
 
   const handleReply = (updateId: number) => {
+    console.log('Reply button clicked for update:', updateId);
     setReplyingTo(updateId);
     setReplyText("");
   };
 
   const handleSubmitReply = (updateId: number) => {
+    console.log('Submit reply clicked for update:', updateId);
     if (!replyText.trim()) return;
 
     toast({
@@ -183,6 +186,7 @@ export default function FounderUpdates() {
   };
 
   const handleShare = (update: CampaignUpdate) => {
+    console.log('Share button clicked for update:', update.id);
     const shareData = {
       title: `${update.title} - Campaign Update`,
       text: `Check out this update from ${update.campaign.title}: ${update.title}`,
@@ -199,11 +203,19 @@ export default function FounderUpdates() {
   };
 
   const handleCopyLink = (update: CampaignUpdate) => {
+    console.log('Copying link for update:', update.id);
     const updateUrl = `${window.location.origin}/updates/${update.id}`;
     navigator.clipboard.writeText(updateUrl).then(() => {
       toast({
         title: "Link Copied",
         description: "Update link has been copied to your clipboard.",
+      });
+    }).catch((err) => {
+      console.error('Failed to copy link:', err);
+      toast({
+        title: "Copy Failed",
+        description: "Could not copy link to clipboard. Please try again.",
+        variant: "destructive",
       });
     });
   };

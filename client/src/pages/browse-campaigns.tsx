@@ -112,7 +112,7 @@ export default function BrowseCampaigns() {
                 <div>
                   <p className="text-green-700 font-medium">Total Investors</p>
                   <p className="text-3xl font-bold text-green-900">
-                    {campaigns.reduce((sum, c) => sum + (c.investorCount || 0), 0)}
+                    {campaigns.reduce((sum, c) => sum + (c.investorCount || 0), 0) || 0}
                   </p>
                 </div>
                 <Users className="h-8 w-8 text-green-700" />

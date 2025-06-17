@@ -61,8 +61,15 @@ export default function InvestorDashboard() {
   });
 
   // Create categories based on actual businessSector data
-  const uniqueSectors = Array.isArray(allCampaigns) ? 
-    [...new Set(allCampaigns.map((c: any) => c.businessSector).filter(Boolean))] : [];
+  const sectorSet = new Set<string>();
+  if (Array.isArray(allCampaigns)) {
+    allCampaigns.forEach((c: any) => {
+      if (c.businessSector) {
+        sectorSet.add(c.businessSector);
+      }
+    });
+  }
+  const uniqueSectors = Array.from(sectorSet);
   const categories = [
     "All Categories",
     ...uniqueSectors

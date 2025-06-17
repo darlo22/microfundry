@@ -36,7 +36,8 @@ export default function CampaignCard({ campaign, isFounder = false, onEdit, onSh
     if (isNaN(numericAmount)) {
       return "$0";
     }
-    return `$${numericAmount.toLocaleString()}`;
+    // Format without unnecessary decimal places
+    return `$${Math.round(numericAmount).toLocaleString()}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -81,7 +82,7 @@ export default function CampaignCard({ campaign, isFounder = false, onEdit, onSh
               </div>
               <div>
                 <p className="text-sm text-gray-500">Investors</p>
-                <p className="text-xl font-bold text-gray-900">{campaign.investorCount}</p>
+                <p className="text-xl font-bold text-gray-900">{campaign.investorCount || 0}</p>
               </div>
             </div>
 

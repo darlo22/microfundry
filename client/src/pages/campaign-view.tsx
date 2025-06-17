@@ -39,6 +39,7 @@ export default function CampaignView() {
   const [showPitchDeckModal, setShowPitchDeckModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAllInvestorsModal, setShowAllInvestorsModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Get campaign ID from URL params (either /campaign/:id or /c/:privateLink)
@@ -90,8 +91,13 @@ export default function CampaignView() {
     return past.toLocaleDateString();
   };
 
-  // Process recent investors from actual investment data
-  const recentInvestors = campaignInvestments.slice(0, 3).map((investment: any) => ({
+  // Filter investments to only show committed/paid ones (not just pending)
+  const committedInvestments = campaignInvestments.filter((investment: any) => 
+    investment.status === 'committed' || investment.status === 'paid' || investment.status === 'completed'
+  );
+
+  // Process recent investors from actual committed investment data
+  const recentInvestors = committedInvestments.slice(0, 3).map((investment: any) => ({
     id: investment.id,
     name: `${investment.investor.firstName} ${investment.investor.lastName}`,
     initials: getInitials(`${investment.investor.firstName} ${investment.investor.lastName}`),
@@ -680,9 +686,13 @@ export default function CampaignView() {
                       ))}
                     </div>
                     
-                    {campaignInvestments.length > 3 && (
-                      <Button variant="link" className="w-full mt-4 text-fundry-orange hover:text-orange-600 text-sm">
-                        View All {campaignInvestments.length} Investors
+                    {committedInvestments.length > 3 && (
+                      <Button 
+                        variant="link" 
+                        className="w-full mt-4 text-fundry-orange hover:text-orange-600 text-sm"
+                        onClick={() => setShowAllInvestorsModal(true)}
+                      >
+                        View All {committedInvestments.length} Investors
                       </Button>
                     )}
                   </>
@@ -849,6 +859,62 @@ export default function CampaignView() {
           campaign={campaign}
         />
       )}
+
+      {/* All Investors Modal */}
+      <Dialog open={showAllInvestorsModal} onOpenChange={setShowAllInvestorsModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Users className="mr-3 text-fundry-orange" size={24} />
+              All Investors ({committedInvestments.length})
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-6">
+            {committedInvestments.map((investment: any) => (
+              <div key={investment.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-fundry-orange rounded-full flex items-center justify-center">
+                    <span className="text-white font-semibold">
+                      {getInitials(`${investment.investor.firstName} ${investment.investor.lastName}`)}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      {investment.investor.firstName} {investment.investor.lastName}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Invested {getTimeAgo(investment.createdAt)}
+                    </div>
+                    <div className="text-xs text-gray-400 capitalize">
+                      Status: {investment.status}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-semibold text-lg text-gray-900">
+                    {formatCurrency(investment.amount)}
+                  </div>
+                  {investment.paymentStatus === 'completed' && (
+                    <div className="text-xs text-green-600 font-medium">
+                      Payment Complete
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            
+            {committedInvestments.length === 0 && (
+              <div className="text-center py-12">
+                <Users className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                <p className="text-gray-500 text-lg">No committed investors yet</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Investors who commit will appear here
+                </p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

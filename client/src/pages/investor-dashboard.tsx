@@ -26,6 +26,7 @@ import { Switch } from "@/components/ui/switch";
 import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle, Eye, EyeOff, Smartphone, Tablet } from "lucide-react";
 import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
+import TwoFactorSetupModal from "@/components/modals/two-factor-setup-modal";
 
 // Edit Profile Form Schema
 const editProfileSchema = z.object({
@@ -1306,59 +1307,14 @@ export default function InvestorDashboard() {
                       <Badge variant={security.twoFactorEnabled ? "default" : "secondary"} className={security.twoFactorEnabled ? "" : "text-red-600"}>
                         {security.twoFactorEnabled ? "Enabled" : "Disabled"}
                       </Badge>
-                      <Dialog open={isEnable2FAOpen} onOpenChange={setIsEnable2FAOpen}>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Settings className="h-4 w-4 mr-2" />
-                            {security.twoFactorEnabled ? "Disable" : "Enable"} 2FA
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-md">
-                          <DialogHeader>
-                            <DialogTitle>
-                              {security.twoFactorEnabled ? "Disable" : "Enable"} Two-Factor Authentication
-                            </DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            {!security.twoFactorEnabled ? (
-                              <div className="space-y-4">
-                                <p className="text-sm text-gray-600">
-                                  Two-factor authentication adds an extra layer of security to your account by requiring a verification code from your phone in addition to your password.
-                                </p>
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                  <p className="text-sm text-yellow-800">
-                                    <strong>Note:</strong> You'll need an authenticator app like Google Authenticator or Authy to use 2FA.
-                                  </p>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="space-y-4">
-                                <p className="text-sm text-gray-600">
-                                  Are you sure you want to disable two-factor authentication? This will make your account less secure.
-                                </p>
-                                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                  <p className="text-sm text-red-800">
-                                    <strong>Warning:</strong> Disabling 2FA will reduce your account security.
-                                  </p>
-                                </div>
-                              </div>
-                            )}
-                            <div className="flex gap-3 justify-end">
-                              <Button variant="outline" onClick={() => setIsEnable2FAOpen(false)}>
-                                Cancel
-                              </Button>
-                              <Button 
-                                onClick={() => toggle2FAMutation.mutate(!security.twoFactorEnabled)}
-                                disabled={toggle2FAMutation.isPending}
-                                variant={security.twoFactorEnabled ? "destructive" : "default"}
-                                className={!security.twoFactorEnabled ? "bg-fundry-orange hover:bg-orange-600" : ""}
-                              >
-                                {toggle2FAMutation.isPending ? "Processing..." : (security.twoFactorEnabled ? "Disable 2FA" : "Enable 2FA")}
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setIsTwoFactorSetupOpen(true)}
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        {security.twoFactorEnabled ? "Manage" : "Enable"} 2FA
+                      </Button>
                     </div>
                   </div>
                 </div>

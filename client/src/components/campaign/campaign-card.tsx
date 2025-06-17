@@ -36,8 +36,12 @@ export default function CampaignCard({ campaign, isFounder = false, onEdit, onSh
     if (isNaN(numericAmount)) {
       return "$0";
     }
-    // Format without unnecessary decimal places
-    return `$${Math.round(numericAmount).toLocaleString()}`;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(numericAmount);
   };
 
   const formatDate = (dateString: string) => {

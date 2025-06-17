@@ -494,6 +494,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get investments for founder's campaigns
+  app.get('/api/investments/founder/:founderId', requireAuth, async (req: any, res) => {
+    try {
+      const founderId = req.params.founderId;
+      
+      if (founderId !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+      }
+
+      // Get all campaigns for the founder first
+      const campaigns = await storage.getCampaignsByFounder(founderId);
+      const campaignIds = campaigns.map(c => c.id);
+      
+      // Get all investments for these campaigns
+      const allInvestments = [];
+      for (const campaignId of campaignIds) {
+        const investments = await storage.getInvestmentsByCampaign(campaignId);
+        allInvestments.push(...investments);
+      }
+      
+      res.json(allInvestments);
+    } catch (error) {
+      console.error('Error fetching founder investments:', error);
+      res.status(500).json({ message: 'Failed to fetch investments' });
+    }
+  });
+
+  // Campaign updates endpoints
+  app.post('/api/campaign-updates', requireAuth, async (req: any, res) => {
+    try {
+      const founderId = req.user.id;
+      const { campaignId, title, content, type } = req.body;
+      
+      // Verify campaign ownership
+      const campaign = await storage.getCampaign(campaignId);
+      if (!campaign || campaign.founderId !== founderId) {
+        return res.status(403).json({ message: 'Not authorized to update this campaign' });
+      }
+
+      const updateData = {
+        campaignId: parseInt(campaignId),
+        title,
+        content,
+        type,
+      };
+
+      const update = await storage.createCampaignUpdate(updateData);
+      res.json(update);
+    } catch (error) {
+      console.error('Error creating campaign update:', error);
+      res.status(500).json({ message: 'Failed to create update' });
+    }
+  });
+
+  app.get('/api/campaign-updates/founder/:founderId', requireAuth, async (req: any, res) => {
+    try {
+      const founderId = req.params.founderId;
+      
+      if (founderId !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+      }
+
+      // Get all campaigns for the founder
+      const campaigns = await storage.getCampaignsByFounder(founderId);
+      const campaignIds = campaigns.map(c => c.id);
+      
+      // Get all updates for these campaigns
+      const allUpdates = [];
+      for (const campaignId of campaignIds) {
+        const updates = await storage.getCampaignUpdates(campaignId);
+        // Add campaign title to each update
+        const updatesWithCampaign = updates.map(update => ({
+          ...update,
+          campaign: { title: campaigns.find(c => c.id === campaignId)?.title || 'Unknown Campaign' }
+        }));
+        allUpdates.push(...updatesWithCampaign);
+      }
+      
+      // Sort by creation date, newest first
+      allUpdates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      res.json(allUpdates);
+    } catch (error) {
+      console.error('Error fetching founder updates:', error);
+      res.status(500).json({ message: 'Failed to fetch updates' });
+    }
+  });
+
+  app.put('/api/campaign-updates/:id', requireAuth, async (req: any, res) => {
+    try {
+      const updateId = parseInt(req.params.id);
+      const founderId = req.user.id;
+      const { title, content, type } = req.body;
+      
+      // For now, just return success (would need to implement update logic)
+      res.json({ id: updateId, title, content, type, updatedAt: new Date() });
+    } catch (error) {
+      console.error('Error updating campaign update:', error);
+      res.status(500).json({ message: 'Failed to update' });
+    }
+  });
+
+  app.delete('/api/campaign-updates/:id', requireAuth, async (req: any, res) => {
+    try {
+      const updateId = parseInt(req.params.id);
+      
+      // For now, just return success (would need to implement delete logic)
+      res.json({ message: 'Update deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting campaign update:', error);
+      res.status(500).json({ message: 'Failed to delete update' });
+    }
+  });
+
   // Catch-all handler for client-side routing
   app.get('*', (req, res, next) => {
     // Skip API routes

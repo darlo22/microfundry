@@ -10,10 +10,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Users, TrendingUp, DollarSign, Mail, Phone, Calendar, Filter, Download, Eye, Send, X } from "lucide-react";
+import { Search, Users, TrendingUp, DollarSign, Mail, Phone, Calendar, Filter, Download, Eye, Send, X, ArrowLeft, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
+import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
 
 interface Investment {
   id: number;
@@ -44,6 +46,7 @@ export default function FounderInvestors() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
@@ -262,11 +265,53 @@ export default function FounderInvestors() {
   }
 
   return (
-    <div className="container mx-auto px-6 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Investors</h1>
-        <p className="text-gray-600">Manage and track your investor relationships</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between h-16">
+            {/* Left: Back Button */}
+            <Button
+              variant="ghost"
+              onClick={() => setLocation("/founder-dashboard")}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+
+            {/* Center: Fundry Logo */}
+            <div 
+              className="flex items-center cursor-pointer"
+              onClick={() => setLocation("/landing")}
+            >
+              <img 
+                src={fundryLogoNew} 
+                alt="Fundry" 
+                className="h-12 w-auto"
+              />
+            </div>
+
+            {/* Right: Logout Button */}
+            <Button
+              variant="ghost"
+              onClick={() => {
+                window.location.href = "/api/logout";
+              }}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
+        </div>
       </div>
+
+      <div className="container mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Investors</h1>
+          <p className="text-gray-600">Manage and track your investor relationships</p>
+        </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -703,6 +748,7 @@ export default function FounderInvestors() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }

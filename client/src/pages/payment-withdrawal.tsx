@@ -318,13 +318,6 @@ export default function PaymentWithdrawal() {
               <Separator orientation="vertical" className="h-6" />
               <img src={fundryLogoNew} alt="Fundry" className="h-8" />
             </div>
-            <Button
-              variant="outline"
-              onClick={() => setLocation("/logout")}
-              className="flex items-center gap-2"
-            >
-              Logout
-            </Button>
           </div>
         </div>
       </div>

@@ -294,17 +294,7 @@ export default function FounderInvestors() {
               />
             </div>
 
-            {/* Right: Logout Button */}
-            <Button
-              variant="ghost"
-              onClick={() => {
-                window.location.href = "/api/logout";
-              }}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
+
           </div>
         </div>
       </div>

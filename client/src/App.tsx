@@ -22,6 +22,10 @@ import InvestmentDisclaimer from "@/pages/investment-disclaimer";
 import SafeAgreementTemplate from "@/pages/safe-agreement-template";
 import InvestorAccreditation from "@/pages/investor-accreditation";
 import FounderDashboard from "@/pages/founder-dashboard";
+import FounderInvestors from "@/pages/founder-investors";
+import FounderAnalytics from "@/pages/founder-analytics";
+import FounderSettings from "@/pages/founder-settings";
+import FounderUpdates from "@/pages/founder-updates";
 import InvestorDashboard from "@/pages/investor-dashboard";
 import CampaignView from "@/pages/campaign-view";
 import NotFound from "@/pages/not-found";
@@ -64,6 +68,11 @@ function Router() {
         <>
           <Route path="/founder-dashboard" component={FounderDashboard} />
           <Route path="/founder/dashboard" component={FounderDashboard} />
+          <Route path="/founder/campaigns" component={FounderDashboard} />
+          <Route path="/founder/investors" component={FounderInvestors} />
+          <Route path="/founder/analytics" component={FounderAnalytics} />
+          <Route path="/founder/settings" component={FounderSettings} />
+          <Route path="/founder/updates" component={FounderUpdates} />
           <Route path="/investor-dashboard" component={InvestorDashboard} />
           <Route path="/investor/dashboard" component={InvestorDashboard} />
         </>

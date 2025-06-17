@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartLine, Rocket, Shield, Users, BarChart, Smartphone, Headphones } from "lucide-react";
@@ -14,6 +14,22 @@ export default function Landing() {
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [showLearnMoreModal, setShowLearnMoreModal] = useState(false);
   const [showInvestorModal, setShowInvestorModal] = useState(false);
+  const [defaultUserType, setDefaultUserType] = useState<"founder" | "investor" | undefined>(undefined);
+
+  // Check URL parameters to auto-open investor onboarding
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const autoInvest = urlParams.get('invest');
+    const userType = urlParams.get('type');
+    
+    if (autoInvest === 'true' && userType === 'investor') {
+      setAuthMode("signup");
+      setDefaultUserType("investor");
+      setShowAuthModal(true);
+      // Clean up URL parameters
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const handleGetStarted = () => {
     setAuthMode("signup");

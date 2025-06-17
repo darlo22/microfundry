@@ -36,11 +36,12 @@ interface OnboardingModalProps {
   onClose: () => void;
   mode: "signin" | "signup";
   onModeChange: (mode: "signin" | "signup") => void;
+  defaultUserType?: "founder" | "investor";
 }
 
-export default function OnboardingModal({ isOpen, onClose, mode, onModeChange }: OnboardingModalProps) {
-  const [selectedUserType, setSelectedUserType] = useState<"founder" | "investor" | null>(null);
-  const [currentStep, setCurrentStep] = useState<"userType" | "form">("userType");
+export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, defaultUserType }: OnboardingModalProps) {
+  const [selectedUserType, setSelectedUserType] = useState<"founder" | "investor" | null>(defaultUserType || null);
+  const [currentStep, setCurrentStep] = useState<"userType" | "form">(defaultUserType ? "form" : "userType");
   const { toast } = useToast();
 
   const registrationForm = useForm<RegistrationData>({

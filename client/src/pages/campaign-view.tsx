@@ -93,12 +93,8 @@ export default function CampaignView() {
 
   const handleInvest = () => {
     if (!isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to invest in this campaign.",
-        variant: "destructive",
-      });
-      window.location.href = "/api/login";
+      // Redirect to landing page with investor onboarding auto-open
+      setLocation("/landing?invest=true&type=investor");
       return;
     }
     setShowInvestmentModal(true);

@@ -61,7 +61,7 @@ export default function InvestmentCard({ investment }: InvestmentCardProps) {
               </Badge>
             </div>
             
-            <p className="text-gray-600 mb-3">{investment.campaign?.shortPitch || 'No description available'}</p>
+            <div className="text-gray-600 mb-3">{investment.campaign?.shortPitch || 'No description available'}</div>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>

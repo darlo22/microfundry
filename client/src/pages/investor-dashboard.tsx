@@ -350,7 +350,10 @@ export default function InvestorDashboard() {
 
   // Export data mutation
   const exportDataMutation = useMutation({
-    mutationFn: () => apiRequest("/api/user/export-data", "GET"),
+    mutationFn: async () => {
+      const response = await apiRequest("GET", "/api/user/export-data");
+      return await response.json();
+    },
     onSuccess: (data) => {
       // Create and download JSON file
       const dataStr = JSON.stringify(data, null, 2);

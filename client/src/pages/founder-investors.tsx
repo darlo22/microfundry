@@ -177,31 +177,33 @@ export default function FounderInvestors() {
   });
 
   // Process investments to create investor profiles
-  const investorProfiles: InvestorProfile[] = (investments || []).reduce((profiles: InvestorProfile[], investment: Investment) => {
-    const existingProfile = profiles.find(p => p.email === investment.investor.email);
-    
-    if (existingProfile) {
-      existingProfile.totalInvested = (parseFloat(existingProfile.totalInvested) + parseFloat(investment.amount)).toString();
-      existingProfile.investmentCount += 1;
-      if (new Date(investment.createdAt) < new Date(existingProfile.firstInvestment)) {
-        existingProfile.firstInvestment = investment.createdAt;
-      }
-    } else {
-      profiles.push({
-        id: investment.investor.email,
-        name: `${investment.investor.firstName} ${investment.investor.lastName}`,
-        email: investment.investor.email,
-        totalInvested: investment.amount,
-        investmentCount: 1,
-        firstInvestment: investment.createdAt,
-        status: investment.status === "paid" ? "active" : investment.status,
-        riskProfile: parseFloat(investment.amount) > 5000 ? "Aggressive" : parseFloat(investment.amount) > 1000 ? "Moderate" : "Conservative",
-        location: "Not provided",
-      });
-    }
-    
-    return profiles;
-  }, []);
+  const investorProfiles: InvestorProfile[] = Array.isArray(investments) 
+    ? (investments as any[]).reduce((profiles: InvestorProfile[], investment: any) => {
+        const existingProfile = profiles.find(p => p.email === investment.investor.email);
+        
+        if (existingProfile) {
+          existingProfile.totalInvested = (parseFloat(existingProfile.totalInvested) + parseFloat(investment.amount)).toString();
+          existingProfile.investmentCount += 1;
+          if (new Date(investment.createdAt) < new Date(existingProfile.firstInvestment)) {
+            existingProfile.firstInvestment = investment.createdAt;
+          }
+        } else {
+          profiles.push({
+            id: investment.investor.email,
+            name: `${investment.investor.firstName} ${investment.investor.lastName}`,
+            email: investment.investor.email,
+            totalInvested: investment.amount,
+            investmentCount: 1,
+            firstInvestment: investment.createdAt,
+            status: investment.status === "paid" ? "active" : investment.status,
+            riskProfile: parseFloat(investment.amount) > 5000 ? "Aggressive" : parseFloat(investment.amount) > 1000 ? "Moderate" : "Conservative",
+            location: "Not provided",
+          });
+        }
+        
+        return profiles;
+      }, [])
+    : [];
 
   // Filter and sort investors
   const filteredInvestors = investorProfiles

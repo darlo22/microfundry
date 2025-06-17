@@ -14,12 +14,13 @@ import { SafeTemplatesModal } from "@/components/modals/safe-templates-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Share, FileText, DollarSign, Rocket, Users, BarChart, TrendingUp, Settings, MessageSquare } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import type { CampaignWithStats, UserStats } from "@/lib/types";
 
 export default function FounderDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showSafeTemplatesModal, setShowSafeTemplatesModal] = useState(false);
@@ -105,6 +106,9 @@ export default function FounderDashboard() {
               <Link href="/founder/settings" className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
                 Settings
               </Link>
+              <Link href="/payment-withdrawal" className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                Payments
+              </Link>
             </nav>
           </div>
         </div>
@@ -181,19 +185,20 @@ export default function FounderDashboard() {
                 </div>
               </Button>
 
-              <Button
-                variant="outline"
-                className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group"
-                onClick={() => setShowSafeTemplatesModal(true)}
-              >
-                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4">
-                  <FileText className="text-white" size={20} />
-                </div>
-                <div className="text-left">
-                  <div className="font-semibold text-gray-900 group-hover:text-fundry-orange">SAFE Templates</div>
-                  <div className="text-sm text-gray-500">Manage agreement templates</div>
-                </div>
-              </Button>
+              <Link href="/payment-withdrawal">
+                <Button
+                  variant="outline"
+                  className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group w-full"
+                >
+                  <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                    <DollarSign className="text-white" size={20} />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-gray-900 group-hover:text-fundry-orange">Payment Withdrawal</div>
+                    <div className="text-sm text-gray-500">Withdraw earnings and manage KYC</div>
+                  </div>
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

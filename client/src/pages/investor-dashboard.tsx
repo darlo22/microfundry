@@ -523,7 +523,8 @@ export default function InvestorDashboard() {
   // Handle tab changes with special behavior for Discover
   const handleTabChange = (value: string) => {
     if (value === 'discover') {
-      handleDiscoverCampaigns();
+      // Instead of navigating away, show discover content within the tab
+      setActiveTab('discover');
     } else {
       setActiveTab(value);
     }
@@ -559,141 +560,123 @@ export default function InvestorDashboard() {
           </TabsList>
 
           <TabsContent value="discover" className="space-y-8">
-            {/* Portfolio Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div 
-                className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-fundry-orange transition-colors"
-                onClick={() => setActiveTab('discover')}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total Invested</p>
-                    <p className="text-3xl font-bold text-gray-900">${stats?.totalInvested || "0"}</p>
-                    <p className="text-sm text-green-600 mt-1">+15% this quarter</p>
-                  </div>
-                  <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <Wallet className="h-6 w-6 text-fundry-orange" />
-                  </div>
-                </div>
-              </div>
-
-              <div 
-                className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-fundry-orange transition-colors"
-                onClick={() => setActiveTab('documents')}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Active Investments</p>
-                    <p className="text-3xl font-bold text-gray-900">{stats?.activeInvestments || 0}</p>
-                    <p className="text-sm text-gray-500 mt-1">3 campaigns closing soon</p>
-                  </div>
-                  <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <PieChart className="h-6 w-6 text-fundry-navy" />
-                  </div>
-                </div>
-              </div>
-
-              <div 
-                className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-fundry-orange transition-colors"
-                onClick={() => setActiveTab('profile')}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Portfolio Value</p>
-                    <p className="text-3xl font-bold text-gray-900">${stats?.estimatedValue || "0.00"}</p>
-                    <p className="text-sm text-green-600 mt-1">+16.4% growth</p>
-                  </div>
-                  <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 text-green-600" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Investment Portfolio */}
+            {/* Search and Filter Section */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Your Investments</CardTitle>
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">All</Button>
-                  <Button variant="outline" size="sm">Active</Button>
-                  <Button variant="outline" size="sm">Completed</Button>
-                </div>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Search className="h-5 w-5" />
+                  Discover Investment Opportunities
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                {investmentsLoading ? (
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search campaigns..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-full sm:w-[200px]">
+                      <Filter className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All Categories">All Categories ({getCategoryCount("All Categories")})</SelectItem>
+                      {Array.from(sectorSet).sort().map((sector) => (
+                        <SelectItem key={sector} value={sector}>
+                          {sector} ({getCategoryCount(sector)})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-orange-50 p-4 rounded-lg border">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Available Campaigns</p>
+                        <p className="text-2xl font-bold text-gray-900">{Array.isArray(allCampaigns) ? allCampaigns.length : 0}</p>
+                      </div>
+                      <div className="h-10 w-10 bg-fundry-orange rounded-lg flex items-center justify-center">
+                        <PieChart className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg border">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Your Investments</p>
+                        <p className="text-2xl font-bold text-gray-900">{stats?.activeInvestments || 0}</p>
+                      </div>
+                      <div className="h-10 w-10 bg-fundry-navy rounded-lg flex items-center justify-center">
+                        <Wallet className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-green-50 p-4 rounded-lg border">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Invested</p>
+                        <p className="text-2xl font-bold text-gray-900">${stats?.totalInvested || "0"}</p>
+                      </div>
+                      <div className="h-10 w-10 bg-green-500 rounded-lg flex items-center justify-center">
+                        <TrendingUp className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Browse All Button */}
+                <div className="text-center">
+                  <Button 
+                    className="bg-fundry-orange hover:bg-orange-600"
+                    onClick={handleDiscoverCampaigns}
+                  >
+                    Browse All Campaigns
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Featured Campaigns */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Featured Campaigns</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {campaignsLoading ? (
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-fundry-orange"></div>
                   </div>
-                ) : investments && investments.length > 0 ? (
-                  <div className="space-y-4">
-                    {investments.map((investment) => (
-                      <InvestmentCard key={investment.id} investment={investment} />
+                ) : filteredCampaigns && filteredCampaigns.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredCampaigns.slice(0, 6).map((campaign: any) => (
+                      <CampaignCard key={campaign.id} campaign={campaign} />
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-gray-500">No investments yet. Discover campaigns to get started!</p>
+                    <p className="text-gray-500">No campaigns found matching your criteria.</p>
                     <Button 
-                      className="mt-4 bg-fundry-orange hover:bg-orange-600"
-                      onClick={handleDiscoverCampaigns}
+                      variant="outline" 
+                      className="mt-4"
+                      onClick={() => {
+                        setSearchTerm("");
+                        setSelectedCategory("All Categories");
+                      }}
                     >
-                      Discover Campaigns
+                      Clear Filters
                     </Button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button
-                    variant="outline"
-                    className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group"
-                    onClick={handleDiscoverCampaigns}
-                  >
-                    <div className="w-10 h-10 bg-fundry-orange rounded-lg flex items-center justify-center mr-4">
-                      <Search className="text-white" size={20} />
-                    </div>
-                    <div className="text-left">
-                      <div className="font-semibold text-gray-900 group-hover:text-fundry-orange">Discover Campaigns</div>
-                      <div className="text-sm text-gray-500">Find new investment opportunities</div>
-                    </div>
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group"
-                    onClick={handleDownloadDocuments}
-                  >
-                    <div className="w-10 h-10 bg-fundry-navy rounded-lg flex items-center justify-center mr-4">
-                      <Download className="text-white" size={20} />
-                    </div>
-                    <div className="text-left">
-                      <div className="font-semibold text-gray-900 group-hover:text-fundry-orange">Download Documents</div>
-                      <div className="text-sm text-gray-500">Get your SAFE agreements</div>
-                    </div>
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group"
-                    onClick={handleManageProfile}
-                  >
-                    <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4">
-                      <Settings className="text-white" size={20} />
-                    </div>
-                    <div className="text-left">
-                      <div className="font-semibold text-gray-900 group-hover:text-fundry-orange">Manage Profile</div>
-                      <div className="text-sm text-gray-500">Update account settings</div>
-                    </div>
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>

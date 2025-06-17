@@ -54,14 +54,14 @@ export default function FounderDashboard() {
 
   // Fetch founder stats
   const { data: stats } = useQuery<UserStats>({
-    queryKey: ["/api/analytics/founder", user?.id],
+    queryKey: [`/api/analytics/founder/${user?.id}`],
     enabled: !!user?.id,
     retry: false,
   });
 
   // Fetch founder campaigns
   const { data: campaigns, isLoading: campaignsLoading } = useQuery<CampaignWithStats[]>({
-    queryKey: ["/api/campaigns/founder", user?.id],
+    queryKey: [`/api/campaigns/founder/${user?.id}`],
     enabled: !!user?.id,
     retry: false,
   });

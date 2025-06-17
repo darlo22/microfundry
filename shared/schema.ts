@@ -32,6 +32,7 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique().notNull(),
   password: varchar("password"),
+  hashedPassword: varchar("hashed_password"),
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
   userType: varchar("user_type", { enum: ["founder", "investor"] }).notNull(),
@@ -46,6 +47,8 @@ export const users = pgTable("users", {
   investmentExperience: varchar("investment_experience"),
   isEmailVerified: boolean("is_email_verified").default(false),
   onboardingCompleted: boolean("onboarding_completed").default(false),
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  passwordLastChanged: timestamp("password_last_changed").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

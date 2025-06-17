@@ -1153,6 +1153,59 @@ Generated on: ${new Date().toLocaleDateString()}
     }
   });
 
+  // Security routes
+  app.put('/api/user/change-password', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+      
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "New password must be at least 8 characters long" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Verify current password
+      const isValidPassword = await comparePasswords(currentPassword, user.hashedPassword);
+      if (!isValidPassword) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+      
+      // Hash new password and update
+      const hashedNewPassword = await hashPassword(newPassword);
+      await storage.updateUserPassword(userId, hashedNewPassword);
+      
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  app.put('/api/user/2fa', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { enabled } = req.body;
+      
+      await storage.updateUser2FA(userId, enabled);
+      
+      res.json({ 
+        message: `Two-factor authentication ${enabled ? 'enabled' : 'disabled'} successfully`,
+        twoFactorEnabled: enabled
+      });
+    } catch (error) {
+      console.error("Error updating 2FA:", error);
+      res.status(500).json({ message: "Failed to update two-factor authentication" });
+    }
+  });
+
   // Notifications routes - using requireAuth for consistency
   app.get('/api/notifications', requireAuth, async (req: any, res) => {
     try {

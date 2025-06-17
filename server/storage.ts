@@ -487,6 +487,27 @@ export class DatabaseStorage implements IStorage {
     `);
     return result.rows[0];
   }
+
+  // Security methods
+  async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        hashedPassword,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUser2FA(userId: string, enabled: boolean): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        twoFactorEnabled: enabled,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
 }
 
 export const storage = new DatabaseStorage();

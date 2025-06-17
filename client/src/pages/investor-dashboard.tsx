@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -23,7 +24,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle, Eye, EyeOff, Smartphone, Tablet } from "lucide-react";
-import { Label } from "@/components/ui/label";
 import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 
@@ -63,6 +63,19 @@ export default function InvestorDashboard() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Payment method modal states
+  const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
+  const [isEditPaymentOpen, setIsEditPaymentOpen] = useState(false);
+  const [isRemovePaymentOpen, setIsRemovePaymentOpen] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<{
+    id: number;
+    type: string;
+    last4: string;
+    expiryMonth: string;
+    expiryYear: string;
+    isDefault: boolean;
+  } | null>(null);
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -100,6 +113,39 @@ export default function InvestorDashboard() {
   const [security, setSecurity] = useState({
     twoFactorEnabled: false,
     passwordLastChanged: "2024-05-18T00:00:00Z",
+  });
+
+  // Mock payment methods data
+  const [paymentMethods, setPaymentMethods] = useState([
+    {
+      id: 1,
+      type: "visa",
+      last4: "4242",
+      expiryMonth: "12",
+      expiryYear: "25",
+      isDefault: true,
+    },
+    {
+      id: 2,
+      type: "mastercard",
+      last4: "8888",
+      expiryMonth: "06",
+      expiryYear: "26",
+      isDefault: false,
+    },
+  ]);
+
+  const [newPaymentMethod, setNewPaymentMethod] = useState({
+    cardNumber: "",
+    expiryMonth: "",
+    expiryYear: "",
+    cvv: "",
+    cardholderName: "",
+  });
+
+  const [editPaymentMethod, setEditPaymentMethod] = useState({
+    expiryMonth: "",
+    expiryYear: "",
   });
 
   // Initialize form with user data
@@ -206,6 +252,92 @@ export default function InvestorDashboard() {
       toast({
         title: "Error",
         description: "Failed to update two-factor authentication. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Add Payment Method Mutation
+  const addPaymentMethodMutation = useMutation({
+    mutationFn: async (data: typeof newPaymentMethod) => {
+      // In a real implementation, this would integrate with a payment processor like Stripe
+      return new Promise(resolve => setTimeout(resolve, 1000));
+    },
+    onSuccess: () => {
+      const newMethod = {
+        id: paymentMethods.length + 1,
+        type: newPaymentMethod.cardNumber.startsWith('4') ? 'visa' : 'mastercard',
+        last4: newPaymentMethod.cardNumber.slice(-4),
+        expiryMonth: newPaymentMethod.expiryMonth,
+        expiryYear: newPaymentMethod.expiryYear,
+        isDefault: paymentMethods.length === 0,
+      };
+      setPaymentMethods(prev => [...prev, newMethod]);
+      setNewPaymentMethod({
+        cardNumber: "",
+        expiryMonth: "",
+        expiryYear: "",
+        cvv: "",
+        cardholderName: "",
+      });
+      setIsAddPaymentOpen(false);
+      toast({
+        title: "Payment Method Added",
+        description: "Your payment method has been added successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add payment method. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Edit Payment Method Mutation
+  const editPaymentMethodMutation = useMutation({
+    mutationFn: async (data: { id: number; expiryMonth: string; expiryYear: string }) => {
+      return new Promise(resolve => setTimeout(resolve, 1000));
+    },
+    onSuccess: (_, data) => {
+      setPaymentMethods(prev => prev.map(method => 
+        method.id === data.id 
+          ? { ...method, expiryMonth: data.expiryMonth, expiryYear: data.expiryYear }
+          : method
+      ));
+      setIsEditPaymentOpen(false);
+      toast({
+        title: "Payment Method Updated",
+        description: "Your payment method has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update payment method. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Remove Payment Method Mutation
+  const removePaymentMethodMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return new Promise(resolve => setTimeout(resolve, 1000));
+    },
+    onSuccess: (_, id) => {
+      setPaymentMethods(prev => prev.filter(method => method.id !== id));
+      setIsRemovePaymentOpen(false);
+      toast({
+        title: "Payment Method Removed",
+        description: "Your payment method has been removed successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to remove payment method. Please try again.",
         variant: "destructive",
       });
     },
@@ -1269,29 +1401,336 @@ export default function InvestorDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Saved Payment Methods */}
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-6 bg-blue-600 rounded flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">VISA</span>
+                {paymentMethods.map((method) => (
+                  <div key={method.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-6 rounded flex items-center justify-center ${
+                          method.type === 'visa' ? 'bg-blue-600' : 'bg-red-600'
+                        }`}>
+                          <span className="text-white text-xs font-bold">
+                            {method.type.toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium">•••• •••• •••• {method.last4}</p>
+                          <p className="text-sm text-gray-600">
+                            Expires {method.expiryMonth}/{method.expiryYear}
+                            {method.isDefault && (
+                              <Badge variant="secondary" className="ml-2">Default</Badge>
+                            )}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">•••• •••• •••• 4242</p>
-                        <p className="text-sm text-gray-600">Expires 12/25</p>
+                      <div className="flex gap-2">
+                        <Dialog open={isEditPaymentOpen && selectedPaymentMethod?.id === method.id} 
+                               onOpenChange={(open) => {
+                                 setIsEditPaymentOpen(open);
+                                 if (!open) setSelectedPaymentMethod(null);
+                               }}>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedPaymentMethod(method);
+                                setEditPaymentMethod({
+                                  expiryMonth: method.expiryMonth,
+                                  expiryYear: method.expiryYear,
+                                });
+                              }}
+                            >
+                              Edit
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                              <DialogTitle>Edit Payment Method</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={(e) => {
+                              e.preventDefault();
+                              editPaymentMethodMutation.mutate({
+                                id: method.id,
+                                expiryMonth: editPaymentMethod.expiryMonth,
+                                expiryYear: editPaymentMethod.expiryYear,
+                              });
+                            }} className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>Card Number</Label>
+                                <Input 
+                                  value={`•••• •••• •••• ${method.last4}`}
+                                  disabled
+                                  className="bg-gray-50"
+                                />
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="editExpiryMonth">Expiry Month</Label>
+                                  <Select 
+                                    value={editPaymentMethod.expiryMonth}
+                                    onValueChange={(value) => setEditPaymentMethod(prev => ({ ...prev, expiryMonth: value }))}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Month" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {Array.from({ length: 12 }, (_, i) => {
+                                        const month = (i + 1).toString().padStart(2, '0');
+                                        return (
+                                          <SelectItem key={month} value={month}>
+                                            {month}
+                                          </SelectItem>
+                                        );
+                                      })}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  <Label htmlFor="editExpiryYear">Expiry Year</Label>
+                                  <Select 
+                                    value={editPaymentMethod.expiryYear}
+                                    onValueChange={(value) => setEditPaymentMethod(prev => ({ ...prev, expiryYear: value }))}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Year" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {Array.from({ length: 10 }, (_, i) => {
+                                        const year = (new Date().getFullYear() + i).toString().slice(-2);
+                                        return (
+                                          <SelectItem key={year} value={year}>
+                                            {year}
+                                          </SelectItem>
+                                        );
+                                      })}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              <div className="flex gap-3 justify-end pt-4">
+                                <Button 
+                                  variant="outline" 
+                                  type="button" 
+                                  onClick={() => setIsEditPaymentOpen(false)}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  type="submit" 
+                                  disabled={editPaymentMethodMutation.isPending}
+                                  className="bg-fundry-orange hover:bg-orange-600"
+                                >
+                                  {editPaymentMethodMutation.isPending ? "Updating..." : "Update"}
+                                </Button>
+                              </div>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
+
+                        <Dialog open={isRemovePaymentOpen && selectedPaymentMethod?.id === method.id} 
+                               onOpenChange={(open) => {
+                                 setIsRemovePaymentOpen(open);
+                                 if (!open) setSelectedPaymentMethod(null);
+                               }}>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => setSelectedPaymentMethod(method)}
+                            >
+                              Remove
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                              <DialogTitle>Remove Payment Method</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <p className="text-sm text-gray-600">
+                                Are you sure you want to remove this payment method? This action cannot be undone.
+                              </p>
+                              
+                              <div className="bg-gray-50 border rounded-lg p-3">
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-8 h-5 rounded flex items-center justify-center ${
+                                    method.type === 'visa' ? 'bg-blue-600' : 'bg-red-600'
+                                  }`}>
+                                    <span className="text-white text-xs font-bold">
+                                      {method.type.toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-sm">•••• •••• •••• {method.last4}</p>
+                                    <p className="text-xs text-gray-600">
+                                      Expires {method.expiryMonth}/{method.expiryYear}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex gap-3 justify-end">
+                                <Button 
+                                  variant="outline" 
+                                  onClick={() => setIsRemovePaymentOpen(false)}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  variant="destructive"
+                                  onClick={() => removePaymentMethodMutation.mutate(method.id)}
+                                  disabled={removePaymentMethodMutation.isPending}
+                                >
+                                  {removePaymentMethodMutation.isPending ? "Removing..." : "Remove"}
+                                </Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">Edit</Button>
-                      <Button variant="outline" size="sm" className="text-red-600">Remove</Button>
                     </div>
                   </div>
-                </div>
+                ))}
 
                 <div className="text-center py-4">
-                  <Button variant="outline">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Payment Method
-                  </Button>
+                  <Dialog open={isAddPaymentOpen} onOpenChange={setIsAddPaymentOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Payment Method
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Add Payment Method</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!newPaymentMethod.cardNumber || !newPaymentMethod.expiryMonth || 
+                            !newPaymentMethod.expiryYear || !newPaymentMethod.cvv || 
+                            !newPaymentMethod.cardholderName) {
+                          toast({
+                            title: "Error",
+                            description: "Please fill in all required fields.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        addPaymentMethodMutation.mutate(newPaymentMethod);
+                      }} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="cardholderName">Cardholder Name</Label>
+                          <Input
+                            id="cardholderName"
+                            value={newPaymentMethod.cardholderName}
+                            onChange={(e) => setNewPaymentMethod(prev => ({ ...prev, cardholderName: e.target.value }))}
+                            placeholder="John Doe"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="cardNumber">Card Number</Label>
+                          <Input
+                            id="cardNumber"
+                            value={newPaymentMethod.cardNumber}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, '');
+                              if (value.length <= 16) {
+                                setNewPaymentMethod(prev => ({ ...prev, cardNumber: value }));
+                              }
+                            }}
+                            placeholder="1234 5678 9012 3456"
+                            maxLength={19}
+                            required
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="expiryMonth">Month</Label>
+                            <Select 
+                              value={newPaymentMethod.expiryMonth}
+                              onValueChange={(value) => setNewPaymentMethod(prev => ({ ...prev, expiryMonth: value }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="MM" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: 12 }, (_, i) => {
+                                  const month = (i + 1).toString().padStart(2, '0');
+                                  return (
+                                    <SelectItem key={month} value={month}>
+                                      {month}
+                                    </SelectItem>
+                                  );
+                                })}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="expiryYear">Year</Label>
+                            <Select 
+                              value={newPaymentMethod.expiryYear}
+                              onValueChange={(value) => setNewPaymentMethod(prev => ({ ...prev, expiryYear: value }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="YY" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: 10 }, (_, i) => {
+                                  const year = (new Date().getFullYear() + i).toString().slice(-2);
+                                  return (
+                                    <SelectItem key={year} value={year}>
+                                      {year}
+                                    </SelectItem>
+                                  );
+                                })}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="cvv">CVV</Label>
+                            <Input
+                              id="cvv"
+                              value={newPaymentMethod.cvv}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '');
+                                if (value.length <= 4) {
+                                  setNewPaymentMethod(prev => ({ ...prev, cvv: value }));
+                                }
+                              }}
+                              placeholder="123"
+                              maxLength={4}
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3 justify-end pt-4">
+                          <Button 
+                            variant="outline" 
+                            type="button" 
+                            onClick={() => setIsAddPaymentOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            disabled={addPaymentMethodMutation.isPending}
+                            className="bg-fundry-orange hover:bg-orange-600"
+                          >
+                            {addPaymentMethodMutation.isPending ? "Adding..." : "Add Payment Method"}
+                          </Button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>

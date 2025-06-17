@@ -32,6 +32,107 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
+import { COUNTRIES_AND_STATES } from "@/data/countries-states";
+
+// Helper function to get banking fields based on country
+const getBankingFieldsForCountry = (country: string) => {
+  const countryConfig: Record<string, { fields: string[]; labels: Record<string, string> }> = {
+    "United States": {
+      fields: ["bankAccount", "routingNumber"],
+      labels: {
+        bankAccount: "Account Number",
+        routingNumber: "Routing Number"
+      }
+    },
+    "United Kingdom": {
+      fields: ["bankAccount", "sortCode"],
+      labels: {
+        bankAccount: "Account Number",
+        sortCode: "Sort Code"
+      }
+    },
+    "Canada": {
+      fields: ["bankAccount", "transitNumber"],
+      labels: {
+        bankAccount: "Account Number",
+        transitNumber: "Transit Number"
+      }
+    },
+    "Australia": {
+      fields: ["bankAccount", "bsb"],
+      labels: {
+        bankAccount: "Account Number",
+        bsb: "BSB Number"
+      }
+    },
+    "Germany": {
+      fields: ["iban", "swiftCode"],
+      labels: {
+        iban: "IBAN",
+        swiftCode: "SWIFT/BIC Code"
+      }
+    },
+    "France": {
+      fields: ["iban", "swiftCode"],
+      labels: {
+        iban: "IBAN",
+        swiftCode: "SWIFT/BIC Code"
+      }
+    },
+    "Italy": {
+      fields: ["iban", "swiftCode"],
+      labels: {
+        iban: "IBAN",
+        swiftCode: "SWIFT/BIC Code"
+      }
+    },
+    "Spain": {
+      fields: ["iban", "swiftCode"],
+      labels: {
+        iban: "IBAN",
+        swiftCode: "SWIFT/BIC Code"
+      }
+    },
+    "Netherlands": {
+      fields: ["iban", "swiftCode"],
+      labels: {
+        iban: "IBAN",
+        swiftCode: "SWIFT/BIC Code"
+      }
+    },
+    "Japan": {
+      fields: ["bankAccount", "bankName", "swiftCode"],
+      labels: {
+        bankAccount: "Account Number",
+        bankName: "Bank Name",
+        swiftCode: "SWIFT Code"
+      }
+    },
+    "Singapore": {
+      fields: ["bankAccount", "swiftCode"],
+      labels: {
+        bankAccount: "Account Number",
+        swiftCode: "SWIFT Code"
+      }
+    },
+    "India": {
+      fields: ["bankAccount", "swiftCode", "bankName"],
+      labels: {
+        bankAccount: "Account Number",
+        swiftCode: "SWIFT Code",
+        bankName: "Bank Name"
+      }
+    }
+  };
+
+  return countryConfig[country] || {
+    fields: ["bankAccount", "swiftCode"],
+    labels: {
+      bankAccount: "Account Number",
+      swiftCode: "SWIFT Code"
+    }
+  };
+};
 
 export default function PaymentWithdrawal() {
   const [, setLocation] = useLocation();
@@ -41,8 +142,16 @@ export default function PaymentWithdrawal() {
   // Withdrawal form state
   const [withdrawalData, setWithdrawalData] = useState({
     amount: "",
+    country: "",
     bankAccount: "",
     routingNumber: "",
+    swiftCode: "",
+    iban: "",
+    sortCode: "",
+    bsb: "",
+    transitNumber: "",
+    bankName: "",
+    bankAddress: "",
     accountType: "checking",
     memo: "",
   });
@@ -94,7 +203,21 @@ export default function PaymentWithdrawal() {
         description: "Your withdrawal request has been submitted and is being processed.",
       });
       setWithdrawalModalOpen(false);
-      setWithdrawalData({ amount: "", bankAccount: "", routingNumber: "", accountType: "checking", memo: "" });
+      setWithdrawalData({ 
+        amount: "", 
+        country: "",
+        bankAccount: "", 
+        routingNumber: "", 
+        swiftCode: "",
+        iban: "",
+        sortCode: "",
+        bsb: "",
+        transitNumber: "",
+        bankName: "",
+        bankAddress: "",
+        accountType: "checking", 
+        memo: "" 
+      });
     },
     onError: (error: any) => {
       toast({
@@ -280,26 +403,58 @@ export default function PaymentWithdrawal() {
                         </div>
 
                         <div>
-                          <Label htmlFor="bankAccount">Bank Account Number</Label>
-                          <Input
-                            id="bankAccount"
-                            value={withdrawalData.bankAccount}
-                            onChange={(e) => setWithdrawalData(prev => ({ ...prev, bankAccount: e.target.value }))}
-                            placeholder="Account number"
-                            required
-                          />
+                          <Label htmlFor="country">Country</Label>
+                          <Select
+                            value={withdrawalData.country}
+                            onValueChange={(value) => {
+                              setWithdrawalData(prev => ({ 
+                                ...prev, 
+                                country: value,
+                                // Reset banking fields when country changes
+                                bankAccount: "",
+                                routingNumber: "",
+                                swiftCode: "",
+                                iban: "",
+                                sortCode: "",
+                                bsb: "",
+                                transitNumber: "",
+                                bankName: "",
+                                bankAddress: ""
+                              }));
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your country" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {COUNTRIES_AND_STATES.map((country) => (
+                                <SelectItem key={country.name} value={country.name}>
+                                  {country.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
 
-                        <div>
-                          <Label htmlFor="routingNumber">Routing Number</Label>
-                          <Input
-                            id="routingNumber"
-                            value={withdrawalData.routingNumber}
-                            onChange={(e) => setWithdrawalData(prev => ({ ...prev, routingNumber: e.target.value }))}
-                            placeholder="Routing number"
-                            required
-                          />
-                        </div>
+                        {/* Dynamic Banking Fields Based on Country */}
+                        {withdrawalData.country && (() => {
+                          const bankingConfig = getBankingFieldsForCountry(withdrawalData.country);
+                          return bankingConfig.fields.map((field) => {
+                            const fieldKey = field as keyof typeof withdrawalData;
+                            return (
+                              <div key={field}>
+                                <Label htmlFor={field}>{bankingConfig.labels[field]}</Label>
+                                <Input
+                                  id={field}
+                                  value={withdrawalData[fieldKey] as string}
+                                  onChange={(e) => setWithdrawalData(prev => ({ ...prev, [field]: e.target.value }))}
+                                  placeholder={bankingConfig.labels[field]}
+                                  required
+                                />
+                              </div>
+                            );
+                          });
+                        })()}
 
                         <div>
                           <Label htmlFor="accountType">Account Type</Label>

@@ -241,11 +241,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/withdrawal-request', requireAuth, async (req: any, res) => {
     try {
-      const { amount, bankAccount, routingNumber, accountType, memo } = req.body;
+      const { 
+        amount, 
+        country,
+        bankAccount, 
+        routingNumber, 
+        swiftCode, 
+        iban, 
+        sortCode, 
+        bsb, 
+        transitNumber, 
+        bankName, 
+        bankAddress,
+        accountType, 
+        memo 
+      } = req.body;
       const userId = req.user.id;
 
-      if (!amount || !bankAccount || !routingNumber) {
-        return res.status(400).json({ message: "Amount, bank account, and routing number are required" });
+      if (!amount || !country || !bankAccount) {
+        return res.status(400).json({ message: "Amount, country, and bank account are required" });
       }
 
       // Validate withdrawal amount against available balance

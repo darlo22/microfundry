@@ -403,7 +403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Store KYC submission in memory (in production, this would be in database)
       kycSubmissions.set(userId, {
-        status: "pending",
+        status: "under_review",
         submittedAt: new Date(),
         data: kycData
       });
@@ -417,7 +417,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         message: "KYC information submitted successfully",
-        status: "pending",
+        status: "under_review",
         submittedAt: new Date().toISOString()
       });
     } catch (error) {

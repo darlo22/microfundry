@@ -268,6 +268,7 @@ export default function PaymentWithdrawal() {
       case "verified":
         return "text-green-600";
       case "pending":
+      case "under_review":
         return "text-yellow-600";
       case "rejected":
         return "text-red-600";
@@ -281,6 +282,7 @@ export default function PaymentWithdrawal() {
       case "verified":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       case "pending":
+      case "under_review":
         return <AlertCircle className="h-4 w-4 text-yellow-600" />;
       case "rejected":
         return <AlertCircle className="h-4 w-4 text-red-600" />;
@@ -587,7 +589,8 @@ export default function PaymentWithdrawal() {
                   {getKycStatusIcon(kycStatus?.status || "not_started")}
                   <div>
                     <p className="font-medium">Status: <span className={getKycStatusColor(kycStatus?.status || "not_started")}>
-                      {kycStatus?.status ? kycStatus.status.charAt(0).toUpperCase() + kycStatus.status.slice(1) : "Not Started"}
+                      {kycStatus?.status === "under_review" ? "Under Review" : 
+                       kycStatus?.status ? kycStatus.status.charAt(0).toUpperCase() + kycStatus.status.slice(1) : "Not Started"}
                     </span></p>
                     {kycStatus?.lastUpdated && (
                       <p className="text-sm text-gray-600">
@@ -596,6 +599,63 @@ export default function PaymentWithdrawal() {
                     )}
                   </div>
                 </div>
+
+                {/* Display submitted KYC information if available */}
+                {(kycStatus?.status === "pending" || kycStatus?.status === "under_review") && (
+                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <h3 className="font-semibold text-yellow-800 mb-3">Submitted KYC Information</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium text-gray-700">Date of Birth:</span>
+                        <span className="ml-2 text-gray-600">Provided</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">SSN:</span>
+                        <span className="ml-2 text-gray-600">****</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Address:</span>
+                        <span className="ml-2 text-gray-600">Provided</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Employment Status:</span>
+                        <span className="ml-2 text-gray-600">Provided</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Annual Income:</span>
+                        <span className="ml-2 text-gray-600">Provided</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Investment Experience:</span>
+                        <span className="ml-2 text-gray-600">Provided</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <h4 className="font-medium text-gray-700 mb-2">Uploaded Documents:</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-sm text-gray-600">Government Issued ID - Uploaded</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-sm text-gray-600">Utility Bill - Uploaded</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-sm text-gray-600">Additional Documents - Uploaded</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                      <p className="text-sm text-blue-800">
+                        <strong>Status:</strong> Your KYC application is under review. You will receive an email notification once the verification is complete. This process typically takes 1-3 business days.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {kycStatus?.status !== "verified" && (
                   <Dialog open={kycModalOpen} onOpenChange={setKycModalOpen}>

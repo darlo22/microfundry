@@ -119,24 +119,24 @@ export default function Footer() {
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex flex-wrap gap-6 mb-4 md:mb-0">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              <Link href="/privacy-policy" className="text-gray-400 hover:text-white transition-colors text-sm">
                 Privacy Policy
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              </Link>
+              <Link href="/terms-of-use" className="text-gray-400 hover:text-white transition-colors text-sm">
                 Terms of Use
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              </Link>
+              <Link href="/cookie-policy" className="text-gray-400 hover:text-white transition-colors text-sm">
                 Cookie Policy
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              </Link>
+              <Link href="/investment-disclaimer" className="text-gray-400 hover:text-white transition-colors text-sm">
                 Investment Disclaimer
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              </Link>
+              <Link href="/safe-agreement-template" className="text-gray-400 hover:text-white transition-colors text-sm">
                 SAFE Agreement Template
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              </Link>
+              <Link href="/investor-accreditation" className="text-gray-400 hover:text-white transition-colors text-sm">
                 Investor Accreditation
-              </a>
+              </Link>
             </div>
             <p className="text-gray-400 text-sm">
               © 2025 Fundry. All rights reserved.

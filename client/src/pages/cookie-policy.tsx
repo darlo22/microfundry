@@ -1,52 +1,9 @@
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Cookie, Settings, Shield, BarChart } from "lucide-react";
+import { Cookie, Settings, Eye, Shield } from "lucide-react";
 
 export default function CookiePolicy() {
-  const cookieTypes = [
-    {
-      name: "Essential Cookies",
-      description: "Required for the platform to function properly",
-      icon: Shield,
-      color: "bg-green-500",
-      examples: [
-        "Authentication tokens",
-        "Session management", 
-        "Security preferences",
-        "Load balancing"
-      ],
-      canDisable: false
-    },
-    {
-      name: "Analytics Cookies",
-      description: "Help us understand how you use our platform",
-      icon: BarChart,
-      color: "bg-blue-500",
-      examples: [
-        "Page views and navigation",
-        "Feature usage statistics",
-        "Performance metrics",
-        "Error tracking"
-      ],
-      canDisable: true
-    },
-    {
-      name: "Preference Cookies",
-      description: "Remember your settings and choices",
-      icon: Settings,
-      color: "bg-purple-500",
-      examples: [
-        "Language preferences",
-        "Theme settings",
-        "Dashboard layout",
-        "Notification preferences"
-      ],
-      canDisable: true
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar title="Cookie Policy" />
@@ -57,283 +14,214 @@ export default function CookiePolicy() {
           <div className="w-16 h-16 bg-fundry-orange rounded-lg flex items-center justify-center mx-auto mb-4">
             <Cookie className="text-white" size={32} />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Cookie Policy</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">🍪 Cookie Policy</h1>
           <p className="text-lg text-gray-600">
-            Last updated: December 16, 2024
+            Effective Date: June 17, 2025
           </p>
           <p className="text-gray-600 mt-2">
-            This Cookie Policy explains how Fundry uses cookies and similar technologies.
+            This Cookie Policy explains how Fundry uses cookies and similar technologies when you visit our platform.
           </p>
         </div>
 
-        {/* What Are Cookies */}
+        {/* Quick Summary */}
         <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">What Are Cookies?</h2>
-            
-            <p className="text-gray-700 mb-4">
-              Cookies are small text files that are stored on your device when you visit a website. 
-              They help websites remember information about your visit, such as your preferences 
-              and login status.
-            </p>
-
-            <p className="text-gray-700 mb-4">
-              We also use similar technologies like web beacons, pixels, and local storage to 
-              enhance your experience on our platform.
-            </p>
-
-            <p className="text-gray-700">
-              Cookies and similar technologies help us provide you with a better, faster, 
-              and safer experience on Fundry.
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Cookie Types */}
-        <div className="space-y-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
-            Types of Cookies We Use
-          </h2>
-
-          {cookieTypes.map((type, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className={`w-12 h-12 ${type.color} rounded-lg flex items-center justify-center mr-4`}>
-                      <type.icon className="text-white" size={24} />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-900">{type.name}</h3>
-                      <p className="text-gray-600 text-sm">{type.description}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    {type.canDisable ? (
-                      <span className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                        Optional
-                      </span>
-                    ) : (
-                      <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
-                        Required
-                      </span>
-                    )}
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <h4 className="font-semibold text-gray-900 mb-2">Examples include:</h4>
-                <ul className="grid grid-cols-2 gap-2">
-                  {type.examples.map((example, exampleIndex) => (
-                    <li key={exampleIndex} className="text-gray-700 text-sm">
-                      • {example}
-                    </li>
-                  ))}
-                </ul>
-                
-                {type.canDisable && (
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <p className="text-blue-800 text-sm">
-                      You can disable these cookies through your browser settings or our 
-                      cookie preference center, though this may affect platform functionality.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* How We Use Cookies */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">How We Use Cookies</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Platform Functionality</h3>
-                <p className="text-gray-700">
-                  Essential cookies enable core features like user authentication, security, 
-                  and basic platform operations. Without these cookies, the platform cannot function properly.
-                </p>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Eye className="mr-3 text-fundry-orange" size={24} />
+              Cookie Usage at a Glance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Shield className="text-white" size={24} />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Essential Only</h3>
+                <p className="text-sm text-gray-600">We use essential cookies for platform functionality and security</p>
               </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">User Experience</h3>
-                <p className="text-gray-700">
-                  Preference cookies remember your settings and choices to provide a personalized 
-                  experience, such as your dashboard layout and notification preferences.
-                </p>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Settings className="text-white" size={24} />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Your Control</h3>
+                <p className="text-sm text-gray-600">You can manage cookie preferences through browser settings</p>
               </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics and Improvement</h3>
-                <p className="text-gray-700">
-                  Analytics cookies help us understand how you use our platform, which features 
-                  are most valuable, and where we can make improvements.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Security</h3>
-                <p className="text-gray-700">
-                  Security cookies help protect your account and detect suspicious activity, 
-                  ensuring a safe environment for fundraising and investing.
-                </p>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Eye className="text-white" size={24} />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">No Tracking</h3>
+                <p className="text-sm text-gray-600">We don't use third-party advertising or tracking cookies</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Third-Party Cookies */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Third-Party Cookies</h2>
-            
-            <p className="text-gray-700 mb-4">
-              We work with trusted third-party services that may place their own cookies on your device:
-            </p>
-
-            <div className="space-y-4">
-              <div className="border-l-4 border-fundry-orange pl-4">
-                <h3 className="font-semibold text-gray-900 mb-1">Analytics Services</h3>
-                <p className="text-gray-700 text-sm">
-                  We use analytics tools to understand platform usage and improve our services.
-                </p>
-              </div>
-
-              <div className="border-l-4 border-blue-500 pl-4">
-                <h3 className="font-semibold text-gray-900 mb-1">Payment Processors</h3>
-                <p className="text-gray-700 text-sm">
-                  Payment processing services may use cookies to facilitate secure transactions.
-                </p>
-              </div>
-
-              <div className="border-l-4 border-green-500 pl-4">
-                <h3 className="font-semibold text-gray-900 mb-1">Authentication</h3>
-                <p className="text-gray-700 text-sm">
-                  Replit's authentication system uses cookies to manage your login session.
-                </p>
-              </div>
-
-              <div className="border-l-4 border-purple-500 pl-4">
-                <h3 className="font-semibold text-gray-900 mb-1">Support Services</h3>
-                <p className="text-gray-700 text-sm">
-                  Customer support tools may use cookies to provide better assistance.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Managing Cookies */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Managing Your Cookie Preferences</h2>
-            
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Cookie Preference Center</h3>
-                <p className="text-gray-700 mb-4">
-                  You can manage your cookie preferences at any time through our cookie preference center. 
-                  This allows you to enable or disable optional cookies while keeping essential ones active.
-                </p>
-                <Button className="bg-fundry-orange hover:bg-orange-600">
-                  <Settings className="mr-2" size={16} />
-                  Manage Cookie Preferences
-                </Button>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Browser Settings</h3>
-                <p className="text-gray-700 mb-3">
-                  You can also control cookies through your browser settings:
-                </p>
-                <ul className="space-y-2 text-gray-700">
-                  <li>• <strong>Chrome:</strong> Settings → Privacy and Security → Cookies and other site data</li>
-                  <li>• <strong>Firefox:</strong> Preferences → Privacy & Security → Cookies and Site Data</li>
-                  <li>• <strong>Safari:</strong> Preferences → Privacy → Manage Website Data</li>
-                  <li>• <strong>Edge:</strong> Settings → Cookies and site permissions → Cookies and site data</li>
-                </ul>
-              </div>
-
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <h4 className="font-semibold text-yellow-800 mb-2">Important Note</h4>
-                <p className="text-yellow-700 text-sm">
-                  Disabling essential cookies will prevent you from using core platform features, 
-                  including logging in, creating campaigns, and making investments.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Cookie Retention */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Cookie Retention</h2>
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Session Cookies</h3>
-                <p className="text-gray-700 text-sm mb-2">
-                  Temporary cookies that are deleted when you close your browser.
-                </p>
-                <p className="text-gray-600 text-xs">
-                  Used for: Authentication, security, temporary preferences
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Persistent Cookies</h3>
-                <p className="text-gray-700 text-sm mb-2">
-                  Stored on your device for a specific period (typically 30 days to 2 years).
-                </p>
-                <p className="text-gray-600 text-xs">
-                  Used for: Saved preferences, analytics, remember login
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-semibold text-gray-900 mb-2">Automatic Cleanup</h4>
-              <p className="text-gray-700 text-sm">
-                We automatically remove expired cookies and regularly review our cookie usage 
-                to ensure we only collect what's necessary for platform functionality.
+        {/* Main Content */}
+        <div className="space-y-8">
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">1️⃣ What Are Cookies?</h2>
+              <p className="text-gray-700 mb-4">
+                Cookies are small text files that are stored on your device when you visit a website. They help websites remember information about your visit, such as your preferred language and other settings.
               </p>
-            </div>
-          </CardContent>
-        </Card>
+              <p className="text-gray-700">
+                Cookies make your browsing experience more efficient and can help provide better, more personalized services.
+              </p>
+            </CardContent>
+          </Card>
 
-        {/* Updates and Contact */}
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Updates and Contact</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Policy Updates</h3>
-                <p className="text-gray-700">
-                  We may update this Cookie Policy from time to time to reflect changes in our 
-                  practices or legal requirements. We'll notify you of significant changes through 
-                  platform notifications or email.
-                </p>
-              </div>
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">2️⃣ How We Use Cookies</h2>
+              
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Essential Cookies</h3>
+              <p className="text-gray-700 mb-4">These cookies are necessary for the platform to function properly:</p>
+              <ul className="space-y-2 text-gray-700 mb-6">
+                <li>• Session management and user authentication</li>
+                <li>• Security features and fraud prevention</li>
+                <li>• Platform functionality and user preferences</li>
+                <li>• Form data persistence during multi-step processes</li>
+              </ul>
 
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Questions or Concerns</h3>
-                <p className="text-gray-700 mb-4">
-                  If you have questions about our cookie practices, please contact us:
-                </p>
-                <div className="space-y-2 text-gray-700">
-                  <p><strong>Email:</strong> privacy@fundry.com</p>
-                  <p><strong>Subject Line:</strong> Cookie Policy Inquiry</p>
-                  <p><strong>Address:</strong> 123 Market Street, Suite 456, San Francisco, CA 94105</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Performance Cookies</h3>
+              <p className="text-gray-700 mb-4">These cookies help us understand how users interact with our platform:</p>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Page load times and performance monitoring</li>
+                <li>• Error tracking and technical issue identification</li>
+                <li>• Basic usage analytics (anonymized)</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">3️⃣ Types of Cookies We Use</h2>
+              
+              <div className="space-y-4">
+                <div className="border-l-4 border-fundry-orange pl-4">
+                  <h4 className="font-semibold text-gray-900">Session Cookies</h4>
+                  <p className="text-gray-700 text-sm">Temporary cookies that expire when you close your browser</p>
+                </div>
+                
+                <div className="border-l-4 border-blue-500 pl-4">
+                  <h4 className="font-semibold text-gray-900">Persistent Cookies</h4>
+                  <p className="text-gray-700 text-sm">Remain on your device until they expire or are deleted</p>
+                </div>
+                
+                <div className="border-l-4 border-green-500 pl-4">
+                  <h4 className="font-semibold text-gray-900">First-Party Cookies</h4>
+                  <p className="text-gray-700 text-sm">Set directly by Fundry for platform functionality</p>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">4️⃣ Cookie Details</h2>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300 text-sm">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border border-gray-300 p-3 text-left">Cookie Name</th>
+                      <th className="border border-gray-300 p-3 text-left">Purpose</th>
+                      <th className="border border-gray-300 p-3 text-left">Duration</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-gray-300 p-3 font-mono">session_id</td>
+                      <td className="border border-gray-300 p-3">User authentication and session management</td>
+                      <td className="border border-gray-300 p-3">Session</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 p-3 font-mono">csrf_token</td>
+                      <td className="border border-gray-300 p-3">Cross-site request forgery protection</td>
+                      <td className="border border-gray-300 p-3">Session</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 p-3 font-mono">user_preferences</td>
+                      <td className="border border-gray-300 p-3">Store user interface preferences</td>
+                      <td className="border border-gray-300 p-3">30 days</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">5️⃣ Managing Your Cookie Preferences</h2>
+              
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Browser Settings</h3>
+              <p className="text-gray-700 mb-4">You can control cookies through your browser settings:</p>
+              <ul className="space-y-2 text-gray-700 mb-6">
+                <li>• <strong>Chrome:</strong> Settings → Privacy and Security → Cookies</li>
+                <li>• <strong>Firefox:</strong> Settings → Privacy & Security → Cookies</li>
+                <li>• <strong>Safari:</strong> Preferences → Privacy → Cookies</li>
+                <li>• <strong>Edge:</strong> Settings → Cookies and Site Permissions</li>
+              </ul>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-yellow-800 text-sm">
+                  <strong>Important:</strong> Disabling essential cookies may prevent you from using certain features of our platform, including user authentication and investment functionality.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">6️⃣ Third-Party Services</h2>
+              
+              <p className="text-gray-700 mb-4">We may use limited third-party services that set their own cookies:</p>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Payment processors (for secure transaction processing)</li>
+                <li>• Analytics services (for platform performance monitoring)</li>
+                <li>• Security services (for fraud prevention and protection)</li>
+              </ul>
+              
+              <p className="text-gray-700 mt-4">
+                These services have their own cookie policies, and we encourage you to review them.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">7️⃣ Updates to This Policy</h2>
+              
+              <p className="text-gray-700">
+                We may update this Cookie Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We will notify users of any significant changes through our platform or via email.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Us</h2>
+              
+              <p className="text-gray-700 mb-4">
+                If you have questions about our use of cookies, please contact us:
+              </p>
+
+              <div className="space-y-2 text-gray-700">
+                <p><strong>Email:</strong> privacy@fundry.com</p>
+                <p><strong>Address:</strong> 123 Market Street, Suite 456, San Francisco, CA 94105</p>
+                <p><strong>Phone:</strong> +1 (555) FUNDRY-1</p>
+              </div>
+
+              <p className="text-gray-700 mt-4">
+                For cookie-related inquiries, please mark your communication as "Cookie Policy Question" 
+                for expedited handling.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <Footer />

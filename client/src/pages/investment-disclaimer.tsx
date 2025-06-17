@@ -1,36 +1,9 @@
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, TrendingDown, DollarSign, Clock, Scale } from "lucide-react";
+import { AlertTriangle, TrendingDown, DollarSign, Shield } from "lucide-react";
 
 export default function InvestmentDisclaimer() {
-  const riskFactors = [
-    {
-      title: "Total Loss of Investment",
-      description: "Early-stage companies have a high failure rate. You may lose your entire investment.",
-      icon: TrendingDown,
-      severity: "high"
-    },
-    {
-      title: "Illiquidity",
-      description: "SAFE investments cannot be easily sold or transferred. Your money may be locked up for years.",
-      icon: Clock,
-      severity: "high"
-    },
-    {
-      title: "Dilution",
-      description: "Future funding rounds may significantly reduce your ownership percentage.",
-      icon: DollarSign,
-      severity: "medium"
-    },
-    {
-      title: "No Voting Rights",
-      description: "SAFE agreements typically do not provide voting rights or board representation.",
-      icon: Scale,
-      severity: "medium"
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar title="Investment Disclaimer" />
@@ -38,287 +11,236 @@ export default function InvestmentDisclaimer() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="w-16 h-16 bg-red-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-red-600 rounded-lg flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="text-white" size={32} />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Investment Disclaimer</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">⚠️ Investment Disclaimer</h1>
           <p className="text-lg text-gray-600">
-            Important Risk Disclosures for Fundry Platform Users
+            Effective Date: June 17, 2025
+          </p>
+          <p className="text-gray-600 mt-2">
+            Important risk disclosure and investment warnings for Fundry platform users.
           </p>
         </div>
 
         {/* Critical Warning */}
         <Card className="mb-8 border-red-300 bg-red-50">
-          <CardContent className="p-6">
-            <div className="flex items-start space-x-4">
-              <AlertTriangle className="text-red-600 mt-1" size={32} />
-              <div>
-                <h2 className="text-2xl font-bold text-red-900 mb-4">CRITICAL INVESTMENT WARNING</h2>
-                <div className="space-y-3 text-red-800">
-                  <p className="font-semibold">
-                    INVESTING IN EARLY-STAGE COMPANIES INVOLVES SUBSTANTIAL RISK AND IS SUITABLE ONLY FOR SOPHISTICATED INVESTORS WHO CAN AFFORD TO LOSE THEIR ENTIRE INVESTMENT.
-                  </p>
-                  <p>
-                    Before investing, carefully consider whether you can afford to lose the money you are investing. These investments are highly speculative and illiquid.
-                  </p>
-                  <p>
-                    Do not invest money that you need for living expenses, emergencies, or other financial obligations.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Key Risk Factors */}
-        <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-2xl text-gray-900">Key Risk Factors</CardTitle>
+            <CardTitle className="flex items-center text-red-800">
+              <AlertTriangle className="mr-3 text-red-600" size={24} />
+              CRITICAL INVESTMENT WARNINGS
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              {riskFactors.map((risk, index) => (
-                <div key={index} className={`p-4 rounded-lg border-l-4 ${
-                  risk.severity === 'high' ? 'border-red-500 bg-red-50' : 'border-yellow-500 bg-yellow-50'
-                }`}>
-                  <div className="flex items-start space-x-3">
-                    <risk.icon className={`mt-1 ${
-                      risk.severity === 'high' ? 'text-red-600' : 'text-yellow-600'
-                    }`} size={24} />
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">{risk.title}</h3>
-                      <p className="text-gray-700 text-sm">{risk.description}</p>
-                    </div>
-                  </div>
+            <div className="space-y-4 text-red-800">
+              <div className="flex items-start space-x-3">
+                <TrendingDown className="text-red-600 mt-1" size={20} />
+                <div>
+                  <p className="font-bold">HIGH RISK OF TOTAL LOSS</p>
+                  <p className="text-sm">You may lose 100% of your investment. Early-stage companies fail frequently.</p>
                 </div>
-              ))}
+              </div>
+              <div className="flex items-start space-x-3">
+                <DollarSign className="text-red-600 mt-1" size={20} />
+                <div>
+                  <p className="font-bold">ILLIQUID INVESTMENTS</p>
+                  <p className="text-sm">Your money will be locked up for years with no guaranteed exit strategy.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <Shield className="text-red-600 mt-1" size={20} />
+                <div>
+                  <p className="font-bold">NO INVESTOR PROTECTIONS</p>
+                  <p className="text-sm">These investments are not protected by FDIC insurance or SEC oversight.</p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* General Risks */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">General Investment Risks</h2>
-            
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Business Failure Risk</h3>
-                <p className="text-gray-700 mb-2">
-                  Most early-stage companies fail. According to industry data, approximately 90% of startups fail, 
-                  with many failing within the first 2-3 years of operation.
+        {/* Main Content */}
+        <div className="space-y-8">
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">1️⃣ Investment Risks</h2>
+              
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Total Loss of Capital</h3>
+              <ul className="space-y-2 text-gray-700 mb-6">
+                <li>• You may lose your entire investment</li>
+                <li>• Early-stage companies have extremely high failure rates (90%+)</li>
+                <li>• No guarantees of returns, profits, or capital preservation</li>
+                <li>• Market conditions can drastically affect startup success</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Illiquidity</h3>
+              <ul className="space-y-2 text-gray-700 mb-6">
+                <li>• Investments are typically illiquid for 5-10 years or longer</li>
+                <li>• No secondary market for selling your investment</li>
+                <li>• Capital may be permanently tied up</li>
+                <li>• Emergency liquidity needs cannot be met through these investments</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Dilution Risk</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Future funding rounds may significantly dilute your ownership</li>
+                <li>• Anti-dilution protections may not apply to small investors</li>
+                <li>• Your percentage ownership can decrease dramatically</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">2️⃣ SAFE Agreement Risks</h2>
+              
+              <ul className="space-y-3 text-gray-700">
+                <li>• <strong>No Immediate Ownership:</strong> SAFE agreements do not provide immediate equity or voting rights</li>
+                <li>• <strong>Conversion Uncertainty:</strong> Conversion to equity depends on future triggering events that may never occur</li>
+                <li>• <strong>Subordination:</strong> SAFE holders typically rank below debt holders in liquidation scenarios</li>
+                <li>• <strong>Valuation Risk:</strong> Conversion terms may result in minimal equity if company valuation increases significantly</li>
+                <li>• <strong>No Maturity Date:</strong> Unlike debt, SAFEs may never convert or pay out</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">3️⃣ Platform Limitations</h2>
+              
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Fundry's Role</h3>
+              <ul className="space-y-2 text-gray-700 mb-6">
+                <li>• Fundry is a technology platform, not an investment adviser</li>
+                <li>• We do not provide investment advice or recommendations</li>
+                <li>• We do not verify or validate company information</li>
+                <li>• We are not responsible for investment outcomes</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Due Diligence</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li>• All due diligence is your responsibility</li>
+                <li>• Company information may be incomplete, outdated, or inaccurate</li>
+                <li>• Past performance does not predict future results</li>
+                <li>• Forward-looking statements are speculative</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">4️⃣ Regulatory Considerations</h2>
+              
+              <ul className="space-y-3 text-gray-700">
+                <li>• <strong>No SEC Registration:</strong> These securities are not registered with the Securities and Exchange Commission</li>
+                <li>• <strong>Limited Oversight:</strong> Private offerings have minimal regulatory oversight</li>
+                <li>• <strong>Investor Limitations:</strong> Certain investments may have investor qualification requirements</li>
+                <li>• <strong>Tax Implications:</strong> Complex tax consequences may apply - consult a tax professional</li>
+                <li>• <strong>Regulatory Changes:</strong> Future regulatory changes may affect your investment</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">5️⃣ Suitability Requirements</h2>
+              
+              <p className="text-gray-700 mb-4 font-semibold">
+                These investments are only suitable for investors who:
+              </p>
+              
+              <ul className="space-y-2 text-gray-700">
+                <li>• Can afford to lose their entire investment</li>
+                <li>• Have adequate liquid savings for emergencies</li>
+                <li>• Understand the high-risk nature of startup investments</li>
+                <li>• Can wait 5-10+ years for potential returns</li>
+                <li>• Have investment experience or professional guidance</li>
+                <li>• Meet any applicable income or net worth requirements</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">6️⃣ No Investment Advice</h2>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                <p className="text-yellow-800 font-semibold mb-3">
+                  IMPORTANT: Fundry does not provide investment advice.
                 </p>
-                <ul className="text-gray-700 text-sm space-y-1">
-                  <li>• Market rejection of products or services</li>
-                  <li>• Inability to achieve product-market fit</li>
-                  <li>• Running out of capital before becoming profitable</li>
-                  <li>• Competition from larger, established companies</li>
-                  <li>• Management team inexperience or turnover</li>
+                <ul className="space-y-2 text-yellow-800 text-sm">
+                  <li>• We are not licensed investment advisers</li>
+                  <li>• All investment decisions are entirely your responsibility</li>
+                  <li>• Consult qualified financial professionals before investing</li>
+                  <li>• Consider your personal financial situation and risk tolerance</li>
+                  <li>• Seek independent legal and tax advice as needed</li>
                 </ul>
               </div>
+            </CardContent>
+          </Card>
 
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Market and Economic Risks</h3>
-                <p className="text-gray-700 mb-2">
-                  External factors beyond the company's control can significantly impact investment outcomes:
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">7️⃣ Forward-Looking Statements</h2>
+              
+              <p className="text-gray-700 mb-4">
+                Company presentations and materials may contain forward-looking statements that:
+              </p>
+              
+              <ul className="space-y-2 text-gray-700">
+                <li>• Are based on current expectations and assumptions</li>
+                <li>• May not reflect actual future performance</li>
+                <li>• Are subject to significant risks and uncertainties</li>
+                <li>• Should not be relied upon as guarantees of future results</li>
+                <li>• May be materially different from actual outcomes</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-red-50 border-red-200">
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-red-800 mb-4">⚠️ Final Warning</h2>
+              
+              <div className="space-y-4 text-red-700">
+                <p className="font-semibold text-lg">
+                  ONLY INVEST MONEY YOU CAN AFFORD TO LOSE COMPLETELY
                 </p>
-                <ul className="text-gray-700 text-sm space-y-1">
-                  <li>• Economic downturns and recessions</li>
-                  <li>• Changes in market conditions and demand</li>
-                  <li>• Regulatory changes affecting the industry</li>
-                  <li>• Technology disruption and obsolescence</li>
-                  <li>• Supply chain disruptions</li>
+                
+                <ul className="space-y-2">
+                  <li>• These are extremely high-risk investments</li>
+                  <li>• The majority of startups fail within the first few years</li>
+                  <li>• Your capital may be permanently lost</li>
+                  <li>• No returns are guaranteed or expected</li>
+                  <li>• Illiquidity may prevent access to your money for years</li>
                 </ul>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Valuation and Pricing Risks</h3>
-                <p className="text-gray-700 mb-2">
-                  Early-stage company valuations are highly speculative and may not reflect actual value:
-                </p>
-                <ul className="text-gray-700 text-sm space-y-1">
-                  <li>• Lack of comparable market data</li>
-                  <li>• Overvaluation due to market hype</li>
-                  <li>• Future funding rounds at lower valuations (down rounds)</li>
-                  <li>• No guarantee of achieving projected growth rates</li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* SAFE-Specific Risks */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">SAFE Agreement Specific Risks</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Conversion Uncertainty</h3>
-                <p className="text-gray-700">
-                  SAFE agreements only convert to equity upon specific triggering events. If these events 
-                  never occur, you may never receive equity in the company.
+                
+                <p className="font-semibold mt-6">
+                  By proceeding with any investment, you acknowledge that you have read, understood, 
+                  and accepted all risks outlined in this disclaimer.
                 </p>
               </div>
+            </CardContent>
+          </Card>
 
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Maturity Date</h3>
-                <p className="text-gray-700">
-                  Unlike traditional debt instruments, SAFEs typically have no maturity date, meaning 
-                  there is no guaranteed timeline for receiving returns.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Subordination to Other Investors</h3>
-                <p className="text-gray-700">
-                  In liquidation scenarios, SAFE holders are typically subordinate to debt holders and 
-                  may receive nothing if the company's assets are insufficient.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Limited Information Rights</h3>
-                <p className="text-gray-700">
-                  SAFE agreements may not provide the same information rights as traditional equity investments, 
-                  limiting your ability to monitor your investment.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Platform Limitations */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Platform Limitations</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Investment Advice</h3>
-                <p className="text-gray-700">
-                  Fundry does not provide investment advice, recommendations, or due diligence services. 
-                  All investment decisions are solely your responsibility.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Limited Due Diligence</h3>
-                <p className="text-gray-700">
-                  While we require certain information from founders, we do not verify the accuracy of 
-                  campaign information or conduct independent due diligence on investment opportunities.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Secondary Market</h3>
-                <p className="text-gray-700">
-                  There is no secondary market for SAFE agreements facilitated through our platform. 
-                  Your investment will be illiquid until a qualifying conversion event occurs.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Investor Qualifications */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Investor Qualifications</h2>
-            
-            <p className="text-gray-700 mb-4">
-              Before investing, ensure you meet the following criteria:
-            </p>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Financial Capability</h3>
-                <ul className="text-gray-700 text-sm space-y-2">
-                  <li>• Can afford to lose entire investment amount</li>
-                  <li>• Investment represents less than 10% of net worth</li>
-                  <li>• Have adequate emergency savings</li>
-                  <li>• No immediate need for invested funds</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Knowledge and Experience</h3>
-                <ul className="text-gray-700 text-sm space-y-2">
-                  <li>• Understand startup investment risks</li>
-                  <li>• Familiar with SAFE agreement terms</li>
-                  <li>• Experience with illiquid investments</li>
-                  <li>• Ability to evaluate business opportunities</li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Legal and Regulatory */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Legal and Regulatory Considerations</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Securities Laws</h3>
-                <p className="text-gray-700">
-                  SAFE investments are securities subject to federal and state securities laws. 
-                  Ensure your investment complies with applicable regulations in your jurisdiction.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Tax Implications</h3>
-                <p className="text-gray-700">
-                  SAFE investments may have complex tax implications. Consult with a qualified 
-                  tax advisor to understand the potential tax consequences of your investment.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No FDIC Insurance</h3>
-                <p className="text-gray-700">
-                  SAFE investments are not bank deposits and are not insured by the FDIC or any 
-                  other government agency.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Final Warning */}
-        <Card className="border-red-300 bg-red-50">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold text-red-900 mb-4">Final Important Reminders</h2>
-            
-            <div className="space-y-3 text-red-800">
-              <p className="font-semibold">
-                • Only invest money you can afford to lose completely
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Information</h2>
+              
+              <p className="text-gray-700 mb-4">
+                For questions about investment risks or this disclaimer:
               </p>
-              <p className="font-semibold">
-                • Diversify your investments across multiple opportunities and asset classes
-              </p>
-              <p className="font-semibold">
-                • Conduct your own due diligence before making any investment decision
-              </p>
-              <p className="font-semibold">
-                • Consult with qualified financial, legal, and tax advisors
-              </p>
-              <p className="font-semibold">
-                • Understand that past performance does not guarantee future results
-              </p>
-            </div>
 
-            <div className="mt-6 p-4 bg-white rounded-lg">
-              <p className="text-gray-900 text-sm">
-                <strong>Disclaimer:</strong> This information is provided for educational purposes only 
-                and does not constitute investment advice. Fundry makes no representations or warranties 
-                about the accuracy or completeness of this information.
+              <div className="space-y-2 text-gray-700">
+                <p><strong>Email:</strong> legal@fundry.com</p>
+                <p><strong>Address:</strong> 123 Market Street, Suite 456, San Francisco, CA 94105</p>
+                <p><strong>Phone:</strong> +1 (555) FUNDRY-1</p>
+              </div>
+
+              <p className="text-gray-700 mt-4">
+                For urgent risk-related inquiries, please mark your communication as "Investment Risk Question" 
+                for expedited handling.
               </p>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <Footer />

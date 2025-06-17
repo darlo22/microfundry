@@ -20,6 +20,7 @@ import TermsOfUse from "@/pages/terms-of-use";
 import CookiePolicy from "@/pages/cookie-policy";
 import InvestmentDisclaimer from "@/pages/investment-disclaimer";
 import SafeAgreementTemplate from "@/pages/safe-agreement-template";
+import InvestorAccreditation from "@/pages/investor-accreditation";
 import FounderDashboard from "@/pages/founder-dashboard";
 import InvestorDashboard from "@/pages/investor-dashboard";
 import CampaignView from "@/pages/campaign-view";
@@ -54,6 +55,7 @@ function Router() {
       <Route path="/cookie-policy" component={CookiePolicy} />
       <Route path="/investment-disclaimer" component={InvestmentDisclaimer} />
       <Route path="/safe-agreement-template" component={SafeAgreementTemplate} />
+      <Route path="/investor-accreditation" component={InvestorAccreditation} />
       <Route path="/founder-dashboard" component={FounderDashboard} />
       <Route path="/founder/dashboard" component={FounderDashboard} />
       <Route path="/investor-dashboard" component={InvestorDashboard} />

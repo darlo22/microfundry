@@ -106,18 +106,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (updateData.teamMembers) {
         try {
           const teamMembers = JSON.parse(updateData.teamMembers);
+          console.log('Processing team members:', teamMembers);
+          console.log('Available files:', files.map(f => ({ fieldname: f.fieldname, filename: f.filename })));
           
           // Process team member photos
           teamMembers.forEach((member: any) => {
             const photoFile = files.find(file => file.fieldname === `teamMemberPhoto_${member.id}`);
+            console.log(`Processing member ${member.id}:`, { 
+              hasPhotoFile: !!photoFile, 
+              currentPhoto: member.photo, 
+              currentPhotoUrl: member.photoUrl 
+            });
+            
             if (photoFile) {
               member.photoUrl = `/uploads/${photoFile.filename}`;
+              console.log(`Set new photoUrl for ${member.id}:`, member.photoUrl);
               // Remove the File object reference
               delete member.photo;
+            } else if (member.photo && typeof member.photo === 'string' && member.photo.startsWith('/uploads/')) {
+              // Preserve existing photoUrl if no new photo uploaded
+              member.photoUrl = member.photo;
+              delete member.photo;
+              console.log(`Preserved existing photoUrl for ${member.id}:`, member.photoUrl);
+            } else if (member.photoUrl) {
+              // Keep existing photoUrl intact
+              delete member.photo;
+              console.log(`Kept existing photoUrl for ${member.id}:`, member.photoUrl);
             }
           });
           
           updateData.teamMembers = JSON.stringify(teamMembers);
+          console.log('Final team members data:', updateData.teamMembers);
         } catch (e) {
           console.error('Error processing team members:', e);
         }

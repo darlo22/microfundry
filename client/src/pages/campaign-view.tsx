@@ -169,11 +169,27 @@ export default function CampaignView() {
               <div className="flex items-start space-x-4">
                 {/* Profile Photo or Avatar */}
                 <div className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  {member.photoUrl ? (
+                  {(member.photoUrl || member.photo) ? (
                     <img 
-                      src={member.photoUrl} 
+                      src={member.photoUrl || member.photo} 
                       alt={member.name || 'Team member'}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.warn('Team member photo failed to load:', member.photoUrl || member.photo);
+                        // Show initials fallback on error
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-full bg-fundry-orange rounded-full flex items-center justify-center">
+                              <span class="text-white text-xl font-bold">
+                                ${member.name?.split(' ').map((n: string) => n[0]).join('') || 'TM'}
+                              </span>
+                            </div>
+                          `;
+                        }
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full bg-fundry-orange rounded-full flex items-center justify-center">

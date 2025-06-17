@@ -86,9 +86,9 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
             id: member.id || `member-${index}`,
             name: member.name || '',
             role: member.role || '',
-            experience: member.experience || '',
-            linkedinProfile: member.linkedinProfile || '',
-            photo: member.photoUrl || ''
+            experience: member.experience || member.bio || '',
+            linkedinProfile: member.linkedinProfile || member.linkedin || '',
+            photo: member.photoUrl || member.photo || ''
           }));
         }
       }
@@ -643,30 +643,61 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                       
                       <div className="space-y-2">
                         <Label htmlFor={`photo-${member.id}`}>Profile Photo</Label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                          <input
-                            id={`photo-${member.id}`}
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                updateTeamMember(member.id, 'photo', file);
-                              }
-                            }}
-                            className="hidden"
-                          />
-                          <label htmlFor={`photo-${member.id}`} className="cursor-pointer flex flex-col items-center gap-2">
-                            <Upload className="w-6 h-6 text-gray-400" />
-                            <span className="text-sm text-gray-600">
-                              {member.photo instanceof File 
-                                ? member.photo.name 
-                                : member.photo && typeof member.photo === 'string' && member.photo !== ''
-                                  ? 'Current photo uploaded'
-                                  : 'Upload profile photo'
-                              }
-                            </span>
-                          </label>
+                        <div className="space-y-3">
+                          {/* Photo Preview */}
+                          {(member.photo && typeof member.photo === 'string' && member.photo !== '') && (
+                            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                              <img 
+                                src={member.photo} 
+                                alt={member.name || 'Team member'}
+                                className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                                onError={(e) => {
+                                  console.warn('Photo failed to load:', member.photo);
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                              <div className="flex-1">
+                                <div className="text-sm font-medium text-gray-900">Current Photo</div>
+                                <div className="text-xs text-gray-500">Photo is uploaded and visible</div>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => updateTeamMember(member.id, 'photo', '')}
+                                className="text-red-600 hover:text-red-800"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
+                          
+                          {/* Upload New Photo */}
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                            <input
+                              id={`photo-${member.id}`}
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  updateTeamMember(member.id, 'photo', file);
+                                }
+                              }}
+                              className="hidden"
+                            />
+                            <label htmlFor={`photo-${member.id}`} className="cursor-pointer flex flex-col items-center gap-2">
+                              <Upload className="w-6 h-6 text-gray-400" />
+                              <span className="text-sm text-gray-600">
+                                {member.photo instanceof File 
+                                  ? `Selected: ${member.photo.name}`
+                                  : (member.photo && typeof member.photo === 'string' && member.photo !== '')
+                                    ? 'Upload new photo'
+                                    : 'Upload profile photo'
+                                }
+                              </span>
+                            </label>
+                          </div>
                         </div>
                       </div>
                     </div>

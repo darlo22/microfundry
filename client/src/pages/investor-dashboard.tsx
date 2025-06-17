@@ -21,7 +21,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle } from "lucide-react";
 import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 
@@ -865,6 +866,205 @@ export default function InvestorDashboard() {
                     </Form>
                   </DialogContent>
                 </Dialog>
+              </CardContent>
+            </Card>
+
+            {/* Security Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Security Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Password Change */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Password</h3>
+                      <p className="text-sm text-gray-600">Last changed 30 days ago</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Key className="h-4 w-4 mr-2" />
+                      Change Password
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Two-Factor Authentication */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Two-Factor Authentication</h3>
+                      <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary" className="text-red-600">Disabled</Badge>
+                      <Button variant="outline" size="sm">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Enable 2FA
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Login Sessions */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Active Sessions</h3>
+                      <p className="text-sm text-gray-600">Manage your active login sessions</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Monitor className="h-4 w-4 mr-2" />
+                      View Sessions
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Payment Methods */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Payment Methods
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Saved Payment Methods */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-6 bg-blue-600 rounded flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">VISA</span>
+                      </div>
+                      <div>
+                        <p className="font-medium">•••• •••• •••• 4242</p>
+                        <p className="text-sm text-gray-600">Expires 12/25</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">Edit</Button>
+                      <Button variant="outline" size="sm" className="text-red-600">Remove</Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center py-4">
+                  <Button variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Payment Method
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Notification Preferences */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Notification Preferences
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Email Notifications */}
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-4">Email Notifications</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Investment Updates</p>
+                        <p className="text-sm text-gray-600">Receive updates from portfolio companies</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">New Opportunities</p>
+                        <p className="text-sm text-gray-600">Get notified about new investment opportunities</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Security Alerts</p>
+                        <p className="text-sm text-gray-600">Important security notifications</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Marketing Communications</p>
+                        <p className="text-sm text-gray-600">Product updates and newsletters</p>
+                      </div>
+                      <Switch />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Push Notifications */}
+                <div className="border-t pt-6">
+                  <h3 className="font-semibold text-gray-900 mb-4">Push Notifications</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Campaign Updates</p>
+                        <p className="text-sm text-gray-600">Real-time updates from your investments</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Investment Reminders</p>
+                        <p className="text-sm text-gray-600">Reminders about pending actions</p>
+                      </div>
+                      <Switch />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Account Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Account Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Data Export */}
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Export Data</h3>
+                      <p className="text-sm text-gray-600">Download a copy of your account data</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Export
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Account Deactivation */}
+                <div className="border border-red-200 rounded-lg p-4 bg-red-50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-red-900">Deactivate Account</h3>
+                      <p className="text-sm text-red-600">Temporarily disable your account</p>
+                    </div>
+                    <Button variant="outline" size="sm" className="border-red-300 text-red-600 hover:bg-red-100">
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                      Deactivate
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

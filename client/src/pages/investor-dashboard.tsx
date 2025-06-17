@@ -923,25 +923,74 @@ export default function InvestorDashboard() {
                   <FileText className="h-5 w-5" />
                   Investment Documents
                 </CardTitle>
+                <p className="text-sm text-gray-600 mt-2">
+                  Download your signed SAFE agreements and investment documents
+                </p>
               </CardHeader>
               <CardContent>
-                {investments && investments.length > 0 ? (
+                {investmentsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-fundry-orange"></div>
+                  </div>
+                ) : investments && investments.length > 0 ? (
                   <div className="space-y-4">
-                    {investments.map((investment) => (
-                      <div key={investment.id} className="border rounded-lg p-4 hover:border-fundry-orange transition-colors">
+                    {investments
+                      .filter(investment => investment.status === 'committed' || investment.status === 'paid' || investment.status === 'completed')
+                      .map((investment) => (
+                      <div key={investment.id} className="border rounded-lg p-6 hover:border-fundry-orange transition-colors bg-white">
                         <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{investment.campaign?.title}</h3>
-                            <p className="text-sm text-gray-600">Investment Amount: ${investment.amount}</p>
-                            <p className="text-sm text-gray-500">Date: {new Date(investment.createdAt).toLocaleDateString()}</p>
-                            <Badge variant="secondary" className="mt-2">
-                              {investment.status}
-                            </Badge>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="w-12 h-12 bg-fundry-orange rounded-lg flex items-center justify-center">
+                                <FileText className="h-6 w-6 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900">{investment.campaign?.title}</h3>
+                                <p className="text-sm text-gray-600">SAFE Agreement</p>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                              <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wide">Investment Amount</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: 'USD'
+                                  }).format(investment.amount)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wide">Investment Date</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {new Date(investment.createdAt).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                  })}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wide">Status</p>
+                                <Badge 
+                                  variant={investment.status === 'completed' ? 'default' : 'secondary'}
+                                  className={investment.status === 'completed' ? 'bg-green-100 text-green-800' : ''}
+                                >
+                                  {investment.status === 'committed' ? 'Signed' : 
+                                   investment.status === 'paid' ? 'Funded' : 
+                                   investment.status === 'completed' ? 'Completed' : investment.status}
+                                </Badge>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wide">Document Type</p>
+                                <p className="text-sm font-medium text-gray-900">SAFE Agreement</p>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex flex-col gap-2 ml-4">
                             <Button
                               variant="outline"
                               size="sm"
+                              className="w-full"
                               onClick={() => {
                                 // Download SAFE agreement for this investment
                                 const link = document.createElement('a');
@@ -950,27 +999,94 @@ export default function InvestorDashboard() {
                                 document.body.appendChild(link);
                                 link.click();
                                 document.body.removeChild(link);
+                                
+                                toast({
+                                  title: "Download Started",
+                                  description: "Your SAFE agreement is being downloaded.",
+                                });
                               }}
                             >
                               <Download className="h-4 w-4 mr-2" />
-                              SAFE Agreement
+                              Download
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-full text-xs"
+                              onClick={() => {
+                                // Open SAFE agreement in new window for viewing
+                                window.open(`/api/investments/${investment.id}/safe-agreement`, '_blank');
+                              }}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View
                             </Button>
                           </div>
                         </div>
                       </div>
                     ))}
+                    
+                    {/* Show message if no signed agreements yet */}
+                    {investments.length > 0 && investments.filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed').length === 0 && (
+                      <div className="text-center py-8 border border-dashed border-gray-300 rounded-lg">
+                        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500 mb-2">Your investments are being processed</p>
+                        <p className="text-sm text-gray-400 mb-4">
+                          SAFE agreements will be available for download once your investments are confirmed.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* Summary Statistics */}
+                    {investments.filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed').length > 0 && (
+                      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <h4 className="font-medium text-gray-900 mb-2">Document Summary</h4>
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div>
+                            <p className="text-2xl font-bold text-fundry-orange">
+                              {investments.filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed').length}
+                            </p>
+                            <p className="text-xs text-gray-600">SAFE Agreements</p>
+                          </div>
+                          <div>
+                            <p className="text-2xl font-bold text-fundry-navy">
+                              {new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: 'USD',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                              }).format(
+                                investments
+                                  .filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed')
+                                  .reduce((sum, inv) => sum + inv.amount, 0)
+                              )}
+                            </p>
+                            <p className="text-xs text-gray-600">Total Invested</p>
+                          </div>
+                          <div>
+                            <p className="text-2xl font-bold text-green-600">
+                              {investments.filter(inv => inv.status === 'completed').length}
+                            </p>
+                            <p className="text-xs text-gray-600">Completed</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500 mb-2">No investment documents yet.</p>
-                    <p className="text-sm text-gray-400 mb-4">
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FileText className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No investment documents yet</h3>
+                    <p className="text-gray-500 mb-6 max-w-md mx-auto">
                       Your SAFE agreements and investment documents will appear here after you invest in campaigns.
                     </p>
                     <Button 
                       className="bg-fundry-orange hover:bg-orange-600"
                       onClick={handleDiscoverCampaigns}
                     >
+                      <Search className="h-4 w-4 mr-2" />
                       Discover Investment Opportunities
                     </Button>
                   </div>

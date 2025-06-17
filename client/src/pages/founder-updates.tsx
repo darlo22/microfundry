@@ -189,7 +189,7 @@ export default function FounderUpdates() {
   };
 
   // Filter updates by selected campaign
-  const filteredUpdates = selectedCampaign 
+  const filteredUpdates = selectedCampaign && selectedCampaign !== "all"
     ? updates.filter((update: CampaignUpdate) => update.campaignId.toString() === selectedCampaign)
     : updates;
 
@@ -376,7 +376,7 @@ export default function FounderUpdates() {
                 <SelectValue placeholder="Filter by campaign" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Campaigns</SelectItem>
+                <SelectItem value="all">All Campaigns</SelectItem>
                 {campaigns.map((campaign: any) => (
                   <SelectItem key={campaign.id} value={campaign.id.toString()}>
                     {campaign.title}

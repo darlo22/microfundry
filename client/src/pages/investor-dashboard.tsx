@@ -76,6 +76,11 @@ export default function InvestorDashboard() {
     isDefault: boolean;
   } | null>(null);
 
+  // Account management modal states
+  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [deactivationReason, setDeactivationReason] = useState("");
+  const [confirmDeactivation, setConfirmDeactivation] = useState("");
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -338,6 +343,59 @@ export default function InvestorDashboard() {
       toast({
         title: "Error",
         description: "Failed to remove payment method. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Export data mutation
+  const exportDataMutation = useMutation({
+    mutationFn: () => apiRequest("/api/user/export-data", "GET"),
+    onSuccess: (data) => {
+      // Create and download JSON file
+      const dataStr = JSON.stringify(data, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `fundry-account-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Data Exported",
+        description: "Your account data has been downloaded successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Export Failed",
+        description: error.message || "Failed to export account data",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Deactivate account mutation
+  const deactivateAccountMutation = useMutation({
+    mutationFn: (data: { reason: string }) =>
+      apiRequest("/api/user/deactivate", "POST", data),
+    onSuccess: () => {
+      toast({
+        title: "Account Deactivated",
+        description: "Your account has been temporarily deactivated",
+      });
+      // Redirect to landing page after deactivation
+      setTimeout(() => {
+        setLocation("/");
+      }, 2000);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Deactivation Failed",
+        description: error.message || "Failed to deactivate account",
         variant: "destructive",
       });
     },
@@ -1818,9 +1876,14 @@ export default function InvestorDashboard() {
                       <h3 className="font-semibold text-gray-900">Export Data</h3>
                       <p className="text-sm text-gray-600">Download a copy of your account data</p>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => exportDataMutation.mutate()}
+                      disabled={exportDataMutation.isPending}
+                    >
                       <Download className="h-4 w-4 mr-2" />
-                      Export
+                      {exportDataMutation.isPending ? "Exporting..." : "Export"}
                     </Button>
                   </div>
                 </div>
@@ -1832,7 +1895,12 @@ export default function InvestorDashboard() {
                       <h3 className="font-semibold text-red-900">Deactivate Account</h3>
                       <p className="text-sm text-red-600">Temporarily disable your account</p>
                     </div>
-                    <Button variant="outline" size="sm" className="border-red-300 text-red-600 hover:bg-red-100">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="border-red-300 text-red-600 hover:bg-red-100"
+                      onClick={() => setIsDeactivateModalOpen(true)}
+                    >
                       <AlertTriangle className="h-4 w-4 mr-2" />
                       Deactivate
                     </Button>

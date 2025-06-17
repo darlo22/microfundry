@@ -1,0 +1,122 @@
+📄 Fundry Terms of Service
+Effective Date: [Insert Date]
+
+1️⃣ Introduction
+Welcome to Fundry (“Platform,” “we,” “us,” or “our”). Fundry is a technology platform that enables startup founders to privately invite individuals within their personal networks to support their business by contributing small investments in exchange for future equity via simple agreements.
+
+By accessing or using Fundry, you (“User,” “Investor,” “Founder”) agree to be bound by these Terms of Service (“Terms”). If you do not agree with these Terms, you may not use Fundry.
+
+2️⃣ Eligibility
+You must be at least 18 years old and legally capable of entering into binding contracts.
+
+You must not be prohibited from using Fundry under the laws of your jurisdiction.
+
+Founders must be authorized to represent their startup or business entity.
+
+3️⃣ Platform Role
+Fundry provides technical tools to facilitate private fundraising.
+
+Fundry is not a broker, investment adviser, financial adviser, or licensed securities dealer.
+
+Fundry does not participate in the negotiation, structuring, valuation, or underwriting of any investment opportunity.
+
+All investment decisions are made entirely at the discretion of Users.
+
+4️⃣ Private Invitation Model
+Fundry facilitates private campaigns that are intended to remain within personal networks.
+
+Campaigns are not publicly marketed, listed, or solicited to the general public.
+
+Campaign links are to be shared privately by Founders with personal contacts.
+
+5️⃣ Investment Process
+Investments made through Fundry are governed by standardized agreements such as SAFE (Simple Agreement for Future Equity).
+
+These agreements do not provide immediate ownership but represent a contractual right to convert into equity upon specific triggering events.
+
+Fundry generates these agreements automatically, but the legal obligation exists solely between the Founder and the Investor.
+
+6️⃣ Investor Risk Disclosure & Disclaimer
+Risk Acknowledgment:
+
+Investing in early-stage companies is highly speculative and risky. By using Fundry, you agree and acknowledge that:
+
+You may lose the entire amount of your investment.
+
+Investments made are illiquid and long-term.
+
+No returns or profits are guaranteed.
+
+Fundry provides no financial, legal, or investment advice.
+
+You are solely responsible for your investment decisions.
+
+Fundry does not verify the accuracy of information provided by Founders.
+
+Fundry is not responsible for the performance, success, or failure of any startup or investment.
+
+Legal Disclaimer:
+
+Fundry is not regulated as a broker-dealer, securities exchange, or financial adviser.
+
+All investments are made at your own discretion and risk.
+
+Fundry operates under private, invitation-only structures that may not be subject to full securities regulations.
+
+Users are responsible for complying with any applicable laws in their jurisdiction.
+
+7️⃣ Founder Responsibilities
+Founders must provide truthful, accurate, and complete information in their campaigns.
+
+Founders are solely responsible for fulfilling any obligations related to their campaigns.
+
+Founders are responsible for ensuring that their campaign does not violate any applicable laws.
+
+8️⃣ Fees and Payment Processing
+Fundry may charge service fees on funds raised, as outlined during campaign creation.
+
+Fundry may partner with third-party payment processors to handle fund collection.
+
+Users authorize Fundry and its payment partners to process transactions as required.
+
+9️⃣ User Conduct
+You agree not to:
+
+Misrepresent any information.
+
+Use Fundry for any illegal, fraudulent, or prohibited activity.
+
+Circumvent or manipulate any platform functions.
+
+Share campaign links publicly in violation of platform rules.
+
+🔟 Account Suspension or Termination
+Fundry may suspend, limit, or terminate any user account at its sole discretion if violations of these Terms or applicable laws occur.
+
+1️⃣1️⃣ Limitation of Liability
+Fundry is not liable for any loss, financial or otherwise, resulting from your use of the platform.
+
+Fundry is not liable for any failure of Founders or startups to perform as expected.
+
+Fundry is not responsible for any errors, omissions, or inaccuracies in campaign materials.
+
+1️⃣2️⃣ No Professional Relationship
+Use of Fundry does not create any fiduciary, advisory, or client relationship.
+
+Fundry does not act as your agent or representative.
+
+1️⃣3️⃣ Jurisdiction and Governing Law
+These Terms are governed by the laws of [Insert Jurisdiction].
+
+Any legal claims shall be resolved in the courts located in [Insert Jurisdiction].
+
+1️⃣4️⃣ Amendments
+Fundry reserves the right to update or modify these Terms at any time.
+
+Continued use of the platform after modifications constitutes acceptance of the new Terms.
+
+1️⃣5️⃣ Entire Agreement
+These Terms, along with any linked legal disclosures, risk acknowledgments, privacy policies, and investor agreements, constitute the full agreement between you and Fundry.
+
+By using Fundry, you acknowledge that you have read, understand, and agree to these Terms of Service.
+

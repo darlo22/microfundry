@@ -358,8 +358,6 @@ export default function Pricing() {
           </CardContent>
         </Card>
 
-
-
         {/* Final CTA */}
         <Card className="bg-gradient-to-r from-fundry-orange to-orange-600 text-white">
           <CardContent className="p-8 text-center">

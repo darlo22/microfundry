@@ -139,7 +139,7 @@ export default function LearnMoreModal({ isOpen, onClose, onGetStarted }: LearnM
             <h3 className="text-2xl font-bold text-center mb-8 text-white">Transparent Pricing</h3>
             
             <div className="grid md:grid-cols-2 gap-8 mb-8">
-              <div className="bg-white/10 rounded-lg p-6 text-center space-y-4 border border-white/20">
+              <div className="bg-gray-800/80 rounded-lg p-6 text-center space-y-4 border border-gray-600/50">
                 <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-lg">
                   <span className="text-2xl font-bold text-white">FREE</span>
                 </div>
@@ -153,7 +153,7 @@ export default function LearnMoreModal({ isOpen, onClose, onGetStarted }: LearnM
                 </div>
               </div>
               
-              <div className="bg-white/10 rounded-lg p-6 text-center space-y-4 border border-fundry-orange/50">
+              <div className="bg-gray-800/80 rounded-lg p-6 text-center space-y-4 border border-fundry-orange/50">
                 <div className="w-20 h-20 bg-fundry-orange rounded-full flex items-center justify-center mx-auto shadow-lg">
                   <span className="text-2xl font-bold text-white">5%</span>
                 </div>
@@ -169,36 +169,36 @@ export default function LearnMoreModal({ isOpen, onClose, onGetStarted }: LearnM
             </div>
 
             {/* Pricing Examples Table */}
-            <div className="bg-white/5 rounded-lg p-6 border border-white/20">
+            <div className="bg-gray-800/80 rounded-lg p-6 border border-gray-600/50">
               <h4 className="text-lg font-semibold text-white mb-4 text-center">Pricing Examples</h4>
               <div className="overflow-x-auto">
                 <table className="w-full text-white">
                   <thead>
-                    <tr className="border-b border-white/30">
+                    <tr className="border-b border-gray-500/50">
                       <th className="text-left py-3 px-4 font-semibold text-white">Amount Raised</th>
                       <th className="text-center py-3 px-4 font-semibold text-white">Platform Fee</th>
                       <th className="text-right py-3 px-4 font-semibold text-white">You Receive</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/20">
-                    <tr className="hover:bg-white/5">
+                  <tbody className="divide-y divide-gray-600/30">
+                    <tr className="hover:bg-gray-700/50">
                       <td className="py-3 px-4 text-white font-medium">$500</td>
-                      <td className="py-3 px-4 text-center text-green-300 font-semibold">$0</td>
+                      <td className="py-3 px-4 text-center text-green-400 font-semibold">$0</td>
                       <td className="py-3 px-4 text-right text-white font-medium">$500</td>
                     </tr>
-                    <tr className="hover:bg-white/5">
+                    <tr className="hover:bg-gray-700/50">
                       <td className="py-3 px-4 text-white font-medium">$1,500</td>
-                      <td className="py-3 px-4 text-center text-orange-300 font-semibold">$75</td>
+                      <td className="py-3 px-4 text-center text-orange-400 font-semibold">$75</td>
                       <td className="py-3 px-4 text-right text-white font-medium">$1,425</td>
                     </tr>
-                    <tr className="hover:bg-white/5">
+                    <tr className="hover:bg-gray-700/50">
                       <td className="py-3 px-4 text-white font-medium">$3,000</td>
-                      <td className="py-3 px-4 text-center text-orange-300 font-semibold">$150</td>
+                      <td className="py-3 px-4 text-center text-orange-400 font-semibold">$150</td>
                       <td className="py-3 px-4 text-right text-white font-medium">$2,850</td>
                     </tr>
-                    <tr className="hover:bg-white/5">
+                    <tr className="hover:bg-gray-700/50">
                       <td className="py-3 px-4 text-white font-medium">$5,000</td>
-                      <td className="py-3 px-4 text-center text-orange-300 font-semibold">$250</td>
+                      <td className="py-3 px-4 text-center text-orange-400 font-semibold">$250</td>
                       <td className="py-3 px-4 text-right text-white font-medium">$4,750</td>
                     </tr>
                   </tbody>

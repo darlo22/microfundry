@@ -56,12 +56,50 @@ export default function CampaignView() {
     retry: false,
   });
 
-  // Fetch recent investors (mock data for now)
-  const recentInvestors = [
-    { initials: "JD", name: "John Doe", amount: "$250", timeAgo: "2 hours ago" },
-    { initials: "SM", name: "Sarah Miller", amount: "$500", timeAgo: "1 day ago" },
-    { initials: "MJ", name: "Mike Johnson", amount: "$100", timeAgo: "2 days ago" },
-  ];
+  // Fetch investments for this campaign
+  const { data: campaignInvestments = [] } = useQuery({
+    queryKey: [`/api/investments/campaign/${campaign?.id}`],
+    enabled: !!campaign?.id,
+  });
+
+  // Helper functions for processing investment data
+  const formatCurrency = (amount: string | number) => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num);
+  };
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const getTimeAgo = (date: string) => {
+    const now = new Date();
+    const past = new Date(date);
+    const diffInMs = now.getTime() - past.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 1) return 'Less than 1 hour ago';
+    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    return past.toLocaleDateString();
+  };
+
+  // Process recent investors from actual investment data
+  const recentInvestors = Array.isArray(campaignInvestments) 
+    ? campaignInvestments.slice(0, 3).map((investment: any) => ({
+        id: investment.id,
+        name: `${investment.investor.firstName} ${investment.investor.lastName}`,
+        initials: getInitials(`${investment.investor.firstName} ${investment.investor.lastName}`),
+        amount: formatCurrency(investment.amount),
+        timeAgo: getTimeAgo(investment.createdAt),
+      }))
+    : [];
 
   const handleBackToDashboard = () => {
     if (user?.userType === "founder") {
@@ -280,10 +318,7 @@ export default function CampaignView() {
     );
   };
 
-  const formatCurrency = (amount: string | number) => {
-    const num = typeof amount === "string" ? parseFloat(amount) : amount;
-    return `$${num.toLocaleString()}`;
-  };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {

@@ -259,10 +259,30 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(investments.createdAt));
   }
 
-  async getInvestmentsByCampaign(campaignId: number): Promise<Investment[]> {
+  async getInvestmentsByCampaign(campaignId: number): Promise<(Investment & { investor: { firstName: string; lastName: string; email: string } })[]> {
     return await db
-      .select()
+      .select({
+        id: investments.id,
+        campaignId: investments.campaignId,
+        investorId: investments.investorId,
+        amount: investments.amount,
+        platformFee: investments.platformFee,
+        totalAmount: investments.totalAmount,
+        status: investments.status,
+        paymentStatus: investments.paymentStatus,
+        agreementSigned: investments.agreementSigned,
+        signedAt: investments.signedAt,
+        ipAddress: investments.ipAddress,
+        createdAt: investments.createdAt,
+        updatedAt: investments.updatedAt,
+        investor: {
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+        }
+      })
       .from(investments)
+      .innerJoin(users, eq(investments.investorId, users.id))
       .where(eq(investments.campaignId, campaignId))
       .orderBy(desc(investments.createdAt));
   }

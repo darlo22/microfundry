@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChartLine, Rocket, TrendingUp, X } from "lucide-react";
+import { ChartLine, Rocket, TrendingUp, X, Briefcase, ArrowLeft } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -98,8 +98,9 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange }:
         description: "You've been logged in successfully.",
       });
       onClose();
-      // Redirect based on user type
-      window.location.href = data.user.userType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
+      // Route based on selected role during sign-in
+      const dashboardRoute = selectedUserType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
+      window.location.href = dashboardRoute;
     },
     onError: (error: any) => {
       toast({
@@ -314,8 +315,87 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange }:
           </form>
         )}
 
-        {mode === "signin" && (
+        {mode === "signin" && currentStep === "userType" && (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <p className="text-gray-600">Choose your role to continue</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Card 
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  selectedUserType === "founder" 
+                    ? "border-fundry-orange bg-orange-50" 
+                    : "hover:border-gray-300"
+                }`}
+                onClick={() => setSelectedUserType("founder")}
+              >
+                <CardContent className="p-6 text-center">
+                  <Briefcase className="w-8 h-8 text-fundry-orange mx-auto mb-3" />
+                  <h4 className="font-semibold text-gray-900 mb-2">Founder</h4>
+                  <p className="text-sm text-gray-600">Access founder dashboard</p>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  selectedUserType === "investor" 
+                    ? "border-fundry-orange bg-orange-50" 
+                    : "hover:border-gray-300"
+                }`}
+                onClick={() => setSelectedUserType("investor")}
+              >
+                <CardContent className="p-6 text-center">
+                  <TrendingUp className="w-8 h-8 text-fundry-orange mx-auto mb-3" />
+                  <h4 className="font-semibold text-gray-900 mb-2">Investor</h4>
+                  <p className="text-sm text-gray-600">Access investor dashboard</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Button
+              onClick={() => setCurrentStep("form")}
+              disabled={!selectedUserType}
+              className="w-full bg-fundry-orange hover:bg-orange-600"
+            >
+              Continue
+            </Button>
+
+            <div className="text-center text-sm text-gray-600">
+              Don't have an account?{" "}
+              <button
+                type="button"
+                onClick={() => handleModeChange("signup")}
+                className="text-fundry-orange hover:underline font-medium"
+              >
+                Create account
+              </button>
+            </div>
+          </div>
+        )}
+
+        {mode === "signin" && currentStep === "form" && (
           <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setCurrentStep("userType")}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <div className="flex items-center gap-2">
+                {selectedUserType === "founder" ? (
+                  <Briefcase className="w-5 h-5 text-fundry-orange" />
+                ) : (
+                  <TrendingUp className="w-5 h-5 text-fundry-orange" />
+                )}
+                <span className="text-sm font-medium capitalize">{selectedUserType}</span>
+              </div>
+            </div>
+
             <div>
               <Label htmlFor="loginEmail">Email</Label>
               <Input

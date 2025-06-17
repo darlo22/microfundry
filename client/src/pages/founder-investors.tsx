@@ -128,12 +128,22 @@ export default function FounderInvestors() {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
+      const formData = new FormData();
+      
+      // Add text fields
+      formData.append('subject', messageData.subject);
+      formData.append('content', messageData.content);
+      formData.append('messageType', messageData.messageType);
+      formData.append('recipients', JSON.stringify(messageData.recipients));
+      
+      // Add file attachments
+      messageData.attachments?.forEach((file: File, index: number) => {
+        formData.append(`attachment_${index}`, file);
+      });
+      
       return await fetch("/api/investor-messages", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(messageData),
+        body: formData, // Don't set Content-Type header for FormData
       }).then(res => {
         if (!res.ok) throw new Error('Failed to send message');
         return res.json();
@@ -152,6 +162,7 @@ export default function FounderInvestors() {
         recipients: "all"
       });
       setSelectedInvestors([]);
+      setAttachments([]);
     },
     onError: (error) => {
       toast({
@@ -663,7 +674,8 @@ export default function FounderInvestors() {
                   subject: messageForm.subject.trim(),
                   content: messageForm.content.trim(),
                   messageType: messageForm.messageType,
-                  recipients: recipientEmails
+                  recipients: recipientEmails,
+                  attachments: attachments
                 };
                 
                 console.log('Sending message with data:', messageData);

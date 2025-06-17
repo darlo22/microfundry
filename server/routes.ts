@@ -608,20 +608,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Investor messages endpoint
-  app.post('/api/investor-messages', requireAuth, async (req: any, res) => {
+  // Investor messages endpoint with file attachment support
+  const messageUpload = multer({
+    dest: 'uploads/message-attachments/',
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+      files: 10 // Maximum 10 files
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'video/mp4', 'video/quicktime', 'video/x-msvideo',
+        'application/pdf',
+        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'text/plain'
+      ];
+      
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Invalid file type') as any, false);
+      }
+    }
+  });
+
+  app.post('/api/investor-messages', requireAuth, messageUpload.any(), async (req: any, res) => {
     try {
       const founderId = req.user.id;
-      const { subject, content, messageType, recipients } = req.body;
+      const { subject, content, messageType } = req.body;
+      let recipients;
+      
+      // Parse recipients JSON string
+      try {
+        recipients = JSON.parse(req.body.recipients || '[]');
+      } catch (e) {
+        recipients = [];
+      }
       
       // Validate required fields
       if (!subject || !content || !recipients || recipients.length === 0) {
         return res.status(400).json({ message: 'Subject, content, and recipients are required' });
       }
 
+      // Process file attachments
+      const attachments = req.files ? req.files.map((file: any) => ({
+        originalName: file.originalname,
+        filename: file.filename,
+        path: file.path,
+        mimetype: file.mimetype,
+        size: file.size
+      })) : [];
+
       // In a real implementation, you would:
       // 1. Save the message to the database
-      // 2. Send emails to the recipients
+      // 2. Send emails to the recipients with attachments
       // 3. Track delivery status
       
       // For now, simulate successful sending
@@ -632,6 +674,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content,
         messageType,
         recipients: Array.isArray(recipients) ? recipients : [recipients],
+        attachments,
         sentAt: new Date(),
         status: 'sent'
       };
@@ -639,7 +682,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Message sent to investors:', {
         subject,
         messageType,
-        recipientCount: Array.isArray(recipients) ? recipients.length : 1
+        recipientCount: Array.isArray(recipients) ? recipients.length : 1,
+        attachmentCount: attachments.length
       });
 
       res.json({ 

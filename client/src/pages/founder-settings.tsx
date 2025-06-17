@@ -69,7 +69,7 @@ export default function FounderSettings() {
   // Update mutations
   const updateProfileMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest("/api/user/profile", "PUT", data);
+      return apiRequest("PUT", "/api/user/profile", data);
     },
     onSuccess: () => {
       toast({
@@ -89,7 +89,7 @@ export default function FounderSettings() {
 
   const updateBusinessMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest(`/api/business-profile/${user?.id}`, "PUT", data);
+      return apiRequest("PUT", `/api/business-profile/${user?.id}`, data);
     },
     onSuccess: () => {
       toast({
@@ -109,7 +109,7 @@ export default function FounderSettings() {
 
   const updateNotificationsMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest("/api/user/notifications", "PUT", data);
+      return apiRequest("PUT", "/api/user/notifications", data);
     },
     onSuccess: () => {
       toast({
@@ -128,28 +128,28 @@ export default function FounderSettings() {
 
   // Initialize form data when user/business data loads
   useState(() => {
-    if (userProfile) {
+    if (userProfile && typeof userProfile === 'object') {
       setPersonalData({
-        firstName: userProfile.firstName || "",
-        lastName: userProfile.lastName || "",
-        email: userProfile.email || "",
-        phone: userProfile.phone || "",
-        location: userProfile.location || "",
-        bio: userProfile.bio || "",
+        firstName: (userProfile as any).firstName || "",
+        lastName: (userProfile as any).lastName || "",
+        email: (userProfile as any).email || "",
+        phone: (userProfile as any).phone || "",
+        location: (userProfile as any).location || "",
+        bio: (userProfile as any).bio || "",
       });
     }
   });
 
   useState(() => {
-    if (businessProfile) {
+    if (businessProfile && typeof businessProfile === 'object') {
       setBusinessData({
-        companyName: businessProfile.companyName || "",
-        website: businessProfile.website || "",
-        industry: businessProfile.industry || "",
-        founded: businessProfile.founded || "",
-        employees: businessProfile.employees || "",
-        description: businessProfile.description || "",
-        address: businessProfile.address || "",
+        companyName: (businessProfile as any).companyName || "",
+        website: (businessProfile as any).website || "",
+        industry: (businessProfile as any).industry || "",
+        founded: (businessProfile as any).founded || "",
+        employees: (businessProfile as any).employees || "",
+        description: (businessProfile as any).description || "",
+        address: (businessProfile as any).address || "",
       });
     }
   });

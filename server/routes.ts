@@ -73,6 +73,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user profile
+  app.put('/api/user/profile', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const updateData = req.body;
+      
+      // Update user profile data
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        ...updateData,
+      });
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
+
+  // Update business profile
+  app.put('/api/business-profile/:userId', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.params.userId;
+      const updateData = req.body;
+      
+      // Ensure user can only update their own profile
+      if (userId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized to update this profile" });
+      }
+      
+      const updatedProfile = await storage.updateBusinessProfile(userId, updateData);
+      res.json(updatedProfile);
+    } catch (error) {
+      console.error("Error updating business profile:", error);
+      res.status(500).json({ message: "Failed to update business profile" });
+    }
+  });
+
+  // Update notification preferences (placeholder endpoint)
+  app.put('/api/user/notifications', requireAuth, async (req: any, res) => {
+    try {
+      // For now, just return success since we don't have notifications table
+      // In a real implementation, this would update notification preferences in the database
+      res.json({ message: "Notification preferences updated successfully" });
+    } catch (error) {
+      console.error("Error updating notification preferences:", error);
+      res.status(500).json({ message: "Failed to update notification preferences" });
+    }
+  });
+
   // Campaign routes
   app.put('/api/campaigns/:id', requireAuth, upload.any(), async (req: any, res) => {
     try {
@@ -237,7 +287,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/campaigns/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const campaign = await storage.getCampaign(parseInt(id));
+      const campaignId = parseInt(id);
+      
+      // Validate that id is a valid number
+      if (isNaN(campaignId)) {
+        return res.status(400).json({ message: "Invalid campaign ID" });
+      }
+      
+      const campaign = await storage.getCampaign(campaignId);
       
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });

@@ -19,19 +19,32 @@ export default function BrowseCampaigns() {
     queryKey: ["/api/campaigns"],
   });
 
+  // Create categories based on actual businessSector data
+  const sectorSet = new Set<string>();
+  campaigns.forEach(c => {
+    if (c.businessSector) {
+      sectorSet.add(c.businessSector);
+    }
+  });
+  const uniqueSectors = Array.from(sectorSet);
+  
   const categories = [
     { id: "all", name: "All Categories", count: campaigns.length },
-    { id: "tech", name: "Technology", count: campaigns.filter(c => c.title.toLowerCase().includes('tech')).length },
-    { id: "health", name: "Healthcare", count: campaigns.filter(c => c.title.toLowerCase().includes('health')).length },
-    { id: "education", name: "Education", count: campaigns.filter(c => c.title.toLowerCase().includes('edu')).length },
-    { id: "fintech", name: "FinTech", count: 0 },
-    { id: "sustainability", name: "Sustainability", count: campaigns.filter(c => c.title.toLowerCase().includes('green')).length }
+    ...uniqueSectors.map(sector => ({
+      id: sector,
+      name: sector,
+      count: campaigns.filter(c => c.businessSector === sector).length
+    }))
   ];
 
   const filteredCampaigns = campaigns.filter(campaign => {
     const matchesSearch = campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         campaign.shortPitch.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
+                         campaign.shortPitch.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (campaign.businessSector && campaign.businessSector.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesCategory = selectedCategory === "all" || campaign.businessSector === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
   });
 
   if (isLoading) {

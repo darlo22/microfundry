@@ -60,18 +60,12 @@ export default function InvestorDashboard() {
     retry: false,
   });
 
-  // Categories for filtering
+  // Create categories based on actual businessSector data
+  const uniqueSectors = Array.isArray(allCampaigns) ? 
+    [...new Set(allCampaigns.map((c: any) => c.businessSector).filter(Boolean))] : [];
   const categories = [
     "All Categories",
-    "Technology",
-    "Healthcare", 
-    "Education",
-    "FinTech",
-    "Sustainability",
-    "Manufacturing",
-    "AI/ML",
-    "E-commerce",
-    "Gaming"
+    ...uniqueSectors
   ];
 
   // Filter campaigns based on search term and category

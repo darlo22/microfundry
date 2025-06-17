@@ -101,7 +101,9 @@ export default function InvestorDashboard() {
         title: "Profile Updated",
         description: "Your profile has been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      // Invalidate and refetch user data to show updated profile
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.refetchQueries({ queryKey: ["/api/user"] });
       setIsEditProfileOpen(false);
     },
     onError: (error: any) => {

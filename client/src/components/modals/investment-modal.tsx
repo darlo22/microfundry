@@ -162,10 +162,10 @@ Platform: Fundry Investment Platform
           onClose();
         }, 1000);
       } else {
-        setCurrentStep('investor-details');
+        setCurrentStep('safe-review');
         toast({
           title: "Successfully signed in",
-          description: "Welcome back! Please complete your investor details.",
+          description: "Welcome back! Let's review your investment agreement.",
         });
       }
     },
@@ -194,10 +194,10 @@ Platform: Fundry Investment Platform
           onClose();
         }, 1000);
       } else {
-        setCurrentStep('investor-details');
+        setCurrentStep('safe-review');
         toast({
           title: "Account created successfully",
-          description: "Welcome to Fundry! Please complete your investor details.",
+          description: "Welcome to Fundry! Let's review your investment agreement.",
         });
       }
     },
@@ -313,14 +313,13 @@ Platform: Fundry Investment Platform
       case 'auth':
         handleAuth();
         break;
-      case 'investor-details':
-        if (validateInvestorDetails()) {
-          setCurrentStep('amount');
-        }
-        break;
       case 'amount':
         if (validateAmount()) {
-          setCurrentStep('safe-review');
+          if (!isAuthenticated) {
+            setCurrentStep('auth');
+          } else {
+            setCurrentStep('safe-review');
+          }
         }
         break;
       case 'safe-review':
@@ -356,14 +355,15 @@ Platform: Fundry Investment Platform
 
   const handlePrevStep = () => {
     switch (currentStep) {
-      case 'investor-details':
-        setCurrentStep('auth');
-        break;
-      case 'amount':
-        setCurrentStep('investor-details');
+      case 'auth':
+        setCurrentStep('amount');
         break;
       case 'safe-review':
-        setCurrentStep('amount');
+        if (!isAuthenticated) {
+          setCurrentStep('auth');
+        } else {
+          setCurrentStep('amount');
+        }
         break;
       case 'terms':
         setCurrentStep('safe-review');
@@ -442,7 +442,6 @@ Platform: Fundry Investment Platform
   const getStepTitle = () => {
     switch (currentStep) {
       case 'auth': return 'Sign In or Create Account';
-      case 'investor-details': return 'Investor Information';
       case 'amount': return 'Investment Amount';
       case 'safe-review': return 'SAFE Agreement Review';
       case 'terms': return 'Terms & Conditions';

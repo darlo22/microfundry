@@ -362,29 +362,27 @@ export default function PaymentWithdrawal() {
                   </div>
                 </div>
                 
-                <div className="mt-6 flex flex-col items-center gap-3">
-                  {kycStatus?.status !== "verified" && (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
-                      <p className="text-yellow-800 text-sm font-medium">
-                        KYC verification required to request withdrawals
-                      </p>
-                      <p className="text-yellow-700 text-xs mt-1">
-                        Complete your identity verification below to access withdrawal features
-                      </p>
-                    </div>
-                  )}
-                  
+                <div className="mt-6 flex justify-center">
+                  <Button 
+                    className="bg-fundry-orange hover:bg-orange-600"
+                    onClick={() => {
+                      if (kycStatus?.status !== "verified") {
+                        toast({
+                          title: "KYC Verification Required",
+                          description: "Please complete your KYC verification below to request withdrawals.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      setWithdrawalModalOpen(true);
+                    }}
+                  >
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Request Withdrawal
+                  </Button>
+
                   <Dialog open={withdrawalModalOpen} onOpenChange={setWithdrawalModalOpen}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        className="bg-fundry-orange hover:bg-orange-600"
-                        disabled={kycStatus?.status !== "verified"}
-                      >
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        Request Withdrawal
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
+                    <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Request Withdrawal</DialogTitle>
                       </DialogHeader>

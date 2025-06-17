@@ -55,6 +55,69 @@ export default function FounderInvestors() {
     recipients: "all"
   });
   const [selectedInvestors, setSelectedInvestors] = useState<string[]>([]);
+  const [attachments, setAttachments] = useState<File[]>([]);
+
+  // File attachment handlers
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const validFiles = files.filter(file => {
+      const maxSize = 10 * 1024 * 1024; // 10MB limit
+      const allowedTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'video/mp4', 'video/quicktime', 'video/x-msvideo',
+        'application/pdf',
+        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'text/plain'
+      ];
+      
+      if (file.size > maxSize) {
+        toast({
+          title: "File too large",
+          description: `${file.name} exceeds 10MB limit`,
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: `${file.name} is not a supported file type`,
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      return true;
+    });
+    
+    setAttachments(prev => [...prev, ...validFiles]);
+    event.target.value = ''; // Reset input
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const getFileIcon = (fileType: string) => {
+    if (fileType.startsWith('image/')) return '🖼️';
+    if (fileType.startsWith('video/')) return '🎥';
+    if (fileType === 'application/pdf') return '📄';
+    if (fileType.includes('word')) return '📝';
+    if (fileType.includes('excel') || fileType.includes('sheet')) return '📊';
+    if (fileType.includes('powerpoint') || fileType.includes('presentation')) return '📽️';
+    return '📎';
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
 
   // Fetch all investments for founder's campaigns
   const { data: investments = [], isLoading } = useQuery({
@@ -474,8 +537,65 @@ export default function FounderInvestors() {
               />
             </div>
 
+            {/* File Attachments */}
+            <div className="space-y-2">
+              <Label>Attachments (Optional)</Label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  id="file-upload"
+                />
+                <label 
+                  htmlFor="file-upload" 
+                  className="cursor-pointer flex flex-col items-center justify-center space-y-2"
+                >
+                  <div className="flex items-center space-x-2 text-gray-600 hover:text-fundry-orange transition-colors">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <span className="text-sm font-medium">Add Files</span>
+                  </div>
+                  <p className="text-xs text-gray-500 text-center">
+                    Images, Videos, PDFs, Documents (Max 10MB each)
+                  </p>
+                </label>
+              </div>
+
+              {/* Show attached files */}
+              {attachments.length > 0 && (
+                <div className="space-y-2">
+                  {attachments.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between bg-gray-100 rounded-lg p-3">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-lg">{getFileIcon(file.type)}</span>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                          <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeAttachment(index)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Preview */}
-            {(messageForm.subject || messageForm.content) && (
+            {(messageForm.subject || messageForm.content || attachments.length > 0) && (
               <div className="border rounded-lg p-4 bg-gray-50">
                 <h4 className="font-medium text-sm text-gray-700 mb-2">Preview</h4>
                 <div className="space-y-2">
@@ -489,6 +609,18 @@ export default function FounderInvestors() {
                     <div>
                       <span className="text-xs text-gray-500">Message:</span>
                       <p className="text-sm whitespace-pre-wrap">{messageForm.content}</p>
+                    </div>
+                  )}
+                  {attachments.length > 0 && (
+                    <div>
+                      <span className="text-xs text-gray-500">Attachments:</span>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {attachments.map((file, index) => (
+                          <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                            {getFileIcon(file.type)} {file.name}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

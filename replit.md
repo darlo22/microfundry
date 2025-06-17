@@ -126,6 +126,7 @@ The deployment uses:
 - June 17, 2025. Implemented comprehensive 2FA system with authenticator app and email support: created database schema with OTP codes table, built TwoFactorService with TOTP generation and QR codes, added complete API endpoints for 2FA setup and verification, integrated setup modal with both authentication methods, connected functionality to founder settings page with backup codes management
 - June 17, 2025. Enhanced investor dashboard Profile page with functional Export and Deactivate buttons: implemented data export API that downloads comprehensive JSON file with user profile, investments, campaigns, and notifications; created secure account deactivation with confirmation modal requiring "DEACTIVATE" typing and reason selection; added proper authentication, validation, and safety measures for both features
 - June 17, 2025. Removed Recent Investors section from campaign view page: eliminated investor listings, "View All Investors" functionality, and related helper functions for cleaner, more focused investment experience
+- June 17, 2025. Fixed currency formatting issues throughout application: updated formatCurrency functions in campaign cards, campaign view, and share modals to properly display decimal places with consistent Intl.NumberFormat implementation showing amounts like $5,000 instead of $50000; replaced simple 2FA enable toggle with comprehensive setup modal requiring proper authenticator app or email verification before enabling two-factor authentication
 
 ## User Preferences
 

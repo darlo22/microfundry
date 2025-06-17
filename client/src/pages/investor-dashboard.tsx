@@ -59,7 +59,7 @@ export default function InvestorDashboard() {
   // Security modal states
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isViewSessionsOpen, setIsViewSessionsOpen] = useState(false);
-  const [isEnable2FAOpen, setIsEnable2FAOpen] = useState(false);
+  const [isTwoFactorSetupOpen, setIsTwoFactorSetupOpen] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -241,27 +241,7 @@ export default function InvestorDashboard() {
     },
   });
 
-  // Toggle 2FA Mutation
-  const toggle2FAMutation = useMutation({
-    mutationFn: async (enabled: boolean) => {
-      return apiRequest("PUT", "/api/user/2fa", { enabled });
-    },
-    onSuccess: (_, enabled) => {
-      toast({
-        title: "Success",
-        description: `Two-factor authentication ${enabled ? 'enabled' : 'disabled'} successfully!`,
-      });
-      setSecurity(prev => ({ ...prev, twoFactorEnabled: enabled }));
-      setIsEnable2FAOpen(false);
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update two-factor authentication. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   // Add Payment Method Mutation
   const addPaymentMethodMutation = useMutation({
@@ -1957,6 +1937,12 @@ export default function InvestorDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Two-Factor Setup Modal */}
+      <TwoFactorSetupModal 
+        isOpen={isTwoFactorSetupOpen} 
+        onClose={() => setIsTwoFactorSetupOpen(false)} 
+      />
 
       <Footer />
     </div>

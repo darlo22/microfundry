@@ -39,13 +39,13 @@ export default function FounderAnalytics() {
     { date: "Week 6", amount: 6200, investors: 8 },
   ];
 
-  const campaignPerformance = campaigns.map(campaign => ({
+  const campaignPerformance = Array.isArray(campaigns) ? (campaigns as any[]).map((campaign: any) => ({
     name: campaign.title,
     raised: parseFloat(campaign.totalRaised || "0"),
     goal: parseFloat(campaign.fundingGoal || "0"),
     investors: campaign.investorCount || 0,
     progress: campaign.progressPercent || 0,
-  }));
+  })) : [];
 
   const investorDistribution = [
     { name: "Small ($25-$500)", value: 45, color: "#22C55E" },
@@ -85,10 +85,10 @@ export default function FounderAnalytics() {
     );
   }
 
-  const totalRaised = parseFloat(founderStats?.totalRaised || "0");
-  const totalInvestors = founderStats?.totalInvestors || 0;
-  const activeCampaigns = founderStats?.activeCampaigns || 0;
-  const conversionRate = founderStats?.conversionRate || 0;
+  const totalRaised = parseFloat((founderStats as any)?.totalRaised || "0");
+  const totalInvestors = (founderStats as any)?.totalInvestors || 0;
+  const activeCampaigns = (founderStats as any)?.activeCampaigns || 0;
+  const conversionRate = (founderStats as any)?.conversionRate || 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -157,7 +157,7 @@ export default function FounderAnalytics() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Campaigns</SelectItem>
-              {campaigns.map((campaign) => (
+              {Array.isArray(campaigns) && (campaigns as any[]).map((campaign: any) => (
                 <SelectItem key={campaign.id} value={campaign.id.toString()}>
                   {campaign.title}
                 </SelectItem>

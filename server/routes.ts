@@ -79,9 +79,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const updateData = req.body;
       
-      // Update user profile data
+      // Get existing user to preserve required fields
+      const existingUser = await storage.getUser(userId);
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Update user profile data while preserving required fields
       const updatedUser = await storage.upsertUser({
         id: userId,
+        email: existingUser.email,
+        userType: existingUser.userType, // Preserve existing user type
         ...updateData,
       });
       

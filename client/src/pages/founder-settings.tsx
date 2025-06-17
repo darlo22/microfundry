@@ -9,12 +9,14 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { User, Building2, Bell, Shield, CreditCard, Key, Mail, Phone, MapPin, Save, AlertTriangle, ArrowLeft, LogOut } from "lucide-react";
 import { useLocation } from "wouter";
 import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
+import { COUNTRIES_AND_STATES, type Country } from "@/data/countries-states";
 
 export default function FounderSettings() {
   const { user } = useAuth();
@@ -39,9 +41,14 @@ export default function FounderSettings() {
     lastName: "",
     email: "",
     phone: "",
-    location: "",
+    country: "",
+    state: "",
     bio: "",
   });
+
+  // Get selected country data for state options
+  const selectedCountry = COUNTRIES_AND_STATES.find(c => c.code === personalData.country);
+  const availableStates = selectedCountry?.states || [];
 
   const [businessData, setBusinessData] = useState({
     companyName: "",
@@ -134,7 +141,8 @@ export default function FounderSettings() {
         lastName: (userProfile as any).lastName || "",
         email: (userProfile as any).email || "",
         phone: (userProfile as any).phone || "",
-        location: (userProfile as any).location || "",
+        country: (userProfile as any).country || "",
+        state: (userProfile as any).state || "",
         bio: (userProfile as any).bio || "",
       });
     }
@@ -291,24 +299,66 @@ export default function FounderSettings() {
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    value={personalData.phone}
+                    onChange={(e) => setPersonalData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      value={personalData.phone}
-                      onChange={(e) => setPersonalData(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder="+1 (555) 123-4567"
-                    />
+                    <Label htmlFor="country">Country</Label>
+                    <Select
+                      value={personalData.country}
+                      onValueChange={(value) => {
+                        setPersonalData(prev => ({ 
+                          ...prev, 
+                          country: value,
+                          state: "" // Reset state when country changes
+                        }));
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRIES_AND_STATES.map((country) => (
+                          <SelectItem key={country.code} value={country.code}>
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      value={personalData.location}
-                      onChange={(e) => setPersonalData(prev => ({ ...prev, location: e.target.value }))}
-                      placeholder="City, State, Country"
-                    />
+                    <Label htmlFor="state">State/Province/Region</Label>
+                    <Select
+                      value={personalData.state}
+                      onValueChange={(value) => setPersonalData(prev => ({ ...prev, state: value }))}
+                      disabled={!personalData.country || availableStates.length === 0}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={
+                          !personalData.country 
+                            ? "Select country first" 
+                            : availableStates.length === 0 
+                              ? "No states available" 
+                              : "Select state"
+                        } />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableStates.map((state) => (
+                          <SelectItem key={state.code} value={state.code}>
+                            {state.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

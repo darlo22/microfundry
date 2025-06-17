@@ -85,6 +85,54 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Store investment context in localStorage when modal opens
+  useEffect(() => {
+    if (isOpen && campaign) {
+      const investmentContext = {
+        campaignId: campaign.id,
+        campaignTitle: campaign.title,
+        selectedAmount,
+        currentStep,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('investmentContext', JSON.stringify(investmentContext));
+    }
+  }, [isOpen, campaign, selectedAmount, currentStep]);
+
+  // Restore investment context when user becomes authenticated
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      const storedContext = localStorage.getItem('investmentContext');
+      if (storedContext) {
+        try {
+          const context = JSON.parse(storedContext);
+          // Check if context is recent (within 30 minutes) and matches current campaign
+          const isRecent = Date.now() - context.timestamp < 30 * 60 * 1000;
+          const isMatchingCampaign = context.campaignId === campaign?.id;
+          
+          if (isRecent && isMatchingCampaign && context.currentStep === 'auth') {
+            setSelectedAmount(context.selectedAmount || 0);
+            setCurrentStep('safe-review');
+            
+            toast({
+              title: "Welcome back!",
+              description: "Continuing your investment process...",
+            });
+          }
+        } catch (error) {
+          console.error('Error parsing investment context:', error);
+        }
+      }
+    }
+  }, [isAuthenticated, isLoading, campaign, toast]);
+
+  // Clear investment context when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      localStorage.removeItem('investmentContext');
+    }
+  }, [isOpen]);
+
   const minimumInvestment = 25;
   const maximumInvestment = 5000;
   const presetAmounts = [100, 250, 500, 1000, 2500];

@@ -81,6 +81,22 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
         description: "Your account has been created successfully.",
       });
       onClose();
+      
+      // Check for investment context before redirecting
+      const storedContext = localStorage.getItem('investmentContext');
+      if (storedContext && selectedUserType === "investor") {
+        try {
+          const context = JSON.parse(storedContext);
+          const isRecent = Date.now() - context.timestamp < 30 * 60 * 1000;
+          if (isRecent) {
+            // Don't redirect, let the investment modal handle continuation
+            return;
+          }
+        } catch (error) {
+          console.error('Error parsing investment context:', error);
+        }
+      }
+      
       // Redirect based on user type
       window.location.href = selectedUserType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
     },
@@ -105,6 +121,22 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
         description: "You've been logged in successfully.",
       });
       onClose();
+      
+      // Check for investment context before redirecting
+      const storedContext = localStorage.getItem('investmentContext');
+      if (storedContext && selectedUserType === "investor") {
+        try {
+          const context = JSON.parse(storedContext);
+          const isRecent = Date.now() - context.timestamp < 30 * 60 * 1000;
+          if (isRecent) {
+            // Don't redirect, let the investment modal handle continuation
+            return;
+          }
+        } catch (error) {
+          console.error('Error parsing investment context:', error);
+        }
+      }
+      
       // Route based on selected role during sign-in
       const dashboardRoute = selectedUserType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
       window.location.href = dashboardRoute;

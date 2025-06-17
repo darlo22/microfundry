@@ -80,11 +80,15 @@ function Router() {
         </>
       )}
       
-      {/* Root path - landing for unauthenticated, home for authenticated */}
-      <Route path="/" component={!isAuthenticated ? Landing : Home} />
+      {/* Root path handling */}
+      <Route path="/">
+        {!isAuthenticated ? <Landing /> : <Home />}
+      </Route>
       
-      {/* Fallback - always show landing for unauthenticated users */}
-      <Route component={!isAuthenticated ? Landing : NotFound} />
+      {/* Catch all routes */}
+      <Route>
+        {!isAuthenticated ? <Landing /> : <NotFound />}
+      </Route>
     </Switch>
   );
 }

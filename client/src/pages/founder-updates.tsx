@@ -237,7 +237,10 @@ export default function FounderUpdates() {
             {/* Right: Logout Button */}
             <Button
               variant="ghost"
-              onClick={() => {
+              onClick={async () => {
+                // Clear the React Query cache before logout
+                const { queryClient } = await import("@/lib/queryClient");
+                queryClient.clear();
                 window.location.href = "/api/logout";
               }}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900"

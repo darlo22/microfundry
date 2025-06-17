@@ -10,6 +10,7 @@ import { ChartLine, Bell, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { FundryLogo } from "@/components/ui/fundry-logo";
+import { queryClient } from "@/lib/queryClient";
 
 interface NavbarProps {
   title?: string;
@@ -21,7 +22,9 @@ export default function Navbar({ title, showNotifications = true, actions }: Nav
   const { user } = useAuth();
   const [location] = useLocation();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Clear the React Query cache before logout
+    queryClient.clear();
     window.location.href = "/api/logout";
   };
 

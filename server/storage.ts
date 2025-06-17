@@ -442,6 +442,54 @@ export class DatabaseStorage implements IStorage {
     // For now, we'll simulate storing the KYC status
     console.log(`Updating KYC status for user ${userId}:`, kycData);
   }
+
+  // Notification methods
+  async getUserNotifications(userId: string): Promise<any[]> {
+    const result = await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+    return result;
+  }
+
+  async markNotificationAsRead(notificationId: number, userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.userId, userId));
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(notifications)
+      .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+    return result[0]?.count || 0;
+  }
+
+  async createNotification(userId: string, type: string, title: string, message: string, metadata?: string): Promise<any> {
+    const [notification] = await db
+      .insert(notifications)
+      .values({
+        userId,
+        type,
+        title,
+        message,
+        metadata,
+        isRead: false,
+        createdAt: new Date()
+      })
+      .returning();
+    return notification;
+  }
 }
 
 export const storage = new DatabaseStorage();

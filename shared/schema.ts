@@ -239,7 +239,7 @@ export const notifications = pgTable("notifications", {
   type: varchar("type").notNull(), // 'update', 'investment', 'security', 'general'
   title: varchar("title").notNull(),
   message: text("message").notNull(),
-  isRead: boolean("is_read").default(false),
+  isRead: boolean("is_read").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   metadata: text("metadata"), // JSON string for additional data
 });

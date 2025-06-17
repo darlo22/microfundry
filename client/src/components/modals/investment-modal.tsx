@@ -303,24 +303,110 @@ Company: ${campaign.title}
 Investor: ${user?.firstName} ${user?.lastName}
 Email: ${user?.email}
 Investment Amount: $${amount}
-Discount Rate: ${campaign.discountRate}%
-Valuation Cap: $${campaign.valuationCap}
+Discount Rate: ${campaign.discountRate || 20}.00%
+Valuation Cap: $${(campaign.valuationCap || 1000000).toLocaleString()}.00
 Date: ${new Date().toLocaleDateString()}
 
 This agreement represents the investor's commitment to invest in ${campaign.title} under the terms of a Simple Agreement for Future Equity (SAFE).
 
 Investment Terms:
 - Investment Amount: $${amount}
-- Discount Rate: ${campaign.discountRate}%
-- Valuation Cap: $${campaign.valuationCap || 'Not applicable'}
+- Discount Rate: ${campaign.discountRate || 20}.00%
+- Valuation Cap: $${(campaign.valuationCap || 1000000).toLocaleString()}.00
 - Pro Rata Rights: Included
 
 The investment will convert to equity shares upon the next qualifying financing round or liquidity event.
 
-Investor Signature: ${signatureData}
+ARTICLE 1: DEFINITIONS
+
+1.1 "Change in Control" means (a) a transaction or series of related transactions in which any "person" or "group" becomes the beneficial owner of more than 50% of the outstanding voting securities of the Company, or (b) any reorganization, merger or consolidation of the Company.
+
+1.2 "Company Capitalization" means the sum, as of immediately prior to the Equity Financing, of (a) all shares of Capital Stock issued and outstanding, assuming exercise or conversion of all outstanding vested and unvested options, warrants and other convertible securities, but excluding this Safe and all other Safes.
+
+1.3 "Conversion Price" means either: (a) the Safe Price or (b) the Discount Price, whichever calculation results in a greater number of shares of Safe Preferred Stock.
+
+1.4 "Discount Price" means the price per share of the Standard Preferred Stock sold in the Equity Financing multiplied by the Discount Rate.
+
+1.5 "Discount Rate" means ${campaign.discountRate || 20}.00%.
+
+1.6 "Dissolution Event" means (a) a voluntary termination of operations, (b) a general assignment for the benefit of the Company's creditors or (c) any other liquidation, dissolution or winding up of the Company.
+
+1.7 "Equity Financing" means a bona fide transaction or series of transactions with the principal purpose of raising capital, pursuant to which the Company issues and sells Preferred Stock at a fixed valuation.
+
+1.8 "Initial Public Offering" means the closing of the Company's first firm commitment underwritten initial public offering of Common Stock pursuant to a registration statement filed under the Securities Act.
+
+1.9 "Liquidity Event" means a Change in Control, a Dissolution Event or an Initial Public Offering.
+
+1.10 "Pro Rata Rights" means a contractual right, but not the obligation, of the Investor to purchase its pro rata share of Private Securities that the Company may issue after the Safe is executed.
+
+1.11 "Safe Price" means $${((amount / (campaign.valuationCap || 1000000)) * 1000000).toFixed(6)} per share.
+
+1.12 "Valuation Cap" means $${(campaign.valuationCap || 1000000).toLocaleString()}.00.
+
+ARTICLE 2: CONVERSION EVENTS
+
+2.1 Equity Financing. If there is an Equity Financing before the expiration or termination of this Safe, the Company will automatically issue to the Investor either: (a) a number of shares of Safe Preferred Stock equal to the Purchase Amount divided by the Conversion Price or (b) at the option of the Investor, shares of Standard Preferred Stock.
+
+2.2 Liquidity Event. If there is a Liquidity Event before the expiration or termination of this Safe, the Investor will, at the Investor's option, either: (a) receive a cash payment equal to the Purchase Amount or (b) automatically receive from the Company a number of shares of Common Stock equal to the Purchase Amount divided by the Liquidity Price.
+
+2.3 Dissolution Event. If there is a Dissolution Event before this Safe expires or terminates, the Investor will receive a cash payment equal to the Purchase Amount, due and payable to the Investor immediately prior to, or concurrent with, the consummation of the Dissolution Event.
+
+ARTICLE 3: COMPANY REPRESENTATIONS
+
+3.1 The Company is a corporation duly organized, validly existing and in good standing under the laws of its jurisdiction of incorporation.
+
+3.2 The execution, delivery and performance by the Company of this Safe is within the power of the Company and has been duly authorized by all necessary corporate actions on the part of the Company.
+
+3.3 This Safe constitutes a legal, valid and binding obligation of the Company, enforceable against the Company in accordance with its terms.
+
+ARTICLE 4: INVESTOR REPRESENTATIONS
+
+4.1 The Investor has full legal capacity, power and authority to execute and deliver this Safe and to perform the Investor's obligations hereunder.
+
+4.2 This Safe constitutes valid and binding obligations of the Investor, enforceable in accordance with its terms.
+
+4.3 The Investor is an accredited investor as such term is defined in Rule 501 of Regulation D under the Securities Act.
+
+4.4 The Investor has been advised that this Safe and the underlying securities have not been registered under the Securities Act, or any state securities laws and, therefore, cannot be resold unless they are registered under the Securities Act and applicable state securities laws or unless an exemption from such registration requirements is available.
+
+ARTICLE 5: ADDITIONAL PROVISIONS
+
+5.1 Pro Rata Rights. The Investor shall have Pro Rata Rights, provided the Investor's Purchase Amount is not less than $${Math.max(1000, amount)}.
+
+5.2 Entire Agreement. This Safe constitutes the full and complete understanding and agreement between the parties with respect to the subject matter hereof, and supersedes all prior understandings and agreements relating to such subject matter.
+
+5.3 Notices. Any notice required or permitted by this Safe will be deemed sufficient when delivered personally or by overnight courier or sent by email to the relevant address listed on the signature page.
+
+5.4 Governing Law. This Safe and all rights and obligations hereunder are governed by the laws of the State of Delaware, without regard to the conflicts of law provisions of such jurisdiction.
+
+5.5 Binding Effect. This Safe shall be binding upon and inure to the benefit of the parties and their successors and assigns.
+
+5.6 Severability. If one or more provisions of this Safe are held to be unenforceable under applicable law, the parties agree to renegotiate such provision in good faith.
+
+5.7 Amendment. This Safe may be amended, modified or waived with the written consent of the Company and the Investor.
+
+ARTICLE 6: SIGNATURE
+
+IN WITNESS WHEREOF, the undersigned have executed this Safe as of the date first written above.
+
+COMPANY: ${campaign.title}
+
+By: _________________________
+Name: [Founder Name]
+Title: Chief Executive Officer
+
+INVESTOR: ${user?.firstName} ${user?.lastName}
+
+Email: ${user?.email}
+Investment Amount: $${amount}
 Date: ${new Date().toLocaleDateString()}
 
-This is a legally binding agreement. Please consult with legal counsel before proceeding.`;
+Investor Signature:
+Date: ${new Date().toLocaleDateString()}
+
+This is a legally binding agreement. Please consult with legal counsel before proceeding.
+
+IMPORTANT NOTICE: This investment involves significant risk and may result in the loss of the entire investment amount. The investor should consult with legal and financial advisors before executing this agreement.`;
   };
 
   const downloadSafeAgreement = (content: string, companyName: string, amount: number) => {

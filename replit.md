@@ -103,6 +103,7 @@ The deployment uses:
 - June 17, 2025. Completed comprehensive legal documentation suite: created Cookie Policy, Investment Disclaimer, SAFE Agreement Template, and Investor Accreditation pages with professional content, proper routing, and footer navigation integration; all legal pages now stable and persistent with detailed risk disclosures, regulatory information, and professional legal frameworks
 - June 17, 2025. Implemented complete 7-step investment flow with proper authentication and data capture: created comprehensive investment process (Amount → Auth → SAFE Review → Terms → Signature → Payment → Confirmation) with progress indicators, investor authentication modal for step 2, real user data integration into SAFE Agreement preview, downloadable SAFE Agreement with populated investor information, and $25 minimum investment threshold
 - June 17, 2025. Fixed logout functionality to properly redirect users to landing page after session termination instead of returning JSON response
+- June 17, 2025. Resolved 404 error after logout by restructuring route configuration: made public routes always accessible, conditionally rendered authenticated routes, and improved fallback routing to show landing page for unauthenticated users instead of 404 errors
 
 ## User Preferences
 

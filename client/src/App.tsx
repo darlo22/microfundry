@@ -39,7 +39,7 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={!isAuthenticated ? Landing : Home} />
+      {/* Public routes always accessible */}
       <Route path="/landing" component={Landing} />
       <Route path="/about" component={About} />
       <Route path="/pricing" component={Pricing} />
@@ -56,13 +56,24 @@ function Router() {
       <Route path="/investment-disclaimer" component={InvestmentDisclaimer} />
       <Route path="/safe-agreement-template" component={SafeAgreementTemplate} />
       <Route path="/investor-accreditation" component={InvestorAccreditation} />
-      <Route path="/founder-dashboard" component={FounderDashboard} />
-      <Route path="/founder/dashboard" component={FounderDashboard} />
-      <Route path="/investor-dashboard" component={InvestorDashboard} />
-      <Route path="/investor/dashboard" component={InvestorDashboard} />
       <Route path="/campaign/:id" component={CampaignView} />
       <Route path="/c/:privateLink" component={CampaignView} />
-      <Route component={NotFound} />
+      
+      {/* Authenticated routes */}
+      {isAuthenticated && (
+        <>
+          <Route path="/founder-dashboard" component={FounderDashboard} />
+          <Route path="/founder/dashboard" component={FounderDashboard} />
+          <Route path="/investor-dashboard" component={InvestorDashboard} />
+          <Route path="/investor/dashboard" component={InvestorDashboard} />
+        </>
+      )}
+      
+      {/* Root path - landing for unauthenticated, home for authenticated */}
+      <Route path="/" component={!isAuthenticated ? Landing : Home} />
+      
+      {/* Fallback - always show landing for unauthenticated users */}
+      <Route component={!isAuthenticated ? Landing : NotFound} />
     </Switch>
   );
 }

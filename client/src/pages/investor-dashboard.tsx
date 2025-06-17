@@ -465,6 +465,13 @@ export default function InvestorDashboard() {
     retry: false,
   });
 
+  // Fetch updates from invested campaigns
+  const { data: investorUpdates, isLoading: updatesLoading } = useQuery({
+    queryKey: ["/api/campaign-updates/investor", user?.id],
+    enabled: !!user?.id,
+    retry: false,
+  });
+
   // Create categories based on actual businessSector data
   const sectorSet = new Set<string>();
   if (Array.isArray(allCampaigns)) {
@@ -693,89 +700,81 @@ export default function InvestorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {/* Sample updates from portfolio companies */}
-                  <div className="border-l-4 border-fundry-orange bg-orange-50 p-6 rounded-r-lg">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">TechFlow Solutions - Product Milestone</h3>
-                        <p className="text-sm text-gray-600">2 days ago</p>
-                      </div>
-                      <Badge variant="secondary">Milestone</Badge>
+                  {updatesLoading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange mx-auto"></div>
+                      <p className="text-gray-500 mt-2">Loading updates...</p>
                     </div>
-                    <p className="text-gray-700 mb-4">
-                      Exciting news! We've successfully launched our beta version and onboarded our first 1,000 users. 
-                      The response has been overwhelming, with 92% user satisfaction rate. We're on track for our Q4 launch.
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <Button variant="outline" size="sm">
-                        Reply
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        👍 Like (12)
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Share
-                      </Button>
-                    </div>
-                  </div>
+                  ) : investorUpdates && Array.isArray(investorUpdates) && investorUpdates.length > 0 ? (
+                    investorUpdates.map((update: any) => {
+                      const getBorderColor = (type: string) => {
+                        switch (type?.toLowerCase()) {
+                          case 'milestone': return 'border-fundry-orange bg-orange-50';
+                          case 'financial': return 'border-blue-500 bg-blue-50';
+                          case 'team': return 'border-green-500 bg-green-50';
+                          case 'announcement': return 'border-purple-500 bg-purple-50';
+                          case 'newsletter': return 'border-indigo-500 bg-indigo-50';
+                          default: return 'border-gray-500 bg-gray-50';
+                        }
+                      };
 
-                  <div className="border-l-4 border-blue-500 bg-blue-50 p-6 rounded-r-lg">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">GreenTech Innovations - Financial Update</h3>
-                        <p className="text-sm text-gray-600">1 week ago</p>
-                      </div>
-                      <Badge variant="secondary">Financial</Badge>
-                    </div>
-                    <p className="text-gray-700 mb-4">
-                      Q3 revenue exceeded our projections by 45%! We've secured three major enterprise clients and 
-                      our monthly recurring revenue is now at $85,000. Thank you for believing in our vision.
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <Button variant="outline" size="sm">
-                        Reply
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        👍 Like (18)
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Share
-                      </Button>
-                    </div>
-                  </div>
+                      const formatDate = (dateString: string) => {
+                        const date = new Date(dateString);
+                        const now = new Date();
+                        const diffTime = Math.abs(now.getTime() - date.getTime());
+                        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        if (diffDays === 0) return 'Today';
+                        if (diffDays === 1) return '1 day ago';
+                        if (diffDays < 7) return `${diffDays} days ago`;
+                        if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+                        return `${Math.floor(diffDays / 30)} months ago`;
+                      };
 
-                  <div className="border-l-4 border-green-500 bg-green-50 p-6 rounded-r-lg">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">HealthBridge - Team Expansion</h3>
-                        <p className="text-sm text-gray-600">2 weeks ago</p>
-                      </div>
-                      <Badge variant="secondary">Team</Badge>
+                      return (
+                        <div key={update.id} className={`border-l-4 p-6 rounded-r-lg ${getBorderColor(update.type)}`}>
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h3 className="font-semibold text-gray-900">
+                                {update.campaign?.title} - {update.title}
+                              </h3>
+                              <p className="text-sm text-gray-600">
+                                {update.createdAt ? formatDate(update.createdAt) : 'Recently'}
+                              </p>
+                            </div>
+                            <Badge variant="secondary" className="capitalize">
+                              {update.type || 'General'}
+                            </Badge>
+                          </div>
+                          <p className="text-gray-700 mb-4 whitespace-pre-wrap">
+                            {update.content}
+                          </p>
+                          <div className="flex items-center gap-3">
+                            <Button variant="outline" size="sm">
+                              Reply
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              👍 Like
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              Share
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-8 border border-dashed border-gray-300 rounded-lg">
+                      <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500 mb-2">No updates from your investments yet.</p>
+                      <p className="text-sm text-gray-400 mb-4">
+                        Updates from founders will appear here once you invest in campaigns.
+                      </p>
+                      <Button variant="outline" className="mt-3" onClick={handleDiscoverCampaigns}>
+                        Discover Investment Opportunities
+                      </Button>
                     </div>
-                    <p className="text-gray-700 mb-4">
-                      We're thrilled to announce that we've hired our first VP of Engineering! Dr. Sarah Chen joins us 
-                      from Google Health and brings 15 years of healthcare technology experience.
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <Button variant="outline" size="sm">
-                        Reply
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        👍 Like (25)
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Share
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="text-center py-8 border border-dashed border-gray-300 rounded-lg">
-                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">You're all caught up! New updates will appear here.</p>
-                    <Button variant="outline" className="mt-3" onClick={handleDiscoverCampaigns}>
-                      Discover More Companies
-                    </Button>
-                  </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

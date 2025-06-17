@@ -1234,6 +1234,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get updates from campaigns the investor has invested in
+  app.get('/api/campaign-updates/investor/:investorId', requireAuth, async (req: any, res) => {
+    try {
+      const investorId = req.params.investorId;
+      
+      if (investorId !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+      }
+
+      // Get all investments by this investor
+      const investments = await storage.getInvestmentsByInvestor(investorId);
+      
+      // Get unique campaign IDs
+      const campaignIds = Array.from(new Set(investments.map(inv => inv.campaignId)));
+      
+      // Get all updates for these campaigns
+      const allUpdates = [];
+      for (const campaignId of campaignIds) {
+        const updates = await storage.getCampaignUpdates(campaignId);
+        
+        // Get campaign details
+        const campaign = await storage.getCampaign(campaignId);
+        
+        // Add campaign info to each update
+        const updatesWithCampaign = updates.map(update => ({
+          ...update,
+          campaign: { 
+            id: campaignId,
+            title: campaign?.title || 'Unknown Campaign',
+            founderId: campaign?.founderId
+          }
+        }));
+        allUpdates.push(...updatesWithCampaign);
+      }
+      
+      // Sort by creation date, newest first
+      allUpdates.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      
+      res.json(allUpdates);
+    } catch (error) {
+      console.error('Error fetching investor updates:', error);
+      res.status(500).json({ message: 'Failed to fetch updates' });
+    }
+  });
+
   app.put('/api/campaign-updates/:id', requireAuth, async (req: any, res) => {
     try {
       const updateId = parseInt(req.params.id);

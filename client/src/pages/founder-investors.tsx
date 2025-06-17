@@ -682,11 +682,10 @@ export default function FounderInvestors() {
                 sendMessageMutation.mutate(messageData);
               }}
               disabled={
-                !messageForm.subject || 
-                !messageForm.content || 
-                !messageForm.recipients ||
+                !messageForm.subject.trim() || 
+                !messageForm.content.trim() || 
                 sendMessageMutation.isPending ||
-                (investorProfiles && investorProfiles.length === 0)
+                (!investorProfiles || investorProfiles.length === 0)
               }
               className="bg-fundry-orange hover:bg-orange-600"
             >

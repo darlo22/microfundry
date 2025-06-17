@@ -18,6 +18,7 @@ import { User, Building2, Bell, Shield, CreditCard, Key, Mail, Phone, MapPin, Sa
 import { useLocation } from "wouter";
 import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
 import { COUNTRIES_AND_STATES, type Country } from "@/data/countries-states";
+import TwoFactorSetupModal from "@/components/modals/two-factor-setup-modal";
 
 export default function FounderSettings() {
   const { user } = useAuth();
@@ -33,6 +34,16 @@ export default function FounderSettings() {
 
   const { data: businessProfile, isLoading: businessLoading } = useQuery({
     queryKey: ["/api/business-profile", user?.id],
+    enabled: !!user?.id,
+  });
+
+  // Get 2FA status
+  const { data: twoFactorStatus } = useQuery<{
+    enabled: boolean;
+    method: string | null;
+    backupCodesCount: number;
+  }>({
+    queryKey: ['/api/2fa/status'],
     enabled: !!user?.id,
   });
 
@@ -70,7 +81,6 @@ export default function FounderSettings() {
   });
 
   const [security, setSecurity] = useState({
-    twoFactorEnabled: false,
     passwordLastChanged: "2024-01-15",
   });
 
@@ -656,63 +666,30 @@ export default function FounderSettings() {
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="space-y-1">
                     <p className="font-medium">Two-Factor Authentication</p>
-                    <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
+                    <p className="text-sm text-gray-600">
+                      {twoFactorStatus?.enabled 
+                        ? `Protected with ${twoFactorStatus.method === 'app' ? 'authenticator app' : 'email'} 2FA`
+                        : 'Add an extra layer of security to your account'
+                      }
+                    </p>
+                    {twoFactorStatus?.enabled && (
+                      <p className="text-xs text-gray-500">
+                        {twoFactorStatus.backupCodesCount} backup codes remaining
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
-                    <Badge variant={security.twoFactorEnabled ? "default" : "secondary"}>
-                      {security.twoFactorEnabled ? "Enabled" : "Disabled"}
+                    <Badge variant={twoFactorStatus?.enabled ? "default" : "secondary"}>
+                      {twoFactorStatus?.enabled ? "Enabled" : "Disabled"}
                     </Badge>
-                    <Dialog open={enable2FAOpen} onOpenChange={setEnable2FAOpen}>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          {security.twoFactorEnabled ? "Disable" : "Enable"}
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>
-                            {security.twoFactorEnabled ? "Disable" : "Enable"} Two-Factor Authentication
-                          </DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          {!security.twoFactorEnabled ? (
-                            <div className="space-y-4">
-                              <p className="text-sm text-gray-600">
-                                Two-factor authentication adds an extra layer of security to your account by requiring a verification code from your phone in addition to your password.
-                              </p>
-                              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                <p className="text-sm text-yellow-800">
-                                  <strong>Note:</strong> You'll need an authenticator app like Google Authenticator or Authy to use 2FA.
-                                </p>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="space-y-4">
-                              <p className="text-sm text-gray-600">
-                                Are you sure you want to disable two-factor authentication? This will make your account less secure.
-                              </p>
-                              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                <p className="text-sm text-red-800">
-                                  <strong>Warning:</strong> Disabling 2FA will reduce your account security.
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                          <div className="flex gap-3 justify-end">
-                            <Button variant="outline" onClick={() => setEnable2FAOpen(false)}>
-                              Cancel
-                            </Button>
-                            <Button 
-                              onClick={() => toggle2FAMutation.mutate(!security.twoFactorEnabled)}
-                              disabled={toggle2FAMutation.isPending}
-                              variant={security.twoFactorEnabled ? "destructive" : "default"}
-                            >
-                              {toggle2FAMutation.isPending ? "Processing..." : (security.twoFactorEnabled ? "Disable 2FA" : "Enable 2FA")}
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setEnable2FAOpen(true)}
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      {twoFactorStatus?.enabled ? "Manage 2FA" : "Enable 2FA"}
+                    </Button>
                   </div>
                 </div>
 
@@ -979,6 +956,12 @@ export default function FounderSettings() {
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* 2FA Setup Modal */}
+      <TwoFactorSetupModal 
+        isOpen={enable2FAOpen} 
+        onClose={() => setEnable2FAOpen(false)} 
+      />
       </div>
     </div>
   );

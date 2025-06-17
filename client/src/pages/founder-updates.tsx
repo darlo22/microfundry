@@ -51,13 +51,13 @@ export default function FounderUpdates() {
   });
 
   // Fetch founder's campaigns
-  const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
+  const { data: campaigns = [], isLoading: campaignsLoading } = useQuery<any[]>({
     queryKey: ["/api/campaigns/founder", user?.id],
     enabled: !!user?.id,
   });
 
   // Fetch campaign updates
-  const { data: updates = [], isLoading: updatesLoading } = useQuery({
+  const { data: updates = [], isLoading: updatesLoading } = useQuery<CampaignUpdate[]>({
     queryKey: ["/api/campaign-updates/founder", user?.id],
     enabled: !!user?.id,
   });
@@ -281,8 +281,8 @@ export default function FounderUpdates() {
 
   // Filter updates by selected campaign
   const filteredUpdates = selectedCampaign && selectedCampaign !== "all"
-    ? (updates || []).filter((update: CampaignUpdate) => update.campaignId.toString() === selectedCampaign)
-    : (updates || []);
+    ? updates.filter((update: CampaignUpdate) => update.campaignId.toString() === selectedCampaign)
+    : updates;
 
   if (campaignsLoading || updatesLoading) {
     return (
@@ -363,7 +363,7 @@ export default function FounderUpdates() {
                     <SelectValue placeholder="Select a campaign" />
                   </SelectTrigger>
                   <SelectContent>
-                    {(campaigns || []).map((campaign: any) => (
+                    {campaigns.map((campaign: any) => (
                       <SelectItem key={campaign.id} value={campaign.id.toString()}>
                         {campaign.title}
                       </SelectItem>

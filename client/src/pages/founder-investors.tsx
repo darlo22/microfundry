@@ -1,13 +1,19 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Users, TrendingUp, DollarSign, Mail, Phone, Calendar, Filter, Download, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Search, Users, TrendingUp, DollarSign, Mail, Phone, Calendar, Filter, Download, Eye, Send, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface Investment {
   id: number;
@@ -36,14 +42,61 @@ interface InvestorProfile {
 
 export default function FounderInvestors() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
+  const [showComposeModal, setShowComposeModal] = useState(false);
+  const [messageForm, setMessageForm] = useState({
+    subject: "",
+    content: "",
+    messageType: "general",
+    recipients: "all"
+  });
+  const [selectedInvestors, setSelectedInvestors] = useState<string[]>([]);
 
   // Fetch all investments for founder's campaigns
   const { data: investments = [], isLoading } = useQuery({
     queryKey: ["/api/investments/founder", user?.id],
     enabled: !!user?.id,
+  });
+
+  // Send message mutation
+  const sendMessageMutation = useMutation({
+    mutationFn: async (messageData: any) => {
+      return await fetch("/api/investor-messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(messageData),
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to send message');
+        return res.json();
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Message Sent",
+        description: "Your message has been sent to the selected investors.",
+      });
+      setShowComposeModal(false);
+      setMessageForm({
+        subject: "",
+        content: "",
+        messageType: "general",
+        recipients: "all"
+      });
+      setSelectedInvestors([]);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   // Process investments to create investor profiles
@@ -331,7 +384,10 @@ export default function FounderInvestors() {
                 <p className="text-gray-600">
                   Send updates, newsletters, and messages to your investors from here.
                 </p>
-                <Button className="mt-4 bg-fundry-orange hover:bg-orange-600">
+                <Button 
+                  className="mt-4 bg-fundry-orange hover:bg-orange-600"
+                  onClick={() => setShowComposeModal(true)}
+                >
                   <Mail className="mr-2 h-4 w-4" />
                   Compose Message
                 </Button>
@@ -340,6 +396,143 @@ export default function FounderInvestors() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Compose Message Modal */}
+      <Dialog open={showComposeModal} onOpenChange={setShowComposeModal}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Mail className="mr-2 h-5 w-5 text-fundry-orange" />
+              Compose Message to Investors
+            </DialogTitle>
+            <DialogDescription>
+              Send updates, announcements, or messages to your investors.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Message Type */}
+            <div className="space-y-2">
+              <Label htmlFor="messageType">Message Type</Label>
+              <Select 
+                value={messageForm.messageType} 
+                onValueChange={(value) => setMessageForm(prev => ({ ...prev, messageType: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select message type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General Update</SelectItem>
+                  <SelectItem value="milestone">Milestone Achievement</SelectItem>
+                  <SelectItem value="financial">Financial Update</SelectItem>
+                  <SelectItem value="announcement">Important Announcement</SelectItem>
+                  <SelectItem value="newsletter">Newsletter</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Recipients */}
+            <div className="space-y-2">
+              <Label>Recipients</Label>
+              <Select 
+                value={messageForm.recipients} 
+                onValueChange={(value) => setMessageForm(prev => ({ ...prev, recipients: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select recipients" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Investors ({investorProfiles.length})</SelectItem>
+                  <SelectItem value="active">Active Investors Only</SelectItem>
+                  <SelectItem value="committed">Committed Investors Only</SelectItem>
+                  <SelectItem value="selected">Selected Investors</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Subject */}
+            <div className="space-y-2">
+              <Label htmlFor="subject">Subject</Label>
+              <Input
+                id="subject"
+                placeholder="Enter message subject..."
+                value={messageForm.subject}
+                onChange={(e) => setMessageForm(prev => ({ ...prev, subject: e.target.value }))}
+              />
+            </div>
+
+            {/* Message Content */}
+            <div className="space-y-2">
+              <Label htmlFor="content">Message</Label>
+              <Textarea
+                id="content"
+                placeholder="Write your message to investors..."
+                value={messageForm.content}
+                onChange={(e) => setMessageForm(prev => ({ ...prev, content: e.target.value }))}
+                rows={6}
+                className="resize-none"
+              />
+            </div>
+
+            {/* Preview */}
+            {(messageForm.subject || messageForm.content) && (
+              <div className="border rounded-lg p-4 bg-gray-50">
+                <h4 className="font-medium text-sm text-gray-700 mb-2">Preview</h4>
+                <div className="space-y-2">
+                  {messageForm.subject && (
+                    <div>
+                      <span className="text-xs text-gray-500">Subject:</span>
+                      <p className="font-medium">{messageForm.subject}</p>
+                    </div>
+                  )}
+                  {messageForm.content && (
+                    <div>
+                      <span className="text-xs text-gray-500">Message:</span>
+                      <p className="text-sm whitespace-pre-wrap">{messageForm.content}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowComposeModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                const messageData = {
+                  ...messageForm,
+                  founderId: user?.id,
+                  recipients: messageForm.recipients === "all" 
+                    ? investorProfiles.map(p => p.email)
+                    : messageForm.recipients === "active"
+                    ? investorProfiles.filter(p => p.status === "active").map(p => p.email)
+                    : messageForm.recipients === "committed"
+                    ? investorProfiles.filter(p => p.status === "committed").map(p => p.email)
+                    : selectedInvestors
+                };
+                sendMessageMutation.mutate(messageData);
+              }}
+              disabled={!messageForm.subject || !messageForm.content || sendMessageMutation.isPending}
+              className="bg-fundry-orange hover:bg-orange-600"
+            >
+              {sendMessageMutation.isPending ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Message
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

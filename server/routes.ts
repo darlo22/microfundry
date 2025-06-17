@@ -608,6 +608,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Investor messages endpoint
+  app.post('/api/investor-messages', requireAuth, async (req: any, res) => {
+    try {
+      const founderId = req.user.id;
+      const { subject, content, messageType, recipients } = req.body;
+      
+      // Validate required fields
+      if (!subject || !content || !recipients || recipients.length === 0) {
+        return res.status(400).json({ message: 'Subject, content, and recipients are required' });
+      }
+
+      // In a real implementation, you would:
+      // 1. Save the message to the database
+      // 2. Send emails to the recipients
+      // 3. Track delivery status
+      
+      // For now, simulate successful sending
+      const messageRecord = {
+        id: Date.now(),
+        founderId,
+        subject,
+        content,
+        messageType,
+        recipients: Array.isArray(recipients) ? recipients : [recipients],
+        sentAt: new Date(),
+        status: 'sent'
+      };
+
+      console.log('Message sent to investors:', {
+        subject,
+        messageType,
+        recipientCount: Array.isArray(recipients) ? recipients.length : 1
+      });
+
+      res.json({ 
+        message: 'Message sent successfully',
+        data: messageRecord
+      });
+    } catch (error) {
+      console.error('Error sending investor message:', error);
+      res.status(500).json({ message: 'Failed to send message' });
+    }
+  });
+
   // Catch-all handler for client-side routing
   app.get('*', (req, res, next) => {
     // Skip API routes

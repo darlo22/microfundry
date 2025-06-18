@@ -156,8 +156,10 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     }
   };
 
-  // Handle Naira payment via Budpay (original implementation)
-  const handleNairaPaymentOriginal = async () => {
+  // Handle Naira payment via Budpay with separate state
+  const [isProcessingNaira, setIsProcessingNaira] = useState(false);
+  
+  const handleNairaPayment = async () => {
     if (!ngnAmount) {
       toast({
         title: "Currency Error",
@@ -167,7 +169,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       return;
     }
 
-    setIsProcessing(true);
+    setIsProcessingNaira(true);
 
     try {
       // Create Budpay payment configuration for modal
@@ -211,7 +213,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
           }
         },
         onClose: () => {
-          setIsProcessing(false);
+          setIsProcessingNaira(false);
         }
       };
 
@@ -296,10 +298,11 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       });
 
       if (response.ok) {
-        const { clientSecret } = await response.json();
-        window.location.href = `https://checkout.stripe.com/pay/${clientSecret}`;
+        const { checkoutUrl } = await response.json();
+        window.location.href = checkoutUrl;
       } else {
-        throw new Error('Failed to create payment intent');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create payment session');
       }
     } catch (error: any) {
       toast({

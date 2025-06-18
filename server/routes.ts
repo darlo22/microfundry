@@ -2788,85 +2788,85 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Create payment intent with investment
   app.post('/api/create-payment-intent', requireAuth, async (req: any, res) => {
     try {
-      const { campaignId, amount, paymentMethodId, investorDetails } = req.body;
+      const { amount, investmentId, currency } = req.body;
       
-      // Validate required fields
-      if (!campaignId || !amount || !paymentMethodId || !investorDetails) {
-        return res.status(400).json({ message: 'Missing required fields' });
+      // Validate required fields for payment modal flow
+      if (!amount || !investmentId) {
+        return res.status(400).json({ message: 'Missing required fields: amount and investmentId are required' });
+      }
+
+      // Get the existing investment
+      const investment = await storage.getInvestment(investmentId);
+      if (!investment) {
+        return res.status(404).json({ message: 'Investment not found' });
+      }
+
+      // Verify the investment belongs to the authenticated user
+      if (investment.investorId !== req.user.id) {
+        return res.status(403).json({ message: 'Unauthorized to process this payment' });
+      }
+
+      // Get campaign for metadata
+      const campaign = await storage.getCampaign(investment.campaignId);
+      if (!campaign) {
+        return res.status(404).json({ message: 'Campaign not found' });
       }
       
       const investmentAmount = parseFloat(amount);
       if (investmentAmount < 25) {
         return res.status(400).json({ message: 'Minimum investment is $25' });
       }
+
+      // Create Stripe Checkout session for the existing investment
+      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
       
-      // Get campaign
-      const campaign = await storage.getCampaign(campaignId);
-      if (!campaign) {
-        return res.status(404).json({ message: 'Campaign not found' });
+      // Build logo URL for campaign
+      let validLogoUrl = null;
+      if (campaign.logoUrl) {
+        try {
+          const logoPath = campaign.logoUrl.startsWith('/uploads/') 
+            ? campaign.logoUrl 
+            : `/uploads/${campaign.logoUrl}`;
+          validLogoUrl = `${baseUrl}${logoPath}`;
+        } catch (error) {
+          console.warn('Invalid logo URL:', campaign.logoUrl);
+        }
       }
-      
-      // Calculate platform fee
-      const platformFee = investmentAmount > 1000 ? Math.round(investmentAmount * 0.05) : 0;
-      const totalAmount = investmentAmount + platformFee;
-      const amountInCents = Math.round(totalAmount * 100);
-      
-      // Create investment record first
-      const investmentData = {
-        campaignId,
-        investorId: req.user.id,
-        amount: investmentAmount.toString(),
-        platformFee: platformFee.toString(),
-        totalAmount: totalAmount.toString(),
-        status: 'pending',
-        investorDetails: JSON.stringify(investorDetails)
-      };
-      
-      const investment = await storage.createInvestment(investmentData);
-      
-      // Create payment intent with Stripe
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: amountInCents,
-        currency: 'usd',
-        payment_method: paymentMethodId,
-        confirm: true,
-        description: `Investment in ${campaign.title}`,
-        metadata: {
-          investmentId: investment.id.toString(),
-          campaignId: campaignId.toString(),
-          investorId: req.user.id,
+
+      // Create Stripe Checkout session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: `Investment in ${campaign.title}`,
+                description: `SAFE investment of $${investmentAmount}`,
+                images: validLogoUrl ? [validLogoUrl] : [],
+              },
+              unit_amount: Math.round(investmentAmount * 100), // Convert to cents
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${baseUrl}/investment-success?session_id={CHECKOUT_SESSION_ID}&campaign_id=${campaign.id}`,
+        cancel_url: `${baseUrl}/investor-dashboard`,
+        allow_promotion_codes: false,
+        billing_address_collection: 'auto',
+        payment_intent_data: {
+          metadata: {
+            investmentId: investmentId.toString(),
+            campaignId: campaign.id.toString(),
+            investorId: req.user.id,
+            amount: investmentAmount.toString(),
+          }
         },
-        return_url: `${process.env.FRONTEND_URL || 'http://localhost:5000'}/investor-dashboard`,
+        customer_email: req.user.email,
       });
-      
-      if (paymentIntent.status === 'succeeded') {
-        // Update investment status to paid
-        await storage.updateInvestment(investment.id, { 
-          status: 'paid',
-          paymentIntentId: paymentIntent.id 
-        });
-        
-        res.json({ 
-          success: true, 
-          investmentId: investment.id,
-          paymentIntentId: paymentIntent.id,
-          message: 'Payment processed successfully'
-        });
-      } else if (paymentIntent.status === 'requires_action') {
-        res.json({
-          requiresAction: true,
-          clientSecret: paymentIntent.client_secret,
-          paymentIntentId: paymentIntent.id,
-          investmentId: investment.id
-        });
-      } else {
-        // If payment failed, delete the investment record
-        await storage.deleteInvestment(investment.id);
-        res.status(400).json({ 
-          message: 'Payment failed',
-          status: paymentIntent.status 
-        });
-      }
+
+      res.json({ checkoutUrl: session.url });
       
     } catch (error: any) {
       console.error('Payment intent creation error:', error);

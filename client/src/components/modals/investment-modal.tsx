@@ -253,16 +253,34 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
             </div>
             <div className="flex justify-between">
               <span>Investment Amount:</span>
-              <span className="font-medium">${selectedAmount}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Platform Fee:</span>
-              <span className="font-medium">${calculateFee(selectedAmount)}</span>
+              <div className="text-right">
+                <div className="font-medium">${selectedAmount}</div>
+                {ngnAmount && !isLoadingRate && (
+                  <div className="text-sm text-gray-600">
+                    ≈ ₦{ngnAmount.toLocaleString()}
+                  </div>
+                )}
+                {isLoadingRate && (
+                  <div className="text-sm text-gray-500">Converting...</div>
+                )}
+              </div>
             </div>
             <div className="flex justify-between text-lg font-bold border-t pt-2">
               <span>Total:</span>
-              <span>${calculateTotal(selectedAmount)}</span>
+              <div className="text-right">
+                <div>${selectedAmount}</div>
+                {ngnAmount && !isLoadingRate && (
+                  <div className="text-base font-normal text-gray-600">
+                    ≈ ₦{ngnAmount.toLocaleString()}
+                  </div>
+                )}
+              </div>
             </div>
+            {exchangeRate && (
+              <div className="text-xs text-gray-500 text-right border-t pt-2">
+                Exchange rate: $1 = ₦{exchangeRate.usdToNgn} ({exchangeRate.source})
+              </div>
+            )}
           </div>
         </div>
 
@@ -324,6 +342,32 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
       localStorage.removeItem('investmentContext');
     }
   }, [isOpen]);
+
+  // Fetch exchange rate when investment amount changes
+  useEffect(() => {
+    const amount = selectedAmount || parseFloat(customAmount) || 0;
+    if (amount > 0 && isOpen) {
+      setIsLoadingRate(true);
+      convertUsdToNgn(amount)
+        .then(({ ngn, rate }) => {
+          setNgnAmount(ngn);
+          setExchangeRate(rate);
+        })
+        .catch((error) => {
+          console.warn('Failed to fetch exchange rate:', error);
+          // Use fallback rate
+          setNgnAmount(amount * 1650);
+          setExchangeRate({
+            usdToNgn: 1650,
+            source: 'Fallback',
+            lastUpdated: new Date()
+          });
+        })
+        .finally(() => {
+          setIsLoadingRate(false);
+        });
+    }
+  }, [selectedAmount, customAmount, isOpen]);
 
   const minimumInvestment = 25;
   const maximumInvestment = 5000;

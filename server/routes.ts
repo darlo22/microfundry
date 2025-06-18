@@ -2183,11 +2183,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
-  // Stripe payment intent endpoint
-  app.post('/api/create-payment-intent', requireAuth, async (req: any, res) => {
+  // Stripe checkout session endpoint
+  app.post('/api/create-checkout-session', requireAuth, async (req: any, res) => {
     try {
-      console.log('Payment intent request body:', req.body);
-      const { amount, campaignId, investorId } = req.body;
+      console.log('Checkout session request body:', req.body);
+      const { amount, campaignId } = req.body;
       
       if (!amount || !campaignId) {
         console.log('Missing required fields:', { amount, campaignId });
@@ -2205,29 +2205,54 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(404).json({ message: 'Campaign not found' });
       }
 
-      console.log('Creating payment intent for campaign:', campaign.title);
+      console.log('Creating checkout session for campaign:', campaign.title);
 
-      // Create payment intent
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: amountInCents,
-        currency: 'usd',
+      // Create checkout session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: `Investment in ${campaign.title}`,
+                description: `Micro-investment through Fundry platform`,
+                images: campaign.logoUrl ? [`${process.env.REPLIT_DEV_DOMAIN || 'https://localhost:5000'}${campaign.logoUrl}`] : [],
+              },
+              unit_amount: amountInCents,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/investment-success?session_id={CHECKOUT_SESSION_ID}&campaign_id=${campaignId}`,
+        cancel_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/campaign/${campaignId}`,
         metadata: {
           campaignId: campaignId.toString(),
           investorId: req.user.id.toString(),
           campaignTitle: campaign.title,
         },
-        description: `Investment in ${campaign.title}`,
+        customer_email: req.user.email,
+        billing_address_collection: 'required',
+        payment_intent_data: {
+          description: `Investment in ${campaign.title} via Fundry`,
+          metadata: {
+            campaignId: campaignId.toString(),
+            investorId: req.user.id.toString(),
+            campaignTitle: campaign.title,
+          },
+        },
       });
 
-      console.log('Payment intent created successfully:', paymentIntent.id);
+      console.log('Checkout session created successfully:', session.id);
 
       res.json({ 
-        clientSecret: paymentIntent.client_secret,
-        paymentIntentId: paymentIntent.id
+        url: session.url,
+        sessionId: session.id
       });
     } catch (error) {
-      console.error('Error creating payment intent:', error);
-      res.status(500).json({ message: 'Failed to create payment intent', error: error.message });
+      console.error('Error creating checkout session:', error);
+      res.status(500).json({ message: 'Failed to create checkout session', error: error.message });
     }
   });
 

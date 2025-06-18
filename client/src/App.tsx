@@ -30,6 +30,7 @@ import PaymentWithdrawal from "@/pages/payment-withdrawal";
 import InvestorDashboard from "@/pages/investor-dashboard";
 import CampaignView from "@/pages/campaign-view";
 import EmailVerification from "@/pages/email-verification";
+import InvestmentSuccess from "@/pages/investment-success";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -63,6 +64,7 @@ function Router() {
       <Route path="/safe-agreement-template" component={SafeAgreementTemplate} />
       <Route path="/investor-accreditation" component={InvestorAccreditation} />
       <Route path="/verify-email" component={EmailVerification} />
+      <Route path="/investment-success" component={InvestmentSuccess} />
       <Route path="/campaign/:id" component={CampaignView} />
       <Route path="/c/:privateLink" component={CampaignView} />
       

@@ -101,20 +101,11 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
     const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
 
     const handlePayment = async () => {
-      if (!stripe || !elements) {
-        toast({
-          title: "Payment Error",
-          description: "Payment system not ready. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       setIsPaymentProcessing(true);
 
       try {
-        // Create payment intent on server
-        const response = await fetch('/api/create-payment-intent', {
+        // Create checkout session on server
+        const response = await fetch('/api/create-checkout-session', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -122,91 +113,56 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
           credentials: 'include',
           body: JSON.stringify({
             amount: calculateTotal(selectedAmount),
-            campaignId: campaign.id,
-            investorId: user?.id
+            campaignId: campaign.id
           })
         });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-          throw new Error(errorData.message || 'Failed to create payment intent');
+          throw new Error(errorData.message || 'Failed to create checkout session');
         }
 
-        const { clientSecret } = await response.json();
+        const { url } = await response.json();
         
-        if (!clientSecret) {
-          throw new Error('No client secret received from server');
+        if (!url) {
+          throw new Error('No checkout URL received from server');
         }
 
-        // Get card element
-        const cardElement = elements.getElement(CardElement);
-        if (!cardElement) {
-          throw new Error('Card element not found');
-        }
+        // Redirect to Stripe Checkout
+        window.location.href = url;
 
-        // Confirm payment with Stripe
-        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-          payment_method: {
-            card: cardElement,
-            billing_details: {
-              name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.username,
-              email: user?.email,
-            },
-          },
-        });
-
-        if (error) {
-          toast({
-            title: "Payment Failed",
-            description: error.message,
-            variant: "destructive",
-          });
-        } else if (paymentIntent.status === 'succeeded') {
-          // Create investment record
-          await createInvestmentMutation.mutateAsync({
-            campaignId: campaign.id,
-            amount: selectedAmount,
-            paymentIntentId: paymentIntent.id,
-            status: 'paid'
-          });
-
-          toast({
-            title: "Payment Successful",
-            description: "Your investment has been processed successfully!",
-          });
-
-          setCurrentStep('confirmation');
-        }
       } catch (error) {
         console.error('Payment error:', error);
         toast({
           title: "Payment Error",
-          description: "Failed to process payment. Please try again.",
+          description: "Failed to create payment session. Please try again.",
           variant: "destructive",
         });
-      } finally {
         setIsPaymentProcessing(false);
       }
     };
 
     return (
       <div className="space-y-6">
-        <div className="bg-gray-50 p-6 rounded-lg">
-          <h4 className="font-semibold mb-4">Payment Details</h4>
-          <div className="bg-white p-4 rounded border">
-            <CardElement
-              options={{
-                style: {
-                  base: {
-                    fontSize: '16px',
-                    color: '#424770',
-                    '::placeholder': {
-                      color: '#aab7c4',
-                    },
-                  },
-                },
-              }}
-            />
+        <div className="bg-gradient-to-r from-orange-50 to-blue-50 p-6 rounded-lg border">
+          <h4 className="font-semibold mb-4 text-gray-800">Secure Payment with Stripe</h4>
+          <div className="bg-white p-4 rounded border space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Secure Checkout</p>
+                <p className="text-sm text-gray-600">You'll be redirected to Stripe's secure payment page</p>
+              </div>
+            </div>
+            <div className="text-sm text-gray-600 space-y-2">
+              <p>• Industry-standard encryption and security</p>
+              <p>• Support for all major credit and debit cards</p>
+              <p>• Your payment information is never stored on our servers</p>
+            </div>
           </div>
         </div>
 

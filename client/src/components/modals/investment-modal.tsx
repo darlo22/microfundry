@@ -658,7 +658,9 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
           document.head.appendChild(script);
         };
 
-        loadBudpayScript();
+        // Skip script loading, use direct API approach
+        console.log('Using direct Budpay payment processing');
+        handleDirectBudpayPayment();
       }
 
     } catch (error: any) {

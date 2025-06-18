@@ -16,7 +16,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { User, Building2, Bell, Shield, CreditCard, Key, Mail, Phone, MapPin, Save, AlertTriangle, ArrowLeft, LogOut, Eye, EyeOff, Monitor, Smartphone, Tablet } from "lucide-react";
 import { useLocation } from "wouter";
-import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
+import fundryLogoNew from "@assets/ChatGPT Image Jun 18, 2025, 07_16_52 AM_1750230510254.png";
 import { COUNTRIES_AND_STATES, type Country } from "@/data/countries-states";
 import TwoFactorSetupModal from "@/components/modals/two-factor-setup-modal";
 

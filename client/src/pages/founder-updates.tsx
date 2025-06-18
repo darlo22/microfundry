@@ -13,7 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { Plus, Edit, Send, Calendar, Users, TrendingUp, MessageSquare, Eye, Trash2, ArrowLeft, LogOut, ThumbsUp, Reply, Share2, Heart, Upload, X, Image, Video, FileIcon, Paperclip } from "lucide-react";
 import { useLocation } from "wouter";
-import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
+import fundryLogoNew from "@assets/ChatGPT Image Jun 18, 2025, 07_16_52 AM_1750230510254.png";
 
 interface CampaignUpdate {
   id: number;

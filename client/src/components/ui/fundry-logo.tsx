@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import fundryLogoImg from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750108534541.png";
+import fundryLogoImg from "@assets/ChatGPT Image Jun 18, 2025, 07_16_52 AM_1750230510254.png";
 
 interface FundryLogoProps {
   className?: string;

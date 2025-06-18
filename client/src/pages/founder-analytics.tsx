@@ -9,7 +9,7 @@ import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, X
 import { TrendingUp, TrendingDown, DollarSign, Users, Eye, Calendar, Download, RefreshCw, Target, Award, Clock, ArrowLeft, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import fundryLogoNew from "@assets/ChatGPT Image Jun 11, 2025, 05_42_54 AM (1)_1750153181796.png";
+import fundryLogoNew from "@assets/ChatGPT Image Jun 18, 2025, 07_16_52 AM_1750230510254.png";
 
 export default function FounderAnalytics() {
   const { user } = useAuth();

@@ -462,7 +462,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
         const pollPayment = setInterval(async () => {
           if (paymentWindow?.closed) {
             clearInterval(pollPayment);
-            setIsProcessingPayment(false);
+            setIsProcessingNaira(false);
             
             // Check payment status
             const statusResponse = await apiRequest('GET', `/api/check-payment-status/${paymentData.reference}`);
@@ -500,7 +500,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
         description: error.message || "Failed to initialize payment",
         variant: "destructive",
       });
-      setIsProcessingPayment(false);
+      setIsProcessingNaira(false);
     }
   };
 
@@ -671,7 +671,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
             description: "Budpay checkout failed to load",
             variant: "destructive",
           });
-          setIsProcessingPayment(false);
+          setIsProcessingNaira(false);
         }
       };
 
@@ -719,7 +719,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
         description: error.message || "Payment failed. Please try again.",
         variant: "destructive",
       });
-      setIsProcessingPayment(false);
+      setIsProcessingNaira(false);
     }
   };
 

@@ -691,7 +691,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
             console.log('Budpay script loaded successfully');
             // Wait a bit for the script to initialize
             setTimeout(() => {
-              if (window.BudPayCheckout) {
+              if ('BudPayCheckout' in window && typeof window.BudPayCheckout === 'function') {
                 initializeBudpay();
               } else {
                 console.warn('BudPayCheckout not available, using direct API approach');

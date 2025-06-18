@@ -170,14 +170,15 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     setIsProcessing(true);
 
     try {
-      // Create Budpay payment configuration
+      // Create Budpay payment configuration for modal
       const budpayConfig = {
         key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,
         email: user?.email || 'investor@fundry.com',
-        amount: ngnAmount * 100, // Convert to kobo
+        amount: ngnAmount, // Amount in Naira (not kobo for modal)
         currency: 'NGN',
         ref: `pay_${investment.id}_${Date.now()}`,
         callback: async (response: any) => {
+          console.log('Budpay modal callback:', response);
           if (response.status === 'success') {
             // Process the payment on the backend
             const backendResponse = await apiRequest('POST', '/api/budpay-payment', {
@@ -214,18 +215,31 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         }
       };
 
-      // Load Budpay script and initialize payment
-      if ((window as any).BudPayCheckout) {
-        (window as any).BudPayCheckout(budpayConfig);
-      } else {
-        // Load Budpay script dynamically
-        const script = document.createElement('script');
-        script.src = 'https://checkout.budpay.com/checkout.js';
-        script.onload = () => {
-          (window as any).BudPayCheckout(budpayConfig);
-        };
-        document.head.appendChild(script);
-      }
+      // Load Budpay script and initialize modal payment
+      const loadBudpayScript = () => {
+        return new Promise((resolve, reject) => {
+          if ((window as any).BudPayCheckout) {
+            resolve((window as any).BudPayCheckout);
+            return;
+          }
+          
+          const script = document.createElement('script');
+          script.src = 'https://checkout.budpay.com/checkout.js';
+          script.onload = () => {
+            if ((window as any).BudPayCheckout) {
+              resolve((window as any).BudPayCheckout);
+            } else {
+              reject(new Error('BudPay script failed to load'));
+            }
+          };
+          script.onerror = () => reject(new Error('Failed to load BudPay script'));
+          document.head.appendChild(script);
+        });
+      };
+
+      const BudPayCheckout = await loadBudpayScript();
+      console.log('Launching Budpay modal with config:', budpayConfig);
+      (BudPayCheckout as any)(budpayConfig);
 
     } catch (error: any) {
       console.error('Budpay payment error:', error);

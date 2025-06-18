@@ -1203,10 +1203,7 @@ export default function InvestorDashboard() {
                 ) : investments && investments.length > 0 ? (
                   <div className="space-y-4">
                     {investments
-                      .filter(investment => {
-                        console.log('Investment status:', investment.status, 'for investment:', investment.id);
-                        return investment.status === 'committed' || investment.status === 'paid' || investment.status === 'completed';
-                      })
+                      .filter(investment => investment.status === 'committed' || investment.status === 'paid' || investment.status === 'completed')
                       .map((investment) => (
                       <div key={investment.id} className="border rounded-lg p-6 hover:border-fundry-orange transition-colors bg-white">
                         <div className="flex items-start justify-between">

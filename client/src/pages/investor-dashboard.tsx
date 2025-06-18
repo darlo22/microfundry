@@ -425,6 +425,8 @@ export default function InvestorDashboard() {
     editProfileMutation.mutate(data);
   };
 
+
+
   // Get states for selected country
   const selectedCountryData = COUNTRIES_AND_STATES.find(c => c.code === selectedCountry);
   const availableStates = selectedCountryData?.states || [];
@@ -645,25 +647,7 @@ export default function InvestorDashboard() {
     retry: false,
   });
 
-  // Payment mutation for Pay Now functionality
-  const payNowMutation = useMutation({
-    mutationFn: async (investmentId: number) => {
-      const response = await apiRequest("POST", `/api/investments/${investmentId}/pay`);
-      if (!response.ok) throw new Error('Failed to create payment session');
-      return response.json();
-    },
-    onSuccess: (data) => {
-      // Redirect to Stripe Checkout
-      window.location.href = data.checkoutUrl;
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Payment Error",
-        description: error.message || "Failed to start payment process",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   // Fetch all campaigns for discovery
   const { data: allCampaigns, isLoading: campaignsLoading } = useQuery({

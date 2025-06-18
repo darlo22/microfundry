@@ -44,6 +44,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   const queryClient = useQueryClient();
   const stripe = useStripe();
   const elements = useElements();
+  const { user } = useAuth();
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [cardholderName, setCardholderName] = useState('');

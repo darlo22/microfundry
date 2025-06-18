@@ -104,6 +104,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
   const [isLoadingRate, setIsLoadingRate] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
+  const [showStripeForm, setShowStripeForm] = useState(false);
 
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
@@ -164,30 +165,37 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
           throw new Error(paymentMethodError.message);
         }
 
-        // Create payment intent and investment in one call
-        const paymentData = {
-          campaignId: campaign.id,
-          amount: selectedAmount.toString(),
-          paymentMethodId: paymentMethod.id,
-          investorDetails: {
-            ...investorDetails,
-            signature: signatureData,
-            agreedToTerms,
-            investmentDate: new Date().toISOString()
-          }
-        };
+        // Confirm payment using existing client secret
+        const { error, paymentIntent } = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            payment_method_data: {
+              billing_details: {
+                name: cardholderName,
+              },
+            },
+          },
+          redirect: 'if_required',
+        });
 
-        const paymentResponse = await apiRequest('POST', '/api/create-payment-intent', paymentData);
-        const result = await paymentResponse.json();
+        if (error) {
+          console.error('Stripe payment error:', error);
+          throw new Error(error.message);
+        }
 
-        if (result.success) {
+        if (paymentIntent && paymentIntent.status === 'succeeded') {
           toast({
             title: "Payment Successful!",
             description: `You have successfully invested $${selectedAmount} in ${campaign.title}`,
           });
+          
+          // Invalidate queries to refresh data
+          queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+          
           setCurrentStep('confirmation');
         } else {
-          throw new Error(result.message || 'Payment failed');
+          throw new Error('Payment not completed');
         }
 
       } catch (error: any) {
@@ -1580,12 +1588,22 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               </div>
             </div>
 
-            {/* Hidden Stripe Elements for USD processing */}
-            <div className="hidden">
-              <Elements stripe={stripePromise}>
-                <StripePaymentForm />
-              </Elements>
-            </div>
+            {/* Stripe Elements form - shows when USD payment is selected */}
+            {showStripeForm && clientSecret && (
+              <Card className="border-2 border-blue-100 bg-white/90">
+                <CardHeader>
+                  <CardTitle className="text-lg text-blue-800 flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    Complete USD Payment
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <StripePaymentForm />
+                  </Elements>
+                </CardContent>
+              </Card>
+            )}
           </div>
         );
 

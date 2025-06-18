@@ -47,10 +47,13 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   const { user } = useAuth();
   
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessingNaira, setIsProcessingNaira] = useState(false);
   const [cardholderName, setCardholderName] = useState('');
   const [ngnAmount, setNgnAmount] = useState<number | null>(null);
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
   const [isLoadingRate, setIsLoadingRate] = useState(true);
+  const [showStripeForm, setShowStripeForm] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
 
   // Fetch exchange rate when modal opens
   useEffect(() => {
@@ -156,8 +159,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     }
   };
 
-  // Handle Naira payment via Budpay with separate state
-  const [isProcessingNaira, setIsProcessingNaira] = useState(false);
+
   
   const handleNairaPayment = async () => {
     if (!ngnAmount) {
@@ -289,29 +291,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   };
 
   const handleUSDPayment = async () => {
-    setIsProcessing(true);
-    try {
-      const response = await apiRequest('POST', '/api/create-payment-intent', {
-        amount: parseFloat(investment.amount),
-        investmentId: investment.id,
-        currency: 'usd'
-      });
-
-      if (response.ok) {
-        const { checkoutUrl } = await response.json();
-        window.location.href = checkoutUrl;
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create payment session');
-      }
-    } catch (error: any) {
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process USD payment",
-        variant: "destructive",
-      });
-      setIsProcessing(false);
-    }
+    setShowStripeForm(true);
   };
 
 

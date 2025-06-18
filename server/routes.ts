@@ -2817,56 +2817,28 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(400).json({ message: 'Minimum investment is $25' });
       }
 
-      // Create Stripe Checkout session for the existing investment
-      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5000';
+      // Create payment intent for inline Stripe Elements
+      const amountInCents = Math.round(investmentAmount * 100);
       
-      // Build logo URL for campaign
-      let validLogoUrl = null;
-      if (campaign.logoUrl) {
-        try {
-          const logoPath = campaign.logoUrl.startsWith('/uploads/') 
-            ? campaign.logoUrl 
-            : `/uploads/${campaign.logoUrl}`;
-          validLogoUrl = `${baseUrl}${logoPath}`;
-        } catch (error) {
-          console.warn('Invalid logo URL:', campaign.logoUrl);
-        }
-      }
-
-      // Create Stripe Checkout session
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: `Investment in ${campaign.title}`,
-                description: `SAFE investment of $${investmentAmount}`,
-                images: validLogoUrl ? [validLogoUrl] : [],
-              },
-              unit_amount: Math.round(investmentAmount * 100), // Convert to cents
-            },
-            quantity: 1,
-          },
-        ],
-        mode: 'payment',
-        success_url: `${baseUrl}/investment-success?session_id={CHECKOUT_SESSION_ID}&campaign_id=${campaign.id}`,
-        cancel_url: `${baseUrl}/investor-dashboard`,
-        allow_promotion_codes: false,
-        billing_address_collection: 'auto',
-        payment_intent_data: {
-          metadata: {
-            investmentId: investmentId.toString(),
-            campaignId: campaign.id.toString(),
-            investorId: req.user.id,
-            amount: investmentAmount.toString(),
-          }
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amountInCents,
+        currency: 'usd',
+        description: `Investment in ${campaign.title}`,
+        metadata: {
+          investmentId: investmentId.toString(),
+          campaignId: campaign.id.toString(),
+          investorId: req.user.id,
+          amount: investmentAmount.toString(),
         },
-        customer_email: req.user.email,
+        automatic_payment_methods: {
+          enabled: true,
+        },
       });
 
-      res.json({ checkoutUrl: session.url });
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id
+      });
       
     } catch (error: any) {
       console.error('Payment intent creation error:', error);

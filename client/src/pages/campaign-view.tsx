@@ -697,9 +697,9 @@ export default function CampaignView() {
             {/* Enhanced Investment Card */}
             <Card className="border-0 shadow-xl bg-gradient-to-br from-white via-orange-50/30 to-blue-50/20 backdrop-blur-sm overflow-hidden">
               <CardContent className="p-0">
-                {/* Header with gradient */}
-                <div className="bg-gradient-to-r from-fundry-navy to-blue-700 p-6 text-white relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-white/5"></div>
+                {/* Header with solid orange */}
+                <div className="bg-fundry-orange p-6 text-white relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-black/5 via-transparent to-white/5"></div>
                   <div className="relative z-10 text-center">
                     <div className="text-4xl font-bold mb-2">
                       {formatCurrency(campaign.totalRaised)}
@@ -747,7 +747,7 @@ export default function CampaignView() {
                   <Button 
                     onClick={handleInvest}
                     disabled={isProcessing}
-                    className="w-full bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-lg font-bold py-6 mb-4 shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="w-full bg-fundry-navy hover:bg-blue-800 text-white text-lg font-bold py-6 mb-4 shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     <DollarSign className="mr-3" size={24} />
                     {isProcessing ? "Processing..." : "Commit to Invest"}

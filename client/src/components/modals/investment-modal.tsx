@@ -165,22 +165,14 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
           throw new Error(paymentMethodError.message);
         }
 
-        // Confirm payment using existing client secret
-        const { error, paymentIntent } = await stripe.confirmPayment({
-          elements,
-          confirmParams: {
-            payment_method_data: {
-              billing_details: {
-                name: cardholderName,
-              },
-            },
-          },
-          redirect: 'if_required',
+        // Confirm payment intent with the payment method
+        const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: paymentMethod.id,
         });
 
-        if (error) {
-          console.error('Stripe payment error:', error);
-          throw new Error(error.message);
+        if (confirmError) {
+          console.error('Stripe payment error:', confirmError);
+          throw new Error(confirmError.message);
         }
 
         if (paymentIntent && paymentIntent.status === 'succeeded') {

@@ -2455,6 +2455,28 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // PATCH endpoint for investment status updates
+  app.patch('/api/investments/:id', requireAuth, async (req: any, res) => {
+    try {
+      const investmentId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      // Get the investment
+      const investment = await storage.getInvestment(investmentId);
+      if (!investment || investment.investorId !== req.user.id) {
+        return res.status(404).json({ message: 'Investment not found' });
+      }
+
+      // Update investment status
+      const updatedInvestment = await storage.updateInvestment(investmentId, { status });
+      
+      res.json(updatedInvestment);
+    } catch (error) {
+      console.error('Error updating investment status:', error);
+      res.status(500).json({ message: 'Failed to update investment status', error: (error as Error).message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

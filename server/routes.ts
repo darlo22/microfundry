@@ -24,9 +24,7 @@ import Stripe from "stripe";
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Simple in-memory store for KYC submissions (in production, this would be in database)
 const kycSubmissions = new Map<string, any>();
@@ -2198,7 +2196,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const amountInCents = Math.round(amount * 100);
       
       // Get campaign details for metadata
-      const campaign = await storage.getCampaignById(campaignId);
+      const campaign = await storage.getCampaign(campaignId);
       if (!campaign) {
         return res.status(404).json({ message: 'Campaign not found' });
       }

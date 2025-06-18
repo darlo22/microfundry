@@ -294,6 +294,7 @@ export class DatabaseStorage implements IStorage {
         totalAmount: investments.totalAmount,
         status: investments.status,
         paymentStatus: investments.paymentStatus,
+        paymentIntentId: investments.paymentIntentId,
         agreementSigned: investments.agreementSigned,
         signedAt: investments.signedAt,
         ipAddress: investments.ipAddress,

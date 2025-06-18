@@ -126,6 +126,7 @@ export const investments = pgTable("investments", {
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
   status: varchar("status").notNull().default("pending"), // pending, committed, paid, completed, cancelled
   paymentStatus: varchar("payment_status").notNull().default("pending"), // pending, processing, completed, failed
+  paymentIntentId: varchar("payment_intent_id"), // Stripe payment intent ID
   agreementSigned: boolean("agreement_signed").notNull().default(false),
   signedAt: timestamp("signed_at"),
   ipAddress: varchar("ip_address"),

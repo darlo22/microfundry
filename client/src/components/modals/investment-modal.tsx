@@ -87,6 +87,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [signatureData, setSignatureData] = useState<string>('');
+  const [cardholderName, setCardholderName] = useState<string>('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [showSafeViewer, setShowSafeViewer] = useState(false);
 
@@ -114,6 +115,16 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
         return;
       }
 
+      // Validate cardholder name
+      if (!cardholderName.trim()) {
+        toast({
+          title: "Missing Information",
+          description: "Please enter the cardholder name",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setIsPaymentProcessing(true);
 
       try {
@@ -127,7 +138,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
           type: 'card',
           card: cardElement,
           billing_details: {
-            name: `${investorDetails.firstName} ${investorDetails.lastName}`,
+            name: cardholderName,
             email: user?.email,
           },
         });
@@ -152,11 +163,15 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
         const paymentResponse = await apiRequest('POST', '/api/create-payment-intent', paymentData);
         const result = await paymentResponse.json();
 
-        toast({
-          title: "Payment Successful!",
-          description: `You have successfully invested $${selectedAmount} in ${campaign.title}`,
-        });
-        setCurrentStep('confirmation');
+        if (result.success) {
+          toast({
+            title: "Payment Successful!",
+            description: `You have successfully invested $${selectedAmount} in ${campaign.title}`,
+          });
+          setCurrentStep('confirmation');
+        } else {
+          throw new Error(result.message || 'Payment failed');
+        }
 
       } catch (error: any) {
         console.error('Payment error:', error);
@@ -180,9 +195,10 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
               </Label>
               <Input
                 id="cardholder-name"
-                value={`${investorDetails.firstName} ${investorDetails.lastName}`}
-                readOnly
-                className="mt-1 bg-gray-50"
+                value={cardholderName}
+                onChange={(e) => setCardholderName(e.target.value)}
+                placeholder="Enter name as it appears on card"
+                className="mt-1"
               />
             </div>
 

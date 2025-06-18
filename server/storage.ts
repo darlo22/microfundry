@@ -58,6 +58,7 @@ export interface IStorage {
   getInvestmentsByInvestor(investorId: string): Promise<Investment[]>;
   getInvestmentsByCampaign(campaignId: number): Promise<Investment[]>;
   updateInvestment(id: number, updates: Partial<InsertInvestment>): Promise<Investment>;
+  deleteInvestment(id: number): Promise<void>;
 
   // SAFE agreement operations
   createSafeAgreement(agreement: InsertSafeAgreement): Promise<SafeAgreement>;

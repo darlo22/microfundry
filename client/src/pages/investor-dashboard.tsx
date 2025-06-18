@@ -429,6 +429,193 @@ export default function InvestorDashboard() {
   const selectedCountryData = COUNTRIES_AND_STATES.find(c => c.code === selectedCountry);
   const availableStates = selectedCountryData?.states || [];
 
+  // PendingInvestmentCard component
+  const PendingInvestmentCard = ({ investment, onPayNow }: { investment: InvestmentWithCampaign; onPayNow: (id: number) => void }) => {
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editAmount, setEditAmount] = useState(investment.amount);
+
+    const editInvestmentMutation = useMutation({
+      mutationFn: async (newAmount: string) => {
+        return apiRequest("PUT", `/api/investments/${investment.id}`, {
+          amount: newAmount,
+        });
+      },
+      onSuccess: () => {
+        toast({
+          title: "Investment Updated",
+          description: "Your investment amount has been updated successfully.",
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/investments/investor/" + user?.id] });
+        setIsEditModalOpen(false);
+      },
+      onError: (error: any) => {
+        toast({
+          title: "Update Failed",
+          description: error.message || "Failed to update investment",
+          variant: "destructive",
+        });
+      },
+    });
+
+    const formatCurrency = (amount: number | string) => {
+      const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(num);
+    };
+
+    return (
+      <>
+        <div className="border border-orange-200 bg-orange-50 rounded-lg p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                  {investment.campaign?.logoUrl ? (
+                    <img 
+                      src={investment.campaign.logoUrl} 
+                      alt={investment.campaign.title}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <Briefcase className="w-6 h-6 text-gray-400" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">{investment.campaign?.title || 'Unknown Campaign'}</h3>
+                  <p className="text-sm text-gray-600">
+                    Committed on {new Date(investment.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Investment Amount</p>
+                  <p className="text-lg font-bold text-gray-900">{formatCurrency(investment.amount)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Platform Fee</p>
+                  <p className="text-lg font-bold text-gray-900">{formatCurrency((investment as any).platformFee || '0')}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Due</p>
+                  <p className="text-lg font-bold text-orange-600">{formatCurrency((investment as any).totalAmount || investment.amount)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Status</p>
+                  <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                    <Clock className="w-3 h-3 mr-1" />
+                    Pending Payment
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-yellow-800">
+                    <p className="font-medium">Payment Required</p>
+                    <p>Complete your payment to secure your investment in this campaign.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Edit className="w-4 h-4" />
+              Edit Amount
+            </Button>
+            <Button
+              onClick={() => onPayNow(investment.id)}
+              className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700"
+              disabled={payNowMutation.isPending}
+            >
+              {payNowMutation.isPending ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <CreditCard className="w-4 h-4" />
+              )}
+              Pay Now
+            </Button>
+          </div>
+        </div>
+
+        {/* Edit Investment Modal */}
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="sm:max-w-md bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 backdrop-blur-sm border-2 border-orange-100/50 shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-gray-900">Edit Investment Amount</DialogTitle>
+              <p className="text-gray-600">Update your investment amount for {investment.campaign?.title}</p>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="amount">Investment Amount ($)</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  min="25"
+                  step="1"
+                  value={editAmount}
+                  onChange={(e) => setEditAmount(e.target.value)}
+                  placeholder="Enter amount"
+                />
+                <p className="text-xs text-gray-500 mt-1">Minimum investment: $25</p>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Investment Amount:</span>
+                  <span>${editAmount || 0}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Platform Fee (5%):</span>
+                  <span>${parseFloat(editAmount || '0') > 1000 ? (parseFloat(editAmount || '0') * 0.05).toFixed(2) : '0.00'}</span>
+                </div>
+                <div className="flex justify-between font-semibold border-t pt-2">
+                  <span>Total Amount:</span>
+                  <span>${parseFloat(editAmount || '0') > 1000 ? 
+                    (parseFloat(editAmount || '0') * 1.05).toFixed(2) : 
+                    editAmount || '0'}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => editInvestmentMutation.mutate(editAmount)}
+                  disabled={editInvestmentMutation.isPending || !editAmount || parseFloat(editAmount) < 25}
+                  className="flex-1 bg-orange-600 hover:bg-orange-700"
+                >
+                  {editInvestmentMutation.isPending ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    'Update Investment'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  };
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

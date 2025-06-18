@@ -2326,6 +2326,109 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Pay Now endpoint for pending investments
+  app.post('/api/investments/:id/pay', requireAuth, async (req: any, res) => {
+    try {
+      const investmentId = parseInt(req.params.id);
+      
+      // Get the investment
+      const investment = await storage.getInvestment(investmentId);
+      if (!investment || investment.investorId !== req.user.id) {
+        return res.status(404).json({ message: 'Investment not found' });
+      }
+
+      if (investment.status !== 'pending') {
+        return res.status(400).json({ message: 'Investment is not in pending status' });
+      }
+
+      // Get campaign details
+      const campaign = await storage.getCampaign(investment.campaignId);
+      if (!campaign) {
+        return res.status(404).json({ message: 'Campaign not found' });
+      }
+
+      // Calculate amounts
+      const amount = parseFloat(investment.amount);
+      const platformFee = parseFloat(investment.platformFee);
+      const totalAmount = amount + platformFee;
+
+      // Create Stripe Checkout session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: `Investment in ${campaign.title}`,
+                description: `SAFE investment of $${amount} with $${platformFee} platform fee`,
+                images: campaign.logoUrl ? [campaign.logoUrl] : [],
+              },
+              unit_amount: Math.round(totalAmount * 100), // Convert to cents
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${process.env.REPL_ID ? 'https://' + process.env.REPL_ID + '.replit.app' : 'http://localhost:5000'}/investment-success?session_id={CHECKOUT_SESSION_ID}&campaign_id=${campaign.id}`,
+        cancel_url: `${process.env.REPL_ID ? 'https://' + process.env.REPL_ID + '.replit.app' : 'http://localhost:5000'}/investor-dashboard`,
+        metadata: {
+          investmentId: investmentId.toString(),
+          campaignId: campaign.id.toString(),
+          investorId: req.user.id,
+          amount: amount.toString(),
+          platformFee: platformFee.toString(),
+        },
+        customer_email: req.user.email,
+      });
+
+      res.json({ checkoutUrl: session.url });
+    } catch (error) {
+      console.error('Error creating payment session:', error);
+      res.status(500).json({ message: 'Failed to create payment session', error: (error as Error).message });
+    }
+  });
+
+  // Update investment endpoint
+  app.put('/api/investments/:id', requireAuth, async (req: any, res) => {
+    try {
+      const investmentId = parseInt(req.params.id);
+      const { amount } = req.body;
+      
+      // Validate amount
+      if (!amount || parseFloat(amount) < 25) {
+        return res.status(400).json({ message: 'Investment amount must be at least $25' });
+      }
+
+      // Get the investment
+      const investment = await storage.getInvestment(investmentId);
+      if (!investment || investment.investorId !== req.user.id) {
+        return res.status(404).json({ message: 'Investment not found' });
+      }
+
+      if (investment.status !== 'pending') {
+        return res.status(400).json({ message: 'Only pending investments can be edited' });
+      }
+
+      // Calculate new amounts
+      const newAmount = parseFloat(amount);
+      const platformFee = newAmount > 1000 ? Math.round(newAmount * 0.05) : 0;
+      const totalAmount = newAmount + platformFee;
+
+      // Update investment
+      const updatedInvestment = await storage.updateInvestment(investmentId, {
+        amount: newAmount.toString(),
+        platformFee: platformFee.toString(),
+        totalAmount: totalAmount.toString(),
+      });
+
+      res.json(updatedInvestment);
+    } catch (error) {
+      console.error('Error updating investment:', error);
+      res.status(500).json({ message: 'Failed to update investment', error: (error as Error).message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -2488,14 +2488,16 @@ export default function InvestorDashboard() {
 
       {/* Payment Modal */}
       {selectedInvestmentForPayment && (
-        <PaymentModal
-          isOpen={isPaymentModalOpen}
-          onClose={() => {
-            setIsPaymentModalOpen(false);
-            setSelectedInvestmentForPayment(null);
-          }}
-          investment={selectedInvestmentForPayment}
-        />
+        <Elements stripe={stripePromise}>
+          <PaymentModal
+            isOpen={isPaymentModalOpen}
+            onClose={() => {
+              setIsPaymentModalOpen(false);
+              setSelectedInvestmentForPayment(null);
+            }}
+            investment={selectedInvestmentForPayment}
+          />
+        </Elements>
       )}
 
       <Footer />

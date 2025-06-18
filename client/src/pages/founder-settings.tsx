@@ -309,7 +309,7 @@ export default function FounderSettings() {
               <img 
                 src={fundryLogoNew} 
                 alt="Fundry" 
-                className="h-96 w-auto"
+                className="h-32 w-auto"
               />
             </div>
 

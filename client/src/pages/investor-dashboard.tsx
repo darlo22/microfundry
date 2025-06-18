@@ -469,7 +469,10 @@ export default function InvestorDashboard() {
           title: "Investment Updated",
           description: "Your investment amount has been updated successfully.",
         });
-        queryClient.invalidateQueries({ queryKey: ["/api/investments/investor/" + user?.id] });
+        // Invalidate multiple related queries to ensure UI updates
+        queryClient.invalidateQueries({ queryKey: ["/api/investments"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/campaigns"] });
         setIsEditModalOpen(false);
       },
       onError: (error: any) => {
@@ -490,7 +493,10 @@ export default function InvestorDashboard() {
           title: "Investment Deleted",
           description: "Your investment commitment has been deleted successfully.",
         });
-        queryClient.invalidateQueries({ queryKey: ["/api/investments/investor/" + user?.id] });
+        // Invalidate multiple related queries to ensure UI updates
+        queryClient.invalidateQueries({ queryKey: ["/api/investments"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/campaigns"] });
       },
       onError: (error: any) => {
         toast({

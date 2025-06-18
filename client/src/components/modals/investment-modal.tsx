@@ -827,23 +827,25 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             <div className="space-y-4">
               {authMode === 'signup' && (
                 <>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="firstName" className="text-sm">First Name</Label>
                       <Input
                         id="firstName"
                         value={authData.firstName}
                         onChange={(e) => setAuthData({...authData, firstName: e.target.value})}
                         placeholder="Enter your first name"
+                        className="text-sm"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="lastName" className="text-sm">Last Name</Label>
                       <Input
                         id="lastName"
                         value={authData.lastName}
                         onChange={(e) => setAuthData({...authData, lastName: e.target.value})}
                         placeholder="Enter your last name"
+                        className="text-sm"
                       />
                     </div>
                   </div>
@@ -851,36 +853,39 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               )}
               
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={authData.email}
                   onChange={(e) => setAuthData({...authData, email: e.target.value})}
                   placeholder="Enter your email"
+                  className="text-sm"
                 />
               </div>
               
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-sm">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   value={authData.password}
                   onChange={(e) => setAuthData({...authData, password: e.target.value})}
                   placeholder="Enter your password"
+                  className="text-sm"
                 />
               </div>
               
               {authMode === 'signup' && (
                 <div>
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
                     value={authData.confirmPassword}
                     onChange={(e) => setAuthData({...authData, confirmPassword: e.target.value})}
                     placeholder="Confirm your password"
+                    className="text-sm"
                   />
                 </div>
               )}
@@ -908,45 +913,45 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             {renderProgressIndicator()}
             
             {/* Investor Details Populated in SAFE Agreement */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <h4 className="font-semibold text-blue-900 mb-2">Investor Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-blue-700">Full Name:</span>
-                  <span className="ml-2 font-medium">{user?.firstName} {user?.lastName}</span>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+              <h4 className="font-semibold text-blue-900 mb-2 text-sm">Investor Information</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div className="flex flex-col sm:flex-row">
+                  <span className="text-blue-700 min-w-fit">Full Name:</span>
+                  <span className="ml-0 sm:ml-2 font-medium truncate">{user?.firstName} {user?.lastName}</span>
                 </div>
-                <div>
-                  <span className="text-blue-700">Email:</span>
-                  <span className="ml-2 font-medium">{user?.email}</span>
+                <div className="flex flex-col sm:flex-row">
+                  <span className="text-blue-700 min-w-fit">Email:</span>
+                  <span className="ml-0 sm:ml-2 font-medium truncate">{user?.email}</span>
                 </div>
-                <div>
-                  <span className="text-blue-700">Investment Amount:</span>
-                  <span className="ml-2 font-medium">${selectedAmount}</span>
+                <div className="flex flex-col sm:flex-row">
+                  <span className="text-blue-700 min-w-fit">Investment Amount:</span>
+                  <span className="ml-0 sm:ml-2 font-medium">${selectedAmount}</span>
                 </div>
-                <div>
-                  <span className="text-blue-700">Date:</span>
-                  <span className="ml-2 font-medium">{new Date().toLocaleDateString()}</span>
+                <div className="flex flex-col sm:flex-row">
+                  <span className="text-blue-700 min-w-fit">Date:</span>
+                  <span className="ml-0 sm:ml-2 font-medium">{new Date().toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
             
-            <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Investment Amount</Label>
-                  <p className="text-lg font-semibold">${selectedAmount}</p>
+                  <Label className="text-xs font-medium text-gray-700">Investment Amount</Label>
+                  <p className="text-base font-semibold">${selectedAmount}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Discount Rate</Label>
-                  <p className="text-lg font-semibold">{campaign.discountRate}%</p>
+                  <Label className="text-xs font-medium text-gray-700">Discount Rate</Label>
+                  <p className="text-base font-semibold">{campaign.discountRate}%</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Valuation Cap</Label>
-                  <p className="text-lg font-semibold">${(parseFloat(campaign.valuationCap || "1000000")).toLocaleString()}</p>
+                  <Label className="text-xs font-medium text-gray-700">Valuation Cap</Label>
+                  <p className="text-base font-semibold">${(parseFloat(campaign.valuationCap || "1000000")).toLocaleString()}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Investment Type</Label>
-                  <p className="text-lg font-semibold">SAFE Agreement</p>
+                  <Label className="text-xs font-medium text-gray-700">Investment Type</Label>
+                  <p className="text-base font-semibold">SAFE Agreement</p>
                 </div>
               </div>
             </div>

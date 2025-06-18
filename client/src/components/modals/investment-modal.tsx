@@ -42,6 +42,8 @@ interface InvestmentModalProps {
 type InvestmentStep = 'amount' | 'auth' | 'safe-review' | 'terms' | 'signature' | 'payment' | 'confirmation';
 
 interface InvestorDetails {
+  firstName: string;
+  lastName: string;
   phone: string;
   address: string;
   city: string;
@@ -64,6 +66,8 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [investorDetails, setInvestorDetails] = useState<InvestorDetails>({
+    firstName: '',
+    lastName: '',
     phone: '',
     address: '',
     city: '',
@@ -101,43 +105,73 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
     const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
 
     const handlePayment = async () => {
+      if (!stripe || !elements) {
+        toast({
+          title: "Payment Error",
+          description: "Payment system is not ready. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setIsPaymentProcessing(true);
 
       try {
-        // Create checkout session on server
-        const response = await fetch('/api/create-checkout-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        const cardElement = elements.getElement(CardElement);
+        if (!cardElement) {
+          throw new Error('Card element not found');
+        }
+
+        // Create payment method with Stripe Elements
+        const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
+          type: 'card',
+          card: cardElement,
+          billing_details: {
+            name: `${investorDetails.firstName} ${investorDetails.lastName}`,
+            email: user?.email,
           },
-          credentials: 'include',
-          body: JSON.stringify({
-            amount: calculateTotal(selectedAmount),
-            campaignId: campaign.id
-          })
         });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-          throw new Error(errorData.message || 'Failed to create checkout session');
+        if (paymentMethodError) {
+          throw new Error(paymentMethodError.message);
         }
 
-        const { url } = await response.json();
-        
-        if (!url) {
-          throw new Error('No checkout URL received from server');
-        }
+        // Create investment record first
+        const investmentData = {
+          campaignId: campaign.id,
+          amount: selectedAmount.toString(),
+          status: 'pending',
+          investorDetails: {
+            ...investorDetails,
+            signature: signatureData,
+            agreedToTerms,
+            investmentDate: new Date().toISOString()
+          }
+        };
 
-        // Redirect to Stripe Checkout
-        window.location.href = url;
+        const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
+        const investmentId = investmentResponse.id;
 
-      } catch (error) {
+        // Process payment with the payment method
+        const paymentResponse = await apiRequest('POST', `/api/investments/${investmentId}/process-payment`, {
+          paymentMethodId: paymentMethod.id,
+          amount: selectedAmount,
+        });
+
+        toast({
+          title: "Payment Successful!",
+          description: `You have successfully invested $${selectedAmount} in ${campaign.title}`,
+        });
+        setCurrentStep('confirmation');
+
+      } catch (error: any) {
         console.error('Payment error:', error);
         toast({
           title: "Payment Error",
-          description: "Failed to create payment session. Please try again.",
+          description: error.message || "Payment failed. Please try again.",
           variant: "destructive",
         });
+      } finally {
         setIsPaymentProcessing(false);
       }
     };
@@ -145,23 +179,53 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
     return (
       <div className="space-y-6">
         <div className="bg-gradient-to-r from-orange-50 to-blue-50 p-6 rounded-lg border">
-          <h4 className="font-semibold mb-4 text-gray-800">Secure Payment with Stripe</h4>
-          <div className="bg-white p-4 rounded border space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Secure Checkout</p>
-                <p className="text-sm text-gray-600">You'll be redirected to Stripe's secure payment page</p>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="cardholder-name" className="text-sm font-medium text-gray-700">
+                Cardholder Name
+              </Label>
+              <Input
+                id="cardholder-name"
+                value={`${investorDetails.firstName} ${investorDetails.lastName}`}
+                readOnly
+                className="mt-1 bg-gray-50"
+              />
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-orange-600" />
+                Card Information
+              </Label>
+              <div className="mt-2 p-4 border border-gray-200 rounded-lg bg-white">
+                <CardElement
+                  options={{
+                    style: {
+                      base: {
+                        fontSize: '16px',
+                        color: '#374151',
+                        fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+                        '::placeholder': {
+                          color: '#9CA3AF',
+                        },
+                      },
+                      invalid: {
+                        color: '#EF4444',
+                      },
+                    },
+                  }}
+                />
               </div>
             </div>
-            <div className="text-sm text-gray-600 space-y-2">
-              <p>• Industry-standard encryption and security</p>
-              <p>• Support for all major credit and debit cards</p>
-              <p>• Your payment information is never stored on our servers</p>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <Shield className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-blue-800">
+                  <p className="font-medium">Secure Payment</p>
+                  <p>Your payment information is encrypted and secure. We use Stripe for secure payment processing.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

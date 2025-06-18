@@ -19,7 +19,7 @@ export default function EmailVerification() {
     }
 
     // Verify the email token
-    fetch(`/verify-email?token=${token}`)
+    fetch(`/api/verify-email?token=${token}`)
       .then(response => {
         if (response.ok) {
           return response.text();

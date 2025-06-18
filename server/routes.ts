@@ -393,8 +393,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Verify email with token
-  app.get('/verify-email', async (req, res) => {
+  // Verify email with token (server endpoint)
+  app.get('/api/verify-email', async (req, res) => {
     // Set headers to prevent browser blocking
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');

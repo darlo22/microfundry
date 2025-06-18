@@ -702,6 +702,7 @@ export default function InvestorDashboard() {
     queryKey: ["/api/investments/investor/" + user?.id],
     enabled: !!user?.id,
     retry: false,
+    staleTime: 0, // Always fetch fresh data
   });
 
 
@@ -1204,8 +1205,10 @@ export default function InvestorDashboard() {
                   <div className="space-y-4">
                     {investments
                       .filter(investment => investment.status === 'committed' || investment.status === 'paid' || investment.status === 'completed')
-                      .map((investment) => (
-                      <div key={investment.id} className="border rounded-lg p-6 hover:border-fundry-orange transition-colors bg-white">
+                      .map((investment) => {
+                        console.log('Displaying investment in Documents:', investment.id, 'with status:', investment.status);
+                        return (
+                        <div key={investment.id} className="border rounded-lg p-6 hover:border-fundry-orange transition-colors bg-white">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-3">
@@ -1292,9 +1295,8 @@ export default function InvestorDashboard() {
                           </div>
                         </div>
                       </div>
-                    ))}
-                    
-                    {/* Show message if no signed agreements yet */}
+                        );
+                      })}
                     {investments.length > 0 && investments.filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed').length === 0 && (
                       <div className="text-center py-8 border border-dashed border-gray-300 rounded-lg">
                         <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />

@@ -6,7 +6,7 @@ interface FundryLogoProps {
   linkToHome?: boolean;
 }
 
-export function FundryLogo({ className = "h-20 w-auto", linkToHome = true }: FundryLogoProps) {
+export function FundryLogo({ className = "h-60 w-auto", linkToHome = true }: FundryLogoProps) {
   const logoImg = (
     <img 
       src={fundryLogoImg}

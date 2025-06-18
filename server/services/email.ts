@@ -48,7 +48,7 @@ export class EmailService {
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
             .header { text-align: center; margin-bottom: 30px; }
-            .logo { color: #f97316; font-size: 24px; font-weight: bold; }
+            .logo { max-width: 200px; height: auto; }
             .content { background: #f9f9f9; padding: 30px; border-radius: 8px; }
             .button { 
               display: inline-block; 
@@ -65,7 +65,7 @@ export class EmailService {
         <body>
           <div class="container">
             <div class="header">
-              <div class="logo">📈 Fundry</div>
+              <img src="https://i.imgur.com/QRJ5KfL.png" alt="Fundry" class="logo" />
             </div>
             
             <div class="content">
@@ -117,7 +117,7 @@ export class EmailService {
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
             .header { text-align: center; margin-bottom: 30px; }
-            .logo { color: #f97316; font-size: 24px; font-weight: bold; }
+            .logo { max-width: 200px; height: auto; }
             .content { background: #f9f9f9; padding: 30px; border-radius: 8px; }
             .button { 
               display: inline-block; 
@@ -134,7 +134,7 @@ export class EmailService {
         <body>
           <div class="container">
             <div class="header">
-              <div class="logo">📈 Fundry</div>
+              <img src="https://i.imgur.com/QRJ5KfL.png" alt="Fundry" class="logo" />
             </div>
             
             <div class="content">

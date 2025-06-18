@@ -379,8 +379,8 @@ export default function CampaignView() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Campaign Navigation */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      {/* Modern Campaign Navigation */}
       <Navbar 
         title={campaign.title}
         showNotifications={false}
@@ -389,7 +389,7 @@ export default function CampaignView() {
             <Button 
               variant="ghost" 
               onClick={handleBackToDashboard}
-              className="flex items-center text-gray-600 hover:text-fundry-orange"
+              className="flex items-center text-gray-600 hover:text-fundry-orange hover:bg-orange-50 transition-all duration-200"
             >
               <ArrowLeft className="mr-2" size={16} />
               Previous
@@ -398,13 +398,16 @@ export default function CampaignView() {
               <Button 
                 variant="outline" 
                 onClick={handleEdit}
-                className="flex items-center border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white"
+                className="flex items-center border-2 border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white transition-all duration-200 shadow-sm"
               >
                 <Edit className="mr-2" size={16} />
                 Edit
               </Button>
             )}
-            <Button onClick={handleShare} className="bg-fundry-orange hover:bg-orange-600">
+            <Button 
+              onClick={handleShare} 
+              className="bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+            >
               <Share className="mr-2" size={16} />
               Share
             </Button>
@@ -416,49 +419,85 @@ export default function CampaignView() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Campaign Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Campaign Header */}
-            <Card>
-              <CardContent className="p-8">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <h1 className="text-3xl font-bold text-gray-900">{campaign.title}</h1>
-                      <Badge className={getStatusColor(campaign.status)}>
-                        {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
-                      </Badge>
-                    </div>
-                    <p className="text-xl text-gray-600 mb-6">{campaign.shortPitch}</p>
-                    
-                    <div className="flex items-center space-x-6 text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <Building className="mr-2" size={16} />
-                        <span>Technology</span>
+            {/* Modern Campaign Header */}
+            <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/50 to-blue-50/30 backdrop-blur-sm">
+              <CardContent className="p-0">
+                {/* Header Gradient Background */}
+                <div className="bg-gradient-to-r from-fundry-orange via-orange-500 to-fundry-navy p-8 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-black/5 via-transparent to-white/10"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-4 mb-4">
+                          <h1 className="text-4xl font-bold text-white drop-shadow-sm">{campaign.title}</h1>
+                          <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-colors">
+                            {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
+                          </Badge>
+                        </div>
+                        <p className="text-xl text-white/95 mb-6 font-medium leading-relaxed">{campaign.shortPitch}</p>
+                        
+                        <div className="flex items-center space-x-6 text-white/80">
+                          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                            <Building className="mr-2" size={16} />
+                            <span className="font-medium">{campaign.businessSector || 'Technology'}</span>
+                          </div>
+                          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                            <MapPin className="mr-2" size={16} />
+                            <span className="font-medium">{campaign.country && campaign.state ? `${campaign.state}, ${campaign.country}` : 'Location TBD'}</span>
+                          </div>
+                          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                            <Calendar className="mr-2" size={16} />
+                            <span className="font-medium">Started {formatDate(campaign.createdAt)}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center">
-                        <MapPin className="mr-2" size={16} />
-                        <span>San Francisco, CA</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Calendar className="mr-2" size={16} />
-                        <span>Started {formatDate(campaign.createdAt)}</span>
+                      
+                      {/* Enhanced Company Logo */}
+                      <div className="w-28 h-28 bg-white/95 backdrop-blur-sm border-2 border-white/30 rounded-2xl flex items-center justify-center ml-8 overflow-hidden shadow-2xl">
+                        {campaign.logoUrl ? (
+                          <img 
+                            src={campaign.logoUrl} 
+                            alt={campaign.title}
+                            className="w-full h-full object-contain p-4"
+                            style={{ maxWidth: '100%', maxHeight: '100%' }}
+                          />
+                        ) : (
+                          <span className="text-fundry-orange text-3xl font-bold">
+                            {campaign.title.charAt(0)}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
+                </div>
+                
+                {/* Stats Section */}
+                <div className="p-8 bg-white">
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-fundry-navy mb-2">{formatCurrency(campaign.totalRaised)}</div>
+                      <div className="text-sm text-gray-600 font-medium">Raised</div>
+                    </div>
+                    <div className="text-center border-l border-r border-gray-200">
+                      <div className="text-3xl font-bold text-fundry-orange mb-2">{campaign.progressPercent}%</div>
+                      <div className="text-sm text-gray-600 font-medium">Complete</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-600 mb-2">{formatCurrency(campaign.fundingGoal)}</div>
+                      <div className="text-sm text-gray-600 font-medium">Goal</div>
+                    </div>
+                  </div>
                   
-                  {/* Company Logo */}
-                  <div className="w-24 h-24 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center ml-6 overflow-hidden shadow-sm">
-                    {campaign.logoUrl ? (
-                      <img 
-                        src={campaign.logoUrl} 
-                        alt={campaign.title}
-                        className="w-full h-full object-contain p-3"
-                        style={{ maxWidth: '100%', maxHeight: '100%' }}
-                      />
-                    ) : (
-                      <span className="text-gray-400 text-2xl font-bold">
-                        {campaign.title.charAt(0)}
-                      </span>
-                    )}
+                  {/* Progress Bar */}
+                  <div className="mt-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-gray-700">Funding Progress</span>
+                      <span className="text-sm font-bold text-fundry-orange">{campaign.progressPercent}%</span>
+                    </div>
+                    <Progress 
+                      value={campaign.progressPercent} 
+                      className="h-3 bg-gray-200"
+                    />
                   </div>
                 </div>
               </CardContent>

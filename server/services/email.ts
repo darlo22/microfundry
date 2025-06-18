@@ -247,9 +247,7 @@ export class EmailService {
   }
 
   async sendWelcomeEmail(email: string, firstName: string, userType: 'founder' | 'investor'): Promise<boolean> {
-    const dashboardUrl = userType === 'founder' 
-      ? `${process.env.BASE_URL || 'http://localhost:5000'}/founder-dashboard`
-      : `${process.env.BASE_URL || 'http://localhost:5000'}/investor-dashboard`;
+    const dashboardUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/landing`;
 
     const html = `
       <!DOCTYPE html>
@@ -445,7 +443,7 @@ export class EmailService {
               </div>
               
               <div class="button-container">
-                <a href="${dashboardUrl}" class="button">Go to Dashboard</a>
+                <a href="${dashboardUrl}" class="button">Sign In to Get Started</a>
               </div>
               
               <div class="support-section">

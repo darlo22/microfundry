@@ -474,7 +474,7 @@ export default function FounderUpdates() {
               <img 
                 src={fundryLogoNew} 
                 alt="Fundry" 
-                className="h-48 w-auto"
+                className="h-96 w-auto"
               />
             </div>
 

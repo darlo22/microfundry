@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChartLine, Rocket, TrendingUp, X, Briefcase, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import fundryLogoImg from "@assets/attached_assets/ChatGPT Image Jun 18, 2025, 07_16_52 AM_1750230510254.png";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -212,12 +213,11 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
       <DialogContent className="max-w-lg">
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-fundry-orange rounded-lg flex items-center justify-center">
-                <ChartLine className="text-white" size={16} />
-              </div>
-              <span className="text-2xl font-bold text-fundry-navy">Fundry</span>
-            </div>
+            <img 
+              src={fundryLogoImg} 
+              alt="Fundry" 
+              className="h-16 w-auto"
+            />
           </div>
           <DialogTitle className="text-2xl font-bold">
             {mode === "signup" ? "Create Account" : "Welcome Back"}

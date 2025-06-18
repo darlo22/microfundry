@@ -2387,14 +2387,18 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           },
         ],
         mode: 'payment',
-        success_url: `${process.env.REPL_ID ? 'https://' + process.env.REPL_ID + '.replit.app' : 'http://localhost:5000'}/investment-success?session_id={CHECKOUT_SESSION_ID}&campaign_id=${campaign.id}`,
-        cancel_url: `${process.env.REPL_ID ? 'https://' + process.env.REPL_ID + '.replit.app' : 'http://localhost:5000'}/investor-dashboard`,
-        metadata: {
-          investmentId: investmentId.toString(),
-          campaignId: campaign.id.toString(),
-          investorId: req.user.id,
-          amount: amount.toString(),
-          platformFee: platformFee.toString(),
+        success_url: `https://${process.env.REPL_ID}.replit.app/investment-success?session_id={CHECKOUT_SESSION_ID}&campaign_id=${campaign.id}`,
+        cancel_url: `https://${process.env.REPL_ID}.replit.app/investor-dashboard`,
+        allow_promotion_codes: false,
+        billing_address_collection: 'auto',
+        payment_intent_data: {
+          metadata: {
+            investmentId: investmentId.toString(),
+            campaignId: campaign.id.toString(),
+            investorId: req.user.id,
+            amount: amount.toString(),
+            platformFee: platformFee.toString(),
+          }
         },
         customer_email: req.user.email,
       });

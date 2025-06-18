@@ -2352,6 +2352,23 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const platformFee = parseFloat(investment.platformFee);
       const totalAmount = amount + platformFee;
 
+      // Validate logo URL for Stripe (must be HTTPS and valid format)
+      const isValidUrl = (url: string) => {
+        try {
+          const parsed = new URL(url);
+          return parsed.protocol === 'https:' && (
+            parsed.pathname.endsWith('.jpg') || 
+            parsed.pathname.endsWith('.jpeg') || 
+            parsed.pathname.endsWith('.png') ||
+            parsed.pathname.endsWith('.gif')
+          );
+        } catch {
+          return false;
+        }
+      };
+
+      const validLogoUrl = campaign.logoUrl && isValidUrl(campaign.logoUrl) ? campaign.logoUrl : null;
+
       // Create Stripe Checkout session
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -2362,7 +2379,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               product_data: {
                 name: `Investment in ${campaign.title}`,
                 description: `SAFE investment of $${amount} with $${platformFee} platform fee`,
-                images: campaign.logoUrl ? [campaign.logoUrl] : [],
+                images: validLogoUrl ? [validLogoUrl] : [],
               },
               unit_amount: Math.round(totalAmount * 100), // Convert to cents
             },

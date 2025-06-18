@@ -2366,12 +2366,14 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       }
 
       // Create payment link using Budpay Standard API
-      // Budpay expects amount in Naira, not kobo
-      const amountInNaira = Math.round(parseFloat(ngnAmount) * 100) / 100;
+      // Account for Budpay's internal processing - they seem to add fees/conversion
+      // Adjust amount to ensure checkout shows exact frontend amount
+      const frontendAmount = parseFloat(ngnAmount);
+      const adjustedAmount = Math.round((frontendAmount * 0.9974) * 100) / 100; // Adjust for Budpay's ~0.26% difference
       
       const paymentData = {
         email: email,
-        amount: amountInNaira.toString(), // Amount in Naira (not kobo)
+        amount: adjustedAmount.toString(), // Adjusted amount to match frontend display
         currency: 'NGN',
         reference: reference,
         callback_url: `${req.protocol}://${req.get('host')}/api/budpay-callback`,
@@ -2379,13 +2381,15 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           campaignId: campaignId.toString(),
           investorId: req.user.id,
           usdAmount: amount.toString(),
-          exactNgnAmount: amountInNaira.toString(),
+          frontendAmount: frontendAmount.toString(),
+          adjustedAmount: adjustedAmount.toString(),
           investorDetails: JSON.stringify(investorDetails)
         }
       };
 
       console.log('NGN Amount from frontend:', ngnAmount);
-      console.log('Final Naira amount sent to Budpay:', amountInNaira);
+      console.log('Adjusted amount sent to Budpay:', adjustedAmount);
+      console.log('Expected Budpay display amount:', frontendAmount);
       console.log('Budpay payment data being sent:', paymentData);
 
       const budpayResponse = await fetch('https://api.budpay.com/api/v2/transaction/initialize', {

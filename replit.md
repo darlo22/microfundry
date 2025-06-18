@@ -142,6 +142,7 @@ The deployment uses:
 - June 18, 2025. Further optimized Payment Withdrawal page logo: reduced logo size by additional 5X (h-21 to h-4) for minimal, clean header design that maintains brand visibility without overwhelming the interface
 - June 18, 2025. Adjusted Payment Withdrawal page logo size: increased logo by 3X (h-4 to h-12) for improved visibility and better brand presence while maintaining clean header design
 - June 18, 2025. Fine-tuned Payment Withdrawal page logo: increased logo by 1.5X (h-12 to h-18) for optimal brand visibility and professional header appearance
+- June 18, 2025. Optimized Payment Withdrawal page logo sizing: reduced logo by 3X (h-18 to h-6) for clean, compact header design with subtle brand presence
 
 ## User Preferences
 

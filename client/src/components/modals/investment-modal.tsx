@@ -26,6 +26,7 @@ import FundryLogo from "@/components/ui/fundry-logo";
 import { SafeDocumentViewer } from "./safe-document-viewer";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { convertUsdToNgn, formatCurrency, type ExchangeRate } from "@/lib/currency";
 
 interface CampaignWithStats extends Campaign {
   totalRaised: string;
@@ -90,6 +91,9 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const [cardholderName, setCardholderName] = useState<string>('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [showSafeViewer, setShowSafeViewer] = useState(false);
+  const [ngnAmount, setNgnAmount] = useState<number | null>(null);
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
+  const [isLoadingRate, setIsLoadingRate] = useState(false);
 
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();

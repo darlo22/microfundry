@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import { convertUsdToNgn, formatCurrency, type ExchangeRate } from '@/lib/currency';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -45,6 +46,34 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [cardholderName, setCardholderName] = useState('');
+  const [ngnAmount, setNgnAmount] = useState<number | null>(null);
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
+  const [isLoadingRate, setIsLoadingRate] = useState(true);
+
+  // Fetch exchange rate when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoadingRate(true);
+      convertUsdToNgn(Number(investment.amount))
+        .then(({ ngn, rate }) => {
+          setNgnAmount(ngn);
+          setExchangeRate(rate);
+        })
+        .catch((error) => {
+          console.warn('Failed to fetch exchange rate:', error);
+          // Use fallback rate
+          setNgnAmount(Number(investment.amount) * 1650);
+          setExchangeRate({
+            usdToNgn: 1650,
+            source: 'Fallback',
+            lastUpdated: new Date()
+          });
+        })
+        .finally(() => {
+          setIsLoadingRate(false);
+        });
+    }
+  }, [isOpen, investment.amount]);
 
   const processPaymentMutation = useMutation({
     mutationFn: async (paymentMethodId: string) => {
@@ -140,9 +169,26 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
             Complete Payment
           </DialogTitle>
-          <p className="text-gray-600 mt-2">
-            Investment Amount: <span className="font-bold text-lg">${investment.amount}</span>
-          </p>
+          <div className="mt-3 space-y-1">
+            <p className="text-gray-600">
+              Investment Amount: <span className="font-bold text-lg">${investment.amount}</span>
+            </p>
+            {isLoadingRate ? (
+              <p className="text-sm text-gray-500">
+                <span className="inline-block w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></span>
+                Loading Naira equivalent...
+              </p>
+            ) : ngnAmount && exchangeRate ? (
+              <div className="text-sm text-gray-600 space-y-1">
+                <p>
+                  Naira Equivalent: <span className="font-semibold text-green-700">₦{ngnAmount.toLocaleString('en-NG')}</span>
+                </p>
+                <p className="text-xs text-gray-500">
+                  Rate: $1 = ₦{exchangeRate.usdToNgn.toLocaleString('en-NG')} ({exchangeRate.source})
+                </p>
+              </div>
+            ) : null}
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -206,7 +252,12 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                 Processing...
               </div>
             ) : (
-              `Pay $${investment.amount}`
+              <div className="text-center">
+                <div>Pay ${investment.amount}</div>
+                {ngnAmount && (
+                  <div className="text-xs opacity-90">(₦{ngnAmount.toLocaleString('en-NG')})</div>
+                )}
+              </div>
             )}
           </Button>
         </div>

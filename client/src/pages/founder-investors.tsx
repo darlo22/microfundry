@@ -294,7 +294,7 @@ export default function FounderInvestors() {
               <img 
                 src={fundryLogoNew} 
                 alt="Fundry" 
-                className="h-36 w-auto"
+                className="h-24 w-auto"
               />
             </div>
 

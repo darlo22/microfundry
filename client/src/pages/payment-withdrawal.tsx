@@ -316,7 +316,7 @@ export default function PaymentWithdrawal() {
                 Back to Dashboard
               </Button>
               <Separator orientation="vertical" className="h-6" />
-              <img src={fundryLogoNew} alt="Fundry" className="h-8" />
+              <img src={fundryLogoNew} alt="Fundry" className="h-16" />
             </div>
           </div>
         </div>

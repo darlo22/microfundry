@@ -419,8 +419,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
 
             {/* NGN Payment Button */}
             <Button
-              onClick={handleNairaPaymentOriginal}
-              disabled={isProcessing || !ngnAmount}
+              onClick={handleNairaPayment}
+              disabled={isProcessingNaira || !ngnAmount}
               className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
             >
               <div className="flex items-center gap-3">
@@ -491,11 +491,11 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
             
             {ngnAmount && !isLoadingRate && (
               <Button
-                onClick={handleNairaPaymentOriginal}
-                disabled={isProcessing}
+                onClick={handleNairaPayment}
+                disabled={isProcessingNaira}
                 className="w-full bg-green-600 hover:bg-green-700"
               >
-                {isProcessing ? 'Processing Payment...' : `Pay ₦${ngnAmount.toLocaleString()} (NGN)`}
+                {isProcessingNaira ? 'Processing Payment...' : `Pay ₦${ngnAmount.toLocaleString()} (NGN)`}
               </Button>
             )}
           </div>

@@ -590,7 +590,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
       };
 
       // Load Budpay script and initialize payment
-      if (typeof window.BudPayCheckout === 'function') {
+      if (window.BudPayCheckout && typeof window.BudPayCheckout === 'function') {
         console.log('Budpay script already loaded');
         initializeBudpay();
       } else {

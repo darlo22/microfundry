@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChartLine, Rocket, TrendingUp, X, Briefcase, ArrowLeft, Eye, EyeOff } from "lucide-react";
-import fundryLogoNew from "@assets/attached_assets/ChatGPT Image Jun 18, 2025, 07_16_52 AM_1750230510254.png";
+import fundryLogoNew from "@assets/ChatGPT Image Jun 18, 2025, 07_16_52 AM_1750230510254.png";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";

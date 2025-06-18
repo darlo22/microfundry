@@ -275,10 +275,53 @@ export class DatabaseStorage implements IStorage {
     return investment;
   }
 
-  async getInvestmentsByInvestor(investorId: string): Promise<Investment[]> {
+  async getInvestmentsByInvestor(investorId: string): Promise<(Investment & { campaign: Campaign })[]> {
     return await db
-      .select()
+      .select({
+        id: investments.id,
+        campaignId: investments.campaignId,
+        investorId: investments.investorId,
+        amount: investments.amount,
+        platformFee: investments.platformFee,
+        totalAmount: investments.totalAmount,
+        status: investments.status,
+        paymentStatus: investments.paymentStatus,
+        paymentIntentId: investments.paymentIntentId,
+        agreementSigned: investments.agreementSigned,
+        signedAt: investments.signedAt,
+        ipAddress: investments.ipAddress,
+        createdAt: investments.createdAt,
+        updatedAt: investments.updatedAt,
+        campaign: {
+          id: campaigns.id,
+          founderId: campaigns.founderId,
+          title: campaigns.title,
+          shortPitch: campaigns.shortPitch,
+          description: campaigns.description,
+          businessSector: campaigns.businessSector,
+          logoUrl: campaigns.logoUrl,
+          pitchDeckUrl: campaigns.pitchDeckUrl,
+          fundingGoal: campaigns.fundingGoal,
+          minInvestment: campaigns.minInvestment,
+          maxInvestment: campaigns.maxInvestment,
+          discountRate: campaigns.discountRate,
+          valuationCap: campaigns.valuationCap,
+          useOfFunds: campaigns.useOfFunds,
+          teamInfo: campaigns.teamInfo,
+          milestones: campaigns.milestones,
+          location: campaigns.location,
+          country: campaigns.country,
+          state: campaigns.state,
+          phone: campaigns.phone,
+          bio: campaigns.bio,
+          status: campaigns.status,
+          featured: campaigns.featured,
+          createdAt: campaigns.createdAt,
+          updatedAt: campaigns.updatedAt,
+        }
+      })
       .from(investments)
+      .innerJoin(campaigns, eq(investments.campaignId, campaigns.id))
       .where(eq(investments.investorId, investorId))
       .orderBy(desc(investments.createdAt));
   }

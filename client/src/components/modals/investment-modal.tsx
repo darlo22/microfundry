@@ -415,24 +415,25 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
     }
   });
 
-  // Manual Budpay payment processing when script fails to load
-  const handleManualBudpayPayment = async () => {
-    console.log('Using manual Budpay payment processing');
+  // Direct Budpay payment processing using payment link
+  const handleDirectBudpayPayment = async () => {
+    console.log('Using direct Budpay payment processing');
     
     try {
       toast({
-        title: "Processing Payment",
-        description: "Processing Naira payment via Budpay...",
+        title: "Redirecting to Payment",
+        description: "Opening Budpay checkout with payment options...",
       });
 
-      // Create investment directly with committed status
-      const investmentData = {
+      // Create payment request with backend
+      const paymentData = {
         campaignId: campaign.id,
         amount: selectedAmount,
-        status: 'committed',
-        paymentMethod: 'budpay',
         currency: 'NGN',
         ngnAmount: ngnAmount,
+        email: user?.email || investorDetails.firstName + '@example.com',
+        reference: `inv_${campaign.id}_${Date.now()}`,
+        paymentMethod: 'budpay',
         investorDetails: {
           ...investorDetails,
           signature: signatureData,
@@ -441,24 +442,60 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
         }
       };
 
-      const result = await createInvestmentMutation.mutateAsync(investmentData);
+      // Call backend to create Budpay payment link
+      const response = await apiRequest('POST', '/api/create-budpay-payment', paymentData);
+      const result = await response.json();
 
-      if (result) {
-        toast({
-          title: "Payment Successful!",
-          description: `You have successfully invested ₦${ngnAmount?.toLocaleString()} in ${campaign.title}`,
-        });
-        setCurrentStep('confirmation');
+      if (result.success && result.paymentUrl) {
+        // Open Budpay payment page in a new window
+        const paymentWindow = window.open(
+          result.paymentUrl,
+          'budpay-payment',
+          'width=600,height=700,scrollbars=yes,resizable=yes'
+        );
+
+        // Poll for payment completion
+        const pollPayment = setInterval(async () => {
+          if (paymentWindow?.closed) {
+            clearInterval(pollPayment);
+            setIsProcessingPayment(false);
+            
+            // Check payment status
+            const statusResponse = await apiRequest('GET', `/api/check-payment-status/${paymentData.reference}`);
+            const statusResult = await statusResponse.json();
+            
+            if (statusResult.success && statusResult.status === 'success') {
+              toast({
+                title: "Payment Successful!",
+                description: `You have successfully invested ₦${ngnAmount?.toLocaleString()} in ${campaign.title}`,
+              });
+              
+              // Invalidate queries to refresh data
+              queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+              
+              setCurrentStep('confirmation');
+            } else {
+              toast({
+                title: "Payment Incomplete",
+                description: "Payment was not completed. Please try again.",
+                variant: "destructive",
+              });
+            }
+          }
+        }, 1000);
+
+      } else {
+        throw new Error(result.message || 'Failed to create payment link');
       }
 
     } catch (error: any) {
-      console.error('Manual payment processing error:', error);
+      console.error('Direct payment processing error:', error);
       toast({
         title: "Payment Error",
-        description: error.message || "Payment processing failed",
+        description: error.message || "Failed to initialize payment",
         variant: "destructive",
       });
-    } finally {
       setIsProcessingPayment(false);
     }
   };
@@ -596,33 +633,27 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
       } else {
         console.log('Loading Budpay script...');
         
-        // Try multiple Budpay script URLs
-        const budpayUrls = [
-          'https://checkout.budpay.com/checkout.js',
-          'https://js.budpay.com/checkout.js',
-          'https://cdn.budpay.com/js/checkout.js'
-        ];
-
-        let urlIndex = 0;
+        // Use the correct Budpay checkout script URL
+        const budpayScriptUrl = 'https://inlinecheckout.budpay.com/budpay-inline-checkout.js';
         
         const loadBudpayScript = () => {
-          if (urlIndex >= budpayUrls.length) {
-            console.error('All Budpay script URLs failed');
-            // Fallback to manual payment processing
-            handleManualBudpayPayment();
-            return;
-          }
-
           const script = document.createElement('script');
-          script.src = budpayUrls[urlIndex];
+          script.src = budpayScriptUrl;
           script.onload = () => {
-            console.log(`Budpay script loaded successfully from: ${budpayUrls[urlIndex]}`);
-            setTimeout(initializeBudpay, 100);
+            console.log('Budpay script loaded successfully');
+            // Wait a bit for the script to initialize
+            setTimeout(() => {
+              if (window.BudPayCheckout) {
+                initializeBudpay();
+              } else {
+                console.warn('BudPayCheckout not available, using direct API approach');
+                handleDirectBudpayPayment();
+              }
+            }, 500);
           };
           script.onerror = () => {
-            console.warn(`Failed to load Budpay script from: ${budpayUrls[urlIndex]}`);
-            urlIndex++;
-            loadBudpayScript(); // Try next URL
+            console.warn('Failed to load Budpay script, using direct API approach');
+            handleDirectBudpayPayment();
           };
           document.head.appendChild(script);
         };

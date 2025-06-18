@@ -2288,6 +2288,158 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Create Budpay payment link endpoint
+  app.post('/api/create-budpay-payment', requireAuth, async (req: any, res) => {
+    try {
+      const { 
+        campaignId, 
+        amount, 
+        ngnAmount, 
+        email,
+        reference,
+        investorDetails
+      } = req.body;
+
+      console.log('Creating Budpay payment link:', req.body);
+
+      // Create payment link using Budpay Standard API
+      const paymentData = {
+        email: email,
+        amount: Math.round(ngnAmount * 100), // Convert to kobo
+        currency: 'NGN',
+        reference: reference,
+        callback_url: `${req.protocol}://${req.get('host')}/api/budpay-callback`,
+        metadata: {
+          campaignId: campaignId.toString(),
+          investorId: req.user.id,
+          usdAmount: amount.toString(),
+          investorDetails: JSON.stringify(investorDetails)
+        }
+      };
+
+      const budpayResponse = await fetch('https://api.budpay.com/api/v2/transaction/initialize', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.BUDPAY_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentData)
+      });
+
+      const budpayResult = await budpayResponse.json();
+      console.log('Budpay response:', budpayResult);
+
+      if (budpayResult.status === true && budpayResult.data?.authorization_url) {
+        res.json({ 
+          success: true, 
+          paymentUrl: budpayResult.data.authorization_url,
+          reference: reference
+        });
+      } else {
+        throw new Error(budpayResult.message || 'Failed to create payment link');
+      }
+
+    } catch (error) {
+      console.error('Budpay payment link creation error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to create payment link',
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  // Check Budpay payment status endpoint
+  app.get('/api/check-payment-status/:reference', requireAuth, async (req: any, res) => {
+    try {
+      const { reference } = req.params;
+      console.log('Checking payment status for reference:', reference);
+
+      const verificationResponse = await fetch(
+        `https://api.budpay.com/api/v2/transaction/verify/${reference}`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${process.env.BUDPAY_SECRET_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const verificationData = await verificationResponse.json();
+      console.log('Payment status verification:', verificationData);
+
+      if (verificationData.status === true && verificationData.data?.status === 'success') {
+        // Create investment record if payment was successful
+        const metadata = verificationData.data.metadata || {};
+        const campaignId = parseInt(metadata.campaignId);
+        const investorId = metadata.investorId;
+        const amount = parseFloat(metadata.usdAmount);
+
+        if (campaignId && investorId && amount) {
+          const investment = await storage.createInvestment({
+            campaignId,
+            investorId,
+            amount: amount.toString(),
+            platformFee: "0",
+            totalAmount: amount.toString(),
+            status: 'paid',
+            paymentStatus: 'completed',
+            paymentIntentId: reference,
+            agreementSigned: true,
+            signedAt: new Date(),
+            ipAddress: req.ip
+          });
+
+          res.json({ 
+            success: true, 
+            status: 'success',
+            investment,
+            message: 'Payment verified successfully'
+          });
+        } else {
+          res.json({ 
+            success: true, 
+            status: 'success',
+            message: 'Payment verified but missing metadata'
+          });
+        }
+      } else {
+        res.json({ 
+          success: false, 
+          status: verificationData.data?.status || 'failed',
+          message: 'Payment not completed'
+        });
+      }
+
+    } catch (error) {
+      console.error('Payment status check error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to check payment status',
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  // Budpay webhook callback endpoint
+  app.post('/api/budpay-callback', async (req, res) => {
+    try {
+      console.log('Budpay callback received:', req.body);
+      
+      const { reference, status } = req.body;
+      
+      if (status === 'success') {
+        console.log('Payment successful via webhook:', reference);
+      }
+      
+      res.status(200).send('OK');
+    } catch (error) {
+      console.error('Budpay callback error:', error);
+      res.status(200).send('OK');
+    }
+  });
+
   // Payment success verification endpoint
   app.get('/api/payment-success/:sessionId', requireAuth, async (req: any, res) => {
     try {

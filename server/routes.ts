@@ -2481,7 +2481,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   app.post('/api/investments/:id/process-payment', requireAuth, async (req: any, res) => {
     try {
       const investmentId = parseInt(req.params.id);
-      const { type, cardDetails, cardId, saveCard } = req.body;
+      const { paymentMethodId, cardholderName } = req.body;
       
       // Get the investment
       const investment = await storage.getInvestment(investmentId);
@@ -2501,33 +2501,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       
       const amountInCents = Math.round(parseFloat(investment.amount) * 100);
       
-      let paymentMethod;
-      
-      if (type === 'new_card') {
-        // Create payment method with new card
-        paymentMethod = await stripe.paymentMethods.create({
-          type: 'card',
-          card: {
-            number: cardDetails.number,
-            exp_month: cardDetails.exp_month,
-            exp_year: cardDetails.exp_year,
-            cvc: cardDetails.cvc,
-          },
-          billing_details: {
-            name: cardDetails.name,
-          },
-        });
-      } else if (type === 'saved_card') {
-        // Use saved card (in real implementation, retrieve from user's saved cards)
-        // For now, we'll simulate this
-        return res.status(400).json({ message: 'Saved cards not implemented yet' });
-      }
-      
-      // Create payment intent
+      // Create payment intent with the payment method
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amountInCents,
         currency: 'usd',
-        payment_method: paymentMethod.id,
+        payment_method: paymentMethodId,
         confirm: true,
         description: `Investment in Campaign ${investment.campaignId}`,
         metadata: {
@@ -2542,7 +2520,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         // Update investment status to paid
         await storage.updateInvestment(investmentId, { 
           status: 'paid',
-          stripePaymentIntentId: paymentIntent.id 
+          paymentIntentId: paymentIntent.id 
         });
         
         res.json({ 

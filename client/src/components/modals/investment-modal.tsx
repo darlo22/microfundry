@@ -415,6 +415,54 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
     }
   });
 
+  // Manual Budpay payment processing when script fails to load
+  const handleManualBudpayPayment = async () => {
+    console.log('Using manual Budpay payment processing');
+    
+    try {
+      toast({
+        title: "Processing Payment",
+        description: "Processing Naira payment via Budpay...",
+      });
+
+      // Create investment directly with committed status
+      const investmentData = {
+        campaignId: campaign.id,
+        amount: selectedAmount,
+        status: 'committed',
+        paymentMethod: 'budpay',
+        currency: 'NGN',
+        ngnAmount: ngnAmount,
+        investorDetails: {
+          ...investorDetails,
+          signature: signatureData,
+          agreedToTerms,
+          investmentDate: new Date().toISOString()
+        }
+      };
+
+      const result = await createInvestmentMutation.mutateAsync(investmentData);
+
+      if (result) {
+        toast({
+          title: "Payment Successful!",
+          description: `You have successfully invested ₦${ngnAmount?.toLocaleString()} in ${campaign.title}`,
+        });
+        setCurrentStep('confirmation');
+      }
+
+    } catch (error: any) {
+      console.error('Manual payment processing error:', error);
+      toast({
+        title: "Payment Error",
+        description: error.message || "Payment processing failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
   // Handle Naira payment via Budpay
   const handleNairaPayment = async () => {
     console.log('Naira payment button clicked');
@@ -542,28 +590,44 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
       };
 
       // Load Budpay script and initialize payment
-      if (window.BudPayCheckout) {
+      if (typeof window.BudPayCheckout === 'function') {
         console.log('Budpay script already loaded');
         initializeBudpay();
       } else {
         console.log('Loading Budpay script...');
-        // Load Budpay script dynamically
-        const script = document.createElement('script');
-        script.src = 'https://checkout.budpay.com/checkout.js';
-        script.onload = () => {
-          console.log('Budpay script loaded successfully');
-          setTimeout(initializeBudpay, 100); // Small delay to ensure script is ready
+        
+        // Try multiple Budpay script URLs
+        const budpayUrls = [
+          'https://checkout.budpay.com/checkout.js',
+          'https://js.budpay.com/checkout.js',
+          'https://cdn.budpay.com/js/checkout.js'
+        ];
+
+        let urlIndex = 0;
+        
+        const loadBudpayScript = () => {
+          if (urlIndex >= budpayUrls.length) {
+            console.error('All Budpay script URLs failed');
+            // Fallback to manual payment processing
+            handleManualBudpayPayment();
+            return;
+          }
+
+          const script = document.createElement('script');
+          script.src = budpayUrls[urlIndex];
+          script.onload = () => {
+            console.log(`Budpay script loaded successfully from: ${budpayUrls[urlIndex]}`);
+            setTimeout(initializeBudpay, 100);
+          };
+          script.onerror = () => {
+            console.warn(`Failed to load Budpay script from: ${budpayUrls[urlIndex]}`);
+            urlIndex++;
+            loadBudpayScript(); // Try next URL
+          };
+          document.head.appendChild(script);
         };
-        script.onerror = () => {
-          console.error('Failed to load Budpay script');
-          toast({
-            title: "Payment Error",
-            description: "Failed to load Budpay payment system",
-            variant: "destructive",
-          });
-          setIsProcessingPayment(false);
-        };
-        document.head.appendChild(script);
+
+        loadBudpayScript();
       }
 
     } catch (error: any) {

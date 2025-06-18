@@ -446,7 +446,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
       // Initialize Budpay payment
       const budpayPaymentConfig = {
-        key: BUDPAY_PUBLIC_KEY,
+        key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,
         email: user?.email || investorDetails.firstName + '@example.com',
         amount: ngnAmount * 100, // Convert to kobo
         currency: 'NGN',

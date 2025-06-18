@@ -9,6 +9,7 @@ import { CreditCard, Lock, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { convertUsdToNgn, formatCurrency, type ExchangeRate } from '@/lib/currency';
 
@@ -170,8 +171,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     try {
       // Create Budpay payment configuration
       const budpayConfig = {
-        key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key',
-        email: investment.campaignTitle || 'investor@example.com',
+        key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,
+        email: user?.email || 'investor@fundry.com',
         amount: ngnAmount * 100, // Convert to kobo
         currency: 'NGN',
         ref: `pay_${investment.id}_${Date.now()}`,

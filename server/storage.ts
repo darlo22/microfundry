@@ -327,6 +327,12 @@ export class DatabaseStorage implements IStorage {
     return investment;
   }
 
+  async deleteInvestment(id: number): Promise<void> {
+    await db
+      .delete(investments)
+      .where(eq(investments.id, id));
+  }
+
   // SAFE agreement operations
   async createSafeAgreement(agreement: InsertSafeAgreement): Promise<SafeAgreement> {
     const [safeAgreement] = await db

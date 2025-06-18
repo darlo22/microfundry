@@ -136,11 +136,11 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
           throw new Error(paymentMethodError.message);
         }
 
-        // Create investment record first
-        const investmentData = {
+        // Create payment intent and investment in one call
+        const paymentData = {
           campaignId: campaign.id,
           amount: selectedAmount.toString(),
-          status: 'pending',
+          paymentMethodId: paymentMethod.id,
           investorDetails: {
             ...investorDetails,
             signature: signatureData,
@@ -149,14 +149,8 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
           }
         };
 
-        const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
-        const investmentId = investmentResponse.id;
-
-        // Process payment with the payment method
-        const paymentResponse = await apiRequest('POST', `/api/investments/${investmentId}/process-payment`, {
-          paymentMethodId: paymentMethod.id,
-          amount: selectedAmount,
-        });
+        const paymentResponse = await apiRequest('POST', '/api/create-payment-intent', paymentData);
+        const result = await paymentResponse.json();
 
         toast({
           title: "Payment Successful!",

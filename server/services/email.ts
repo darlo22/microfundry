@@ -179,6 +179,7 @@ export class EmailService {
       to: email,
       subject: `Welcome to Fundry - Your ${userType} account is ready!`,
       html,
+      from: 'Fundry <onboarding@resend.dev>',
     });
   }
 }

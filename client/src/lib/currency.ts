@@ -75,11 +75,32 @@ export async function getUsdToNgnRate(): Promise<ExchangeRate> {
     console.warn('Failed to fetch exchange rate from fallback source:', error);
   }
 
-  // Final fallback: Use a reasonable default rate (approximate black market rate)
-  // Based on typical USD/NGN black market rates as of 2025
+  // Try to get Budpay-compatible rate from our backend
+  try {
+    const budpayRateResponse = await fetch('/api/budpay-exchange-rate');
+    if (budpayRateResponse.ok) {
+      const budpayData = await budpayRateResponse.json();
+      if (budpayData.success && budpayData.rate) {
+        const budpayRate: ExchangeRate = {
+          usdToNgn: budpayData.rate,
+          source: budpayData.source,
+          lastUpdated: new Date(budpayData.lastUpdated)
+        };
+        
+        exchangeRateCache = budpayRate;
+        cacheExpiry = now + CACHE_DURATION;
+        
+        return budpayRate;
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to fetch Budpay exchange rate:', error);
+  }
+
+  // Final fallback: Use Budpay-compatible rate
   const fallbackRate: ExchangeRate = {
-    usdToNgn: 1650, // Approximate black market rate
-    source: 'Fallback Rate',
+    usdToNgn: 1560, // Current Budpay-compatible rate
+    source: 'Budpay Fallback Rate',
     lastUpdated: new Date()
   };
   

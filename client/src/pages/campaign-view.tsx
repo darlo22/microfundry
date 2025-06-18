@@ -406,7 +406,7 @@ export default function CampaignView() {
             )}
             <Button 
               onClick={handleShare} 
-              className="bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-fundry-orange hover:bg-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <Share className="mr-2" size={16} />
               Share
@@ -422,9 +422,9 @@ export default function CampaignView() {
             {/* Modern Campaign Header */}
             <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/50 to-blue-50/30 backdrop-blur-sm">
               <CardContent className="p-0">
-                {/* Header Gradient Background */}
-                <div className="bg-gradient-to-r from-fundry-orange via-orange-500 to-fundry-navy p-8 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-black/5 via-transparent to-white/10"></div>
+                {/* Header with Solid Dark Orange Background */}
+                <div className="bg-orange-700 p-8 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-black/5 via-transparent to-white/5"></div>
                   <div className="relative z-10">
                     <div className="flex items-start justify-between mb-6">
                       <div className="flex-1">

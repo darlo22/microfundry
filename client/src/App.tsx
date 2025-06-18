@@ -29,6 +29,7 @@ import FounderUpdates from "@/pages/founder-updates";
 import PaymentWithdrawal from "@/pages/payment-withdrawal";
 import InvestorDashboard from "@/pages/investor-dashboard";
 import CampaignView from "@/pages/campaign-view";
+import EmailVerification from "@/pages/email-verification";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -61,6 +62,7 @@ function Router() {
       <Route path="/investment-disclaimer" component={InvestmentDisclaimer} />
       <Route path="/safe-agreement-template" component={SafeAgreementTemplate} />
       <Route path="/investor-accreditation" component={InvestorAccreditation} />
+      <Route path="/verify-email" component={EmailVerification} />
       <Route path="/campaign/:id" component={CampaignView} />
       <Route path="/c/:privateLink" component={CampaignView} />
       

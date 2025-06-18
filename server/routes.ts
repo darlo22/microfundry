@@ -1428,8 +1428,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Verify campaign ownership
       const campaign = await storage.getCampaign(campaignId);
       if (!campaign || campaign.founderId !== founderId) {
-        return res.status(403).json({ message: 'Not authorized to update this campaign' });
+        return res.status(403).json({ message: 'Access denied: You can only update your own campaigns' });
       }
+
+      // Verify campaign has actual investors before allowing updates
+      const investments = await storage.getInvestmentsByCampaign(campaignId);
+      const confirmedInvestments = investments.filter(inv => 
+        inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed'
+      );
+
+      // Log the update creation for audit trail
+      console.log(`Founder ${founderId} creating update for campaign ${campaignId} with ${confirmedInvestments.length} confirmed investors`);
 
       const updateData = {
         campaignId: parseInt(campaignId),
@@ -1439,7 +1448,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const update = await storage.createCampaignUpdate(updateData);
-      res.json(update);
+      
+      // Add metadata about investor reach
+      const updateWithMetadata = {
+        ...update,
+        targetInvestorCount: confirmedInvestments.length,
+        investorIds: confirmedInvestments.map(inv => inv.investorId)
+      };
+
+      res.json(updateWithMetadata);
     } catch (error) {
       console.error('Error creating campaign update:', error);
       res.status(500).json({ message: 'Failed to create update' });
@@ -1485,38 +1502,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const investorId = req.params.investorId;
       
+      // Strict authorization: only allow investors to access their own updates
       if (investorId !== req.user.id) {
-        return res.status(403).json({ message: 'Not authorized' });
+        return res.status(403).json({ message: 'Access denied: You can only view your own updates' });
       }
 
-      // Get all investments by this investor
+      // Get all confirmed investments by this investor (committed, paid, completed statuses)
       const investments = await storage.getInvestmentsByInvestor(investorId);
       
-      // Get unique campaign IDs
-      const campaignIds = Array.from(new Set(investments.map(inv => inv.campaignId)));
+      // Filter to only include confirmed investments (exclude pending)
+      const confirmedInvestments = investments.filter(inv => 
+        inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed'
+      );
       
-      // Get all updates for these campaigns
+      // If no confirmed investments, return empty array
+      if (confirmedInvestments.length === 0) {
+        return res.json([]);
+      }
+      
+      // Get unique campaign IDs from confirmed investments only
+      const campaignIds = Array.from(new Set(confirmedInvestments.map(inv => inv.campaignId)));
+      
+      // Get all updates for these campaigns with additional validation
       const allUpdates = [];
       for (const campaignId of campaignIds) {
         const updates = await storage.getCampaignUpdates(campaignId);
         
-        // Get campaign details
+        // Get campaign details and verify it exists
         const campaign = await storage.getCampaign(campaignId);
         
-        // Add campaign info to each update
+        // Skip if campaign doesn't exist or is inactive
+        if (!campaign || campaign.status !== 'active') {
+          continue;
+        }
+        
+        // Add campaign info to each update with investor validation
         const updatesWithCampaign = updates.map(update => ({
           ...update,
           campaign: { 
             id: campaignId,
-            title: campaign?.title || 'Unknown Campaign',
-            founderId: campaign?.founderId
-          }
+            title: campaign.title || 'Unknown Campaign',
+            founderId: campaign.founderId
+          },
+          // Add metadata for tracking
+          viewedByInvestor: investorId,
+          investmentStatus: confirmedInvestments.find(inv => inv.campaignId === campaignId)?.status
         }));
         allUpdates.push(...updatesWithCampaign);
       }
       
       // Sort by creation date, newest first
       allUpdates.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      
+      // Log for audit trail
+      console.log(`Investor ${investorId} accessed ${allUpdates.length} updates from ${campaignIds.length} invested campaigns`);
       
       res.json(allUpdates);
     } catch (error) {

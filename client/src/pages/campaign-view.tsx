@@ -661,17 +661,17 @@ export default function CampaignView() {
                   <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Pitch Deck</h2>
                 </div>
                 {campaign.pitchDeckUrl ? (
-                  <div className="bg-gradient-to-br from-orange-50 via-white to-amber-50/30 border-2 border-dashed border-fundry-orange/30 rounded-2xl p-12 text-center shadow-inner">
-                    <div className="w-20 h-20 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg">
+                  <div className="bg-fundry-navy border-2 border-dashed border-blue-400/30 rounded-2xl p-12 text-center shadow-inner">
+                    <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg">
                       <FileText className="w-10 h-10 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-fundry-navy mb-2">
+                    <h3 className="text-xl font-bold text-white mb-2">
                       {campaign.title}_PitchDeck.pdf
                     </h3>
-                    <p className="text-gray-700 mb-8 font-medium">Pitch deck available for viewing</p>
+                    <p className="text-white/80 mb-8 font-medium">Pitch deck available for viewing</p>
                     <Button 
                       onClick={handleViewPitchDeck}
-                      className="bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8 py-3"
+                      className="bg-fundry-orange hover:bg-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8 py-3"
                     >
                       <FileText className="mr-2" size={18} />
                       View Pitch Deck

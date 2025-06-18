@@ -295,7 +295,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     try {
       // Get payment intent from backend
       const response = await apiRequest('POST', '/api/create-payment-intent', {
-        investmentId: investment.id
+        investmentId: investment.id,
+        amount: parseFloat(investment.amount)
       });
 
       if (!response.ok) {

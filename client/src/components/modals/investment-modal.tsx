@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -103,6 +103,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const [ngnAmount, setNgnAmount] = useState<number | null>(null);
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
   const [isLoadingRate, setIsLoadingRate] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
 
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
@@ -520,16 +521,17 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
       const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
 
-      // Process Stripe payment
+      // Process Stripe payment with required fields
       const response = await apiRequest('POST', '/api/create-payment-intent', {
         amount: selectedAmount,
-        investmentId: investmentResponse.id,
-        currency: 'usd'
+        investmentId: investmentResponse.id
       });
 
       if (response.ok) {
         const { clientSecret } = await response.json();
-        window.location.href = `https://checkout.stripe.com/pay/${clientSecret}`;
+        // Store client secret for inline payment processing
+        setClientSecret(clientSecret);
+        setCurrentStep('confirmation');
       }
       
     } catch (error: any) {
@@ -1694,6 +1696,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           <DialogTitle className="text-center text-base sm:text-lg">
             {getStepTitle(currentStep)}
           </DialogTitle>
+          <DialogDescription className="text-center text-sm text-gray-600">
+            Complete your investment in {campaign.title}
+          </DialogDescription>
         </DialogHeader>
         
         <div className="py-2 px-1 overflow-x-hidden">

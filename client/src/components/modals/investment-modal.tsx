@@ -523,15 +523,19 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
       // Process Stripe payment with required fields
       const response = await apiRequest('POST', '/api/create-payment-intent', {
-        amount: selectedAmount,
-        investmentId: investmentResponse.id
+        amount: selectedAmount.toString(),
+        investmentId: investmentResponse.investment.id
       });
 
       if (response.ok) {
         const { clientSecret } = await response.json();
         // Store client secret for inline payment processing
         setClientSecret(clientSecret);
-        setCurrentStep('confirmation');
+        // Stay on payment step to show Stripe form
+        setShowStripeForm(true);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create payment intent');
       }
       
     } catch (error: any) {

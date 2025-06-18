@@ -27,6 +27,7 @@ import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, Use
 import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 import TwoFactorSetupModal from "@/components/modals/two-factor-setup-modal";
+import PaymentModal from "@/components/modals/payment-modal";
 
 // Edit Profile Form Schema
 const editProfileSchema = z.object({
@@ -81,6 +82,10 @@ export default function InvestorDashboard() {
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
   const [deactivationReason, setDeactivationReason] = useState("");
   const [confirmDeactivation, setConfirmDeactivation] = useState("");
+
+  // Payment modal state
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedInvestmentForPayment, setSelectedInvestmentForPayment] = useState<any>(null);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -427,29 +432,16 @@ export default function InvestorDashboard() {
 
 
 
-  // Convert pending investment to committed status
-  const payNowMutation = useMutation({
-    mutationFn: async (investmentId: number) => {
-      const response = await apiRequest("PATCH", `/api/investments/${investmentId}`, {
-        status: 'committed'
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Investment Committed",
-        description: "Your investment has been successfully committed!",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Commitment Error",
-        description: error.message || "Failed to commit investment",
-        variant: "destructive",
-      });
-    },
-  });
+  // Open payment modal for investment
+  const handlePayNow = (investment: any) => {
+    setSelectedInvestmentForPayment({
+      id: investment.id,
+      amount: investment.amount,
+      campaignId: investment.campaignId,
+      campaignTitle: investment.campaign?.title || 'Investment'
+    });
+    setIsPaymentModalOpen(true);
+  };
 
   // Get states for selected country
   const selectedCountryData = COUNTRIES_AND_STATES.find(c => c.code === selectedCountry);
@@ -563,13 +555,8 @@ export default function InvestorDashboard() {
             <Button
               onClick={() => onPayNow(investment.id)}
               className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700"
-              disabled={payNowMutation.isPending}
             >
-              {payNowMutation.isPending ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <CreditCard className="w-4 h-4" />
-              )}
+              <CreditCard className="w-4 h-4" />
               Pay Now
             </Button>
           </div>
@@ -842,7 +829,7 @@ export default function InvestorDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {investments.filter(inv => inv.status === 'pending').map((investment) => (
-                      <PendingInvestmentCard key={investment.id} investment={investment} onPayNow={payNowMutation.mutate} />
+                      <PendingInvestmentCard key={investment.id} investment={investment} onPayNow={() => handlePayNow(investment)} />
                     ))}
                   </div>
                 </CardContent>

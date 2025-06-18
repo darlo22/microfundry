@@ -291,7 +291,91 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   };
 
   const handleUSDPayment = async () => {
-    setShowStripeForm(true);
+    setIsProcessing(true);
+    try {
+      // Get payment intent from backend
+      const response = await apiRequest('POST', '/api/create-payment-intent', {
+        investmentId: investment.id
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create payment intent');
+      }
+
+      const { clientSecret: secret } = await response.json();
+      setClientSecret(secret);
+      setShowStripeForm(true);
+    } catch (error: any) {
+      toast({
+        title: "Payment Setup Failed",
+        description: error.message || "Failed to setup payment",
+        variant: "destructive",
+      });
+      setIsProcessing(false);
+    }
+  };
+
+  const handleStripePayment = async () => {
+    if (!stripe || !elements || !clientSecret) {
+      toast({
+        title: "Payment System Error",
+        description: "Payment system is not ready. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!cardholderName.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter the cardholder name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Confirm payment with Stripe
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        clientSecret,
+        confirmParams: {
+          payment_method_data: {
+            billing_details: {
+              name: cardholderName,
+            },
+          },
+          return_url: `${window.location.origin}/investor-dashboard`,
+        },
+        redirect: 'if_required',
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (paymentIntent && paymentIntent.status === 'succeeded') {
+        toast({
+          title: "Payment Successful!",
+          description: `Payment of $${investment.amount} completed successfully`,
+        });
+        
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+        
+        onClose();
+      }
+    } catch (error: any) {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process payment",
+        variant: "destructive",
+      });
+      setIsProcessing(false);
+    }
   };
 
 
@@ -366,68 +450,122 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
             </CardContent>
           </Card>
 
-          {/* Payment Method Selection */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
-              Choose Payment Method
-            </h3>
-            
-            {/* USD Payment Button */}
-            <Button
-              onClick={handleUSDPayment}
-              disabled={isProcessing}
-              className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-lg font-bold">$</span>
+          {/* Payment Method Selection or Stripe Form */}
+          {!showStripeForm ? (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
+                Choose Payment Method
+              </h3>
+              
+              {/* USD Payment Button */}
+              <Button
+                onClick={handleUSDPayment}
+                disabled={isProcessing}
+                className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-lg font-bold">$</span>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-base">Pay with USD</div>
+                    <div className="text-sm opacity-90">Powered by Stripe</div>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <div className="font-semibold text-base">Pay with USD</div>
-                  <div className="text-sm opacity-90">Powered by Stripe</div>
+                <div className="text-right">
+                  {isProcessing ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <span className="font-bold text-lg">${investment.amount}</span>
+                  )}
                 </div>
-              </div>
-              <div className="text-right">
-                {isProcessing ? (
-                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <span className="font-bold text-lg">${investment.amount}</span>
-                )}
-              </div>
-            </Button>
+              </Button>
 
-            {/* NGN Payment Button */}
-            <Button
-              onClick={handleNairaPayment}
-              disabled={isProcessingNaira || !ngnAmount}
-              className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-lg font-bold">₦</span>
+              {/* NGN Payment Button */}
+              <Button
+                onClick={handleNairaPayment}
+                disabled={isProcessingNaira || !ngnAmount}
+                className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-lg font-bold">₦</span>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-base">Pay with Naira</div>
+                    <div className="text-sm opacity-90">Powered by Budpay</div>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <div className="font-semibold text-base">Pay with Naira</div>
-                  <div className="text-sm opacity-90">Powered by Budpay</div>
+                <div className="text-right">
+                  {isProcessingNaira ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <span className="font-bold text-lg">
+                      {ngnAmount ? `₦${ngnAmount.toLocaleString('en-NG')}` : '...'}
+                    </span>
+                  )}
                 </div>
-              </div>
-              <div className="text-right">
-                {isProcessing ? (
-                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <span className="font-bold text-lg">
-                    {ngnAmount ? `₦${ngnAmount.toLocaleString('en-NG')}` : '...'}
-                  </span>
-                )}
-              </div>
-            </Button>
-          </div>
-
-          {/* Hidden Stripe Elements for USD processing */}
-          <div className="hidden">
-            <CardElement options={CARD_ELEMENT_OPTIONS} />
-          </div>
+              </Button>
+            </div>
+          ) : (
+            /* Stripe Payment Form */
+            <Card className="border-2 border-blue-100 bg-white/90">
+              <CardHeader>
+                <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
+                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">$</div>
+                  Pay ${investment.amount} with USD
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cardholderName">Cardholder Name</Label>
+                  <Input
+                    id="cardholderName"
+                    type="text"
+                    placeholder="Enter cardholder name"
+                    value={cardholderName}
+                    onChange={(e) => setCardholderName(e.target.value)}
+                    disabled={isProcessing}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Card Information</Label>
+                  <div className="p-3 border border-gray-300 rounded-md bg-white">
+                    <CardElement options={CARD_ELEMENT_OPTIONS} />
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    onClick={() => {
+                      setShowStripeForm(false);
+                      setIsProcessing(false);
+                      setCardholderName('');
+                    }}
+                    variant="outline"
+                    className="flex-1"
+                    disabled={isProcessing}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={handleStripePayment}
+                    disabled={isProcessing}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isProcessing ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    ) : (
+                      <Lock className="w-4 h-4 mr-2" />
+                    )}
+                    {isProcessing ? 'Processing...' : `Pay $${investment.amount}`}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Security Notice */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

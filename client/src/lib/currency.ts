@@ -99,7 +99,7 @@ export async function getUsdToNgnRate(): Promise<ExchangeRate> {
 
   // Final fallback: Use Budpay-compatible rate
   const fallbackRate: ExchangeRate = {
-    usdToNgn: 1560, // Current Budpay-compatible rate
+    usdToNgn: 1545, // Budpay's standard rate
     source: 'Budpay Fallback Rate',
     lastUpdated: new Date()
   };

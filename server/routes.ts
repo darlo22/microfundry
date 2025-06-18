@@ -2311,12 +2311,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       }
 
       // Create payment link using Budpay Standard API
-      // Budpay expects amount in kobo (smallest currency unit)
+      // Budpay actually expects amount in Naira, not kobo
       const amountInNaira = parseFloat(ngnAmount);
-      const amountInKobo = Math.round(amountInNaira * 100);
       const paymentData = {
         email: email,
-        amount: amountInKobo.toString(), // Amount in kobo
+        amount: amountInNaira.toFixed(2), // Amount in Naira with 2 decimal places
         currency: 'NGN',
         reference: reference,
         callback_url: `${req.protocol}://${req.get('host')}/api/budpay-callback`,

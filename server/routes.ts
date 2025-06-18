@@ -388,6 +388,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Verify email with token
   app.get('/verify-email', async (req, res) => {
+    // Set headers to prevent browser blocking
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    
     try {
       const { token } = req.query;
 

@@ -2302,10 +2302,19 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       console.log('Creating Budpay payment link:', req.body);
 
+      // Validate required fields
+      if (!email || !ngnAmount || !reference) {
+        return res.status(400).json({
+          success: false,
+          message: 'Missing required fields: email, ngnAmount, or reference'
+        });
+      }
+
       // Create payment link using Budpay Standard API
+      const amountInKobo = Math.round(ngnAmount * 100);
       const paymentData = {
         email: email,
-        amount: Math.round(ngnAmount * 100), // Convert to kobo
+        amount: amountInKobo.toString(), // Convert to kobo and stringify
         currency: 'NGN',
         reference: reference,
         callback_url: `${req.protocol}://${req.get('host')}/api/budpay-callback`,
@@ -2317,6 +2326,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         }
       };
 
+      console.log('Budpay payment data being sent:', paymentData);
+
       const budpayResponse = await fetch('https://api.budpay.com/api/v2/transaction/initialize', {
         method: 'POST',
         headers: {
@@ -2327,7 +2338,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       });
 
       const budpayResult = await budpayResponse.json();
-      console.log('Budpay response:', budpayResult);
+      console.log('Budpay API response:', budpayResult);
+      console.log('Budpay response status:', budpayResponse.status);
 
       if (budpayResult.status === true && budpayResult.data?.authorization_url) {
         res.json({ 

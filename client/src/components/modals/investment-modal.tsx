@@ -692,16 +692,16 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     const currentStepIndex = steps.indexOf(currentStep);
 
     return (
-      <div className="flex justify-center mb-6">
-        <div className="flex items-center space-x-4">
+      <div className="flex justify-center mb-4 px-2">
+        <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto max-w-full">
           {steps.map((step, index) => (
-            <div key={step} className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            <div key={step} className="flex items-center flex-shrink-0">
+              <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium ${
                 index <= currentStepIndex ? 'bg-fundry-orange text-white' : 'bg-gray-200 text-gray-600'
               }`}>
                 {index + 1}
               </div>
-              {index < steps.length - 1 && <div className="w-8 h-0.5 bg-gray-300 mx-2" />}
+              {index < steps.length - 1 && <div className="w-2 sm:w-3 h-0.5 bg-gray-300 mx-1" />}
             </div>
           ))}
         </div>
@@ -716,16 +716,16 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     switch (currentStep) {
       case 'amount':
         return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose Investment Amount</h3>
-              <p className="text-gray-600">Step {stepNumber} of 7: Select how much you'd like to invest</p>
+          <div className="space-y-4">
+            <div className="text-center px-1">
+              <Icon className="mx-auto h-8 w-8 text-fundry-orange mb-2" />
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Choose Investment Amount</h3>
+              <p className="text-xs text-gray-600 break-words px-2">Step {stepNumber} of 7: Select how much you'd like to invest</p>
             </div>
             
             {renderProgressIndicator()}
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+            <div className="grid grid-cols-2 gap-2 px-2">
               {presetAmounts.map((amount) => (
                 <Button
                   key={amount}
@@ -738,16 +738,17 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               ))}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="custom-amount">Custom Amount</Label>
+            <div className="space-y-1 px-2">
+              <Label htmlFor="custom-amount" className="text-xs">Custom Amount</Label>
               <Input
                 id="custom-amount"
                 type="number"
                 value={customAmount}
                 onChange={(e) => handleCustomAmountChange(e.target.value)}
-                placeholder={`Minimum $${minimumInvestment}`}
+                placeholder={`Min $${minimumInvestment}`}
                 min={minimumInvestment}
                 max={maximumInvestment}
+                className="text-xs h-8"
               />
             </div>
 
@@ -1200,15 +1201,17 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] w-[95vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[450px] w-[90vw] max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="text-center text-base sm:text-lg">
             {getStepTitle(currentStep)}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="py-4">
-          {renderStepContent()}
+        <div className="py-2 px-1 overflow-x-hidden">
+          <div className="max-w-full">
+            {renderStepContent()}
+          </div>
         </div>
         
         <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">

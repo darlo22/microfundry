@@ -348,17 +348,28 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
 
     setIsProcessing(true);
     try {
-      // Submit the payment to Stripe
-      const { error, paymentIntent } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          payment_method_data: {
-            billing_details: {
-              name: cardholderName,
-            },
-          },
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) {
+        throw new Error('Card element not found');
+      }
+
+      // Create payment method with Stripe Elements
+      const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+        billing_details: {
+          name: cardholderName,
+          email: user?.email,
         },
-        redirect: 'if_required',
+      });
+
+      if (paymentMethodError) {
+        throw new Error(paymentMethodError.message);
+      }
+
+      // Confirm payment intent with the payment method
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: paymentMethod.id,
       });
 
       if (error) {

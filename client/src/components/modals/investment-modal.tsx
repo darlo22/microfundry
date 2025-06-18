@@ -475,6 +475,14 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
       });
       
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      
+      // Set investor details with firstName and lastName from auth form
+      setInvestorDetails(prev => ({
+        ...prev,
+        firstName: authData.firstName,
+        lastName: authData.lastName
+      }));
+      
       toast({
         title: "Account Created Successfully",
         description: "Welcome to Fundry! Proceeding with your investment.",
@@ -566,9 +574,9 @@ ARTICLE 1: DEFINITIONS
 
 1.10 "Pro Rata Rights" means a contractual right, but not the obligation, of the Investor to purchase its pro rata share of Private Securities that the Company may issue after the Safe is executed.
 
-1.11 "Safe Price" means $${((amount / (campaign.valuationCap || 1000000)) * 1000000).toFixed(6)} per share.
+1.11 "Safe Price" means $${(amount / parseFloat(campaign.valuationCap || "1000000") * 1000000).toFixed(6)} per share.
 
-1.12 "Valuation Cap" means $${(campaign.valuationCap || 1000000).toLocaleString()}.00.
+1.12 "Valuation Cap" means $${(parseFloat(campaign.valuationCap || "1000000")).toLocaleString()}.00.
 
 ARTICLE 2: CONVERSION EVENTS
 
@@ -1162,6 +1170,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     setSelectedAmount(0);
     setCustomAmount('');
     setInvestorDetails({
+      firstName: '',
+      lastName: '',
       phone: '',
       address: '',
       city: '',

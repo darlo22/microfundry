@@ -14,7 +14,7 @@ interface EmailParams {
 }
 
 export class EmailService {
-  private fromEmail = 'onboarding@resend.dev'; // Using verified Resend domain
+  private fromEmail = 'noreply@microfundry.com';
 
   async sendEmail(params: EmailParams): Promise<boolean> {
     try {
@@ -95,9 +95,9 @@ export class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Verify Your Email Address - Fundry',
+      subject: 'Verify Your Email Address - Micro Fundry',
       html,
-      from: 'Fundry <onboarding@resend.dev>',
+      from: 'Micro Fundry <noreply@microfundry.com>',
     });
   }
 
@@ -177,9 +177,9 @@ export class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: `Welcome to Fundry - Your ${userType} account is ready!`,
+      subject: `Welcome to Micro Fundry - Your ${userType} account is ready!`,
       html,
-      from: 'Fundry <onboarding@resend.dev>',
+      from: 'Micro Fundry <noreply@microfundry.com>',
     });
   }
 }

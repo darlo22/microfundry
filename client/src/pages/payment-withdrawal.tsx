@@ -159,7 +159,6 @@ export default function PaymentWithdrawal() {
   // KYC form state
   const [kycData, setKycData] = useState({
     dateOfBirth: "",
-    ssn: "",
     address: "",
     city: "",
     state: "",
@@ -876,70 +875,83 @@ export default function PaymentWithdrawal() {
                           </div>
                         </div>
 
+                        {/* Document Upload Section */}
                         <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="governmentId">Government Issued ID</Label>
-                            <Input
-                              id="governmentId"
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              onChange={(e) => {
-                                const files = Array.from(e.target.files || []);
-                                setKycData(prev => ({ ...prev, governmentId: files }));
-                              }}
-                              className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-fundry-orange file:text-white hover:file:bg-orange-600"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                              Upload driver's license, passport, or state ID (Max size: 2MB)
-                            </p>
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center text-white font-bold text-sm">4</div>
+                            <h3 className="text-lg font-semibold text-fundry-navy">Document Upload</h3>
                           </div>
+                          
+                          <div className="space-y-4">
+                            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-fundry-orange transition-colors">
+                              <Label htmlFor="governmentId" className="text-fundry-navy font-medium">Government Issued ID</Label>
+                              <Input
+                                id="governmentId"
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={(e) => {
+                                  const files = Array.from(e.target.files || []);
+                                  setKycData(prev => ({ ...prev, governmentId: files }));
+                                }}
+                                className="mt-2 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-fundry-orange file:text-white hover:file:bg-orange-600"
+                              />
+                              <p className="text-xs text-gray-500 mt-2">
+                                Upload driver's license, passport, or state ID (Max size: 2MB)
+                              </p>
+                            </div>
 
-                          <div>
-                            <Label htmlFor="utilityBill">Utility Bill / Proof of Address</Label>
-                            <Input
-                              id="utilityBill"
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              onChange={(e) => {
-                                const files = Array.from(e.target.files || []);
-                                setKycData(prev => ({ ...prev, utilityBill: files }));
-                              }}
-                              className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-fundry-orange file:text-white hover:file:bg-orange-600"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                              Upload recent utility bill or bank statement (Max size: 2MB)
-                            </p>
-                          </div>
+                            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-fundry-orange transition-colors">
+                              <Label htmlFor="utilityBill" className="text-fundry-navy font-medium">Utility Bill / Proof of Address</Label>
+                              <Input
+                                id="utilityBill"
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={(e) => {
+                                  const files = Array.from(e.target.files || []);
+                                  setKycData(prev => ({ ...prev, utilityBill: files }));
+                                }}
+                                className="mt-2 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-fundry-orange file:text-white hover:file:bg-orange-600"
+                              />
+                              <p className="text-xs text-gray-500 mt-2">
+                                Upload recent utility bill or bank statement (Max size: 2MB)
+                              </p>
+                            </div>
 
-                          <div>
-                            <Label htmlFor="otherDocuments">Other Documents (Optional)</Label>
-                            <Input
-                              id="otherDocuments"
-                              type="file"
-                              multiple
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              onChange={(e) => {
-                                const files = Array.from(e.target.files || []);
-                                setKycData(prev => ({ ...prev, otherDocuments: files }));
-                              }}
-                              className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-fundry-orange file:text-white hover:file:bg-orange-600"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                              Additional supporting documents (Max size: 2MB each)
-                            </p>
+                            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-fundry-orange transition-colors">
+                              <Label htmlFor="otherDocuments" className="text-fundry-navy font-medium">Other Documents (Optional)</Label>
+                              <Input
+                                id="otherDocuments"
+                                type="file"
+                                multiple
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={(e) => {
+                                  const files = Array.from(e.target.files || []);
+                                  setKycData(prev => ({ ...prev, otherDocuments: files }));
+                                }}
+                                className="mt-2 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-fundry-orange file:text-white hover:file:bg-orange-600"
+                              />
+                              <p className="text-xs text-gray-500 mt-2">
+                                Additional supporting documents (Max size: 2MB each)
+                              </p>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="flex gap-3 justify-end pt-4">
-                          <Button type="button" variant="outline" onClick={() => setKycModalOpen(false)}>
+                        <div className="flex gap-3 justify-end pt-6 border-t border-gray-200 mt-6">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={() => setKycModalOpen(false)}
+                            className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                          >
                             Cancel
                           </Button>
                           <Button 
                             type="submit" 
                             disabled={kycMutation.isPending}
-                            className="bg-fundry-orange hover:bg-orange-600"
+                            className="px-6 py-2 bg-fundry-orange hover:bg-orange-600 text-white font-medium shadow-lg"
                           >
-                            {kycMutation.isPending ? "Submitting..." : "Submit KYC"}
+                            {kycMutation.isPending ? "Submitting..." : "Complete Verification"}
                           </Button>
                         </div>
                       </form>

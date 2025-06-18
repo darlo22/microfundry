@@ -2311,14 +2311,12 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       }
 
       // Create payment link using Budpay Standard API
-      // Budpay expects amount in kobo (smallest unit), not Naira
-      // Convert NGN to kobo by multiplying by 100
+      // Budpay expects amount in Naira, not kobo
       const amountInNaira = Math.round(parseFloat(ngnAmount) * 100) / 100;
-      const amountInKobo = Math.round(amountInNaira * 100);
       
       const paymentData = {
         email: email,
-        amount: amountInKobo.toString(), // Amount in kobo (smallest unit)
+        amount: amountInNaira.toString(), // Amount in Naira (not kobo)
         currency: 'NGN',
         reference: reference,
         callback_url: `${req.protocol}://${req.get('host')}/api/budpay-callback`,
@@ -2327,14 +2325,12 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           investorId: req.user.id,
           usdAmount: amount.toString(),
           exactNgnAmount: amountInNaira.toString(),
-          exactKoboAmount: amountInKobo.toString(),
           investorDetails: JSON.stringify(investorDetails)
         }
       };
 
       console.log('NGN Amount from frontend:', ngnAmount);
-      console.log('Calculated Naira amount:', amountInNaira);
-      console.log('Converted to Kobo:', amountInKobo);
+      console.log('Final Naira amount sent to Budpay:', amountInNaira);
       console.log('Budpay payment data being sent:', paymentData);
 
       const budpayResponse = await fetch('https://api.budpay.com/api/v2/transaction/initialize', {

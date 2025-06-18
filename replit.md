@@ -141,6 +141,7 @@ The deployment uses:
 - June 18, 2025. Optimized founder dashboard logo sizing: reduced logo sizes by 3X across all founder admin dashboard pages (Updates, Investors, Settings, Analytics: h-96 to h-32; Payment Withdrawal: h-64 to h-21) for better visual balance and improved page layout proportions
 - June 18, 2025. Further optimized Payment Withdrawal page logo: reduced logo size by additional 5X (h-21 to h-4) for minimal, clean header design that maintains brand visibility without overwhelming the interface
 - June 18, 2025. Adjusted Payment Withdrawal page logo size: increased logo by 3X (h-4 to h-12) for improved visibility and better brand presence while maintaining clean header design
+- June 18, 2025. Fine-tuned Payment Withdrawal page logo: increased logo by 1.5X (h-12 to h-18) for optimal brand visibility and professional header appearance
 
 ## User Preferences
 

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ChartLine, Rocket, TrendingUp, X, Briefcase, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import fundryLogoNew from "@assets/ChatGPT Image Jun 18, 2025, 07_16_52 AM_1750230510254.png";
 import { useMutation } from "@tanstack/react-query";
@@ -213,18 +213,20 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
       <DialogContent className="max-w-lg">
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img 
-              src={fundryLogoNew} 
-              alt="Fundry" 
-              className="h-16 w-auto"
-            />
+            <div className="w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center mb-4">
+              <img 
+                src={fundryLogoNew} 
+                alt="Fundry" 
+                className="h-10 w-auto filter brightness-0 invert"
+              />
+            </div>
           </div>
-          <DialogTitle className="text-2xl font-bold">
+          <DialogTitle>
             {mode === "signup" ? "Create Account" : "Welcome Back"}
           </DialogTitle>
-          <p className="text-gray-600">
+          <DialogDescription>
             {mode === "signup" ? "Join Fundry today" : "Sign in to your account"}
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         {mode === "signup" && currentStep === "userType" && (

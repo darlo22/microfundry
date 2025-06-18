@@ -512,21 +512,21 @@ export default function FounderUpdates() {
               <div className="flex-1 overflow-y-auto space-y-6 pr-2">
                 <div className="space-y-2">
                   <Label htmlFor="campaign">Campaign</Label>
-                <Select 
-                  value={updateForm.campaignId} 
-                  onValueChange={(value) => setUpdateForm(prev => ({ ...prev, campaignId: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a campaign" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {campaigns.map((campaign: any) => (
-                      <SelectItem key={campaign.id} value={campaign.id.toString()}>
-                        {campaign.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <Select 
+                    value={updateForm.campaignId} 
+                    onValueChange={(value) => setUpdateForm(prev => ({ ...prev, campaignId: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a campaign" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {campaigns.map((campaign: any) => (
+                        <SelectItem key={campaign.id} value={campaign.id.toString()}>
+                          {campaign.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -572,83 +572,84 @@ export default function FounderUpdates() {
 
                 {/* File Attachments Section */}
                 <div className="space-y-4">
-                <Label>Attachments</Label>
-                
-                {/* Drag and Drop Zone */}
-                <div
-                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                    dragActive 
-                      ? 'border-fundry-orange bg-orange-50' 
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600 mb-2">
-                    Drag and drop files here, or click to select
-                  </p>
-                  <p className="text-xs text-gray-500 mb-4">
-                    Supports: Images, Videos, PDFs, Documents (Max 10MB each)
-                  </p>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    id="file-upload"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById('file-upload')?.click()}
-                    className="mx-auto"
+                  <Label>Attachments</Label>
+                  
+                  {/* Drag and Drop Zone */}
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                      dragActive 
+                        ? 'border-fundry-orange bg-orange-50' 
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
                   >
-                    <Paperclip className="mr-2 h-4 w-4" />
-                    Choose Files
-                  </Button>
-                </div>
-
-                {/* Attached Files Display */}
-                {attachedFiles.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-700">
-                      {attachedFiles.length} file{attachedFiles.length !== 1 ? 's' : ''} attached
+                    <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600 mb-2">
+                      Drag and drop files here, or click to select
                     </p>
-                    <div className="space-y-2 max-h-32 overflow-y-auto">
-                      {attachedFiles.map((file, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                        >
-                          <div className="flex items-center gap-3">
-                            {getFileIcon(file.type)}
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-900 truncate">
-                                {file.name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {formatFileSize(file.size)}
-                              </p>
-                            </div>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeFile(index)}
-                            className="text-gray-400 hover:text-red-500"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
+                    <p className="text-xs text-gray-500 mb-4">
+                      Supports: Images, Videos, PDFs, Documents (Max 10MB each)
+                    </p>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      id="file-upload"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('file-upload')?.click()}
+                      className="mx-auto"
+                    >
+                      <Paperclip className="mr-2 h-4 w-4" />
+                      Choose Files
+                    </Button>
                   </div>
-                )}
+
+                  {/* Attached Files Display */}
+                  {attachedFiles.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-gray-700">
+                        {attachedFiles.length} file{attachedFiles.length !== 1 ? 's' : ''} attached
+                      </p>
+                      <div className="space-y-2 max-h-32 overflow-y-auto">
+                        {attachedFiles.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              {getFileIcon(file.type)}
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {file.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {formatFileSize(file.size)}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeFile(index)}
+                              className="text-gray-400 hover:text-red-500"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex-shrink-0 flex justify-end gap-3 pt-4 border-t border-gray-200">

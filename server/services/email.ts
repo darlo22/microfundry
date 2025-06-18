@@ -14,7 +14,7 @@ interface EmailParams {
 }
 
 export class EmailService {
-  private fromEmail = 'support@resend.dev';
+  private fromEmail = 'support@microfundry.com';
 
   async sendEmail(params: EmailParams): Promise<boolean> {
     try {
@@ -97,7 +97,7 @@ export class EmailService {
       to: email,
       subject: 'Verify Your Email Address - Micro Fundry',
       html,
-      from: 'Micro Fundry Support <support@resend.dev>',
+      from: 'Micro Fundry Support <support@microfundry.com>',
     });
   }
 
@@ -179,7 +179,7 @@ export class EmailService {
       to: email,
       subject: `Welcome to Micro Fundry - Your ${userType} account is ready!`,
       html,
-      from: 'Micro Fundry Support <support@resend.dev>',
+      from: 'Micro Fundry Support <support@microfundry.com>',
     });
   }
 }

@@ -2369,6 +2369,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       const validLogoUrl = campaign.logoUrl && isValidUrl(campaign.logoUrl) ? campaign.logoUrl : null;
 
+      // Get base URL from request
+      const protocol = req.secure ? 'https' : 'http';
+      const host = req.get('host') || `${process.env.REPL_ID}.replit.app`;
+      const baseUrl = `${protocol}://${host}`;
+
       // Create Stripe Checkout session
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -2387,8 +2392,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           },
         ],
         mode: 'payment',
-        success_url: `https://${process.env.REPL_ID}.replit.app/investment-success?session_id={CHECKOUT_SESSION_ID}&campaign_id=${campaign.id}`,
-        cancel_url: `https://${process.env.REPL_ID}.replit.app/investor-dashboard`,
+        success_url: `${baseUrl}/investment-success?session_id={CHECKOUT_SESSION_ID}&campaign_id=${campaign.id}`,
+        cancel_url: `${baseUrl}/investor-dashboard`,
         allow_promotion_codes: false,
         billing_address_collection: 'auto',
         payment_intent_data: {

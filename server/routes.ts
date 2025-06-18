@@ -2186,20 +2186,26 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Stripe payment intent endpoint
   app.post('/api/create-payment-intent', requireAuth, async (req: any, res) => {
     try {
+      console.log('Payment intent request body:', req.body);
       const { amount, campaignId, investorId } = req.body;
       
       if (!amount || !campaignId) {
+        console.log('Missing required fields:', { amount, campaignId });
         return res.status(400).json({ message: 'Amount and campaign ID are required' });
       }
 
       // Convert amount to cents for Stripe
-      const amountInCents = Math.round(amount * 100);
+      const amountInCents = Math.round(parseFloat(amount) * 100);
+      console.log('Amount in cents:', amountInCents);
       
       // Get campaign details for metadata
-      const campaign = await storage.getCampaign(campaignId);
+      const campaign = await storage.getCampaign(parseInt(campaignId));
       if (!campaign) {
+        console.log('Campaign not found:', campaignId);
         return res.status(404).json({ message: 'Campaign not found' });
       }
+
+      console.log('Creating payment intent for campaign:', campaign.title);
 
       // Create payment intent
       const paymentIntent = await stripe.paymentIntents.create({
@@ -2213,13 +2219,15 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         description: `Investment in ${campaign.title}`,
       });
 
+      console.log('Payment intent created successfully:', paymentIntent.id);
+
       res.json({ 
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id
       });
     } catch (error) {
       console.error('Error creating payment intent:', error);
-      res.status(500).json({ message: 'Failed to create payment intent' });
+      res.status(500).json({ message: 'Failed to create payment intent', error: error.message });
     }
   });
 

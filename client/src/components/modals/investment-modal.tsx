@@ -114,22 +114,40 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
       try {
         // Create payment intent on server
-        const response = await apiRequest('POST', '/api/create-payment-intent', {
-          amount: calculateTotal(selectedAmount),
-          campaignId: campaign.id,
-          investorId: user?.id
+        const response = await fetch('/api/create-payment-intent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            amount: calculateTotal(selectedAmount),
+            campaignId: campaign.id,
+            investorId: user?.id
+          })
         });
 
         if (!response.ok) {
-          throw new Error('Failed to create payment intent');
+          const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+          throw new Error(errorData.message || 'Failed to create payment intent');
         }
 
         const { clientSecret } = await response.json();
+        
+        if (!clientSecret) {
+          throw new Error('No client secret received from server');
+        }
+
+        // Get card element
+        const cardElement = elements.getElement(CardElement);
+        if (!cardElement) {
+          throw new Error('Card element not found');
+        }
 
         // Confirm payment with Stripe
         const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
           payment_method: {
-            card: elements.getElement(CardElement)!,
+            card: cardElement,
             billing_details: {
               name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.username,
               email: user?.email,

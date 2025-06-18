@@ -417,6 +417,10 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
   // Handle Naira payment via Budpay
   const handleNairaPayment = async () => {
+    console.log('Naira payment button clicked');
+    console.log('NGN Amount:', ngnAmount);
+    console.log('Selected Amount:', selectedAmount);
+    
     if (!ngnAmount) {
       toast({
         title: "Currency Error",
@@ -426,7 +430,21 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
       return;
     }
 
+    if (!import.meta.env.VITE_BUDPAY_PUBLIC_KEY) {
+      toast({
+        title: "Configuration Error",
+        description: "Budpay public key not configured",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsProcessingPayment(true);
+    
+    toast({
+      title: "Initializing Payment",
+      description: "Setting up Budpay checkout...",
+    });
 
     try {
       // Create Budpay payment request
@@ -448,47 +466,102 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
       const budpayPaymentConfig = {
         key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,
         email: user?.email || investorDetails.firstName + '@example.com',
-        amount: ngnAmount * 100, // Convert to kobo
+        amount: Math.round(ngnAmount * 100), // Convert to kobo
         currency: 'NGN',
         ref: `inv_${campaign.id}_${Date.now()}`,
         callback: async (response: any) => {
-          if (response.status === 'success') {
-            // Process the payment on the backend
-            const backendResponse = await apiRequest('POST', '/api/budpay-payment', {
-              ...paymentData,
-              budpayReference: response.reference,
-              budpayTransactionId: response.trans
-            });
-
-            const result = await backendResponse.json();
-
-            if (result.success) {
+          console.log('Budpay callback response:', response);
+          try {
+            if (response.status === 'success') {
               toast({
-                title: "Payment Successful!",
-                description: `You have successfully invested ₦${ngnAmount.toLocaleString()} in ${campaign.title}`,
+                title: "Processing Payment",
+                description: "Verifying payment with backend...",
               });
-              setCurrentStep('confirmation');
+
+              // Process the payment on the backend
+              const backendResponse = await apiRequest('POST', '/api/budpay-payment', {
+                ...paymentData,
+                budpayReference: response.reference,
+                budpayTransactionId: response.trans
+              });
+
+              const result = await backendResponse.json();
+              console.log('Backend verification result:', result);
+
+              if (result.success) {
+                toast({
+                  title: "Payment Successful!",
+                  description: `You have successfully invested ₦${ngnAmount.toLocaleString()} in ${campaign.title}`,
+                });
+                
+                // Invalidate queries to refresh data
+                queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+                
+                setCurrentStep('confirmation');
+              } else {
+                throw new Error(result.message || 'Payment verification failed');
+              }
             } else {
-              throw new Error(result.message || 'Payment verification failed');
+              throw new Error('Payment was cancelled or failed');
             }
-          } else {
-            throw new Error('Payment was cancelled or failed');
+          } catch (error: any) {
+            console.error('Payment callback error:', error);
+            toast({
+              title: "Payment Error",
+              description: error.message || "Payment processing failed",
+              variant: "destructive",
+            });
+          } finally {
+            setIsProcessingPayment(false);
           }
         },
         onClose: () => {
+          console.log('Budpay modal closed');
+          setIsProcessingPayment(false);
+        }
+      };
+
+      console.log('Budpay config:', budpayPaymentConfig);
+
+      // Function to initialize Budpay
+      const initializeBudpay = () => {
+        console.log('Initializing Budpay checkout...');
+        if (window.BudPayCheckout) {
+          console.log('BudPayCheckout found, calling it...');
+          window.BudPayCheckout(budpayPaymentConfig);
+        } else {
+          console.error('BudPayCheckout not found on window object');
+          toast({
+            title: "Payment Error",
+            description: "Budpay checkout failed to load",
+            variant: "destructive",
+          });
           setIsProcessingPayment(false);
         }
       };
 
       // Load Budpay script and initialize payment
       if (window.BudPayCheckout) {
-        window.BudPayCheckout(budpayPaymentConfig);
+        console.log('Budpay script already loaded');
+        initializeBudpay();
       } else {
+        console.log('Loading Budpay script...');
         // Load Budpay script dynamically
         const script = document.createElement('script');
         script.src = 'https://checkout.budpay.com/checkout.js';
         script.onload = () => {
-          window.BudPayCheckout(budpayPaymentConfig);
+          console.log('Budpay script loaded successfully');
+          setTimeout(initializeBudpay, 100); // Small delay to ensure script is ready
+        };
+        script.onerror = () => {
+          console.error('Failed to load Budpay script');
+          toast({
+            title: "Payment Error",
+            description: "Failed to load Budpay payment system",
+            variant: "destructive",
+          });
+          setIsProcessingPayment(false);
         };
         document.head.appendChild(script);
       }

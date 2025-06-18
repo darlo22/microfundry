@@ -2,13 +2,12 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { CreditCard, Lock, User, Calendar, Shield } from 'lucide-react';
+import { CreditCard, Lock, User, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -32,42 +31,18 @@ interface SavedCard {
 export default function PaymentModal({ isOpen, onClose, investment }: PaymentModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const stripe = useStripe();
+  const elements = useElements();
   
-  const [useNewCard, setUseNewCard] = useState(true);
-  const [selectedCardId, setSelectedCardId] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  // Card form data
-  const [cardData, setCardData] = useState({
-    cardNumber: '',
-    expiryMonth: '',
-    expiryYear: '',
-    cvv: '',
-    cardholderName: '',
-    saveCard: false
-  });
-
-  // Mock saved cards - in real implementation, fetch from user's saved cards
-  const savedCards: SavedCard[] = [
-    {
-      id: 'card_1',
-      last4: '4242',
-      brand: 'visa',
-      expiryMonth: 12,
-      expiryYear: 2027
-    },
-    {
-      id: 'card_2',
-      last4: '5555',
-      brand: 'mastercard',
-      expiryMonth: 8,
-      expiryYear: 2026
-    }
-  ];
+  const [cardholderName, setCardholderName] = useState('');
 
   const processPaymentMutation = useMutation({
-    mutationFn: async (paymentData: any) => {
-      const response = await apiRequest('POST', `/api/investments/${investment.id}/process-payment`, paymentData);
+    mutationFn: async (paymentMethodId: string) => {
+      const response = await apiRequest('POST', `/api/investments/${investment.id}/process-payment`, {
+        paymentMethodId,
+        cardholderName
+      });
       return response.json();
     },
     onSuccess: () => {
@@ -88,48 +63,48 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   });
 
   const handlePayment = async () => {
+    if (!stripe || !elements) {
+      toast({
+        title: "Payment System Error",
+        description: "Payment system is not ready. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!cardholderName.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter the cardholder name",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
-      if (useNewCard) {
-        // Validate card data
-        if (!cardData.cardNumber || !cardData.expiryMonth || !cardData.expiryYear || !cardData.cvv || !cardData.cardholderName) {
-          toast({
-            title: "Missing Information",
-            description: "Please fill in all card details",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        // Process with new card
-        await processPaymentMutation.mutateAsync({
-          type: 'new_card',
-          cardDetails: {
-            number: cardData.cardNumber.replace(/\s/g, ''),
-            exp_month: parseInt(cardData.expiryMonth),
-            exp_year: parseInt(cardData.expiryYear),
-            cvc: cardData.cvv,
-            name: cardData.cardholderName
-          },
-          saveCard: cardData.saveCard
-        });
-      } else {
-        // Process with saved card
-        if (!selectedCardId) {
-          toast({
-            title: "No Card Selected",
-            description: "Please select a saved card",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        await processPaymentMutation.mutateAsync({
-          type: 'saved_card',
-          cardId: selectedCardId
-        });
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) {
+        throw new Error('Card element not found');
       }
+
+      // Create payment method
+      const { error, paymentMethod } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+        billing_details: {
+          name: cardholderName,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Process payment with the backend
+      await processPaymentMutation.mutateAsync(paymentMethod.id);
+      
     } catch (error: any) {
       toast({
         title: "Payment Error",

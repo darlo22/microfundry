@@ -516,15 +516,7 @@ export default function InvestorDashboard() {
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Investment Amount</p>
-                  <p className="text-lg font-bold text-gray-900">{formatCurrency(investment.amount)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Platform Fee</p>
-                  <p className="text-lg font-bold text-gray-900">{formatCurrency((investment as any).platformFee || '0')}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Due</p>
-                  <p className="text-lg font-bold text-orange-600">{formatCurrency((investment as any).totalAmount || investment.amount)}</p>
+                  <p className="text-lg font-bold text-orange-600">{formatCurrency(investment.amount)}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600">Status</p>
@@ -591,19 +583,9 @@ export default function InvestorDashboard() {
               </div>
 
               <div className="bg-gray-50 p-3 rounded-lg space-y-2">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between font-semibold">
                   <span>Investment Amount:</span>
                   <span>${editAmount || 0}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Platform Fee (5%):</span>
-                  <span>${parseFloat(editAmount || '0') > 1000 ? (parseFloat(editAmount || '0') * 0.05).toFixed(2) : '0.00'}</span>
-                </div>
-                <div className="flex justify-between font-semibold border-t pt-2">
-                  <span>Total Amount:</span>
-                  <span>${parseFloat(editAmount || '0') > 1000 ? 
-                    (parseFloat(editAmount || '0') * 1.05).toFixed(2) : 
-                    editAmount || '0'}</span>
                 </div>
               </div>
 

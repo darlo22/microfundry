@@ -356,11 +356,11 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   };
 
   const calculateFee = (amount: number) => {
-    return amount > 1000 ? Math.round(amount * 0.05) : 0;
+    return 0; // Platform fees removed
   };
 
   const calculateTotal = (amount: number) => {
-    return amount + calculateFee(amount);
+    return amount; // No fees applied
   };
 
   const handleNextStep = () => {
@@ -764,17 +764,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
             {selectedAmount > 0 && (
               <div className="bg-gray-50 p-2 mx-2 rounded-lg space-y-1 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Investment:</span>
-                  <span className="font-semibold">${selectedAmount}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Fee ({selectedAmount > 1000 ? '5%' : 'Free'}):</span>
-                  <span className="font-semibold">${calculateFee(selectedAmount)}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm font-bold border-t pt-1">
-                  <span>Total:</span>
-                  <span>${calculateTotal(selectedAmount)}</span>
+                <div className="flex justify-between items-center text-sm font-bold">
+                  <span>Investment Amount:</span>
+                  <span>${selectedAmount}</span>
                 </div>
               </div>
             )}

@@ -725,13 +725,13 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             
             {renderProgressIndicator()}
             
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
               {presetAmounts.map((amount) => (
                 <Button
                   key={amount}
                   variant={selectedAmount === amount ? "default" : "outline"}
                   onClick={() => handleAmountSelection(amount)}
-                  className={selectedAmount === amount ? "bg-fundry-orange hover:bg-orange-600" : ""}
+                  className={`text-sm px-3 py-2 ${selectedAmount === amount ? "bg-fundry-orange hover:bg-orange-600" : ""}`}
                 >
                   ${amount}
                 </Button>
@@ -752,16 +752,16 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             </div>
 
             {selectedAmount > 0 && (
-              <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                <div className="flex justify-between">
-                  <span>Investment Amount:</span>
+              <div className="bg-gray-50 p-3 rounded-lg space-y-2 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Investment Amount:</span>
                   <span className="font-semibold">${selectedAmount}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Platform Fee ({selectedAmount > 1000 ? '5%' : 'Free'}):</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Platform Fee ({selectedAmount > 1000 ? '5%' : 'Free'}):</span>
                   <span className="font-semibold">${calculateFee(selectedAmount)}</span>
                 </div>
-                <div className="flex justify-between text-lg font-bold border-t pt-2">
+                <div className="flex justify-between items-center text-base font-bold border-t pt-2">
                   <span>Total:</span>
                   <span>${calculateTotal(selectedAmount)}</span>
                 </div>
@@ -805,11 +805,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               <FundryLogo className="h-8" />
             </div>
 
-            <div className="flex justify-center space-x-4 mb-6">
+            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mb-6">
               <Button
                 variant={authMode === 'signin' ? 'default' : 'outline'}
                 onClick={() => setAuthMode('signin')}
-                className={authMode === 'signin' ? 'bg-fundry-orange hover:bg-orange-600' : ''}
+                className={`flex-1 sm:flex-none text-sm ${authMode === 'signin' ? 'bg-fundry-orange hover:bg-orange-600' : ''}`}
               >
                 <LogIn className="w-4 h-4 mr-2" />
                 Sign In
@@ -817,7 +817,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               <Button
                 variant={authMode === 'signup' ? 'default' : 'outline'}
                 onClick={() => setAuthMode('signup')}
-                className={authMode === 'signup' ? 'bg-fundry-orange hover:bg-orange-600' : ''}
+                className={`flex-1 sm:flex-none text-sm ${authMode === 'signup' ? 'bg-fundry-orange hover:bg-orange-600' : ''}`}
               >
                 <UserPlus className="w-4 h-4 mr-2" />
                 Sign Up
@@ -1195,30 +1195,32 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px] w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-center">
+          <DialogTitle className="text-center text-base sm:text-lg">
             {getStepTitle(currentStep)}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="py-6">
+        <div className="py-4">
           {renderStepContent()}
         </div>
         
-        <div className="flex justify-between">
+        <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
           <Button
             variant="outline"
             onClick={handlePrevStep}
             disabled={currentStep === 'amount' || currentStep === 'confirmation'}
+            className="w-full sm:w-auto"
           >
             Previous
           </Button>
           
-          <div className="flex space-x-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={handleClose}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
@@ -1227,7 +1229,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               <Button
                 onClick={handleNextStep}
                 disabled={!canProceed() || isProcessingPayment || createInvestmentMutation.isPending}
-                className="bg-fundry-orange hover:bg-orange-600"
+                className="bg-fundry-orange hover:bg-orange-600 w-full sm:w-auto"
               >
                 {currentStep === 'payment' ? 
                   (isProcessingPayment ? 'Processing...' : 'Commit Investment') : 

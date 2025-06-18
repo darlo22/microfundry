@@ -114,7 +114,7 @@ export default function FounderAnalytics() {
               <img 
                 src={fundryLogoNew} 
                 alt="Fundry" 
-                className="h-24 w-auto"
+                className="h-48 w-auto"
               />
             </div>
 

@@ -78,36 +78,60 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
       const response = await apiRequest("POST", "/api/register", data);
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    onSuccess: (data) => {
+      setPendingUserId(data.userId);
+      setUserEmail(registrationForm.getValues("email"));
+      setCurrentStep("emailVerification");
+      
       toast({
-        title: "Welcome to Fundry!",
-        description: "Your account has been created successfully.",
+        title: "Account created!",
+        description: "Please check your email to verify your account.",
       });
-      onClose();
-      
-      // Check for investment context before redirecting
-      const storedContext = localStorage.getItem('investmentContext');
-      if (storedContext && selectedUserType === "investor") {
-        try {
-          const context = JSON.parse(storedContext);
-          const isRecent = Date.now() - context.timestamp < 30 * 60 * 1000;
-          if (isRecent) {
-            // Don't redirect, let the investment modal handle continuation
-            return;
-          }
-        } catch (error) {
-          console.error('Error parsing investment context:', error);
-        }
-      }
-      
-      // Redirect based on user type
-      window.location.href = selectedUserType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
     },
     onError: (error: any) => {
       toast({
         title: "Registration failed",
         description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const sendVerificationEmailMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await apiRequest("POST", "/api/send-verification-email", { userId });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Email sent!",
+        description: "Check your inbox for the verification email.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send verification email.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resendVerificationEmailMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const response = await apiRequest("POST", "/api/resend-verification-email", { email });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Email sent!",
+        description: "A new verification email has been sent to your inbox.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to resend verification email.",
         variant: "destructive",
       });
     },
@@ -374,6 +398,53 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
               </button>
             </div>
           </form>
+        )}
+
+        {currentStep === "emailVerification" && (
+          <div className="space-y-6 text-center">
+            <div className="space-y-4">
+              <div className="w-16 h-16 bg-fundry-orange/10 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-fundry-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Check Your Email</h3>
+                <p className="text-gray-600">
+                  We've sent a verification link to <strong>{userEmail}</strong>
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Click the link in the email to verify your account and start using Fundry.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Button
+                onClick={() => pendingUserId && resendVerificationEmailMutation.mutate(userEmail)}
+                disabled={resendVerificationEmailMutation.isPending}
+                variant="outline"
+                className="w-full"
+              >
+                {resendVerificationEmailMutation.isPending ? "Sending..." : "Resend Email"}
+              </Button>
+
+              <Button
+                onClick={handleClose}
+                variant="ghost"
+                className="w-full text-gray-600"
+              >
+                I'll verify later
+              </Button>
+            </div>
+
+            <div className="text-xs text-gray-500 space-y-1">
+              <p>• Check your spam folder if you don't see the email</p>
+              <p>• The verification link expires in 24 hours</p>
+              <p>• You can sign in after verification is complete</p>
+            </div>
+          </div>
         )}
 
         {mode === "signin" && currentStep === "userType" && (

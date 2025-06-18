@@ -5,8 +5,12 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as SelectUser } from "@shared/schema";
+import { User as SelectUser, emailVerificationTokens } from "@shared/schema";
 import connectPg from "connect-pg-simple";
+import { emailService } from "./services/email";
+import { db } from "./db";
+import { nanoid } from "nanoid";
+import { eq } from "drizzle-orm";
 
 declare global {
   namespace Express {
@@ -65,6 +69,12 @@ export function setupAuth(app: Express) {
           if (!user || !user.password || !(await comparePasswords(password, user.password))) {
             return done(null, false, { message: "Invalid email or password" });
           }
+          
+          // Check if email is verified
+          if (!user.isEmailVerified) {
+            return done(null, false, { message: "Please verify your email address before signing in" });
+          }
+          
           return done(null, user);
         } catch (error) {
           return done(error);
@@ -103,7 +113,7 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "User already exists with this email" });
       }
 
-      // Create user
+      // Create user with email verification disabled initially
       const hashedPassword = await hashPassword(password);
       const user = await storage.createUser({
         id: "", // Will be generated in createUser method
@@ -112,12 +122,33 @@ export function setupAuth(app: Express) {
         firstName,
         lastName,
         userType,
+        isEmailVerified: false,
       });
 
-      // Auto-login after registration
-      req.login(user, (err) => {
-        if (err) return next(err);
-        res.status(201).json({ user, message: "Account created successfully" });
+      // Generate verification token
+      const token = nanoid(32);
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      // Store verification token
+      await db.insert(emailVerificationTokens).values({
+        id: nanoid(),
+        userId: user.id,
+        token,
+        expiresAt,
+      });
+
+      // Send verification email
+      const emailSent = await emailService.sendVerificationEmail(user.email, token, user.firstName);
+      
+      if (!emailSent) {
+        console.error("Failed to send verification email for user:", user.id);
+      }
+
+      // Return user info without auto-login (require email verification first)
+      res.status(201).json({ 
+        userId: user.id,
+        message: "Account created successfully. Please check your email to verify your account.",
+        emailSent
       });
     } catch (error) {
       console.error("Registration error:", error);

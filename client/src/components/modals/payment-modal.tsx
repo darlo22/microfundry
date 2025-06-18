@@ -215,31 +215,60 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         }
       };
 
-      // Load Budpay script and initialize modal payment
-      const loadBudpayScript = () => {
-        return new Promise((resolve, reject) => {
-          if ((window as any).BudPayCheckout) {
-            resolve((window as any).BudPayCheckout);
-            return;
-          }
-          
-          const script = document.createElement('script');
-          script.src = 'https://checkout.budpay.com/checkout.js';
-          script.onload = () => {
-            if ((window as any).BudPayCheckout) {
-              resolve((window as any).BudPayCheckout);
-            } else {
-              reject(new Error('BudPay script failed to load'));
-            }
-          };
-          script.onerror = () => reject(new Error('Failed to load BudPay script'));
-          document.head.appendChild(script);
-        });
-      };
+      // Create Budpay payment using backend API instead of frontend widget
+      console.log('Creating Budpay payment via backend API...');
+      
+      const paymentResponse = await fetch('/api/create-budpay-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          campaignId: investment.campaignId,
+          amount: investment.amount,
+          ngnAmount: ngnAmount,
+          email: user?.email || '',
+          reference: `pay_${investment.id}_${Date.now()}`,
+          paymentMethod: 'budpay',
+          investorDetails: {}
+        })
+      });
 
-      const BudPayCheckout = await loadBudpayScript();
-      console.log('Launching Budpay modal with config:', budpayConfig);
-      (BudPayCheckout as any)(budpayConfig);
+      const paymentResult = await paymentResponse.json();
+      
+      if (!paymentResult.success) {
+        throw new Error(paymentResult.message || 'Failed to create payment');
+      }
+
+      console.log('Budpay payment URL:', paymentResult.paymentUrl);
+      
+      // Open payment URL in a popup window
+      const popup = window.open(
+        paymentResult.paymentUrl,
+        'budpay-payment',
+        'width=600,height=700,scrollbars=yes,resizable=yes'
+      );
+
+      if (!popup) {
+        throw new Error('Popup blocked. Please allow popups for this site.');
+      }
+
+      // Monitor popup for completion
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          setIsProcessing(false);
+          
+          // Refresh investment data
+          queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+          
+          toast({
+            title: "Payment Window Closed",
+            description: "Please check your investment status in the dashboard.",
+          });
+          
+          onClose();
+        }
+      }, 1000);
 
     } catch (error: any) {
       console.error('Budpay payment error:', error);

@@ -2477,6 +2477,109 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Process payment for investment
+  app.post('/api/investments/:id/process-payment', requireAuth, async (req: any, res) => {
+    try {
+      const investmentId = parseInt(req.params.id);
+      const { type, cardDetails, cardId, saveCard } = req.body;
+      
+      // Get the investment
+      const investment = await storage.getInvestment(investmentId);
+      if (!investment) {
+        return res.status(404).json({ message: 'Investment not found' });
+      }
+      
+      // Verify the investment belongs to the authenticated user
+      if (investment.investorId !== req.user.id) {
+        return res.status(403).json({ message: 'Unauthorized to process this payment' });
+      }
+      
+      // Check if investment is in pending status
+      if (investment.status !== 'pending') {
+        return res.status(400).json({ message: 'Investment must be in pending status to process payment' });
+      }
+      
+      const amountInCents = Math.round(parseFloat(investment.amount) * 100);
+      
+      let paymentMethod;
+      
+      if (type === 'new_card') {
+        // Create payment method with new card
+        paymentMethod = await stripe.paymentMethods.create({
+          type: 'card',
+          card: {
+            number: cardDetails.number,
+            exp_month: cardDetails.exp_month,
+            exp_year: cardDetails.exp_year,
+            cvc: cardDetails.cvc,
+          },
+          billing_details: {
+            name: cardDetails.name,
+          },
+        });
+      } else if (type === 'saved_card') {
+        // Use saved card (in real implementation, retrieve from user's saved cards)
+        // For now, we'll simulate this
+        return res.status(400).json({ message: 'Saved cards not implemented yet' });
+      }
+      
+      // Create payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amountInCents,
+        currency: 'usd',
+        payment_method: paymentMethod.id,
+        confirm: true,
+        description: `Investment in Campaign ${investment.campaignId}`,
+        metadata: {
+          investmentId: investmentId.toString(),
+          campaignId: investment.campaignId.toString(),
+          investorId: req.user.id,
+        },
+        return_url: `${process.env.FRONTEND_URL || 'http://localhost:5000'}/investor-dashboard`,
+      });
+      
+      if (paymentIntent.status === 'succeeded') {
+        // Update investment status to paid
+        await storage.updateInvestment(investmentId, { 
+          status: 'paid',
+          stripePaymentIntentId: paymentIntent.id 
+        });
+        
+        res.json({ 
+          success: true, 
+          paymentIntentId: paymentIntent.id,
+          message: 'Payment processed successfully'
+        });
+      } else if (paymentIntent.status === 'requires_action') {
+        res.json({
+          requiresAction: true,
+          clientSecret: paymentIntent.client_secret,
+          paymentIntentId: paymentIntent.id
+        });
+      } else {
+        res.status(400).json({ 
+          message: 'Payment failed',
+          status: paymentIntent.status 
+        });
+      }
+      
+    } catch (error: any) {
+      console.error('Payment processing error:', error);
+      
+      if (error.type === 'StripeCardError') {
+        res.status(400).json({ 
+          message: error.message || 'Card payment failed',
+          code: error.code 
+        });
+      } else {
+        res.status(500).json({ 
+          message: 'Payment processing failed',
+          error: error.message 
+        });
+      }
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

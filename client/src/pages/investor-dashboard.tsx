@@ -2481,6 +2481,18 @@ export default function InvestorDashboard() {
         onClose={() => setIsTwoFactorSetupOpen(false)} 
       />
 
+      {/* Payment Modal */}
+      {selectedInvestmentForPayment && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => {
+            setIsPaymentModalOpen(false);
+            setSelectedInvestmentForPayment(null);
+          }}
+          investment={selectedInvestmentForPayment}
+        />
+      )}
+
       <Footer />
     </div>
   );

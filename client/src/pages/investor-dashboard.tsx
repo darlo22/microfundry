@@ -427,6 +427,25 @@ export default function InvestorDashboard() {
 
 
 
+  // Pay Now mutation for pending investments (moved here for component access)
+  const payNowMutation = useMutation({
+    mutationFn: async (investmentId: number) => {
+      const response = await apiRequest("POST", `/api/investments/${investmentId}/pay`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Redirect to Stripe Checkout
+      window.location.href = data.checkoutUrl;
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment Error",
+        description: error.message || "Failed to initiate payment",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Get states for selected country
   const selectedCountryData = COUNTRIES_AND_STATES.find(c => c.code === selectedCountry);
   const availableStates = selectedCountryData?.states || [];

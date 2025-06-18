@@ -14,7 +14,7 @@ interface EmailParams {
 }
 
 export class EmailService {
-  private fromEmail = 'noreply@fundry.com';
+  private fromEmail = 'onboarding@resend.dev'; // Using verified Resend domain
 
   async sendEmail(params: EmailParams): Promise<boolean> {
     try {
@@ -29,6 +29,7 @@ export class EmailService {
       return true;
     } catch (error) {
       console.error('Failed to send email:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       return false;
     }
   }
@@ -96,6 +97,7 @@ export class EmailService {
       to: email,
       subject: 'Verify Your Email Address - Fundry',
       html,
+      from: 'Fundry <onboarding@resend.dev>',
     });
   }
 

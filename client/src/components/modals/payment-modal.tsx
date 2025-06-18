@@ -338,26 +338,30 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
 
     setIsProcessing(true);
     try {
-      // Confirm payment with Stripe
+      // Submit the payment to Stripe
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
-        clientSecret,
         confirmParams: {
           payment_method_data: {
             billing_details: {
               name: cardholderName,
             },
           },
-          return_url: `${window.location.origin}/investor-dashboard`,
         },
         redirect: 'if_required',
       });
 
       if (error) {
+        console.error('Stripe payment error:', error);
         throw new Error(error.message);
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
+        // Update investment status on backend
+        await apiRequest('PUT', `/api/investments/${investment.id}/status`, {
+          status: 'paid'
+        });
+
         toast({
           title: "Payment Successful!",
           description: `Payment of $${investment.amount} completed successfully`,
@@ -368,13 +372,17 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
         
         onClose();
+      } else {
+        throw new Error('Payment not completed');
       }
     } catch (error: any) {
+      console.error('Payment processing error:', error);
       toast({
         title: "Payment Failed",
         description: error.message || "Failed to process payment",
         variant: "destructive",
       });
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -528,6 +536,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                     value={cardholderName}
                     onChange={(e) => setCardholderName(e.target.value)}
                     disabled={isProcessing}
+                    autoComplete="cc-name"
+                    className="w-full"
                   />
                 </div>
                 

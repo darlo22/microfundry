@@ -2247,7 +2247,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       console.log('Checkout session created successfully:', session.id);
 
       res.json({ 
-        url: session.url,
+        checkoutUrl: session.url,
         sessionId: session.id
       });
     } catch (error) {

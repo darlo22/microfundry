@@ -253,7 +253,8 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
   const createInvestmentMutation = useMutation({
     mutationFn: async (investmentData: any) => {
-      return await apiRequest('POST', '/api/investments', investmentData);
+      const response = await apiRequest('POST', '/api/investments', investmentData);
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
@@ -429,6 +430,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const handlePayment = async () => {
     setIsProcessingPayment(true);
     try {
+      // First create a committed investment record
       const investmentData = {
         campaignId: campaign.id,
         amount: selectedAmount.toString(),
@@ -441,19 +443,24 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
         }
       };
 
-      await createInvestmentMutation.mutateAsync(investmentData);
+      const investment = await createInvestmentMutation.mutateAsync(investmentData);
       
-      toast({
-        title: "Investment Successful!",
-        description: `You have successfully committed $${selectedAmount} to ${campaign.title}`,
-      });
+      // Then redirect to Stripe Checkout for payment
+      const paymentResponse = await apiRequest('POST', `/api/investments/${investment.id}/pay`, {});
+      const paymentData = await paymentResponse.json();
+      
+      if (paymentData.checkoutUrl) {
+        // Redirect to Stripe Checkout
+        window.location.href = paymentData.checkoutUrl;
+      } else {
+        throw new Error('Failed to create checkout session');
+      }
     } catch (error: any) {
       toast({
         title: "Payment Failed",
         description: error.message || "Failed to process payment",
         variant: "destructive",
       });
-    } finally {
       setIsProcessingPayment(false);
     }
   };

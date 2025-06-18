@@ -319,32 +319,105 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Cardholder Name */}
-          <div>
-            <Label htmlFor="cardholderName">Cardholder Name</Label>
-            <Input
-              id="cardholderName"
-              placeholder="John Doe"
-              value={cardholderName}
-              onChange={(e) => setCardholderName(e.target.value)}
-              className="mt-1"
-            />
-          </div>
-
-          {/* Stripe Card Element */}
-          <Card className="border-2 border-orange-100">
+          {/* Investment Summary */}
+          <Card className="border-2 border-orange-100 bg-white/90">
             <CardHeader>
               <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-orange-500" />
-                Card Information
+                <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 text-sm font-bold">$</div>
+                Investment Summary
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="p-3 border border-gray-300 rounded-md bg-white">
-                <CardElement options={CARD_ELEMENT_OPTIONS} />
+            <CardContent className="space-y-3">
+              <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                <span className="text-gray-600 font-medium">USD Amount:</span>
+                <span className="font-bold text-xl text-gray-900">${investment.amount}</span>
               </div>
+              
+              {isLoadingRate ? (
+                <div className="flex justify-between items-center py-3">
+                  <span className="text-gray-600 font-medium">NGN Equivalent:</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-gray-500">Loading...</span>
+                  </div>
+                </div>
+              ) : ngnAmount && exchangeRate ? (
+                <>
+                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                    <span className="text-gray-600 font-medium">NGN Equivalent:</span>
+                    <span className="font-bold text-xl text-green-700">₦{ngnAmount.toLocaleString('en-NG')}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-sm text-gray-500">Exchange Rate:</span>
+                    <span className="text-sm text-gray-600">$1 = ₦{exchangeRate.usdToNgn.toLocaleString('en-NG')}</span>
+                  </div>
+                </>
+              ) : null}
             </CardContent>
           </Card>
+
+          {/* Payment Method Selection */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
+              Choose Payment Method
+            </h3>
+            
+            {/* USD Payment Button */}
+            <Button
+              onClick={handleUSDPayment}
+              disabled={isProcessing}
+              className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-lg font-bold">$</span>
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold text-base">Pay with USD</div>
+                  <div className="text-sm opacity-90">Powered by Stripe</div>
+                </div>
+              </div>
+              <div className="text-right">
+                {isProcessing ? (
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <span className="font-bold text-lg">${investment.amount}</span>
+                )}
+              </div>
+            </Button>
+
+            {/* NGN Payment Button */}
+            <Button
+              onClick={handleNairaPayment}
+              disabled={isProcessing || !ngnAmount}
+              className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-lg font-bold">₦</span>
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold text-base">Pay with Naira</div>
+                  <div className="text-sm opacity-90">Powered by Budpay</div>
+                </div>
+              </div>
+              <div className="text-right">
+                {isProcessing ? (
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <span className="font-bold text-lg">
+                    {ngnAmount ? `₦${ngnAmount.toLocaleString('en-NG')}` : '...'}
+                  </span>
+                )}
+              </div>
+            </Button>
+          </div>
+
+          {/* Hidden Stripe Elements for USD processing */}
+          <div className="hidden">
+            <CardElement options={CARD_ELEMENT_OPTIONS} />
+          </div>
 
           {/* Security Notice */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

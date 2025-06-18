@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -871,6 +872,113 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
     }
   };
 
+  const handleUSDPayment = async () => {
+    setIsProcessingPayment(true);
+    try {
+      // Create investment first
+      const investmentData = {
+        campaignId: campaign.id,
+        amount: selectedAmount.toString(),
+        status: 'committed',
+        investorDetails: {
+          ...investorDetails,
+          signature: signatureData,
+          agreedToTerms,
+          investmentDate: new Date().toISOString()
+        }
+      };
+
+      const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
+
+      // Process Stripe payment
+      const response = await apiRequest('POST', '/api/create-payment-intent', {
+        amount: selectedAmount,
+        investmentId: investmentResponse.id,
+        currency: 'usd'
+      });
+
+      if (response.ok) {
+        const { clientSecret } = await response.json();
+        
+        // Redirect to Stripe checkout
+        window.location.href = `https://checkout.stripe.com/pay/${clientSecret}`;
+      }
+      
+    } catch (error: any) {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process USD payment",
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
+    }
+  };
+
+  const handleNairaPayment = async () => {
+    if (!ngnAmount) {
+      toast({
+        title: "Currency Error",
+        description: "Naira amount not available. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    try {
+      // Create investment first
+      const investmentData = {
+        campaignId: campaign.id,
+        amount: selectedAmount.toString(),
+        status: 'committed',
+        investorDetails: {
+          ...investorDetails,
+          signature: signatureData,
+          agreedToTerms,
+          investmentDate: new Date().toISOString()
+        }
+      };
+
+      const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
+
+      // Process Budpay payment
+      const response = await apiRequest('POST', '/api/budpay-payment', {
+        amount: Math.round(ngnAmount),
+        investmentId: investmentResponse.id,
+        email: user?.email || 'investor@fundry.com',
+        currency: 'NGN'
+      });
+
+      if (response.ok) {
+        const { authorization_url } = await response.json();
+        
+        // Open Budpay payment in popup
+        const popup = window.open(
+          authorization_url,
+          'budpay-payment',
+          'width=600,height=600,scrollbars=yes,resizable=yes'
+        );
+
+        // Monitor popup for completion
+        const checkClosed = setInterval(() => {
+          if (popup?.closed) {
+            clearInterval(checkClosed);
+            setCurrentStep('confirmation');
+            setIsProcessingPayment(false);
+          }
+        }, 1000);
+      }
+      
+    } catch (error: any) {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process Naira payment",
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
+    }
+  };
+
   const generateSafeAgreement = (campaign: CampaignWithStats, amount: number) => {
     return `SIMPLE AGREEMENT FOR FUTURE EQUITY
 
@@ -1421,9 +1529,120 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             
             {renderProgressIndicator()}
             
-            <Elements stripe={stripePromise}>
-              <StripePaymentForm />
-            </Elements>
+            {/* Investment Summary */}
+            <Card className="border-2 border-orange-100 bg-white/90">
+              <CardHeader>
+                <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
+                  <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 text-sm font-bold">$</div>
+                  Investment Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                  <span className="text-gray-600 font-medium">USD Amount:</span>
+                  <span className="font-bold text-xl text-gray-900">${selectedAmount}</span>
+                </div>
+                
+                {ngnAmount && exchangeRate ? (
+                  <>
+                    <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                      <span className="text-gray-600 font-medium">NGN Equivalent:</span>
+                      <span className="font-bold text-xl text-green-700">₦{ngnAmount.toLocaleString('en-NG')}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-sm text-gray-500">Exchange Rate:</span>
+                      <span className="text-sm text-gray-600">$1 = ₦{exchangeRate.usdToNgn.toLocaleString('en-NG')}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between items-center py-3">
+                    <span className="text-gray-600 font-medium">NGN Equivalent:</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-gray-500">Loading...</span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Payment Method Selection */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
+                Choose Payment Method
+              </h3>
+              
+              {/* USD Payment Button */}
+              <Button
+                onClick={handleUSDPayment}
+                disabled={isProcessingPayment}
+                className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-lg font-bold">$</span>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-base">Pay with USD</div>
+                    <div className="text-sm opacity-90">Powered by Stripe</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  {isProcessingPayment ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <span className="font-bold text-lg">${selectedAmount}</span>
+                  )}
+                </div>
+              </Button>
+
+              {/* NGN Payment Button */}
+              <Button
+                onClick={handleNairaPayment}
+                disabled={isProcessingPayment || !ngnAmount}
+                className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-lg font-bold">₦</span>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-base">Pay with Naira</div>
+                    <div className="text-sm opacity-90">Powered by Budpay</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  {isProcessingPayment ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <span className="font-bold text-lg">
+                      {ngnAmount ? `₦${ngnAmount.toLocaleString('en-NG')}` : '...'}
+                    </span>
+                  )}
+                </div>
+              </Button>
+            </div>
+
+            {/* Security Notice */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-blue-900 mb-1">Secure Payment</h4>
+                  <p className="text-sm text-blue-700">
+                    Your payment information is encrypted and secure. Card details will be handled directly by the selected payment processor.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Hidden Stripe Elements for USD processing */}
+            <div className="hidden">
+              <Elements stripe={stripePromise}>
+                <StripePaymentForm />
+              </Elements>
+            </div>
           </div>
         );
 

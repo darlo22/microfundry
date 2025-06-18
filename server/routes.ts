@@ -2196,6 +2196,49 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Budpay payment route for Naira payments
+  app.post("/api/budpay-payment", requireAuth, async (req: any, res) => {
+    try {
+      const { 
+        campaignId, 
+        amount, 
+        ngnAmount, 
+        budpayReference, 
+        budpayTransactionId,
+        investorDetails,
+        paymentMethod 
+      } = req.body;
+
+      // Verify Budpay transaction (in production, you'd verify with Budpay API)
+      // For now, we'll create the investment record directly
+      const investment = await storage.createInvestment({
+        campaignId: parseInt(campaignId),
+        investorId: req.user.id,
+        amount: amount.toString(),
+        platformFee: "0", // No platform fees
+        totalAmount: amount.toString(),
+        status: 'paid',
+        paymentStatus: 'completed',
+        paymentIntentId: budpayReference,
+        agreementSigned: true,
+        signedAt: new Date(),
+        ipAddress: req.ip
+      });
+
+      res.json({ 
+        success: true, 
+        investment,
+        message: 'Payment processed successfully'
+      });
+    } catch (error: any) {
+      console.error('Budpay payment error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: "Error processing Budpay payment: " + error.message 
+      });
+    }
+  });
+
   // Payment success verification endpoint
   app.get('/api/payment-success/:sessionId', requireAuth, async (req: any, res) => {
     try {

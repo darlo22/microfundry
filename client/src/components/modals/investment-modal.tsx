@@ -28,6 +28,13 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { convertUsdToNgn, formatCurrency, type ExchangeRate } from "@/lib/currency";
 
+// Global type declaration for Budpay
+declare global {
+  interface Window {
+    BudPayCheckout: (config: any) => void;
+  }
+}
+
 
 interface CampaignWithStats extends Campaign {
   totalRaised: string;
@@ -105,10 +112,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
 
   // Budpay configuration
-  const budpayConfig = {
-    publicKey: import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key', // Will be replaced with actual key
-    secretKey: import.meta.env.VITE_BUDPAY_SECRET_KEY || 'sk_test_budpay_secret_key' // For backend use
-  };
+  const BUDPAY_PUBLIC_KEY = import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key';
 
   // Stripe Payment Form Component
   const StripePaymentForm = () => {
@@ -442,7 +446,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
       // Initialize Budpay payment
       const budpayPaymentConfig = {
-        key: budpayConfig.publicKey,
+        key: BUDPAY_PUBLIC_KEY,
         email: user?.email || investorDetails.firstName + '@example.com',
         amount: ngnAmount * 100, // Convert to kobo
         currency: 'NGN',
@@ -478,13 +482,13 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
       // Load Budpay script and initialize payment
       if (window.BudPayCheckout) {
-        window.BudPayCheckout(budpayConfig);
+        window.BudPayCheckout(budpayPaymentConfig);
       } else {
         // Load Budpay script dynamically
         const script = document.createElement('script');
         script.src = 'https://checkout.budpay.com/checkout.js';
         script.onload = () => {
-          window.BudPayCheckout(budpayConfig);
+          window.BudPayCheckout(budpayPaymentConfig);
         };
         document.head.appendChild(script);
       }

@@ -232,34 +232,43 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-between pt-6 border-t">
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isProcessing}
-          >
-            Cancel
-          </Button>
+        <div className="space-y-4 pt-6 border-t">
+          <div className="flex justify-between">
+            <Button
+              variant="outline"
+              onClick={handleClose}
+              disabled={isProcessing}
+            >
+              Cancel
+            </Button>
+          </div>
           
-          <Button
-            onClick={handlePayment}
-            disabled={isProcessing || processPaymentMutation.isPending || !stripe}
-            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 min-w-[120px]"
-          >
-            {isProcessing || processPaymentMutation.isPending ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Processing...
-              </div>
-            ) : (
-              <div className="text-center">
-                <div>Pay ${investment.amount}</div>
-                {ngnAmount && (
-                  <div className="text-xs opacity-90">(₦{ngnAmount.toLocaleString('en-NG')})</div>
-                )}
-              </div>
+          <div className="space-y-3">
+            <Button
+              onClick={handlePayment}
+              disabled={isProcessing || processPaymentMutation.isPending || !stripe}
+              className="w-full bg-blue-900 hover:bg-blue-800"
+            >
+              {isProcessing || processPaymentMutation.isPending ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Processing...
+                </div>
+              ) : (
+                `Pay $${investment.amount} (USD)`
+              )}
+            </Button>
+            
+            {ngnAmount && !isLoadingRate && (
+              <Button
+                onClick={handleNairaPayment}
+                disabled={isProcessing}
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                {isProcessing ? 'Processing Payment...' : `Pay ₦${ngnAmount.toLocaleString()} (NGN)`}
+              </Button>
             )}
-          </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

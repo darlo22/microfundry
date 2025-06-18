@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
@@ -118,7 +118,17 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   // Budpay configuration
   const BUDPAY_PUBLIC_KEY = import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key';
 
-
+  // Investment mutation
+  const createInvestmentMutation = useMutation({
+    mutationFn: async (investmentData: any) => {
+      const response = await apiRequest('POST', '/api/investments', investmentData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+    }
+  });
 
   // Stripe Payment Form Component
   const StripePaymentForm = () => {

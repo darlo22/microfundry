@@ -501,7 +501,47 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
     }
   };
 
-  // Handle Naira payment via Budpay
+  // Payment handler functions
+  const handleUSDPayment = async () => {
+    setIsProcessingPayment(true);
+    try {
+      // Create investment first
+      const investmentData = {
+        campaignId: campaign.id,
+        amount: selectedAmount.toString(),
+        status: 'committed',
+        investorDetails: {
+          ...investorDetails,
+          signature: signatureData,
+          agreedToTerms,
+          investmentDate: new Date().toISOString()
+        }
+      };
+
+      const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
+
+      // Process Stripe payment
+      const response = await apiRequest('POST', '/api/create-payment-intent', {
+        amount: selectedAmount,
+        investmentId: investmentResponse.id,
+        currency: 'usd'
+      });
+
+      if (response.ok) {
+        const { clientSecret } = await response.json();
+        window.location.href = `https://checkout.stripe.com/pay/${clientSecret}`;
+      }
+      
+    } catch (error: any) {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process USD payment",
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
+    }
+  };
+
   const handleNairaPayment = async () => {
     console.log('Naira payment button clicked');
     console.log('NGN Amount:', ngnAmount);
@@ -872,112 +912,9 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
     }
   };
 
-  const handleUSDPayment = async () => {
-    setIsProcessingPayment(true);
-    try {
-      // Create investment first
-      const investmentData = {
-        campaignId: campaign.id,
-        amount: selectedAmount.toString(),
-        status: 'committed',
-        investorDetails: {
-          ...investorDetails,
-          signature: signatureData,
-          agreedToTerms,
-          investmentDate: new Date().toISOString()
-        }
-      };
 
-      const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
 
-      // Process Stripe payment
-      const response = await apiRequest('POST', '/api/create-payment-intent', {
-        amount: selectedAmount,
-        investmentId: investmentResponse.id,
-        currency: 'usd'
-      });
 
-      if (response.ok) {
-        const { clientSecret } = await response.json();
-        
-        // Redirect to Stripe checkout
-        window.location.href = `https://checkout.stripe.com/pay/${clientSecret}`;
-      }
-      
-    } catch (error: any) {
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process USD payment",
-        variant: "destructive",
-      });
-      setIsProcessingPayment(false);
-    }
-  };
-
-  const handleNairaPayment = async () => {
-    if (!ngnAmount) {
-      toast({
-        title: "Currency Error",
-        description: "Naira amount not available. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsProcessingPayment(true);
-    try {
-      // Create investment first
-      const investmentData = {
-        campaignId: campaign.id,
-        amount: selectedAmount.toString(),
-        status: 'committed',
-        investorDetails: {
-          ...investorDetails,
-          signature: signatureData,
-          agreedToTerms,
-          investmentDate: new Date().toISOString()
-        }
-      };
-
-      const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
-
-      // Process Budpay payment
-      const response = await apiRequest('POST', '/api/budpay-payment', {
-        amount: Math.round(ngnAmount),
-        investmentId: investmentResponse.id,
-        email: user?.email || 'investor@fundry.com',
-        currency: 'NGN'
-      });
-
-      if (response.ok) {
-        const { authorization_url } = await response.json();
-        
-        // Open Budpay payment in popup
-        const popup = window.open(
-          authorization_url,
-          'budpay-payment',
-          'width=600,height=600,scrollbars=yes,resizable=yes'
-        );
-
-        // Monitor popup for completion
-        const checkClosed = setInterval(() => {
-          if (popup?.closed) {
-            clearInterval(checkClosed);
-            setCurrentStep('confirmation');
-            setIsProcessingPayment(false);
-          }
-        }, 1000);
-      }
-      
-    } catch (error: any) {
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process Naira payment",
-        variant: "destructive",
-      });
-      setIsProcessingPayment(false);
-    }
-  };
 
   const generateSafeAgreement = (campaign: CampaignWithStats, amount: number) => {
     return `SIMPLE AGREEMENT FOR FUTURE EQUITY

@@ -156,8 +156,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     }
   };
 
-  // Handle Naira payment via Budpay
-  const handleNairaPayment = async () => {
+  // Handle Naira payment via Budpay (original implementation)
+  const handleNairaPaymentOriginal = async () => {
     if (!ngnAmount) {
       toast({
         title: "Currency Error",
@@ -285,6 +285,33 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     setCardholderName('');
     onClose();
   };
+
+  const handleUSDPayment = async () => {
+    setIsProcessing(true);
+    try {
+      const response = await apiRequest('POST', '/api/create-payment-intent', {
+        amount: parseFloat(investment.amount),
+        investmentId: investment.id,
+        currency: 'usd'
+      });
+
+      if (response.ok) {
+        const { clientSecret } = await response.json();
+        window.location.href = `https://checkout.stripe.com/pay/${clientSecret}`;
+      } else {
+        throw new Error('Failed to create payment intent');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process USD payment",
+        variant: "destructive",
+      });
+      setIsProcessing(false);
+    }
+  };
+
+
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>

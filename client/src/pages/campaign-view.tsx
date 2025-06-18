@@ -503,97 +503,112 @@ export default function CampaignView() {
               </CardContent>
             </Card>
 
-            {/* Campaign Description */}
-            <Card>
+            {/* Modern Campaign Description */}
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">About This Campaign</h2>
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">About This Campaign</h2>
+                </div>
                 <div className="prose max-w-none text-gray-700 leading-relaxed">
                   {campaign.fullPitch.split('\n').map((paragraph, index) => (
-                    <p key={index} className="mb-4">{paragraph}</p>
+                    <p key={index} className="mb-4 text-gray-700 leading-7">{paragraph}</p>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Investment Details */}
-            <Card>
+            {/* Modern Investment Details */}
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Investment Details</h2>
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Investment Details</h2>
+                </div>
+                <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center py-3 border-b">
-                      <span className="text-gray-600">Funding Goal</span>
-                      <span className="font-semibold text-lg">{formatCurrency(campaign.fundingGoal)}</span>
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-lg border-l-4 border-fundry-orange">
+                      <span className="text-gray-700 font-medium">Funding Goal</span>
+                      <span className="font-bold text-lg text-fundry-navy">{formatCurrency(campaign.fundingGoal)}</span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b">
-                      <span className="text-gray-600">Amount Raised</span>
-                      <span className="font-semibold text-lg text-green-600">{formatCurrency(campaign.totalRaised)}</span>
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-green-50 to-emerald-50/30 rounded-lg border-l-4 border-green-500">
+                      <span className="text-gray-700 font-medium">Amount Raised</span>
+                      <span className="font-bold text-lg text-green-600">{formatCurrency(campaign.totalRaised)}</span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b">
-                      <span className="text-gray-600">Minimum Investment</span>
-                      <span className="font-semibold text-lg">{formatCurrency(campaign.minimumInvestment)}</span>
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-orange-50 to-amber-50/30 rounded-lg border-l-4 border-fundry-orange">
+                      <span className="text-gray-700 font-medium">Minimum Investment</span>
+                      <span className="font-bold text-lg text-fundry-orange">{formatCurrency(campaign.minimumInvestment)}</span>
                     </div>
-                    <div className="flex justify-between items-center py-3">
-                      <span className="text-gray-600">Maximum Ask</span>
-                      <span className="font-semibold text-lg">{formatCurrency(campaign.fundingGoal)}</span>
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-blue-50 to-indigo-50/30 rounded-lg border-l-4 border-blue-500">
+                      <span className="text-gray-700 font-medium">Maximum Ask</span>
+                      <span className="font-bold text-lg text-blue-600">{formatCurrency(campaign.fundingGoal)}</span>
                     </div>
                   </div>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center py-3 border-b">
-                      <span className="text-gray-600">Discount Rate</span>
-                      <span className="font-semibold text-lg">{campaign.discountRate}%</span>
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-purple-50 to-violet-50/30 rounded-lg border-l-4 border-purple-500">
+                      <span className="text-gray-700 font-medium">Discount Rate</span>
+                      <span className="font-bold text-lg text-purple-600">{campaign.discountRate}%</span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b">
-                      <span className="text-gray-600">Valuation Cap</span>
-                      <span className="font-semibold text-lg">{formatCurrency(campaign.valuationCap || "1000000")}</span>
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-indigo-50 to-blue-50/30 rounded-lg border-l-4 border-indigo-500">
+                      <span className="text-gray-700 font-medium">Valuation Cap</span>
+                      <span className="font-bold text-lg text-indigo-600">{formatCurrency(campaign.valuationCap || "1000000")}</span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b">
-                      <span className="text-gray-600">Total Investors</span>
-                      <span className="font-semibold text-lg">{campaign.investorCount}</span>
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-teal-50 to-cyan-50/30 rounded-lg border-l-4 border-teal-500">
+                      <span className="text-gray-700 font-medium">Total Investors</span>
+                      <span className="font-bold text-lg text-teal-600">{campaign.investorCount}</span>
                     </div>
-                    <div className="flex justify-between items-center py-3">
-                      <span className="text-gray-600">Progress</span>
-                      <span className="font-semibold text-lg">{campaign.progressPercent}%</span>
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-emerald-50 to-green-50/30 rounded-lg border-l-4 border-emerald-500">
+                      <span className="text-gray-700 font-medium">Progress</span>
+                      <span className="font-bold text-lg text-emerald-600">{campaign.progressPercent}%</span>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Traction & Metrics */}
-            <Card>
+            {/* Modern Traction & Metrics */}
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Traction & Growth</h2>
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Traction & Growth</h2>
+                </div>
                 {renderTractionMetrics()}
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {campaign.businessModel && (
-                    <div className="p-4 bg-gray-50 rounded-xl">
-                      <h3 className="font-semibold text-lg text-gray-900 mb-2">Business Model</h3>
-                      <p className="text-gray-600">{campaign.businessModel}</p>
+                    <div className="p-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50/30 rounded-2xl border border-blue-100 shadow-sm">
+                      <h3 className="font-bold text-lg text-fundry-navy mb-3 flex items-center">
+                        <div className="w-2 h-6 bg-blue-500 rounded-full mr-3"></div>
+                        Business Model
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.businessModel}</p>
                     </div>
                   )}
                   {campaign.useOfFunds && Array.isArray(campaign.useOfFunds) && campaign.useOfFunds.length > 0 && (
-                    <div className="p-4 bg-gray-50 rounded-xl">
-                      <h3 className="font-semibold text-lg text-gray-900 mb-4">Use of Funds</h3>
-                      <div className="space-y-3">
+                    <div className="p-6 bg-gradient-to-br from-orange-50 via-white to-amber-50/30 rounded-2xl border border-orange-100 shadow-sm">
+                      <h3 className="font-bold text-lg text-fundry-navy mb-4 flex items-center">
+                        <div className="w-2 h-6 bg-fundry-orange rounded-full mr-3"></div>
+                        Use of Funds
+                      </h3>
+                      <div className="space-y-4">
                         {campaign.useOfFunds.map((allocation: any, index: number) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                          <div key={index} className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                             <div className="flex-1">
-                              <div className="font-medium text-gray-900">{allocation.category}</div>
+                              <div className="font-semibold text-gray-900">{allocation.category}</div>
                               {allocation.description && (
                                 <div className="text-sm text-gray-600 mt-1">{allocation.description}</div>
                               )}
                             </div>
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-4">
                               <div className="text-right">
-                                <div className="font-semibold text-fundry-orange">{allocation.percentage}%</div>
-                                <div className="text-xs text-gray-500">
+                                <div className="font-bold text-fundry-orange text-lg">{allocation.percentage}%</div>
+                                <div className="text-xs text-gray-500 font-medium">
                                   {formatCurrency((parseFloat(campaign.fundingGoal) * allocation.percentage / 100).toString())}
                                 </div>
                               </div>
-                              <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="w-20 h-3 bg-gray-200 rounded-full overflow-hidden">
                                 <div 
-                                  className="h-full bg-fundry-orange transition-all duration-300"
+                                  className="h-full bg-gradient-to-r from-fundry-orange to-orange-600 transition-all duration-500"
                                   style={{ width: `${allocation.percentage}%` }}
                                 />
                               </div>
@@ -604,131 +619,161 @@ export default function CampaignView() {
                     </div>
                   )}
                   {campaign.marketSize && (
-                    <div className="p-4 bg-gray-50 rounded-xl">
-                      <h3 className="font-semibold text-lg text-gray-900 mb-2">Market Opportunity</h3>
-                      <p className="text-gray-600">{campaign.marketSize}</p>
+                    <div className="p-6 bg-gradient-to-br from-green-50 via-white to-emerald-50/30 rounded-2xl border border-green-100 shadow-sm">
+                      <h3 className="font-bold text-lg text-fundry-navy mb-3 flex items-center">
+                        <div className="w-2 h-6 bg-green-500 rounded-full mr-3"></div>
+                        Market Opportunity
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.marketSize}</p>
                     </div>
                   )}
                   {campaign.competitiveLandscape && (
-                    <div className="p-4 bg-gray-50 rounded-xl">
-                      <h3 className="font-semibold text-lg text-gray-900 mb-2">Competitive Landscape</h3>
-                      <p className="text-gray-600">{campaign.competitiveLandscape}</p>
+                    <div className="p-6 bg-gradient-to-br from-purple-50 via-white to-violet-50/30 rounded-2xl border border-purple-100 shadow-sm">
+                      <h3 className="font-bold text-lg text-fundry-navy mb-3 flex items-center">
+                        <div className="w-2 h-6 bg-purple-500 rounded-full mr-3"></div>
+                        Competitive Landscape
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.competitiveLandscape}</p>
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Team Information */}
-            <Card>
+            {/* Modern Team Information */}
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Meet the Team</h2>
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Meet the Team</h2>
+                </div>
                 <div className="space-y-4">
                   {renderTeamMembers()}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Pitch Deck Viewer */}
-            <Card>
+            {/* Modern Pitch Deck Viewer */}
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Pitch Deck</h2>
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Pitch Deck</h2>
+                </div>
                 {campaign.pitchDeckUrl ? (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-                    <FileText className="mx-auto h-16 w-16 text-fundry-orange mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <div className="bg-gradient-to-br from-orange-50 via-white to-amber-50/30 border-2 border-dashed border-fundry-orange/30 rounded-2xl p-12 text-center shadow-inner">
+                    <div className="w-20 h-20 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg">
+                      <FileText className="w-10 h-10 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-fundry-navy mb-2">
                       {campaign.title}_PitchDeck.pdf
                     </h3>
-                    <p className="text-gray-600 mb-6">Pitch deck available for viewing</p>
+                    <p className="text-gray-700 mb-8 font-medium">Pitch deck available for viewing</p>
                     <Button 
                       onClick={handleViewPitchDeck}
-                      className="bg-fundry-orange hover:bg-orange-600"
+                      className="bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8 py-3"
                     >
-                      <FileText className="mr-2" size={16} />
+                      <FileText className="mr-2" size={18} />
                       View Pitch Deck
                     </Button>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-gray-200 rounded-lg p-12 text-center">
-                    <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-500 mb-2">
+                  <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50/20 border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center">
+                    <div className="w-20 h-20 bg-gray-200 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+                      <FileText className="w-10 h-10 text-gray-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-500 mb-2">
                       No pitch deck uploaded
                     </h3>
-                    <p className="text-gray-400">This campaign hasn't uploaded a pitch deck yet</p>
+                    <p className="text-gray-400 font-medium">This campaign hasn't uploaded a pitch deck yet</p>
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Investment Sidebar */}
+          {/* Modern Investment Sidebar */}
           <div className="space-y-6">
-            {/* Investment Card */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center mb-6">
-                  <div className="text-4xl font-bold text-gray-900 mb-2">
-                    {formatCurrency(campaign.totalRaised)}
-                  </div>
-                  <div className="text-gray-600">
-                    raised of <span className="font-semibold">{formatCurrency(campaign.fundingGoal)}</span> goal
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <Progress value={campaign.progressPercent} className="h-3 mb-2" />
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>{campaign.progressPercent}% funded</span>
-                    {campaign.deadline && (
-                      <span>
-                        {Math.ceil((new Date(campaign.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{campaign.investorCount}</div>
-                    <div className="text-sm text-gray-600">Investors</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">
-                      {campaign.investorCount > 0 
-                        ? formatCurrency(Math.round(parseFloat(campaign.totalRaised) / campaign.investorCount))
-                        : "$0"
-                      }
+            {/* Enhanced Investment Card */}
+            <Card className="border-0 shadow-xl bg-gradient-to-br from-white via-orange-50/30 to-blue-50/20 backdrop-blur-sm overflow-hidden">
+              <CardContent className="p-0">
+                {/* Header with gradient */}
+                <div className="bg-gradient-to-r from-fundry-navy to-blue-700 p-6 text-white relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-white/5"></div>
+                  <div className="relative z-10 text-center">
+                    <div className="text-4xl font-bold mb-2">
+                      {formatCurrency(campaign.totalRaised)}
                     </div>
-                    <div className="text-sm text-gray-600">Avg. Investment</div>
+                    <div className="text-white/90 font-medium">
+                      raised of <span className="font-bold text-white">{formatCurrency(campaign.fundingGoal)}</span> goal
+                    </div>
                   </div>
                 </div>
 
-                <Button 
-                  onClick={handleInvest}
-                  disabled={isProcessing}
-                  className="w-full bg-fundry-orange hover:bg-orange-600 text-lg font-semibold py-4 mb-4"
-                >
-                  <DollarSign className="mr-2" size={20} />
-                  {isProcessing ? "Processing..." : "Commit to Invest"}
-                </Button>
-                <p className="text-xs text-gray-500 text-center mb-4">
-                  Commit now, complete payment later via dashboard
-                </p>
-
-                <div className="text-center text-sm text-gray-500">
-                  Minimum investment: <span className="font-medium">{formatCurrency(campaign.minimumInvestment)}</span>
-                </div>
-
-                <div className="mt-6 pt-6 border-t">
-                  <h3 className="font-semibold text-gray-900 mb-3">SAFE Agreement Terms</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Discount Rate:</span>
-                      <span className="font-medium">{campaign.discountRate}%</span>
+                {/* Main content */}
+                <div className="p-6">
+                  <div className="mb-6">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm font-semibold text-gray-700">Progress</span>
+                      <span className="text-sm font-bold text-fundry-orange">{campaign.progressPercent}%</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Valuation Cap:</span>
-                      <span className="font-medium">{formatCurrency(campaign.valuationCap || "1000000")}</span>
+                    <Progress value={campaign.progressPercent} className="h-4 bg-gray-200" />
+                    <div className="flex justify-between text-sm text-gray-600 mt-2">
+                      <span className="font-medium">{campaign.progressPercent}% funded</span>
+                      {campaign.deadline && (
+                        <span className="font-medium">
+                          {Math.ceil((new Date(campaign.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50/30 rounded-xl border border-blue-100">
+                      <div className="text-2xl font-bold text-fundry-navy">{campaign.investorCount}</div>
+                      <div className="text-sm text-gray-600 font-medium">Investors</div>
+                    </div>
+                    <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50/30 rounded-xl border border-green-100">
+                      <div className="text-2xl font-bold text-green-600">
+                        {campaign.investorCount > 0 
+                          ? formatCurrency(Math.round(parseFloat(campaign.totalRaised) / campaign.investorCount))
+                          : "$0"
+                        }
+                      </div>
+                      <div className="text-sm text-gray-600 font-medium">Avg. Investment</div>
+                    </div>
+                  </div>
+
+                  <Button 
+                    onClick={handleInvest}
+                    disabled={isProcessing}
+                    className="w-full bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-lg font-bold py-6 mb-4 shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    <DollarSign className="mr-3" size={24} />
+                    {isProcessing ? "Processing..." : "Commit to Invest"}
+                  </Button>
+                  <p className="text-xs text-gray-600 text-center mb-6 font-medium">
+                    Commit now, complete payment later via dashboard
+                  </p>
+
+                  <div className="text-center text-sm text-gray-600 mb-6 p-3 bg-gray-50 rounded-lg">
+                    Minimum investment: <span className="font-bold text-fundry-orange">{formatCurrency(campaign.minimumInvestment)}</span>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50/20 rounded-xl p-6 border border-gray-100">
+                    <h3 className="font-bold text-fundry-navy mb-4 flex items-center">
+                      <div className="w-2 h-6 bg-fundry-orange rounded-full mr-3"></div>
+                      SAFE Agreement Terms
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-700 font-medium">Discount Rate:</span>
+                        <span className="font-bold text-purple-600">{campaign.discountRate}%</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-700 font-medium">Valuation Cap:</span>
+                        <span className="font-bold text-indigo-600">{formatCurrency(campaign.valuationCap || "1000000")}</span>
+                      </div>
                     </div>
                   </div>
                 </div>

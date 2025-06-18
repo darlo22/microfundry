@@ -427,20 +427,25 @@ export default function InvestorDashboard() {
 
 
 
-  // Pay Now mutation for pending investments (moved here for component access)
+  // Convert pending investment to committed status
   const payNowMutation = useMutation({
     mutationFn: async (investmentId: number) => {
-      const response = await apiRequest("POST", `/api/investments/${investmentId}/pay`);
+      const response = await apiRequest("PATCH", `/api/investments/${investmentId}`, {
+        status: 'committed'
+      });
       return response.json();
     },
-    onSuccess: (data) => {
-      // Redirect to Stripe Checkout
-      window.location.href = data.checkoutUrl;
+    onSuccess: () => {
+      toast({
+        title: "Investment Committed",
+        description: "Your investment has been successfully committed!",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
     },
     onError: (error: any) => {
       toast({
-        title: "Payment Error",
-        description: error.message || "Failed to initiate payment",
+        title: "Commitment Error",
+        description: error.message || "Failed to commit investment",
         variant: "destructive",
       });
     },

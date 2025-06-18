@@ -105,6 +105,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const [isLoadingRate, setIsLoadingRate] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
   const [showStripeForm, setShowStripeForm] = useState(false);
+  const [createdInvestment, setCreatedInvestment] = useState<any>(null);
 
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
@@ -176,6 +177,11 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
         }
 
         if (paymentIntent && paymentIntent.status === 'succeeded') {
+          // Update investment status to 'paid' on backend
+          await apiRequest('PUT', `/api/investments/${createdInvestment?.id}/status`, {
+            status: 'paid'
+          });
+
           toast({
             title: "Payment Successful!",
             description: `You have successfully invested $${selectedAmount} in ${campaign.title}`,
@@ -1613,7 +1619,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
               <h4 className="font-semibold text-green-900 mb-4">Congratulations!</h4>
               <p className="text-green-800 mb-4">
-                You have successfully committed ${selectedAmount} to {campaign.title}. Your investment is now active and you will receive updates on the company's progress.
+                You have successfully invested ${selectedAmount} in {campaign.title}. Your payment has been processed and you will receive updates on the company's progress.
               </p>
               
               <div className="space-y-2 text-sm">

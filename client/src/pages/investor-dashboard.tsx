@@ -821,7 +821,14 @@ export default function InvestorDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total Invested</p>
-                    <p className="text-3xl font-bold text-gray-900">${stats?.totalInvested || "0"}</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {stats?.totalInvested ? new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      }).format(parseFloat(stats.totalInvested)) : '$0'}
+                    </p>
                     <p className="text-sm text-green-600 mt-1">+15% this quarter</p>
                   </div>
                   <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -853,7 +860,14 @@ export default function InvestorDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Portfolio Value</p>
-                    <p className="text-3xl font-bold text-gray-900">${stats?.estimatedValue || "0.00"}</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {stats?.estimatedValue ? new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }).format(parseFloat(stats.estimatedValue)) : '$0.00'}
+                    </p>
                     <p className="text-sm text-green-600 mt-1">+16.4% growth</p>
                   </div>
                   <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -1205,9 +1219,7 @@ export default function InvestorDashboard() {
                   <div className="space-y-4">
                     {investments
                       .filter(investment => investment.status === 'committed' || investment.status === 'paid' || investment.status === 'completed')
-                      .map((investment) => {
-                        console.log('Displaying investment in Documents:', investment.id, 'with status:', investment.status);
-                        return (
+                      .map((investment) => (
                         <div key={investment.id} className="border rounded-lg p-6 hover:border-fundry-orange transition-colors bg-white">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -1295,20 +1307,28 @@ export default function InvestorDashboard() {
                           </div>
                         </div>
                       </div>
-                        );
-                      })}
-                    {investments.length > 0 && investments.filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed').length === 0 && (
-                      <div className="text-center py-8 border border-dashed border-gray-300 rounded-lg">
-                        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-500 mb-2">Your investments are being processed</p>
-                        <p className="text-sm text-gray-400 mb-4">
-                          SAFE agreements will be available for download once your investments are confirmed.
-                        </p>
-                      </div>
-                    )}
-                    
-                    {/* Summary Statistics */}
-                    {investments.filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed').length > 0 && (
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FileText className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Investment Documents Yet</h3>
+                    <p className="text-gray-500 mb-6">
+                      Make your first investment to generate SAFE agreements and other investment documents.
+                    </p>
+                    <Button 
+                      onClick={() => setActiveTab('discover')}
+                      className="bg-fundry-orange hover:bg-fundry-orange/90 text-white"
+                    >
+                      Discover Investment Opportunities
+                    </Button>
+                  </div>
+                )}
+                
+                {/* Summary Statistics */}
+                {investments && investments.filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed').length > 0 && (
                       <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                         <h4 className="font-medium text-gray-900 mb-2">Document Summary</h4>
                         <div className="grid grid-cols-3 gap-4 text-center">

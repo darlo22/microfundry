@@ -2256,6 +2256,76 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Payment success verification endpoint
+  app.get('/api/payment-success/:sessionId', requireAuth, async (req: any, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      // Retrieve the checkout session from Stripe
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({ message: 'Session not found' });
+      }
+
+      // Verify the session belongs to the current user
+      if (session.metadata?.investorId !== req.user.id) {
+        return res.status(403).json({ message: 'Unauthorized access to session' });
+      }
+
+      if (session.payment_status === 'paid') {
+        // Create investment record if payment was successful
+        const campaignId = parseInt(session.metadata.campaignId);
+        const amount = (session.amount_total || 0) / 100; // Convert from cents
+        const platformFee = amount > 1000 ? Math.round(amount * 0.05) : 0;
+        
+        // Check if investment already exists
+        const existingInvestments = await storage.getInvestmentsByInvestor(req.user.id);
+        const existingInvestment = existingInvestments.find(inv => 
+          inv.campaignId === campaignId && inv.paymentIntentId === session.payment_intent
+        );
+
+        let investment;
+        if (!existingInvestment) {
+          // Create new investment record
+          investment = await storage.createInvestment({
+            campaignId,
+            investorId: req.user.id,
+            amount: (amount - platformFee).toString(),
+            platformFee: platformFee.toString(),
+            totalAmount: amount.toString(),
+            status: 'paid',
+            paymentStatus: 'completed',
+            paymentIntentId: session.payment_intent as string,
+            agreementSigned: true,
+            signedAt: new Date(),
+            ipAddress: req.ip
+          });
+        } else {
+          investment = existingInvestment;
+        }
+
+        // Get campaign details
+        const campaign = await storage.getCampaign(campaignId);
+
+        res.json({
+          investmentId: investment.id,
+          campaignId,
+          campaignTitle: campaign?.title || 'Unknown Campaign',
+          amount: parseFloat(investment.amount),
+          platformFee: parseFloat(investment.platformFee),
+          totalAmount: parseFloat(investment.totalAmount),
+          paymentStatus: 'completed'
+        });
+      } else {
+        res.status(400).json({ message: 'Payment not completed' });
+      }
+    } catch (error) {
+      console.error('Error verifying payment success:', error);
+      res.status(500).json({ message: 'Failed to verify payment', error: (error as Error).message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

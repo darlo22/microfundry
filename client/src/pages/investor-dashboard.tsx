@@ -23,7 +23,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle, Eye, EyeOff, Smartphone, Tablet } from "lucide-react";
+import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle, Eye, EyeOff, Smartphone, Tablet, Clock, ExternalLink } from "lucide-react";
 import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 import TwoFactorSetupModal from "@/components/modals/two-factor-setup-modal";
@@ -458,6 +458,26 @@ export default function InvestorDashboard() {
     retry: false,
   });
 
+  // Payment mutation for Pay Now functionality
+  const payNowMutation = useMutation({
+    mutationFn: async (investmentId: number) => {
+      const response = await apiRequest("POST", `/api/investments/${investmentId}/pay`);
+      if (!response.ok) throw new Error('Failed to create payment session');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Redirect to Stripe Checkout
+      window.location.href = data.checkoutUrl;
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment Error",
+        description: error.message || "Failed to start payment process",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Fetch all campaigns for discovery
   const { data: allCampaigns, isLoading: campaignsLoading } = useQuery({
     queryKey: ["/api/campaigns"],
@@ -614,6 +634,26 @@ export default function InvestorDashboard() {
               </div>
             </div>
 
+            {/* Pending Commitments */}
+            {investments && investments.filter(inv => inv.status === 'pending').length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-orange-600" />
+                    Pending Commitments
+                  </CardTitle>
+                  <p className="text-sm text-gray-600">Complete your payments to finalize these investments</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {investments.filter(inv => inv.status === 'pending').map((investment) => (
+                      <PendingInvestmentCard key={investment.id} investment={investment} onPayNow={payNowMutation.mutate} />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Investment Portfolio */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
@@ -629,15 +669,15 @@ export default function InvestorDashboard() {
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-fundry-orange"></div>
                   </div>
-                ) : investments && investments.length > 0 ? (
+                ) : investments && investments.filter(inv => inv.status !== 'pending').length > 0 ? (
                   <div className="space-y-4">
-                    {investments.map((investment) => (
+                    {investments.filter(inv => inv.status !== 'pending').map((investment) => (
                       <InvestmentCard key={investment.id} investment={investment} />
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-gray-500">No investments yet. Discover campaigns to get started!</p>
+                    <p className="text-gray-500">No completed investments yet. Discover campaigns to get started!</p>
                     <Button 
                       className="mt-4 bg-fundry-orange hover:bg-orange-600"
                       onClick={handleDiscoverCampaigns}

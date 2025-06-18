@@ -35,7 +35,8 @@ export class EmailService {
   }
 
   async sendVerificationEmail(email: string, token: string, firstName: string): Promise<boolean> {
-    const verificationUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/verify-email?token=${token}`;
+    const baseUrl = process.env.BASE_URL || (process.env.NODE_ENV === 'production' ? 'https://your-app.replit.app' : 'http://localhost:5000');
+    const verificationUrl = `${baseUrl}/verify-email?token=${token}`;
     
     const html = `
       <!DOCTYPE html>

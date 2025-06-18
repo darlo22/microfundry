@@ -94,6 +94,137 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   // Initialize Stripe
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
 
+  // Stripe Payment Form Component
+  const StripePaymentForm = () => {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
+
+    const handlePayment = async () => {
+      if (!stripe || !elements) {
+        toast({
+          title: "Payment Error",
+          description: "Payment system not ready. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIsPaymentProcessing(true);
+
+      try {
+        // Create payment intent on server
+        const response = await apiRequest('POST', '/api/create-payment-intent', {
+          amount: calculateTotal(selectedAmount),
+          campaignId: campaign.id,
+          investorId: user?.id
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create payment intent');
+        }
+
+        const { clientSecret } = await response.json();
+
+        // Confirm payment with Stripe
+        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: elements.getElement(CardElement)!,
+            billing_details: {
+              name: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.username,
+              email: user?.email,
+            },
+          },
+        });
+
+        if (error) {
+          toast({
+            title: "Payment Failed",
+            description: error.message,
+            variant: "destructive",
+          });
+        } else if (paymentIntent.status === 'succeeded') {
+          // Create investment record
+          await createInvestmentMutation.mutateAsync({
+            campaignId: campaign.id,
+            amount: selectedAmount,
+            paymentIntentId: paymentIntent.id,
+            status: 'paid'
+          });
+
+          toast({
+            title: "Payment Successful",
+            description: "Your investment has been processed successfully!",
+          });
+
+          setCurrentStep('confirmation');
+        }
+      } catch (error) {
+        console.error('Payment error:', error);
+        toast({
+          title: "Payment Error",
+          description: "Failed to process payment. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsPaymentProcessing(false);
+      }
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-gray-50 p-6 rounded-lg">
+          <h4 className="font-semibold mb-4">Payment Details</h4>
+          <div className="bg-white p-4 rounded border">
+            <CardElement
+              options={{
+                style: {
+                  base: {
+                    fontSize: '16px',
+                    color: '#424770',
+                    '::placeholder': {
+                      color: '#aab7c4',
+                    },
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="bg-gray-50 p-6 rounded-lg">
+          <h4 className="font-semibold mb-4">Investment Summary</h4>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>Company:</span>
+              <span className="font-medium">{campaign.title}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Investment Amount:</span>
+              <span className="font-medium">${selectedAmount}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Platform Fee:</span>
+              <span className="font-medium">${calculateFee(selectedAmount)}</span>
+            </div>
+            <div className="flex justify-between text-lg font-bold border-t pt-2">
+              <span>Total:</span>
+              <span>${calculateTotal(selectedAmount)}</span>
+            </div>
+          </div>
+        </div>
+
+        <Button
+          onClick={handlePayment}
+          disabled={!stripe || isPaymentProcessing}
+          className="w-full bg-blue-900 hover:bg-blue-800"
+        >
+          {isPaymentProcessing ? 'Processing Payment...' : `Pay $${calculateTotal(selectedAmount)}`}
+        </Button>
+      </div>
+    );
+  };
+
   // Store investment context in localStorage when modal opens
   useEffect(() => {
     if (isOpen && campaign) {
@@ -899,41 +1030,15 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           <div className="space-y-6">
             <div className="text-center">
               <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Processing</h3>
-              <p className="text-gray-600">Step {stepNumber} of 7: Complete your investment commitment</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure Payment</h3>
+              <p className="text-gray-600">Step {stepNumber} of 7: Complete your investment payment</p>
             </div>
             
             {renderProgressIndicator()}
             
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h4 className="font-semibold mb-4">Investment Summary</h4>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Company:</span>
-                  <span className="font-medium">{campaign.title}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Investment Amount:</span>
-                  <span className="font-medium">${selectedAmount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Platform Fee:</span>
-                  <span className="font-medium">${calculateFee(selectedAmount)}</span>
-                </div>
-                <div className="flex justify-between text-lg font-bold border-t pt-2">
-                  <span>Total:</span>
-                  <span>${calculateTotal(selectedAmount)}</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="font-semibold text-blue-900 mb-2">Investment Commitment</h4>
-              <p className="text-sm text-blue-800">
-                By proceeding, you are committing to invest ${selectedAmount} in {campaign.title}. 
-                This creates a binding commitment that will be processed through our secure payment system.
-              </p>
-            </div>
+            <Elements stripe={stripePromise}>
+              <StripePaymentForm />
+            </Elements>
           </div>
         );
 
@@ -965,7 +1070,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 </div>
                 <div className="flex justify-between">
                   <span>Status:</span>
-                  <span className="font-medium text-green-600">Committed</span>
+                  <span className="font-medium text-green-600">Paid</span>
                 </div>
               </div>
             </div>
@@ -975,7 +1080,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 You can track your investment progress in your investor dashboard.
               </p>
               <Button
-                onClick={onClose}
+                onClick={() => {
+                  onClose();
+                  setLocation('/investor-dashboard');
+                }}
                 className="bg-fundry-orange hover:bg-orange-600"
               >
                 Go to Dashboard

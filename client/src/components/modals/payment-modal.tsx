@@ -55,9 +55,16 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   const [showStripeForm, setShowStripeForm] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
 
-  // Fetch exchange rate when modal opens
+  // Reset state and fetch exchange rate when modal opens
   useEffect(() => {
     if (isOpen) {
+      // Reset all state when modal opens
+      setIsProcessing(false);
+      setIsProcessingNaira(false);
+      setCardholderName('');
+      setShowStripeForm(false);
+      setClientSecret('');
+      
       setIsLoadingRate(true);
       convertUsdToNgn(Number(investment.amount))
         .then(({ ngn, rate }) => {
@@ -295,8 +302,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     try {
       // Get payment intent from backend
       const response = await apiRequest('POST', '/api/create-payment-intent', {
-        investmentId: investment.id,
-        amount: parseFloat(investment.amount)
+        amount: investment.amount,
+        investmentId: investment.id
       });
 
       if (!response.ok) {
@@ -307,12 +314,15 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       const { clientSecret: secret } = await response.json();
       setClientSecret(secret);
       setShowStripeForm(true);
+      setIsProcessing(false); // Reset processing state after successful setup
     } catch (error: any) {
+      console.error('Payment setup error:', error);
       toast({
         title: "Payment Setup Failed",
         description: error.message || "Failed to setup payment",
         variant: "destructive",
       });
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -531,13 +541,21 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                   <Label htmlFor="cardholderName">Cardholder Name</Label>
                   <Input
                     id="cardholderName"
+                    name="cardholderName"
                     type="text"
                     placeholder="Enter cardholder name"
                     value={cardholderName}
-                    onChange={(e) => setCardholderName(e.target.value)}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      console.log('Cardholder name input:', newValue);
+                      setCardholderName(newValue);
+                    }}
+                    onBlur={(e) => console.log('Cardholder name on blur:', e.target.value)}
                     disabled={isProcessing}
                     autoComplete="cc-name"
-                    className="w-full"
+                    className="w-full bg-white border-gray-300 focus:border-blue-500"
+                    required
+                    data-testid="cardholder-name-input"
                   />
                 </div>
                 

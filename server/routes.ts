@@ -2217,7 +2217,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               product_data: {
                 name: `Investment in ${campaign.title}`,
                 description: `Micro-investment through Fundry platform`,
-                images: campaign.logoUrl ? [`${process.env.REPLIT_DEV_DOMAIN || 'https://localhost:5000'}${campaign.logoUrl}`] : [],
+                images: campaign.logoUrl ? [`https://${process.env.REPL_ID}.replit.app${campaign.logoUrl}`] : [],
               },
               unit_amount: amountInCents,
             },
@@ -2225,8 +2225,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           },
         ],
         mode: 'payment',
-        success_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/investment-success?session_id={CHECKOUT_SESSION_ID}&campaign_id=${campaignId}`,
-        cancel_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/campaign/${campaignId}`,
+        success_url: `https://${process.env.REPL_ID}.replit.app/investment-success?session_id={CHECKOUT_SESSION_ID}&campaign_id=${campaignId}`,
+        cancel_url: `https://${process.env.REPL_ID}.replit.app/campaign/${campaignId}`,
         metadata: {
           campaignId: campaignId.toString(),
           investorId: req.user.id.toString(),

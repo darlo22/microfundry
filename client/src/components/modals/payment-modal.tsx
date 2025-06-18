@@ -154,6 +154,88 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     }
   };
 
+  // Handle Naira payment via Budpay
+  const handleNairaPayment = async () => {
+    if (!ngnAmount) {
+      toast({
+        title: "Currency Error",
+        description: "Naira amount not available",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      // Create Budpay payment configuration
+      const budpayConfig = {
+        key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key',
+        email: investment.campaignTitle || 'investor@example.com',
+        amount: ngnAmount * 100, // Convert to kobo
+        currency: 'NGN',
+        ref: `pay_${investment.id}_${Date.now()}`,
+        callback: async (response: any) => {
+          if (response.status === 'success') {
+            // Process the payment on the backend
+            const backendResponse = await apiRequest('POST', '/api/budpay-payment', {
+              campaignId: investment.campaignId,
+              amount: investment.amount,
+              ngnAmount: ngnAmount,
+              budpayReference: response.reference,
+              budpayTransactionId: response.trans,
+              paymentMethod: 'budpay'
+            });
+
+            const result = await backendResponse.json();
+
+            if (result.success) {
+              toast({
+                title: "Payment Successful!",
+                description: `Payment of ₦${ngnAmount.toLocaleString()} completed successfully`,
+              });
+              
+              // Invalidate queries to refresh data
+              queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+              
+              onClose();
+            } else {
+              throw new Error(result.message || 'Payment verification failed');
+            }
+          } else {
+            throw new Error('Payment was cancelled or failed');
+          }
+        },
+        onClose: () => {
+          setIsProcessing(false);
+        }
+      };
+
+      // Load Budpay script and initialize payment
+      if ((window as any).BudPayCheckout) {
+        (window as any).BudPayCheckout(budpayConfig);
+      } else {
+        // Load Budpay script dynamically
+        const script = document.createElement('script');
+        script.src = 'https://checkout.budpay.com/checkout.js';
+        script.onload = () => {
+          (window as any).BudPayCheckout(budpayConfig);
+        };
+        document.head.appendChild(script);
+      }
+
+    } catch (error: any) {
+      console.error('Budpay payment error:', error);
+      toast({
+        title: "Payment Error",
+        description: error.message || "Payment failed. Please try again.",
+        variant: "destructive",
+      });
+      setIsProcessing(false);
+    }
+  };
+
   const handleClose = () => {
     setCardholderName('');
     onClose();

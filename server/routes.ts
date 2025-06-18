@@ -15,6 +15,9 @@ import { nanoid } from "nanoid";
 import multer from "multer";
 import path from "path";
 import { TwoFactorService } from "./twoFactorService";
+import { emailService } from "./services/email";
+import { eq, and, gt } from "drizzle-orm";
+import { emailVerificationTokens } from "@shared/schema";
 
 // Simple in-memory store for KYC submissions (in production, this would be in database)
 const kycSubmissions = new Map<string, any>();
@@ -331,6 +334,213 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error regenerating backup codes:", error);
       res.status(500).json({ message: "Failed to regenerate backup codes" });
+    }
+  });
+
+  // Email Verification Routes
+  
+  // Send verification email
+  app.post('/api/send-verification-email', async (req, res) => {
+    try {
+      const { userId } = req.body;
+
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.isEmailVerified) {
+        return res.status(400).json({ message: "Email is already verified" });
+      }
+
+      // Generate verification token
+      const token = nanoid(32);
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      // Delete any existing tokens for this user
+      await db.delete(emailVerificationTokens).where(eq(emailVerificationTokens.userId, userId));
+
+      // Store verification token
+      await db.insert(emailVerificationTokens).values({
+        id: nanoid(),
+        userId,
+        token,
+        expiresAt,
+      });
+
+      // Send verification email
+      const emailSent = await emailService.sendVerificationEmail(user.email, token, user.firstName);
+      
+      if (!emailSent) {
+        return res.status(500).json({ message: "Failed to send verification email" });
+      }
+
+      res.json({ message: "Verification email sent successfully" });
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      res.status(500).json({ message: "Failed to send verification email" });
+    }
+  });
+
+  // Verify email with token
+  app.get('/verify-email', async (req, res) => {
+    try {
+      const { token } = req.query;
+
+      if (!token || typeof token !== 'string') {
+        return res.status(400).send(`
+          <html>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+              <h1 style="color: #dc2626;">Invalid Verification Link</h1>
+              <p>This verification link is invalid or malformed.</p>
+              <a href="/" style="color: #f97316;">Return to Fundry</a>
+            </body>
+          </html>
+        `);
+      }
+
+      // Find verification token
+      const verificationToken = await db.select()
+        .from(emailVerificationTokens)
+        .where(and(
+          eq(emailVerificationTokens.token, token),
+          gt(emailVerificationTokens.expiresAt, new Date())
+        ))
+        .limit(1);
+
+      if (verificationToken.length === 0) {
+        return res.status(400).send(`
+          <html>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+              <h1 style="color: #dc2626;">Verification Link Expired</h1>
+              <p>This verification link has expired or is invalid.</p>
+              <p>Please request a new verification email.</p>
+              <a href="/" style="color: #f97316;">Return to Fundry</a>
+            </body>
+          </html>
+        `);
+      }
+
+      const tokenData = verificationToken[0];
+
+      // Get user and verify email
+      const user = await storage.getUser(tokenData.userId);
+      if (!user) {
+        return res.status(404).send(`
+          <html>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+              <h1 style="color: #dc2626;">User Not Found</h1>
+              <p>The user associated with this verification link was not found.</p>
+              <a href="/" style="color: #f97316;">Return to Fundry</a>
+            </body>
+          </html>
+        `);
+      }
+
+      if (user.isEmailVerified) {
+        return res.status(200).send(`
+          <html>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+              <h1 style="color: #059669;">Email Already Verified</h1>
+              <p>Your email address has already been verified.</p>
+              <a href="/signin" style="display: inline-block; padding: 12px 24px; background: #f97316; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px;">Sign In</a>
+            </body>
+          </html>
+        `);
+      }
+
+      // Update user's email verification status
+      await storage.updateUser(tokenData.userId, { isEmailVerified: true });
+
+      // Delete the used token
+      await db.delete(emailVerificationTokens).where(eq(emailVerificationTokens.id, tokenData.id));
+
+      // Send welcome email
+      await emailService.sendWelcomeEmail(user.email, user.firstName, user.userType);
+
+      // Return success page
+      const dashboardUrl = user.userType === 'founder' ? '/founder-dashboard' : '/investor-dashboard';
+      res.status(200).send(`
+        <html>
+          <head>
+            <title>Email Verified - Fundry</title>
+          </head>
+          <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+            <div style="max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #059669;">Email Verified Successfully!</h1>
+              <p style="font-size: 18px; margin: 20px 0;">Welcome to Fundry, ${user.firstName}!</p>
+              <p>Your email has been verified and your account is now active. You can now sign in and start using the platform.</p>
+              <div style="margin: 30px 0;">
+                <a href="/signin" style="display: inline-block; padding: 12px 24px; background: #f97316; color: white; text-decoration: none; border-radius: 6px; margin: 10px;">Sign In Now</a>
+                <a href="/" style="display: inline-block; padding: 12px 24px; border: 2px solid #f97316; color: #f97316; text-decoration: none; border-radius: 6px; margin: 10px;">Return to Home</a>
+              </div>
+              <p style="color: #666; font-size: 14px;">© 2025 Fundry. All rights reserved.</p>
+            </div>
+          </body>
+        </html>
+      `);
+    } catch (error) {
+      console.error("Error verifying email:", error);
+      res.status(500).send(`
+        <html>
+          <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+            <h1 style="color: #dc2626;">Verification Error</h1>
+            <p>An error occurred while verifying your email. Please try again later.</p>
+            <a href="/" style="color: #f97316;">Return to Fundry</a>
+          </body>
+        </html>
+      `);
+    }
+  });
+
+  // Resend verification email
+  app.post('/api/resend-verification-email', async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.isEmailVerified) {
+        return res.status(400).json({ message: "Email is already verified" });
+      }
+
+      // Generate new verification token
+      const token = nanoid(32);
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      // Delete any existing tokens for this user
+      await db.delete(emailVerificationTokens).where(eq(emailVerificationTokens.userId, user.id));
+
+      // Store new verification token
+      await db.insert(emailVerificationTokens).values({
+        id: nanoid(),
+        userId: user.id,
+        token,
+        expiresAt,
+      });
+
+      // Send verification email
+      const emailSent = await emailService.sendVerificationEmail(user.email, token, user.firstName);
+      
+      if (!emailSent) {
+        return res.status(500).json({ message: "Failed to send verification email" });
+      }
+
+      res.json({ message: "Verification email sent successfully" });
+    } catch (error) {
+      console.error("Error resending verification email:", error);
+      res.status(500).json({ message: "Failed to resend verification email" });
     }
   });
 

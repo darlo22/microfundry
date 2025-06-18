@@ -41,9 +41,11 @@ interface OnboardingModalProps {
 
 export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, defaultUserType }: OnboardingModalProps) {
   const [selectedUserType, setSelectedUserType] = useState<"founder" | "investor" | null>(defaultUserType || null);
-  const [currentStep, setCurrentStep] = useState<"userType" | "form">(defaultUserType ? "form" : "userType");
+  const [currentStep, setCurrentStep] = useState<"userType" | "form" | "emailVerification">(defaultUserType ? "form" : "userType");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
   const { toast } = useToast();
 
   // Reset modal state when defaultUserType changes

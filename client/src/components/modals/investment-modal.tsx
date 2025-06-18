@@ -99,6 +99,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const [signatureData, setSignatureData] = useState<string>('');
   const [cardholderName, setCardholderName] = useState<string>('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [isProcessingNaira, setIsProcessingNaira] = useState(false);
   const [showSafeViewer, setShowSafeViewer] = useState(false);
   const [ngnAmount, setNgnAmount] = useState<number | null>(null);
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
@@ -572,7 +573,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
       return;
     }
 
-    setIsProcessingPayment(true);
+    setIsProcessingNaira(true);
     
     toast({
       title: "Initializing Payment",
@@ -646,12 +647,12 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
               variant: "destructive",
             });
           } finally {
-            setIsProcessingPayment(false);
+            setIsProcessingNaira(false);
           }
         },
         onClose: () => {
           console.log('Budpay modal closed');
-          setIsProcessingPayment(false);
+          setIsProcessingNaira(false);
         }
       };
 
@@ -1521,8 +1522,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               {/* USD Payment Button */}
               <Button
                 onClick={handleUSDPayment}
-                disabled={isProcessingPayment}
-                className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
+                disabled={isProcessingPayment || isProcessingNaira}
+                className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -1545,8 +1546,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               {/* NGN Payment Button */}
               <Button
                 onClick={handleNairaPayment}
-                disabled={isProcessingPayment || !ngnAmount}
-                className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
+                disabled={isProcessingPayment || isProcessingNaira || !ngnAmount}
+                className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -1558,7 +1559,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                   </div>
                 </div>
                 <div className="text-right">
-                  {isProcessingPayment ? (
+                  {isProcessingNaira ? (
                     <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <span className="font-bold text-lg">

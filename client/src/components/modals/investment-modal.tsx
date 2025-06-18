@@ -549,9 +549,9 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
       // Initialize Budpay payment
       const budpayPaymentConfig = {
-        key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,
+        key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,  
         email: user?.email || investorDetails.firstName + '@example.com',
-        amount: Math.round(ngnAmount * 100), // Convert to kobo
+        amount: Math.round(ngnAmount), // Amount in Naira, Budpay handles kobo conversion
         currency: 'NGN',
         ref: `inv_${campaign.id}_${Date.now()}`,
         callback: async (response: any) => {

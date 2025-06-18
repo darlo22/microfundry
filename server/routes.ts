@@ -2376,22 +2376,43 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(400).json({ message: 'Only pending investments can be edited' });
       }
 
-      // Calculate new amounts
+      // No platform fees applied - remove fee calculations
       const newAmount = parseFloat(amount);
-      const platformFee = newAmount > 1000 ? Math.round(newAmount * 0.05) : 0;
-      const totalAmount = newAmount + platformFee;
 
       // Update investment
       const updatedInvestment = await storage.updateInvestment(investmentId, {
         amount: newAmount.toString(),
-        platformFee: platformFee.toString(),
-        totalAmount: totalAmount.toString(),
       });
 
       res.json(updatedInvestment);
     } catch (error) {
       console.error('Error updating investment:', error);
       res.status(500).json({ message: 'Failed to update investment', error: (error as Error).message });
+    }
+  });
+
+  // Delete investment endpoint
+  app.delete('/api/investments/:id', requireAuth, async (req: any, res) => {
+    try {
+      const investmentId = parseInt(req.params.id);
+      
+      // Get the investment
+      const investment = await storage.getInvestment(investmentId);
+      if (!investment || investment.investorId !== req.user.id) {
+        return res.status(404).json({ message: 'Investment not found' });
+      }
+
+      if (investment.status !== 'pending') {
+        return res.status(400).json({ message: 'Only pending investments can be deleted' });
+      }
+
+      // Delete the investment
+      await storage.deleteInvestment(investmentId);
+
+      res.json({ message: 'Investment deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting investment:', error);
+      res.status(500).json({ message: 'Failed to delete investment', error: (error as Error).message });
     }
   });
 

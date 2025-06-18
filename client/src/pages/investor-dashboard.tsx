@@ -19,11 +19,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle, Eye, EyeOff, Smartphone, Tablet, Clock, ExternalLink } from "lucide-react";
+import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle, Eye, EyeOff, Smartphone, Tablet, Clock, ExternalLink, Trash2 } from "lucide-react";
 import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 import TwoFactorSetupModal from "@/components/modals/two-factor-setup-modal";
@@ -480,6 +481,26 @@ export default function InvestorDashboard() {
       },
     });
 
+    const deleteInvestmentMutation = useMutation({
+      mutationFn: async (investmentId: number) => {
+        return apiRequest("DELETE", `/api/investments/${investmentId}`);
+      },
+      onSuccess: () => {
+        toast({
+          title: "Investment Deleted",
+          description: "Your investment commitment has been deleted successfully.",
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/investments/investor/" + user?.id] });
+      },
+      onError: (error: any) => {
+        toast({
+          title: "Delete Failed",
+          description: error.message || "Failed to delete investment",
+          variant: "destructive",
+        });
+      },
+    });
+
     const formatCurrency = (amount: number | string) => {
       const num = typeof amount === 'string' ? parseFloat(amount) : amount;
       return new Intl.NumberFormat('en-US', {
@@ -549,6 +570,38 @@ export default function InvestorDashboard() {
               <Edit className="w-4 h-4" />
               Edit Amount
             </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 text-red-600 border-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 backdrop-blur-sm border-2 border-orange-100/50 shadow-2xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-xl font-bold text-gray-900">Delete Investment Commitment</AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-600">
+                    Are you sure you want to delete your investment commitment of {formatCurrency(investment.amount)} 
+                    for {investment.campaign?.title}? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="border-gray-300 hover:bg-gray-50">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteInvestmentMutation.mutate(investment.id)}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Delete Commitment
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button
               onClick={() => onPayNow(investment.id)}
               className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700"

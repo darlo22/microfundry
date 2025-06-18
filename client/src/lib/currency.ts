@@ -97,7 +97,8 @@ export async function convertUsdToNgn(usdAmount: number): Promise<{
   rate: ExchangeRate;
 }> {
   const rate = await getUsdToNgnRate();
-  const ngn = usdAmount * rate.usdToNgn;
+  // Round to 2 decimal places for consistency
+  const ngn = Math.round((usdAmount * rate.usdToNgn) * 100) / 100;
   
   return { ngn, rate };
 }

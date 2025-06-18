@@ -2312,7 +2312,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       // Create payment link using Budpay Standard API
       // Budpay actually expects amount in Naira, not kobo
-      const amountInNaira = parseFloat(ngnAmount);
+      // Round to ensure consistency with frontend display
+      const amountInNaira = Math.round(parseFloat(ngnAmount) * 100) / 100;
       const paymentData = {
         email: email,
         amount: amountInNaira.toFixed(2), // Amount in Naira with 2 decimal places

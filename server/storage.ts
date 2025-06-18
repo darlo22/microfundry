@@ -329,6 +329,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteInvestment(id: number): Promise<void> {
+    // First delete any associated SAFE agreements
+    await db
+      .delete(safeAgreements)
+      .where(eq(safeAgreements.investmentId, id));
+    
+    // Then delete the investment
     await db
       .delete(investments)
       .where(eq(investments.id, id));

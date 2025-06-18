@@ -502,15 +502,16 @@ export default function FounderUpdates() {
               New Update
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
+          <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle>
                 {editingUpdate ? "Edit Update" : "Create New Update"}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="campaign">Campaign</Label>
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+              <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+                <div className="space-y-2">
+                  <Label htmlFor="campaign">Campaign</Label>
                 <Select 
                   value={updateForm.campaignId} 
                   onValueChange={(value) => setUpdateForm(prev => ({ ...prev, campaignId: value }))}
@@ -526,50 +527,131 @@ export default function FounderUpdates() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="type">Update Type</Label>
-                <Select 
-                  value={updateForm.type} 
-                  onValueChange={(value: any) => setUpdateForm(prev => ({ ...prev, type: value }))}
+                <div className="space-y-2">
+                  <Label htmlFor="type">Update Type</Label>
+                  <Select 
+                    value={updateForm.type} 
+                    onValueChange={(value: any) => setUpdateForm(prev => ({ ...prev, type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select update type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="progress">Progress Update</SelectItem>
+                      <SelectItem value="milestone">Milestone Achieved</SelectItem>
+                      <SelectItem value="announcement">Announcement</SelectItem>
+                      <SelectItem value="financial">Financial Update</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={updateForm.title}
+                    onChange={(e) => setUpdateForm(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="Update title..."
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="content">Content</Label>
+                  <Textarea
+                    id="content"
+                    value={updateForm.content}
+                    onChange={(e) => setUpdateForm(prev => ({ ...prev, content: e.target.value }))}
+                    placeholder="Share your progress, achievements, or important news with your investors..."
+                    rows={8}
+                    required
+                  />
+                </div>
+
+                {/* File Attachments Section */}
+                <div className="space-y-4">
+                <Label>Attachments</Label>
+                
+                {/* Drag and Drop Zone */}
+                <div
+                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                    dragActive 
+                      ? 'border-fundry-orange bg-orange-50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select update type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="progress">Progress Update</SelectItem>
-                    <SelectItem value="milestone">Milestone Achieved</SelectItem>
-                    <SelectItem value="announcement">Announcement</SelectItem>
-                    <SelectItem value="financial">Financial Update</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600 mb-2">
+                    Drag and drop files here, or click to select
+                  </p>
+                  <p className="text-xs text-gray-500 mb-4">
+                    Supports: Images, Videos, PDFs, Documents (Max 10MB each)
+                  </p>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('file-upload')?.click()}
+                    className="mx-auto"
+                  >
+                    <Paperclip className="mr-2 h-4 w-4" />
+                    Choose Files
+                  </Button>
+                </div>
+
+                {/* Attached Files Display */}
+                {attachedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-gray-700">
+                      {attachedFiles.length} file{attachedFiles.length !== 1 ? 's' : ''} attached
+                    </p>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {attachedFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            {getFileIcon(file.type)}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {file.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {formatFileSize(file.size)}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFile(index)}
+                            className="text-gray-400 hover:text-red-500"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  value={updateForm.title}
-                  onChange={(e) => setUpdateForm(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Update title..."
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="content">Content</Label>
-                <Textarea
-                  id="content"
-                  value={updateForm.content}
-                  onChange={(e) => setUpdateForm(prev => ({ ...prev, content: e.target.value }))}
-                  placeholder="Share your progress, achievements, or important news with your investors..."
-                  rows={8}
-                  required
-                />
-              </div>
-
-              <div className="flex justify-end gap-3">
+              <div className="flex-shrink-0 flex justify-end gap-3 pt-4 border-t border-gray-200">
                 <Button 
                   type="button" 
                   variant="outline" 

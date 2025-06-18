@@ -676,9 +676,13 @@ export default function PaymentWithdrawal() {
                         {kycStatus?.status === "pending" ? "Update KYC" : "Complete KYC"}
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>KYC Verification</DialogTitle>
+                    <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-orange-50 to-blue-50">
+                      <DialogHeader className="text-center pb-6">
+                        <div className="mx-auto w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center mb-4">
+                          <Shield className="h-8 w-8 text-white" />
+                        </div>
+                        <DialogTitle className="text-2xl font-bold text-fundry-navy">Identity Verification</DialogTitle>
+                        <p className="text-gray-600 mt-2">Complete your verification to access withdrawal features</p>
                       </DialogHeader>
                       <form
                         onSubmit={(e) => {
@@ -689,15 +693,6 @@ export default function PaymentWithdrawal() {
                             toast({
                               title: "Validation Error",
                               description: "Date of birth is required",
-                              variant: "destructive",
-                            });
-                            return;
-                          }
-                          
-                          if (!kycData.ssn || kycData.ssn.length < 4) {
-                            toast({
-                              title: "Validation Error", 
-                              description: "SSN (last 4 digits) is required",
                               variant: "destructive",
                             });
                             return;
@@ -714,145 +709,170 @@ export default function PaymentWithdrawal() {
                           
                           kycMutation.mutate(kycData);
                         }}
-                        className="space-y-4"
+                        className="space-y-6 bg-white rounded-lg p-6 shadow-sm"
                       >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                            <Input
-                              id="dateOfBirth"
-                              type="date"
-                              value={kycData.dateOfBirth}
-                              onChange={(e) => setKycData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                              required
-                            />
+                        {/* Personal Information Section */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center text-white font-bold text-sm">1</div>
+                            <h3 className="text-lg font-semibold text-fundry-navy">Personal Information</h3>
                           </div>
-
-                          <div>
-                            <Label htmlFor="ssn">SSN (Last 4 digits)</Label>
-                            <Input
-                              id="ssn"
-                              type="password"
-                              maxLength={4}
-                              value={kycData.ssn}
-                              onChange={(e) => setKycData(prev => ({ ...prev, ssn: e.target.value }))}
-                              placeholder="####"
-                              required
-                            />
+                          
+                          <div className="grid grid-cols-1 gap-4">
+                            <div>
+                              <Label htmlFor="dateOfBirth" className="text-fundry-navy font-medium">Date of Birth</Label>
+                              <Input
+                                id="dateOfBirth"
+                                type="date"
+                                value={kycData.dateOfBirth}
+                                onChange={(e) => setKycData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                                className="mt-1 border-gray-300 focus:border-fundry-orange focus:ring-fundry-orange"
+                                required
+                              />
+                            </div>
                           </div>
+                        </div>
 
-                          <div className="md:col-span-2">
-                            <Label htmlFor="address">Address</Label>
-                            <Input
-                              id="address"
-                              value={kycData.address}
-                              onChange={(e) => setKycData(prev => ({ ...prev, address: e.target.value }))}
-                              placeholder="Street address"
-                              required
-                            />
+                        {/* Address Information Section */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center text-white font-bold text-sm">2</div>
+                            <h3 className="text-lg font-semibold text-fundry-navy">Address Information</h3>
                           </div>
+                          
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="address" className="text-fundry-navy font-medium">Street Address</Label>
+                              <Input
+                                id="address"
+                                value={kycData.address}
+                                onChange={(e) => setKycData(prev => ({ ...prev, address: e.target.value }))}
+                                placeholder="Enter your full street address"
+                                className="mt-1 border-gray-300 focus:border-fundry-orange focus:ring-fundry-orange"
+                                required
+                              />
+                            </div>
 
-                          <div>
-                            <Label htmlFor="city">City</Label>
-                            <Input
-                              id="city"
-                              value={kycData.city}
-                              onChange={(e) => setKycData(prev => ({ ...prev, city: e.target.value }))}
-                              required
-                            />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="city" className="text-fundry-navy font-medium">City</Label>
+                                <Input
+                                  id="city"
+                                  value={kycData.city}
+                                  onChange={(e) => setKycData(prev => ({ ...prev, city: e.target.value }))}
+                                  placeholder="Enter your city"
+                                  className="mt-1 border-gray-300 focus:border-fundry-orange focus:ring-fundry-orange"
+                                  required
+                                />
+                              </div>
+
+                              <div>
+                                <Label htmlFor="state" className="text-fundry-navy font-medium">State</Label>
+                                <Input
+                                  id="state"
+                                  value={kycData.state}
+                                  onChange={(e) => setKycData(prev => ({ ...prev, state: e.target.value }))}
+                                  placeholder="Enter your state"
+                                  className="mt-1 border-gray-300 focus:border-fundry-orange focus:ring-fundry-orange"
+                                  required
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <Label htmlFor="zipCode" className="text-fundry-navy font-medium">ZIP Code</Label>
+                              <Input
+                                id="zipCode"
+                                value={kycData.zipCode}
+                                onChange={(e) => setKycData(prev => ({ ...prev, zipCode: e.target.value }))}
+                                placeholder="Enter your ZIP code"
+                                className="mt-1 border-gray-300 focus:border-fundry-orange focus:ring-fundry-orange"
+                                required
+                              />
+                            </div>
                           </div>
+                        </div>
 
-                          <div>
-                            <Label htmlFor="state">State</Label>
-                            <Input
-                              id="state"
-                              value={kycData.state}
-                              onChange={(e) => setKycData(prev => ({ ...prev, state: e.target.value }))}
-                              required
-                            />
+                        {/* Professional & Financial Information Section */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center text-white font-bold text-sm">3</div>
+                            <h3 className="text-lg font-semibold text-fundry-navy">Professional & Financial Information</h3>
                           </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="employmentStatus" className="text-fundry-navy font-medium">Employment Status</Label>
+                              <Select
+                                value={kycData.employmentStatus}
+                                onValueChange={(value) => setKycData(prev => ({ ...prev, employmentStatus: value }))}
+                              >
+                                <SelectTrigger className="mt-1 border-gray-300 focus:border-fundry-orange focus:ring-fundry-orange">
+                                  <SelectValue placeholder="Select your employment status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="employed">Employed</SelectItem>
+                                  <SelectItem value="self-employed">Self-Employed</SelectItem>
+                                  <SelectItem value="unemployed">Unemployed</SelectItem>
+                                  <SelectItem value="retired">Retired</SelectItem>
+                                  <SelectItem value="student">Student</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
 
-                          <div>
-                            <Label htmlFor="zipCode">ZIP Code</Label>
-                            <Input
-                              id="zipCode"
-                              value={kycData.zipCode}
-                              onChange={(e) => setKycData(prev => ({ ...prev, zipCode: e.target.value }))}
-                              required
-                            />
-                          </div>
+                            <div>
+                              <Label htmlFor="annualIncome" className="text-fundry-navy font-medium">Annual Income</Label>
+                              <Select
+                                value={kycData.annualIncome}
+                                onValueChange={(value) => setKycData(prev => ({ ...prev, annualIncome: value }))}
+                              >
+                                <SelectTrigger className="mt-1 border-gray-300 focus:border-fundry-orange focus:ring-fundry-orange">
+                                  <SelectValue placeholder="Select your income range" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="under-50k">Under $50,000</SelectItem>
+                                  <SelectItem value="50k-100k">$50,000 - $100,000</SelectItem>
+                                  <SelectItem value="100k-200k">$100,000 - $200,000</SelectItem>
+                                  <SelectItem value="200k-500k">$200,000 - $500,000</SelectItem>
+                                  <SelectItem value="over-500k">Over $500,000</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
 
-                          <div>
-                            <Label htmlFor="employmentStatus">Employment Status</Label>
-                            <Select
-                              value={kycData.employmentStatus}
-                              onValueChange={(value) => setKycData(prev => ({ ...prev, employmentStatus: value }))}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="employed">Employed</SelectItem>
-                                <SelectItem value="self-employed">Self-Employed</SelectItem>
-                                <SelectItem value="unemployed">Unemployed</SelectItem>
-                                <SelectItem value="retired">Retired</SelectItem>
-                                <SelectItem value="student">Student</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+                            <div>
+                              <Label htmlFor="investmentExperience" className="text-fundry-navy font-medium">Investment Experience</Label>
+                              <Select
+                                value={kycData.investmentExperience}
+                                onValueChange={(value) => setKycData(prev => ({ ...prev, investmentExperience: value }))}
+                              >
+                                <SelectTrigger className="mt-1 border-gray-300 focus:border-fundry-orange focus:ring-fundry-orange">
+                                  <SelectValue placeholder="Select your experience level" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">No experience</SelectItem>
+                                  <SelectItem value="beginner">Beginner (1-3 years)</SelectItem>
+                                  <SelectItem value="intermediate">Intermediate (3-7 years)</SelectItem>
+                                  <SelectItem value="advanced">Advanced (7+ years)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
 
-                          <div>
-                            <Label htmlFor="annualIncome">Annual Income</Label>
-                            <Select
-                              value={kycData.annualIncome}
-                              onValueChange={(value) => setKycData(prev => ({ ...prev, annualIncome: value }))}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select range" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="under-50k">Under $50,000</SelectItem>
-                                <SelectItem value="50k-100k">$50,000 - $100,000</SelectItem>
-                                <SelectItem value="100k-200k">$100,000 - $200,000</SelectItem>
-                                <SelectItem value="200k-500k">$200,000 - $500,000</SelectItem>
-                                <SelectItem value="over-500k">Over $500,000</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div>
-                            <Label htmlFor="investmentExperience">Investment Experience</Label>
-                            <Select
-                              value={kycData.investmentExperience}
-                              onValueChange={(value) => setKycData(prev => ({ ...prev, investmentExperience: value }))}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select experience" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="none">No experience</SelectItem>
-                                <SelectItem value="beginner">Beginner (1-3 years)</SelectItem>
-                                <SelectItem value="intermediate">Intermediate (3-7 years)</SelectItem>
-                                <SelectItem value="advanced">Advanced (7+ years)</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div>
-                            <Label htmlFor="riskTolerance">Risk Tolerance</Label>
-                            <Select
-                              value={kycData.riskTolerance}
-                              onValueChange={(value) => setKycData(prev => ({ ...prev, riskTolerance: value }))}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select tolerance" />
-                              </SelectTrigger>
+                            <div>
+                              <Label htmlFor="riskTolerance" className="text-fundry-navy font-medium">Risk Tolerance</Label>
+                              <Select
+                                value={kycData.riskTolerance}
+                                onValueChange={(value) => setKycData(prev => ({ ...prev, riskTolerance: value }))}
+                              >
+                                <SelectTrigger className="mt-1 border-gray-300 focus:border-fundry-orange focus:ring-fundry-orange">
+                                  <SelectValue placeholder="Select your risk tolerance" />
+                                </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="conservative">Conservative</SelectItem>
                                 <SelectItem value="moderate">Moderate</SelectItem>
                                 <SelectItem value="aggressive">Aggressive</SelectItem>
                               </SelectContent>
                             </Select>
+                          </div>
                           </div>
                         </div>
 

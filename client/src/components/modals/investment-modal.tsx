@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 import { 
   DollarSign, 
   User, 
@@ -22,6 +23,9 @@ import {
 } from "lucide-react";
 import type { Campaign } from "@shared/schema";
 import FundryLogo from "@/components/ui/fundry-logo";
+import { SafeDocumentViewer } from "./safe-document-viewer";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 interface CampaignWithStats extends Campaign {
   totalRaised: string;
@@ -80,10 +84,15 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [signatureData, setSignatureData] = useState<string>('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [showSafeViewer, setShowSafeViewer] = useState(false);
 
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+
+  // Initialize Stripe
+  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
 
   // Store investment context in localStorage when modal opens
   useEffect(() => {

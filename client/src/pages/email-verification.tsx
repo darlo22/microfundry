@@ -10,47 +10,62 @@ export default function EmailVerification() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const statusParam = urlParams.get('status');
     const token = urlParams.get('token');
 
+    // Handle status from server redirect
+    if (statusParam) {
+      switch (statusParam) {
+        case 'success':
+          setStatus('success');
+          setMessage('Your email has been verified successfully!');
+          break;
+        case 'already-verified':
+          setStatus('success');
+          setMessage('Your email has already been verified');
+          break;
+        case 'expired':
+          setStatus('expired');
+          setMessage('This verification link has expired or is invalid');
+          break;
+        case 'invalid':
+          setStatus('error');
+          setMessage('Invalid verification link - missing or malformed token');
+          break;
+        case 'error':
+        default:
+          setStatus('error');
+          setMessage('An error occurred during verification');
+          break;
+      }
+      return;
+    }
+
+    // Fallback for direct API calls (legacy support)
     if (!token) {
       setStatus('error');
       setMessage('Invalid verification link - missing token');
       return;
     }
 
-    // Verify the email token
+    // Direct API verification (legacy)
     fetch(`/api/verify-email?token=${token}`)
       .then(response => {
-        if (response.ok) {
-          return response.text();
-        } else if (response.status === 400) {
-          setStatus('expired');
-          setMessage('This verification link has expired or is invalid');
-          throw new Error('Token expired');
-        } else {
-          setStatus('error');
-          setMessage('Verification failed');
-          throw new Error('Verification failed');
+        if (response.redirected) {
+          // Handle redirect by parsing the URL
+          const url = new URL(response.url);
+          const redirectStatus = url.searchParams.get('status');
+          if (redirectStatus) {
+            window.location.href = response.url;
+            return;
+          }
         }
-      })
-      .then(html => {
-        if (html.includes('Email Verified Successfully')) {
-          setStatus('success');
-          setMessage('Your email has been verified successfully!');
-        } else if (html.includes('Email Already Verified')) {
-          setStatus('success');
-          setMessage('Your email has already been verified');
-        } else {
-          setStatus('error');
-          setMessage('Verification failed');
-        }
+        return response.text();
       })
       .catch(error => {
         console.error('Verification error:', error);
-        if (status !== 'expired') {
-          setStatus('error');
-          setMessage('An error occurred during verification');
-        }
+        setStatus('error');
+        setMessage('An error occurred during verification');
       });
   }, []);
 
@@ -101,7 +116,7 @@ export default function EmailVerification() {
         {status === 'success' && (
           <div className="space-y-4">
             <Button
-              onClick={() => setLocation('/signin')}
+              onClick={() => setLocation('/landing')}
               className="w-full bg-fundry-orange hover:bg-fundry-orange/90"
             >
               Sign In Now

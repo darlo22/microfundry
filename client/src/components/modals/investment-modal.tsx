@@ -118,6 +118,8 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   // Budpay configuration
   const BUDPAY_PUBLIC_KEY = import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key';
 
+
+
   // Stripe Payment Form Component
   const StripePaymentForm = () => {
     const stripe = useStripe();
@@ -404,24 +406,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
   const maximumInvestment = 5000;
   const presetAmounts = [100, 250, 500, 1000, 2500];
 
-  const createInvestmentMutation = useMutation({
-    mutationFn: async (investmentData: any) => {
-      const response = await apiRequest('POST', '/api/investments', investmentData);
-      return await response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-      setCurrentStep('confirmation');
-    },
-    onError: (error) => {
-      toast({
-        title: "Investment Failed",
-        description: error.message || "Failed to process investment",
-        variant: "destructive",
-      });
-    }
-  });
+
 
   // Direct Budpay payment processing using payment link
   const handleDirectBudpayPayment = async () => {
@@ -907,7 +892,8 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
         }
       };
 
-      await createInvestmentMutation.mutateAsync(investmentData);
+      const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
+      setCreatedInvestment(investmentResponse.investment);
       
       toast({
         title: "Investment Successful!",

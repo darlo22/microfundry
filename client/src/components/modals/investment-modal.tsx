@@ -28,6 +28,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { convertUsdToNgn, formatCurrency, type ExchangeRate } from "@/lib/currency";
 
+
 interface CampaignWithStats extends Campaign {
   totalRaised: string;
   investorCount: number;
@@ -102,6 +103,12 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
   // Initialize Stripe
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
+
+  // Budpay configuration
+  const budpayConfig = {
+    publicKey: import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key', // Will be replaced with actual key
+    secretKey: import.meta.env.VITE_BUDPAY_SECRET_KEY || 'sk_test_budpay_secret_key' // For backend use
+  };
 
   // Stripe Payment Form Component
   const StripePaymentForm = () => {
@@ -284,13 +291,25 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
           </div>
         </div>
 
-        <Button
-          onClick={handlePayment}
-          disabled={!stripe || isPaymentProcessing}
-          className="w-full bg-blue-900 hover:bg-blue-800"
-        >
-          {isPaymentProcessing ? 'Processing Payment...' : `Pay $${calculateTotal(selectedAmount)}`}
-        </Button>
+        <div className="space-y-3">
+          <Button
+            onClick={handlePayment}
+            disabled={!stripe || isPaymentProcessing}
+            className="w-full bg-blue-900 hover:bg-blue-800"
+          >
+            {isPaymentProcessing ? 'Processing Payment...' : `Pay $${selectedAmount} (USD)`}
+          </Button>
+          
+          {ngnAmount && !isLoadingRate && (
+            <Button
+              onClick={handleNairaPayment}
+              disabled={isPaymentProcessing}
+              className="w-full bg-green-600 hover:bg-green-700"
+            >
+              {isPaymentProcessing ? 'Processing Payment...' : `Pay ₦${ngnAmount.toLocaleString()} (NGN)`}
+            </Button>
+          )}
+        </div>
       </div>
     );
   };
@@ -391,6 +410,95 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
       });
     }
   });
+
+  // Handle Naira payment via Budpay
+  const handleNairaPayment = async () => {
+    if (!ngnAmount) {
+      toast({
+        title: "Currency Error",
+        description: "Naira amount not available",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingPayment(true);
+
+    try {
+      // Create Budpay payment request
+      const paymentData = {
+        campaignId: campaign.id,
+        amount: selectedAmount,
+        currency: 'NGN',
+        ngnAmount: ngnAmount,
+        paymentMethod: 'budpay',
+        investorDetails: {
+          ...investorDetails,
+          signature: signatureData,
+          agreedToTerms,
+          investmentDate: new Date().toISOString()
+        }
+      };
+
+      // Initialize Budpay payment
+      const budpayPaymentConfig = {
+        key: budpayConfig.publicKey,
+        email: user?.email || investorDetails.firstName + '@example.com',
+        amount: ngnAmount * 100, // Convert to kobo
+        currency: 'NGN',
+        ref: `inv_${campaign.id}_${Date.now()}`,
+        callback: async (response: any) => {
+          if (response.status === 'success') {
+            // Process the payment on the backend
+            const backendResponse = await apiRequest('POST', '/api/budpay-payment', {
+              ...paymentData,
+              budpayReference: response.reference,
+              budpayTransactionId: response.trans
+            });
+
+            const result = await backendResponse.json();
+
+            if (result.success) {
+              toast({
+                title: "Payment Successful!",
+                description: `You have successfully invested ₦${ngnAmount.toLocaleString()} in ${campaign.title}`,
+              });
+              setCurrentStep('confirmation');
+            } else {
+              throw new Error(result.message || 'Payment verification failed');
+            }
+          } else {
+            throw new Error('Payment was cancelled or failed');
+          }
+        },
+        onClose: () => {
+          setIsProcessingPayment(false);
+        }
+      };
+
+      // Load Budpay script and initialize payment
+      if (window.BudPayCheckout) {
+        window.BudPayCheckout(budpayConfig);
+      } else {
+        // Load Budpay script dynamically
+        const script = document.createElement('script');
+        script.src = 'https://checkout.budpay.com/checkout.js';
+        script.onload = () => {
+          window.BudPayCheckout(budpayConfig);
+        };
+        document.head.appendChild(script);
+      }
+
+    } catch (error: any) {
+      console.error('Budpay payment error:', error);
+      toast({
+        title: "Payment Error",
+        description: error.message || "Payment failed. Please try again.",
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
+    }
+  };
 
   const handleAmountSelection = (amount: number) => {
     setSelectedAmount(amount);

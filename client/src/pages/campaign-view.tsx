@@ -389,7 +389,7 @@ export default function CampaignView() {
               <p className="text-orange-100 mt-2">Learn more about this investment opportunity</p>
             </div>
             
-            <CardContent className="p-8 bg-gradient-to-br from-white via-slate-50/80 to-blue-50/60">
+            <CardContent className="p-8 bg-white">
               <div className="space-y-6">
                 {campaign.fullPitch.split('\r\n\r\n').map((paragraph, index) => {
                   if (paragraph.trim() === '') return null;
@@ -397,14 +397,14 @@ export default function CampaignView() {
                   // Check if this is the intro paragraph
                   if (index === 0 && paragraph.includes('"beyond payments"')) {
                     return (
-                      <div key={index} className="bg-gradient-to-r from-fundry-navy to-blue-800 rounded-xl p-6 text-white shadow-lg">
-                        <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                      <div key={index} className="bg-gray-50 rounded-xl p-6 shadow-lg border border-gray-200">
+                        <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-gray-900">
+                          <div className="w-8 h-8 bg-fundry-orange rounded-lg flex items-center justify-center text-white">
                             🎯
                           </div>
                           Company Vision
                         </h3>
-                        <p className="text-white leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
+                        <p className="text-gray-800 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
                       </div>
                     );
                   }
@@ -414,8 +414,8 @@ export default function CampaignView() {
                       paragraph.includes('Business-friendly') || paragraph.includes('Interactive')) {
                     const features = paragraph.split('\r\n').filter(line => line.trim());
                     return (
-                      <div key={index} className="bg-gradient-to-r from-blue-50 to-orange-50 rounded-xl p-6 shadow-lg border border-orange-100">
-                        <h3 className="text-xl font-semibold text-fundry-navy mb-6 flex items-center gap-3">
+                      <div key={index} className="bg-gray-50 rounded-xl p-6 shadow-lg border border-gray-200">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-3">
                           <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center text-white text-sm font-bold">
                             ✓
                           </div>
@@ -423,7 +423,7 @@ export default function CampaignView() {
                         </h3>
                         <div className="grid gap-4">
                           {features.map((feature, idx) => (
-                            <div key={idx} className="flex items-start gap-4 bg-white/90 rounded-lg p-5 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                            <div key={idx} className="flex items-start gap-4 bg-white rounded-lg p-5 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
                               <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0">
                                 <span className="text-white text-lg">
                                   {idx === 0 ? '💳' : idx === 1 ? '✈️' : idx === 2 ? '🏢' : '👥'}
@@ -442,21 +442,21 @@ export default function CampaignView() {
                   // Market positioning paragraph
                   if (paragraph.includes('holistic fintech alternative')) {
                     return (
-                      <div key={index} className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-6 border-l-4 border-emerald-500 shadow-lg">
-                        <h3 className="text-lg font-semibold text-emerald-800 mb-3 flex items-center gap-2">
+                      <div key={index} className="bg-gray-50 rounded-xl p-6 border-l-4 border-emerald-500 shadow-lg">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                           <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm">
                             📈
                           </div>
                           Market Position
                         </h3>
-                        <p className="text-gray-900 leading-relaxed text-lg font-semibold">{paragraph.trim()}</p>
+                        <p className="text-gray-800 leading-relaxed text-lg font-semibold">{paragraph.trim()}</p>
                       </div>
                     );
                   }
                   
                   // Regular paragraph with enhanced styling
                   return (
-                    <div key={index} className="bg-gradient-to-r from-gray-50 to-slate-100 rounded-xl p-6 border-l-4 border-gray-400 shadow-md">
+                    <div key={index} className="bg-gray-50 rounded-xl p-6 border-l-4 border-gray-400 shadow-md">
                       <p className="text-gray-900 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
                     </div>
                   );

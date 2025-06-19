@@ -3234,27 +3234,39 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.json({ slides: slideUrls });
       }
 
-      // Convert PDF to PNG slides using ImageMagick directly
-      const command = `convert -density 150 "${pdfPath}" -resize 800x600 -quality 85 "${slidesDir}/slide-%03d.png"`;
+      // Convert PDF to PNG slides using ImageMagick with timeout and optimization
+      const command = `convert -limit memory 256MB -limit map 512MB -density 100 "${pdfPath}[0-4]" -resize 600x450 -quality 70 "${slidesDir}/slide-%03d.png"`;
       
-      await execAsync(command);
-      
-      // Get the generated slide files
-      const slideFiles = fs.readdirSync(slidesDir)
-        .filter(file => file.endsWith('.png'))
-        .sort((a, b) => {
-          const aNum = parseInt(a.match(/(\d+)/)?.[1] || '0');
-          const bNum = parseInt(b.match(/(\d+)/)?.[1] || '0');
-          return aNum - bNum;
-        });
-      
-      const slideUrls = slideFiles.map(file => `/uploads/slides/${campaignId}/${file}`);
-      
-      if (slideUrls.length === 0) {
-        throw new Error('No slides were generated from PDF');
-      }
+      try {
+        // Set a 30-second timeout for conversion
+        await execAsync(command, { timeout: 30000 });
+        
+        // Get the generated slide files
+        const slideFiles = fs.readdirSync(slidesDir)
+          .filter(file => file.endsWith('.png'))
+          .sort((a, b) => {
+            const aNum = parseInt(a.match(/(\d+)/)?.[1] || '0');
+            const bNum = parseInt(b.match(/(\d+)/)?.[1] || '0');
+            return aNum - bNum;
+          });
+        
+        const slideUrls = slideFiles.map(file => `/uploads/slides/${campaignId}/${file}`);
+        
+        if (slideUrls.length === 0) {
+          throw new Error('No slides were generated from PDF');
+        }
 
-      res.json({ slides: slideUrls });
+        res.json({ slides: slideUrls });
+      } catch (conversionError: any) {
+        console.error('PDF conversion failed:', conversionError);
+        
+        // If conversion fails, return error but allow PDF download
+        res.status(200).json({ 
+          slides: [], 
+          error: 'PDF conversion failed - large file or timeout',
+          downloadUrl: `/uploads/${campaignId}/pitch-deck.pdf`
+        });
+      }
     } catch (error) {
       console.error('Error converting PDF to slides:', error);
       res.status(500).json({ message: 'Failed to convert PDF to slides' });

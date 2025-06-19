@@ -150,50 +150,80 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     setIsProcessingNaira(true);
     
     try {
-      // Initialize BudPay checkout
-      if (typeof window !== 'undefined' && window.BudPayCheckout) {
-        window.BudPayCheckout({
-          key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,
-          email: user?.email || '',
-          amount: Math.round(ngnAmount * 100), // Convert to kobo
-          currency: 'NGN',
-          reference: `inv_${investment.id}_${Date.now()}`,
-          callback: async function(response: any) {
-            try {
-              // Verify payment with backend
-              const verifyResponse = await apiRequest('POST', '/api/verify-budpay-payment', {
-                reference: response.reference,
-                investmentId: investment.id
-              });
+      // Create payment request with backend using direct API approach
+      const paymentData = {
+        campaignId: investment.campaignId,
+        amount: parseFloat(investment.amount),
+        currency: 'NGN',
+        ngnAmount: ngnAmount,
+        email: user?.email || '',
+        reference: `inv_${investment.id}_${Date.now()}`,
+        paymentMethod: 'budpay',
+        investmentId: investment.id
+      };
 
-              if (verifyResponse.ok) {
-                toast({
-                  title: "Payment Successful!",
-                  description: `Your investment of ₦${ngnAmount.toLocaleString('en-NG')} has been processed successfully.`,
-                });
-                
-                queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-                queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-                onClose();
-              } else {
-                throw new Error('Payment verification failed');
-              }
-            } catch (error) {
-              console.error('Payment verification error:', error);
+      console.log('Creating Budpay payment link:', paymentData);
+
+      // Call backend to create Budpay payment link
+      const response = await apiRequest('POST', '/api/create-budpay-payment', paymentData);
+      const result = await response.json();
+
+      if (result.success && result.paymentUrl) {
+        // Open Budpay payment page in a new window
+        const paymentWindow = window.open(
+          result.paymentUrl,
+          'budpay-payment',
+          'width=600,height=700,scrollbars=yes,resizable=yes'
+        );
+
+        if (!paymentWindow) {
+          throw new Error('Popup blocked. Please allow popups for payment processing.');
+        }
+
+        // Poll for payment completion
+        const pollPaymentStatus = async () => {
+          try {
+            const statusResponse = await apiRequest('GET', `/api/check-payment-status/${result.reference}`);
+            const statusResult = await statusResponse.json();
+            
+            if (statusResult.success && statusResult.status === 'success') {
+              // Payment successful
               toast({
-                title: "Payment Verification Failed",
-                description: "Payment was processed but verification failed. Please contact support.",
-                variant: "destructive",
+                title: "Payment Successful!",
+                description: `Your investment of ₦${ngnAmount.toLocaleString('en-NG')} has been processed successfully.`,
               });
+              
+              queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+              paymentWindow.close();
+              onClose();
+              setIsProcessingNaira(false);
+              return;
             }
-          },
-          onClose: function() {
-            setIsProcessingNaira(false);
+          } catch (error) {
+            console.error('Error checking payment status:', error);
           }
-        });
+          
+          // Continue polling if payment window is still open
+          if (!paymentWindow.closed) {
+            setTimeout(pollPaymentStatus, 3000);
+          } else {
+            // Payment window closed, stop processing
+            setIsProcessingNaira(false);
+            toast({
+              title: "Payment Window Closed",
+              description: "Payment was cancelled or completed. Please check your investment status.",
+            });
+          }
+        };
+
+        // Start polling after a short delay
+        setTimeout(pollPaymentStatus, 2000);
+
       } else {
-        throw new Error('BudPay checkout not available');
+        throw new Error(result.message || 'Failed to create payment link');
       }
+
     } catch (error: any) {
       console.error('Naira payment error:', error);
       toast({

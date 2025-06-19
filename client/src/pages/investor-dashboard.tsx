@@ -492,6 +492,12 @@ export default function InvestorDashboard() {
     deactivateAccountMutation.mutate(deactivationReason);
   };
 
+  // Handle edit investment
+  const handleEditInvestment = (id: number, amount: number) => {
+    editInvestmentMutation.mutate({ id, amount });
+    setEditInvestmentModal({ isOpen: false, investment: null, amount: 0 });
+  };
+
   // Filter campaigns based on search and category
   const filteredCampaigns = (campaigns as any[] || []).filter((campaign: any) => {
     const searchLower = searchTerm.toLowerCase();
@@ -1139,6 +1145,7 @@ This SAFE Agreement has been digitally signed and executed.
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-8">
+            <div className="space-y-8">
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
               {/* Profile Information */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -1576,7 +1583,6 @@ This SAFE Agreement has been digitally signed and executed.
                       </div>
                     </DialogContent>
                   </Dialog>
-                  </div>
                 </div>
               </div>
             </div>
@@ -2058,7 +2064,7 @@ This SAFE Agreement has been digitally signed and executed.
       )}
 
       {/* Edit Investment Modal */}
-      <Dialog open={editInvestmentModal.isOpen} onOpenChange={(open) => !open && setEditInvestmentModal({ isOpen: false, investment: null })}>
+      <Dialog open={editInvestmentModal.isOpen} onOpenChange={(open) => !open && setEditInvestmentModal({ isOpen: false, investment: null, amount: 0 })}>
         <DialogContent className="bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border border-orange-200 shadow-2xl rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-gray-900">Edit Investment</DialogTitle>
@@ -2076,7 +2082,7 @@ This SAFE Agreement has been digitally signed and executed.
             </div>
             <div className="flex gap-2">
               <Button
-                onClick={() => setEditInvestmentModal({ isOpen: false, investment: null })}
+                onClick={() => setEditInvestmentModal({ isOpen: false, investment: null, amount: 0 })}
                 variant="outline"
                 className="flex-1"
               >

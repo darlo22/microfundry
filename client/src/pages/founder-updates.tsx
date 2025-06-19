@@ -452,33 +452,24 @@ export default function FounderUpdates() {
 
   return (
     <div className="min-h-screen bg-slate-900">
-      {/* Navigation Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-lg">
-        <div className="container mx-auto px-4 sm:px-6">
+      {/* Header */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Left: Back Button */}
-            <Button
-              variant="ghost"
-              onClick={() => setLocation("/founder-dashboard")}
-              className="flex items-center gap-2 text-gray-700 hover:text-fundry-orange transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back to Dashboard</span>
-            </Button>
-
-            {/* Center: Fundry Logo */}
-            <div 
-              className="flex items-center cursor-pointer"
-              onClick={() => setLocation("/landing")}
-            >
-              <img 
-                src={fundryLogoNew} 
-                alt="Fundry" 
-                className="h-12 w-auto"
-              />
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/founder-dashboard")}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Dashboard
+              </Button>
             </div>
-
-            <div className="w-32"></div> {/* Spacer for centering */}
+            <div className="flex items-center">
+              <img src={fundryLogoNew} alt="Fundry" className="h-8" />
+            </div>
           </div>
         </div>
       </div>

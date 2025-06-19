@@ -75,6 +75,51 @@ const safeHandler = (handler: Function) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
+  // Custom video streaming endpoint with range support
+  app.get('/api/video/:filename', (req: express.Request, res: express.Response) => {
+    const filename = req.params.filename;
+    const filePath = path.join(process.cwd(), 'uploads', filename);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+    
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+    
+    // Set video headers
+    res.setHeader('Content-Type', 'video/mp4');
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    
+    if (range) {
+      // Handle range requests for video streaming
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunksize = (end - start) + 1;
+      
+      res.writeHead(206, {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Content-Length': chunksize,
+        'Content-Type': 'video/mp4',
+        'Accept-Ranges': 'bytes'
+      });
+      
+      const file = fs.createReadStream(filePath, { start, end });
+      file.pipe(res);
+    } else {
+      // Send entire file
+      res.writeHead(200, {
+        'Content-Length': fileSize,
+        'Content-Type': 'video/mp4',
+        'Accept-Ranges': 'bytes'
+      });
+      fs.createReadStream(filePath).pipe(res);
+    }
+  });
 
   // Serve slide files from nested directories
   app.get('/uploads/slides/:campaignId/:filename', safeHandler((req: express.Request, res: express.Response) => {

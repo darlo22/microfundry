@@ -193,81 +193,19 @@ export default function CampaignView() {
                 {campaign.pitchMediaUrl ? (
                   <div className="aspect-video w-full bg-gray-900 relative overflow-hidden">
                     {campaign.pitchMediaUrl.match(/\.(mp4|mov|avi|webm)$/i) ? (
-                      <>
-                        {/* Video Loading Overlay */}
-                        <div className="absolute inset-0 bg-gray-900 flex items-center justify-center z-10" id="video-loading">
-                          <div className="text-center text-white">
-                            <div className="w-16 h-16 border-4 border-fundry-orange border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                            <p className="text-lg font-medium">Loading video...</p>
-                          </div>
-                        </div>
-                        
-                        <video 
-                          controls 
-                          className="w-full h-full object-cover relative z-20"
-                          poster={campaign.logoUrl ? (campaign.logoUrl.startsWith('/') ? campaign.logoUrl : `/${campaign.logoUrl}`) : undefined}
-                          preload="auto"
-                          playsInline
-                          controlsList="nodownload"
-                          crossOrigin="anonymous"
-                          onLoadStart={() => {
-                            console.log('Video loading started:', campaign.pitchMediaUrl);
-                            const loadingEl = document.getElementById('video-loading');
-                            if (loadingEl) loadingEl.style.display = 'flex';
-                          }}
-                          onCanPlay={() => {
-                            console.log('Video can play:', campaign.pitchMediaUrl);
-                            const loadingEl = document.getElementById('video-loading');
-                            if (loadingEl) loadingEl.style.display = 'none';
-                          }}
-                          onLoadedData={() => {
-                            console.log('Video data loaded:', campaign.pitchMediaUrl);
-                            const loadingEl = document.getElementById('video-loading');
-                            if (loadingEl) loadingEl.style.display = 'none';
-                          }}
-                          onError={(e) => {
-                            console.error('Video failed to load:', campaign.pitchMediaUrl);
-                            console.error('Video error details:', {
-                              error: e.currentTarget.error,
-                              networkState: e.currentTarget.networkState,
-                              readyState: e.currentTarget.readyState,
-                              src: e.currentTarget.currentSrc
-                            });
-                            
-                            // Hide loading and show error
-                            const loadingEl = document.getElementById('video-loading');
-                            if (loadingEl) loadingEl.style.display = 'none';
-                            
-                            // Show error message
-                            const errorEl = document.getElementById('video-error');
-                            if (errorEl) errorEl.style.display = 'flex';
-                          }}
-                          src={campaign.pitchMediaUrl.startsWith('/') ? campaign.pitchMediaUrl : `/${campaign.pitchMediaUrl}`}
-                        >
-                          Your browser does not support the video tag.
-                        </video>
-                      
-                      {/* Video Error Overlay */}
-                      <div className="absolute inset-0 bg-gray-900 flex items-center justify-center z-30 hidden" id="video-error">
-                        <div className="text-center text-white max-w-md px-6">
-                          <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </div>
-                          <h3 className="text-xl font-bold mb-2">Video Unavailable</h3>
-                          <p className="text-gray-300 mb-4">
-                            We're having trouble loading this video. Please try refreshing the page or contact support if the issue persists.
-                          </p>
-                          <Button 
-                            onClick={() => window.location.reload()} 
-                            className="bg-fundry-orange hover:bg-orange-600 text-white"
-                          >
-                            Refresh Page
-                          </Button>
-                        </div>
-                      </div>
-                      </>
+                      <video 
+                        controls 
+                        className="w-full h-full object-cover"
+                        preload="metadata"
+                        playsInline
+                        src={campaign.pitchMediaUrl.startsWith('/') ? campaign.pitchMediaUrl : `/${campaign.pitchMediaUrl}`}
+                        onError={(e) => {
+                          console.error('Video playback error:', e);
+                          console.error('Video URL:', campaign.pitchMediaUrl);
+                        }}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
                     ) : (
                       <img 
                         src={campaign.pitchMediaUrl.startsWith('/') ? campaign.pitchMediaUrl : `/${campaign.pitchMediaUrl}`} 

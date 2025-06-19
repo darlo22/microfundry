@@ -44,6 +44,13 @@ const upload = multer({
       cb(null, file.mimetype === 'application/pdf');
     } else if (file.fieldname === 'logo' || file.fieldname.startsWith('teamMemberPhoto_')) {
       cb(null, file.mimetype.startsWith('image/'));
+    } else if (file.fieldname === 'pitchMedia') {
+      // Accept video and image files for pitch media
+      const allowedTypes = [
+        'video/mp4', 'video/quicktime', 'video/webm', 'video/x-msvideo',
+        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'
+      ];
+      cb(null, allowedTypes.includes(file.mimetype));
     } else {
       cb(null, true);
     }

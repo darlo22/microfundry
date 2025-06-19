@@ -17,6 +17,23 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Serve static files from uploads directory with proper MIME types
+app.use('/uploads', express.static('uploads', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.mp4')) {
+      res.setHeader('Content-Type', 'video/mp4');
+    } else if (path.endsWith('.mov')) {
+      res.setHeader('Content-Type', 'video/quicktime');
+    } else if (path.endsWith('.webm')) {
+      res.setHeader('Content-Type', 'video/webm');
+    } else if (path.endsWith('.avi')) {
+      res.setHeader('Content-Type', 'video/x-msvideo');
+    }
+    // Enable range requests for video streaming
+    res.setHeader('Accept-Ranges', 'bytes');
+  }
+}));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

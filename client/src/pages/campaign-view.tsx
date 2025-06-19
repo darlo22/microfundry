@@ -153,7 +153,7 @@ export default function CampaignView() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
       <Navbar 
         showBackButton={true}
         onBackClick={handleBackToDashboard}
@@ -183,7 +183,7 @@ export default function CampaignView() {
         <div className="space-y-4 sm:space-y-6 lg:space-y-8">
           
           {/* Hero Section - Pitch Media First (Wefunder Style) */}
-          <Card className="overflow-hidden border-0 shadow-xl bg-white">
+          <Card className="overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur-sm">
             <CardContent className="p-0">
               {/* Pitch Video/Cover Image - Prominent Display */}
               <div className="relative">
@@ -266,18 +266,18 @@ export default function CampaignView() {
               </div>
 
               {/* Campaign Info Below Media */}
-              <div className="p-6 sm:p-8">
+              <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/80 to-blue-50/60">
                 {/* Title and Basic Info */}
                 <div className="mb-6">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-3 mb-3">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-fundry-navy">{campaign.title}</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{campaign.title}</h1>
                         <Badge className="bg-fundry-orange/10 text-fundry-orange border-fundry-orange/20">
                           {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                         </Badge>
                       </div>
-                      <p className="text-lg text-gray-700 mb-4 leading-relaxed">{campaign.shortPitch}</p>
+                      <p className="text-lg text-gray-800 mb-4 leading-relaxed font-medium">{campaign.shortPitch}</p>
                       
                       {/* Meta Information */}
                       <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
@@ -373,7 +373,7 @@ export default function CampaignView() {
           </Card>
 
           {/* About This Campaign */}
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden bg-white/95 backdrop-blur-sm">
             {/* Header */}
             <div className="bg-gradient-to-r from-fundry-orange to-orange-600 px-8 py-6">
               <h2 className="text-2xl font-bold text-white flex items-center gap-3">
@@ -385,7 +385,7 @@ export default function CampaignView() {
               <p className="text-orange-100 mt-2">Learn more about this investment opportunity</p>
             </div>
             
-            <CardContent className="p-8">
+            <CardContent className="p-8 bg-gradient-to-br from-white via-slate-50/80 to-blue-50/60">
               <div className="space-y-6">
                 {campaign.fullPitch.split('\r\n\r\n').map((paragraph, index) => {
                   if (paragraph.trim() === '') return null;
@@ -393,14 +393,14 @@ export default function CampaignView() {
                   // Check if this is the intro paragraph
                   if (index === 0 && paragraph.includes('"beyond payments"')) {
                     return (
-                      <div key={index} className="bg-gradient-to-r from-fundry-navy to-blue-800 rounded-xl p-6 text-white">
+                      <div key={index} className="bg-gradient-to-r from-fundry-navy to-blue-800 rounded-xl p-6 text-white shadow-lg">
                         <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
                           <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                             🎯
                           </div>
                           Company Vision
                         </h3>
-                        <p className="text-blue-100 leading-relaxed text-lg">{paragraph.trim()}</p>
+                        <p className="text-white leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
                       </div>
                     );
                   }
@@ -410,7 +410,7 @@ export default function CampaignView() {
                       paragraph.includes('Business-friendly') || paragraph.includes('Interactive')) {
                     const features = paragraph.split('\r\n').filter(line => line.trim());
                     return (
-                      <div key={index} className="bg-gradient-to-r from-blue-50 to-orange-50 rounded-xl p-6">
+                      <div key={index} className="bg-gradient-to-r from-blue-50 to-orange-50 rounded-xl p-6 shadow-lg border border-orange-100">
                         <h3 className="text-xl font-semibold text-fundry-navy mb-6 flex items-center gap-3">
                           <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center text-white text-sm font-bold">
                             ✓
@@ -419,14 +419,14 @@ export default function CampaignView() {
                         </h3>
                         <div className="grid gap-4">
                           {features.map((feature, idx) => (
-                            <div key={idx} className="flex items-start gap-4 bg-white rounded-lg p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                            <div key={idx} className="flex items-start gap-4 bg-white/90 rounded-lg p-5 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
                               <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0">
                                 <span className="text-white text-lg">
                                   {idx === 0 ? '💳' : idx === 1 ? '✈️' : idx === 2 ? '🏢' : '👥'}
                                 </span>
                               </div>
                               <div className="flex-1">
-                                <p className="text-gray-800 font-medium leading-relaxed text-lg">{feature.trim()}</p>
+                                <p className="text-gray-900 font-semibold leading-relaxed text-lg">{feature.trim()}</p>
                               </div>
                             </div>
                           ))}
@@ -438,22 +438,22 @@ export default function CampaignView() {
                   // Market positioning paragraph
                   if (paragraph.includes('holistic fintech alternative')) {
                     return (
-                      <div key={index} className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-6 border-l-4 border-emerald-500">
-                        <h3 className="text-lg font-semibold text-emerald-700 mb-3 flex items-center gap-2">
+                      <div key={index} className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-6 border-l-4 border-emerald-500 shadow-lg">
+                        <h3 className="text-lg font-semibold text-emerald-800 mb-3 flex items-center gap-2">
                           <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm">
                             📈
                           </div>
                           Market Position
                         </h3>
-                        <p className="text-gray-700 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
+                        <p className="text-gray-900 leading-relaxed text-lg font-semibold">{paragraph.trim()}</p>
                       </div>
                     );
                   }
                   
                   // Regular paragraph with enhanced styling
                   return (
-                    <div key={index} className="bg-gray-50 rounded-xl p-6 border-l-4 border-gray-300">
-                      <p className="text-gray-700 leading-relaxed text-lg">{paragraph.trim()}</p>
+                    <div key={index} className="bg-gradient-to-r from-gray-50 to-slate-100 rounded-xl p-6 border-l-4 border-gray-400 shadow-md">
+                      <p className="text-gray-900 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
                     </div>
                   );
                 })}
@@ -503,47 +503,47 @@ export default function CampaignView() {
 
           {/* Business Strategy Section */}
           {(campaign.problemStatement || campaign.solution || campaign.marketOpportunity || campaign.businessModel || campaign.goToMarketStrategy || campaign.competitiveLandscape) && (
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardContent className="p-8">
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/95 backdrop-blur-sm">
+              <CardContent className="p-8 bg-gradient-to-br from-white via-slate-50/80 to-blue-50/60">
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Business Strategy</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">Business Strategy</h2>
                 </div>
                 <div className="grid md:grid-cols-2 gap-8">
                   {campaign.problemStatement && (
-                    <div className="bg-red-50 rounded-xl p-6 border-l-4 border-red-500">
-                      <h3 className="text-lg font-semibold text-red-700 mb-3">Problem Statement</h3>
-                      <p className="text-gray-700 leading-relaxed">{campaign.problemStatement}</p>
+                    <div className="bg-gradient-to-r from-red-50 to-rose-100 rounded-xl p-6 border-l-4 border-red-500 shadow-md">
+                      <h3 className="text-lg font-semibold text-red-800 mb-3">Problem Statement</h3>
+                      <p className="text-gray-900 leading-relaxed font-medium">{campaign.problemStatement}</p>
                     </div>
                   )}
                   {campaign.solution && (
-                    <div className="bg-green-50 rounded-xl p-6 border-l-4 border-green-500">
-                      <h3 className="text-lg font-semibold text-green-700 mb-3">Solution</h3>
-                      <p className="text-gray-700 leading-relaxed">{campaign.solution}</p>
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-100 rounded-xl p-6 border-l-4 border-green-500 shadow-md">
+                      <h3 className="text-lg font-semibold text-green-800 mb-3">Solution</h3>
+                      <p className="text-gray-900 leading-relaxed font-medium">{campaign.solution}</p>
                     </div>
                   )}
                   {campaign.marketOpportunity && (
-                    <div className="bg-blue-50 rounded-xl p-6 border-l-4 border-blue-500">
-                      <h3 className="text-lg font-semibold text-blue-700 mb-3">Market Opportunity</h3>
-                      <p className="text-gray-700 leading-relaxed">{campaign.marketOpportunity}</p>
+                    <div className="bg-gradient-to-r from-blue-50 to-sky-100 rounded-xl p-6 border-l-4 border-blue-500 shadow-md">
+                      <h3 className="text-lg font-semibold text-blue-800 mb-3">Market Opportunity</h3>
+                      <p className="text-gray-900 leading-relaxed font-medium">{campaign.marketOpportunity}</p>
                     </div>
                   )}
                   {campaign.businessModel && (
-                    <div className="bg-purple-50 rounded-xl p-6 border-l-4 border-purple-500">
-                      <h3 className="text-lg font-semibold text-purple-700 mb-3">Business Model</h3>
-                      <p className="text-gray-700 leading-relaxed">{campaign.businessModel}</p>
+                    <div className="bg-gradient-to-r from-purple-50 to-violet-100 rounded-xl p-6 border-l-4 border-purple-500 shadow-md">
+                      <h3 className="text-lg font-semibold text-purple-800 mb-3">Business Model</h3>
+                      <p className="text-gray-900 leading-relaxed font-medium">{campaign.businessModel}</p>
                     </div>
                   )}
                   {campaign.goToMarketStrategy && (
-                    <div className="bg-orange-50 rounded-xl p-6 border-l-4 border-orange-500">
-                      <h3 className="text-lg font-semibold text-orange-700 mb-3">Go-To-Market Strategy</h3>
-                      <p className="text-gray-700 leading-relaxed">{campaign.goToMarketStrategy}</p>
+                    <div className="bg-gradient-to-r from-orange-50 to-amber-100 rounded-xl p-6 border-l-4 border-orange-500 shadow-md">
+                      <h3 className="text-lg font-semibold text-orange-800 mb-3">Go-To-Market Strategy</h3>
+                      <p className="text-gray-900 leading-relaxed font-medium">{campaign.goToMarketStrategy}</p>
                     </div>
                   )}
                   {campaign.competitiveLandscape && (
-                    <div className="bg-indigo-50 rounded-xl p-6 border-l-4 border-indigo-500">
-                      <h3 className="text-lg font-semibold text-indigo-700 mb-3">Competitive Landscape</h3>
-                      <p className="text-gray-700 leading-relaxed">{campaign.competitiveLandscape}</p>
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-100 rounded-xl p-6 border-l-4 border-indigo-500 shadow-md">
+                      <h3 className="text-lg font-semibold text-indigo-800 mb-3">Competitive Landscape</h3>
+                      <p className="text-gray-900 leading-relaxed font-medium">{campaign.competitiveLandscape}</p>
                     </div>
                   )}
                 </div>

@@ -451,19 +451,19 @@ export default function FounderUpdates() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
       {/* Navigation Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-6">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-orange-200 sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             {/* Left: Back Button */}
             <Button
               variant="ghost"
               onClick={() => setLocation("/founder-dashboard")}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-2 text-fundry-navy hover:text-fundry-orange transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
             </Button>
 
             {/* Center: Fundry Logo */}
@@ -474,21 +474,28 @@ export default function FounderUpdates() {
               <img 
                 src={fundryLogoNew} 
                 alt="Fundry" 
-                className="h-32 w-auto"
+                className="h-12 w-auto"
               />
             </div>
 
-
+            <div className="w-32"></div> {/* Spacer for centering */}
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Campaign Updates</h1>
-            <p className="text-gray-600">Keep your investors informed with regular updates</p>
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <div className="bg-gradient-to-r from-fundry-orange to-fundry-navy p-6 rounded-2xl text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2 flex items-center">
+              <MessageSquare className="mr-3 text-white" size={32} />
+              Campaign Updates
+            </h1>
+            <p className="text-orange-100 text-sm sm:text-base">Keep your investors informed with regular updates</p>
           </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+          <div></div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button 

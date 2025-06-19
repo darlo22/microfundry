@@ -23,42 +23,306 @@ import { apiRequest } from "@/lib/queryClient";
 
 // Countries and registration types data
 const COUNTRIES_STATES = {
-  "United States": {
-    states: ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"],
-    registrationTypes: ["C Corporation", "S Corporation", "LLC", "Partnership", "Sole Proprietorship", "Non-Profit Corporation"]
+  "Afghanistan": { states: [], registrationTypes: ["Private Company", "Partnership", "Sole Proprietorship"] },
+  "Albania": { states: [], registrationTypes: ["Limited Liability Company", "Joint Stock Company", "Partnership", "Sole Proprietorship"] },
+  "Algeria": { states: [], registrationTypes: ["SARL", "SPA", "EURL", "SNC", "Sole Proprietorship"] },
+  "Andorra": { states: [], registrationTypes: ["Private Limited Company", "Public Limited Company", "Partnership"] },
+  "Angola": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Argentina": {
+    states: ["Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes", "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza", "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis", "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"],
+    registrationTypes: ["SA", "SRL", "SAS", "Partnership", "Sole Proprietorship"]
+  },
+  "Armenia": { states: [], registrationTypes: ["LLC", "CJSC", "OJSC", "Partnership", "Individual Entrepreneur"] },
+  "Australia": {
+    states: ["New South Wales", "Victoria", "Queensland", "Western Australia", "South Australia", "Tasmania", "Australian Capital Territory", "Northern Territory"],
+    registrationTypes: ["Proprietary Limited Company", "Public Company", "Partnership", "Sole Trader", "Trust", "Co-operative"]
+  },
+  "Austria": { 
+    states: ["Burgenland", "Carinthia", "Lower Austria", "Upper Austria", "Salzburg", "Styria", "Tyrol", "Vorarlberg", "Vienna"],
+    registrationTypes: ["GmbH", "AG", "KG", "OG", "Einzelunternehmen"] 
+  },
+  "Azerbaijan": { states: [], registrationTypes: ["LLC", "OJSC", "CJSC", "Partnership", "Individual Entrepreneur"] },
+  "Bahamas": { states: [], registrationTypes: ["IBC", "Exempted Company", "Partnership", "Sole Proprietorship"] },
+  "Bahrain": { states: [], registrationTypes: ["WLL", "BSC", "Partnership", "Sole Proprietorship"] },
+  "Bangladesh": { 
+    states: ["Dhaka", "Chittagong", "Rajshahi", "Khulna", "Barisal", "Sylhet", "Rangpur", "Mymensingh"],
+    registrationTypes: ["Private Limited Company", "Public Limited Company", "Partnership", "Sole Proprietorship"] 
+  },
+  "Barbados": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Trader"] },
+  "Belarus": { states: [], registrationTypes: ["LLC", "OJSC", "CJSC", "Partnership", "Individual Entrepreneur"] },
+  "Belgium": { 
+    states: ["Antwerp", "Brussels", "East Flanders", "Flemish Brabant", "Hainaut", "Liège", "Limburg", "Luxembourg", "Namur", "Walloon Brabant", "West Flanders"],
+    registrationTypes: ["BVBA/SPRL", "NV/SA", "CVBA/SCRL", "Partnership"] 
+  },
+  "Belize": { states: [], registrationTypes: ["IBC", "Private Company", "Partnership", "Sole Proprietorship"] },
+  "Benin": { states: [], registrationTypes: ["SARL", "SA", "SNC", "Partnership", "Sole Proprietorship"] },
+  "Bhutan": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Bolivia": { states: [], registrationTypes: ["SA", "SRL", "Partnership", "Sole Proprietorship"] },
+  "Bosnia and Herzegovina": { states: [], registrationTypes: ["LLC", "JSC", "Partnership", "Sole Proprietorship"] },
+  "Botswana": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Brazil": {
+    states: ["Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Espírito Santo", "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará", "Paraíba", "Paraná", "Pernambuco", "Piauí", "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul", "Rondônia", "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"],
+    registrationTypes: ["Ltda", "SA", "EIRELI", "MEI", "Partnership"]
+  },
+  "Brunei": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Bulgaria": { states: [], registrationTypes: ["OOD", "AD", "EAD", "Partnership", "Sole Trader"] },
+  "Burkina Faso": { states: [], registrationTypes: ["SARL", "SA", "SNC", "Partnership", "Sole Proprietorship"] },
+  "Burundi": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Cambodia": { states: [], registrationTypes: ["Private Limited Company", "Public Limited Company", "Partnership", "Sole Proprietorship"] },
+  "Cameroon": { states: [], registrationTypes: ["SARL", "SA", "SNC", "Partnership", "Sole Proprietorship"] },
+  "Canada": {
+    states: ["Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", "Northwest Territories", "Nova Scotia", "Nunavut", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan", "Yukon"],
+    registrationTypes: ["Corporation", "Partnership", "Sole Proprietorship", "Co-operative", "Not-for-profit Corporation"]
+  },
+  "Cape Verde": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Central African Republic": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Chad": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Chile": { states: [], registrationTypes: ["SA", "SpA", "Ltda", "Partnership", "Sole Proprietorship"] },
+  "China": {
+    states: ["Beijing", "Tianjin", "Hebei", "Shanxi", "Inner Mongolia", "Liaoning", "Jilin", "Heilongjiang", "Shanghai", "Jiangsu", "Zhejiang", "Anhui", "Fujian", "Jiangxi", "Shandong", "Henan", "Hubei", "Hunan", "Guangdong", "Guangxi", "Hainan", "Chongqing", "Sichuan", "Guizhou", "Yunnan", "Tibet", "Shaanxi", "Gansu", "Qinghai", "Ningxia", "Xinjiang", "Hong Kong", "Macau"],
+    registrationTypes: ["Limited Company", "Joint Venture", "WFOE", "Representative Office", "Partnership"]
+  },
+  "Colombia": { states: [], registrationTypes: ["SAS", "SA", "Ltda", "Partnership", "Sole Proprietorship"] },
+  "Comoros": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Congo": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Costa Rica": { states: [], registrationTypes: ["SA", "SRL", "Partnership", "Sole Proprietorship"] },
+  "Croatia": { states: [], registrationTypes: ["d.o.o.", "d.d.", "j.d.o.o.", "Partnership", "Sole Proprietorship"] },
+  "Cuba": { states: [], registrationTypes: ["State Enterprise", "Joint Venture", "Cooperative", "Self-Employment"] },
+  "Cyprus": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Czech Republic": { states: [], registrationTypes: ["s.r.o.", "a.s.", "Partnership", "Sole Proprietorship"] },
+  "Denmark": { states: [], registrationTypes: ["ApS", "A/S", "Partnership", "Sole Proprietorship"] },
+  "Djibouti": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Dominica": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Dominican Republic": { states: [], registrationTypes: ["SRL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Ecuador": { states: [], registrationTypes: ["SA", "CIA. LTDA.", "Partnership", "Sole Proprietorship"] },
+  "Egypt": { states: [], registrationTypes: ["LLC", "SAE", "Partnership", "Sole Proprietorship"] },
+  "El Salvador": { states: [], registrationTypes: ["SA de CV", "SRL de CV", "Partnership", "Sole Proprietorship"] },
+  "Equatorial Guinea": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Eritrea": { states: [], registrationTypes: ["Private Company", "Partnership", "Sole Proprietorship"] },
+  "Estonia": { states: [], registrationTypes: ["OÜ", "AS", "Partnership", "Sole Proprietorship"] },
+  "Eswatini": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Ethiopia": { states: [], registrationTypes: ["Private Limited Company", "Share Company", "Partnership", "Sole Proprietorship"] },
+  "Fiji": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Finland": { states: [], registrationTypes: ["Oy", "Oyj", "Partnership", "Sole Proprietorship"] },
+  "France": {
+    states: ["Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté", "Brittany", "Centre-Val de Loire", "Corsica", "Grand Est", "Hauts-de-France", "Île-de-France", "Normandy", "Nouvelle-Aquitaine", "Occitania", "Pays de la Loire", "Provence-Alpes-Côte d'Azur"],
+    registrationTypes: ["SARL", "SAS", "SA", "EURL", "SNC", "Auto-entrepreneur"]
+  },
+  "Gabon": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Gambia": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Georgia": { states: [], registrationTypes: ["LLC", "JSC", "Partnership", "Sole Proprietorship"] },
+  "Germany": {
+    states: ["Baden-Württemberg", "Bavaria", "Berlin", "Brandenburg", "Bremen", "Hamburg", "Hesse", "Lower Saxony", "Mecklenburg-Vorpommern", "North Rhine-Westphalia", "Rhineland-Palatinate", "Saarland", "Saxony", "Saxony-Anhalt", "Schleswig-Holstein", "Thuringia"],
+    registrationTypes: ["GmbH", "AG", "UG", "KG", "OHG", "Einzelunternehmen"]
+  },
+  "Ghana": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Greece": { states: [], registrationTypes: ["AE", "EPE", "IKE", "Partnership", "Sole Proprietorship"] },
+  "Grenada": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Guatemala": { states: [], registrationTypes: ["SA", "SRL", "Partnership", "Sole Proprietorship"] },
+  "Guinea": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Guinea-Bissau": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Guyana": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Haiti": { states: [], registrationTypes: ["SA", "SARL", "Partnership", "Sole Proprietorship"] },
+  "Honduras": { states: [], registrationTypes: ["SA", "SRL", "Partnership", "Sole Proprietorship"] },
+  "Hungary": { states: [], registrationTypes: ["Kft.", "Zrt.", "Bt.", "Kkt.", "Sole Proprietorship"] },
+  "Iceland": { states: [], registrationTypes: ["ehf.", "hf.", "Partnership", "Sole Proprietorship"] },
+  "India": {
+    states: ["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"],
+    registrationTypes: ["Private Limited Company", "Public Limited Company", "Limited Liability Partnership", "One Person Company", "Partnership Firm", "Sole Proprietorship"]
+  },
+  "Indonesia": { 
+    states: ["Aceh", "North Sumatra", "West Sumatra", "Riau", "Jambi", "South Sumatra", "Bengkulu", "Lampung", "Bangka Belitung Islands", "Riau Islands", "Jakarta", "West Java", "Central Java", "Yogyakarta", "East Java", "Banten", "Bali", "West Nusa Tenggara", "East Nusa Tenggara", "West Kalimantan", "Central Kalimantan", "South Kalimantan", "East Kalimantan", "North Kalimantan", "North Sulawesi", "Central Sulawesi", "South Sulawesi", "Southeast Sulawesi", "Gorontalo", "West Sulawesi", "Maluku", "North Maluku", "Papua", "West Papua"],
+    registrationTypes: ["PT", "CV", "Partnership", "Sole Proprietorship"] 
+  },
+  "Iran": { states: [], registrationTypes: ["Private Joint Stock Company", "Public Joint Stock Company", "LLC", "Partnership"] },
+  "Iraq": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Ireland": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Trader"] },
+  "Israel": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Italy": { 
+    states: ["Abruzzo", "Basilicata", "Calabria", "Campania", "Emilia-Romagna", "Friuli-Venezia Giulia", "Lazio", "Liguria", "Lombardy", "Marche", "Molise", "Piedmont", "Puglia", "Sardinia", "Sicily", "Tuscany", "Trentino-Alto Adige", "Umbria", "Aosta Valley", "Veneto"],
+    registrationTypes: ["SRL", "SPA", "Partnership", "Sole Proprietorship"] 
+  },
+  "Jamaica": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Japan": {
+    states: ["Hokkaido", "Aomori", "Iwate", "Miyagi", "Akita", "Yamagata", "Fukushima", "Ibaraki", "Tochigi", "Gunma", "Saitama", "Chiba", "Tokyo", "Kanagawa", "Niigata", "Toyama", "Ishikawa", "Fukui", "Yamanashi", "Nagano", "Gifu", "Shizuoka", "Aichi", "Mie", "Shiga", "Kyoto", "Osaka", "Hyogo", "Nara", "Wakayama", "Tottori", "Shimane", "Okayama", "Hiroshima", "Yamaguchi", "Tokushima", "Kagawa", "Ehime", "Kochi", "Fukuoka", "Saga", "Nagasaki", "Kumamoto", "Oita", "Miyazaki", "Kagoshima", "Okinawa"],
+    registrationTypes: ["KK", "GK", "Partnership", "Sole Proprietorship"]
+  },
+  "Jordan": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Kazakhstan": { states: [], registrationTypes: ["LLP", "JSC", "Partnership", "Individual Entrepreneur"] },
+  "Kenya": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Kiribati": { states: [], registrationTypes: ["Private Company", "Partnership", "Sole Proprietorship"] },
+  "Kuwait": { states: [], registrationTypes: ["WLL", "KSCC", "Partnership", "Sole Proprietorship"] },
+  "Kyrgyzstan": { states: [], registrationTypes: ["LLC", "OJSC", "Partnership", "Individual Entrepreneur"] },
+  "Laos": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Latvia": { states: [], registrationTypes: ["SIA", "AS", "Partnership", "Sole Proprietorship"] },
+  "Lebanon": { states: [], registrationTypes: ["SAL", "SARL", "Partnership", "Sole Proprietorship"] },
+  "Lesotho": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Liberia": { states: [], registrationTypes: ["Corporation", "LLC", "Partnership", "Sole Proprietorship"] },
+  "Libya": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Liechtenstein": { states: [], registrationTypes: ["AG", "GmbH", "Partnership", "Sole Proprietorship"] },
+  "Lithuania": { states: [], registrationTypes: ["UAB", "AB", "Partnership", "Individual Activity"] },
+  "Luxembourg": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Madagascar": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Malawi": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Malaysia": { 
+    states: ["Johor", "Kedah", "Kelantan", "Kuala Lumpur", "Labuan", "Malacca", "Negeri Sembilan", "Pahang", "Penang", "Perak", "Perlis", "Putrajaya", "Sabah", "Sarawak", "Selangor", "Terengganu"],
+    registrationTypes: ["Sdn Bhd", "Bhd", "Partnership", "Sole Proprietorship"] 
+  },
+  "Maldives": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Mali": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Malta": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Trader"] },
+  "Marshall Islands": { states: [], registrationTypes: ["Corporation", "LLC", "Partnership", "Sole Proprietorship"] },
+  "Mauritania": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Mauritius": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Mexico": {
+    states: ["Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas", "Chihuahua", "Coahuila", "Colima", "Durango", "Guanajuato", "Guerrero", "Hidalgo", "Jalisco", "Mexico", "Michoacán", "Morelos", "Nayarit", "Nuevo León", "Oaxaca", "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa", "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas", "Mexico City"],
+    registrationTypes: ["SA de CV", "SRL de CV", "Partnership", "Sole Proprietorship"]
+  },
+  "Micronesia": { states: [], registrationTypes: ["Corporation", "Partnership", "Sole Proprietorship"] },
+  "Moldova": { states: [], registrationTypes: ["SRL", "SA", "Partnership", "Individual Enterprise"] },
+  "Monaco": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Mongolia": { states: [], registrationTypes: ["LLC", "JSC", "Partnership", "Sole Proprietorship"] },
+  "Montenegro": { states: [], registrationTypes: ["d.o.o.", "a.d.", "Partnership", "Entrepreneur"] },
+  "Morocco": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Mozambique": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Myanmar": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Namibia": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Nauru": { states: [], registrationTypes: ["Corporation", "Partnership", "Sole Proprietorship"] },
+  "Nepal": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Netherlands": { 
+    states: ["Drenthe", "Flevoland", "Friesland", "Gelderland", "Groningen", "Limburg", "North Brabant", "North Holland", "Overijssel", "South Holland", "Utrecht", "Zeeland"],
+    registrationTypes: ["BV", "NV", "Partnership", "Sole Proprietorship"] 
+  },
+  "New Zealand": { 
+    states: ["Auckland", "Bay of Plenty", "Canterbury", "Gisborne", "Hawke's Bay", "Manawatu-Wanganui", "Marlborough", "Nelson", "Northland", "Otago", "Southland", "Taranaki", "Tasman", "Waikato", "Wellington", "West Coast"],
+    registrationTypes: ["Limited Company", "Partnership", "Sole Trader", "Co-operative"] 
+  },
+  "Nicaragua": { states: [], registrationTypes: ["SA", "SRL", "Partnership", "Sole Proprietorship"] },
+  "Niger": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Nigeria": {
+    states: ["Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Federal Capital Territory", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"],
+    registrationTypes: ["Private Limited Company", "Public Limited Company", "Limited by Guarantee", "Unlimited Company", "Partnership", "Sole Proprietorship"]
+  },
+  "North Korea": { states: [], registrationTypes: ["State Enterprise", "Joint Venture", "Cooperative"] },
+  "North Macedonia": { states: [], registrationTypes: ["DOO", "AD", "Partnership", "Sole Proprietorship"] },
+  "Norway": { states: [], registrationTypes: ["AS", "ASA", "Partnership", "Sole Proprietorship"] },
+  "Oman": { states: [], registrationTypes: ["LLC", "SAOG", "Partnership", "Sole Proprietorship"] },
+  "Pakistan": {
+    states: ["Punjab", "Sindh", "Khyber Pakhtunkhwa", "Balochistan", "Gilgit-Baltistan", "Azad Kashmir", "Islamabad Capital Territory"],
+    registrationTypes: ["Private Limited Company", "Public Limited Company", "Partnership", "Sole Proprietorship"]
+  },
+  "Palau": { states: [], registrationTypes: ["Corporation", "Partnership", "Sole Proprietorship"] },
+  "Panama": { states: [], registrationTypes: ["SA", "SRL", "Partnership", "Sole Proprietorship"] },
+  "Papua New Guinea": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Paraguay": { states: [], registrationTypes: ["SA", "SRL", "Partnership", "Sole Proprietorship"] },
+  "Peru": { states: [], registrationTypes: ["SAC", "SA", "SRL", "Partnership", "Sole Proprietorship"] },
+  "Philippines": {
+    states: ["Abra", "Agusan del Norte", "Agusan del Sur", "Aklan", "Albay", "Antique", "Apayao", "Aurora", "Basilan", "Bataan", "Batanes", "Batangas", "Benguet", "Biliran", "Bohol", "Bukidnon", "Bulacan", "Cagayan", "Camarines Norte", "Camarines Sur", "Camiguin", "Capiz", "Catanduanes", "Cavite", "Cebu", "Cotabato", "Davao de Oro", "Davao del Norte", "Davao del Sur", "Davao Occidental", "Davao Oriental", "Dinagat Islands", "Eastern Samar", "Guimaras", "Ifugao", "Ilocos Norte", "Ilocos Sur", "Iloilo", "Isabela", "Kalinga", "Laguna", "Lanao del Norte", "Lanao del Sur", "La Union", "Leyte", "Maguindanao", "Marinduque", "Masbate", "Metro Manila", "Misamis Occidental", "Misamis Oriental", "Mountain Province", "Negros Occidental", "Negros Oriental", "Northern Samar", "Nueva Ecija", "Nueva Vizcaya", "Occidental Mindoro", "Oriental Mindoro", "Palawan", "Pampanga", "Pangasinan", "Quezon", "Quirino", "Rizal", "Romblon", "Samar", "Sarangani", "Siquijor", "Sorsogon", "South Cotabato", "Southern Leyte", "Sultan Kudarat", "Sulu", "Surigao del Norte", "Surigao del Sur", "Tarlac", "Tawi-Tawi", "Zambales", "Zamboanga del Norte", "Zamboanga del Sur", "Zamboanga Sibugay"],
+    registrationTypes: ["Corporation", "Partnership", "Sole Proprietorship"]
+  },
+  "Poland": { 
+    states: ["Greater Poland", "Kuyavian-Pomeranian", "Lesser Poland", "Lodz", "Lower Silesian", "Lublin", "Lubusz", "Masovian", "Opole", "Podlasie", "Pomeranian", "Silesian", "Subcarpathian", "Swietokrzyskie", "Warmian-Masurian", "West Pomeranian"],
+    registrationTypes: ["Sp. z o.o.", "S.A.", "Partnership", "Sole Proprietorship"] 
+  },
+  "Portugal": { 
+    states: ["Azores", "Beja", "Braga", "Bragança", "Castelo Branco", "Coimbra", "Évora", "Faro", "Guarda", "Leiria", "Lisboa", "Madeira", "Portalegre", "Porto", "Santarém", "Setúbal", "Viana do Castelo", "Vila Real", "Viseu"],
+    registrationTypes: ["Lda", "SA", "Partnership", "Sole Proprietorship"] 
+  },
+  "Qatar": { states: [], registrationTypes: ["WLL", "QSC", "Partnership", "Sole Proprietorship"] },
+  "Romania": { states: [], registrationTypes: ["SRL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Russia": {
+    states: ["Moscow", "Saint Petersburg", "Novosibirsk Oblast", "Yekaterinburg", "Nizhny Novgorod", "Kazan", "Chelyabinsk", "Omsk", "Samara", "Rostov-on-Don", "Ufa", "Krasnoyarsk", "Perm", "Volgograd", "Voronezh"],
+    registrationTypes: ["LLC", "OJSC", "CJSC", "Partnership", "Individual Entrepreneur"]
+  },
+  "Rwanda": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Saint Kitts and Nevis": { states: [], registrationTypes: ["IBC", "Private Company", "Partnership", "Sole Proprietorship"] },
+  "Saint Lucia": { states: [], registrationTypes: ["IBC", "Private Company", "Partnership", "Sole Proprietorship"] },
+  "Saint Vincent and the Grenadines": { states: [], registrationTypes: ["IBC", "Private Company", "Partnership", "Sole Proprietorship"] },
+  "Samoa": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "San Marino": { states: [], registrationTypes: ["SpA", "SRL", "Partnership", "Sole Proprietorship"] },
+  "São Tomé and Príncipe": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Saudi Arabia": { 
+    states: ["Riyadh", "Mecca", "Medina", "Eastern Province", "Asir", "Tabuk", "Qassim", "Hail", "Northern Borders", "Jazan", "Najran", "Al Bahah", "Al Jawf"],
+    registrationTypes: ["LLC", "JSC", "Partnership", "Sole Proprietorship"] 
+  },
+  "Senegal": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Serbia": { states: [], registrationTypes: ["d.o.o.", "a.d.", "Partnership", "Entrepreneur"] },
+  "Seychelles": { states: [], registrationTypes: ["IBC", "CSL", "Partnership", "Sole Proprietorship"] },
+  "Sierra Leone": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Singapore": { states: [], registrationTypes: ["Pte Ltd", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Slovakia": { states: [], registrationTypes: ["s.r.o.", "a.s.", "Partnership", "Sole Proprietorship"] },
+  "Slovenia": { states: [], registrationTypes: ["d.o.o.", "d.d.", "Partnership", "s.p."] },
+  "Solomon Islands": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Somalia": { states: [], registrationTypes: ["Private Company", "Partnership", "Sole Proprietorship"] },
+  "South Africa": {
+    states: ["Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal", "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"],
+    registrationTypes: ["Private Company", "Public Company", "Personal Liability Company", "Close Corporation", "Sole Proprietorship", "Partnership"]
+  },
+  "South Korea": {
+    states: ["Seoul", "Busan", "Daegu", "Incheon", "Gwangju", "Daejeon", "Ulsan", "Sejong", "Gyeonggi", "Gangwon", "North Chungcheong", "South Chungcheong", "North Jeolla", "South Jeolla", "North Gyeongsang", "South Gyeongsang", "Jeju"],
+    registrationTypes: ["Chusik Hoesa", "Yuhan Hoesa", "Partnership", "Sole Proprietorship"]
+  },
+  "South Sudan": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Spain": { 
+    states: ["Andalusia", "Aragon", "Asturias", "Balearic Islands", "Basque Country", "Canary Islands", "Cantabria", "Castile and León", "Castile-La Mancha", "Catalonia", "Extremadura", "Galicia", "La Rioja", "Madrid", "Murcia", "Navarre", "Valencia", "Ceuta", "Melilla"],
+    registrationTypes: ["SL", "SA", "Partnership", "Sole Proprietorship"] 
+  },
+  "Sri Lanka": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Sudan": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Suriname": { states: [], registrationTypes: ["NV", "BV", "Partnership", "Sole Proprietorship"] },
+  "Sweden": { states: [], registrationTypes: ["AB", "Partnership", "Sole Proprietorship"] },
+  "Switzerland": { 
+    states: ["Aargau", "Appenzell Ausserrhoden", "Appenzell Innerrhoden", "Basel-Landschaft", "Basel-Stadt", "Bern", "Fribourg", "Geneva", "Glarus", "Graubünden", "Jura", "Lucerne", "Neuchâtel", "Nidwalden", "Obwalden", "Schaffhausen", "Schwyz", "Solothurn", "St. Gallen", "Thurgau", "Ticino", "Uri", "Valais", "Vaud", "Zug", "Zürich"],
+    registrationTypes: ["GmbH", "AG", "Partnership", "Sole Proprietorship"] 
+  },
+  "Syria": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Taiwan": { 
+    states: ["Taipei", "New Taipei", "Taoyuan", "Taichung", "Tainan", "Kaohsiung", "Keelung", "Hsinchu", "Chiayi", "Yunlin", "Changhua", "Nantou", "Pingtung", "Yilan", "Hualien", "Taitung", "Penghu", "Kinmen", "Lienchiang"],
+    registrationTypes: ["Company Limited by Shares", "Partnership", "Sole Proprietorship"] 
+  },
+  "Tajikistan": { states: [], registrationTypes: ["LLC", "OJSC", "Partnership", "Individual Entrepreneur"] },
+  "Tanzania": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Thailand": { 
+    states: ["Bangkok", "Amnat Charoen", "Ang Thong", "Bueng Kan", "Buriram", "Chachoengsao", "Chai Nat", "Chaiyaphum", "Chanthaburi", "Chiang Mai", "Chiang Rai", "Chonburi", "Chumphon", "Kalasin", "Kamphaeng Phet", "Kanchanaburi", "Khon Kaen", "Krabi", "Lampang", "Lamphun", "Loei", "Lopburi", "Mae Hong Son", "Maha Sarakham", "Mukdahan", "Nakhon Nayok", "Nakhon Pathom", "Nakhon Phanom", "Nakhon Ratchasima", "Nakhon Sawan", "Nakhon Si Thammarat", "Nan", "Narathiwat", "Nong Bua Lam Phu", "Nong Khai", "Nonthaburi", "Pathum Thani", "Pattani", "Phang Nga", "Phatthalung", "Phayao", "Phetchabun", "Phetchaburi", "Phichit", "Phitsanulok", "Phrae", "Phuket", "Prachin Buri", "Prachuap Khiri Khan", "Ranong", "Ratchaburi", "Rayong", "Roi Et", "Sa Kaeo", "Sakon Nakhon", "Samut Prakan", "Samut Sakhon", "Samut Songkhram", "Saraburi", "Satun", "Sing Buri", "Sisaket", "Songkhla", "Sukhothai", "Suphan Buri", "Surat Thani", "Surin", "Tak", "Trang", "Trat", "Ubon Ratchathani", "Udon Thani", "Uthai Thani", "Uttaradit", "Yala", "Yasothon"],
+    registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] 
+  },
+  "Timor-Leste": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Togo": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Tonga": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Trinidad and Tobago": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Tunisia": { states: [], registrationTypes: ["SARL", "SA", "Partnership", "Sole Proprietorship"] },
+  "Turkey": { 
+    states: ["Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Aksaray", "Amasya", "Ankara", "Antalya", "Ardahan", "Artvin", "Aydın", "Balıkesir", "Bartın", "Batman", "Bayburt", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Düzce", "Edirne", "Elazığ", "Erzincan", "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkâri", "Hatay", "Iğdır", "Isparta", "Istanbul", "İzmir", "Kahramanmaraş", "Karabük", "Karaman", "Kars", "Kastamonu", "Kayseri", "Kırıkkale", "Kırklareli", "Kırşehir", "Kilis", "Kocaeli", "Konya", "Kütahya", "Malatya", "Manisa", "Mardin", "Mersin", "Muğla", "Muş", "Nevşehir", "Niğde", "Ordu", "Osmaniye", "Rize", "Sakarya", "Samsun", "Siirt", "Sinop", "Sivas", "Şanlıurfa", "Şırnak", "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Uşak", "Van", "Yalova", "Yozgat", "Zonguldak"],
+    registrationTypes: ["Limited Şirket", "Anonim Şirket", "Partnership", "Sole Proprietorship"] 
+  },
+  "Turkmenistan": { states: [], registrationTypes: ["LLC", "OJSC", "Partnership", "Individual Entrepreneur"] },
+  "Tuvalu": { states: [], registrationTypes: ["Private Company", "Partnership", "Sole Proprietorship"] },
+  "Uganda": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Ukraine": { states: [], registrationTypes: ["LLC", "PJSC", "Partnership", "Individual Entrepreneur"] },
+  "United Arab Emirates": { 
+    states: ["Abu Dhabi", "Dubai", "Sharjah", "Ajman", "Umm Al Quwain", "Ras Al Khaimah", "Fujairah"],
+    registrationTypes: ["LLC", "PJSC", "Branch", "Free Zone Company"] 
   },
   "United Kingdom": {
     states: ["England", "Scotland", "Wales", "Northern Ireland"],
     registrationTypes: ["Private Limited Company", "Public Limited Company", "Limited Liability Partnership", "Community Interest Company", "Sole Trader", "Partnership"]
   },
-  "Canada": {
-    states: ["Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", "Northwest Territories", "Nova Scotia", "Nunavut", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan", "Yukon"],
-    registrationTypes: ["Corporation", "Partnership", "Sole Proprietorship", "Co-operative", "Not-for-profit Corporation"]
+  "United States": {
+    states: ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"],
+    registrationTypes: ["C Corporation", "S Corporation", "LLC", "Partnership", "Sole Proprietorship", "Non-Profit Corporation"]
   },
-  "Australia": {
-    states: ["New South Wales", "Victoria", "Queensland", "Western Australia", "South Australia", "Tasmania", "Australian Capital Territory", "Northern Territory"],
-    registrationTypes: ["Proprietary Limited Company", "Public Company", "Partnership", "Sole Trader", "Trust", "Co-operative"]
+  "Uruguay": { states: [], registrationTypes: ["SA", "SRL", "Partnership", "Sole Proprietorship"] },
+  "Uzbekistan": { states: [], registrationTypes: ["LLC", "OJSC", "Partnership", "Individual Entrepreneur"] },
+  "Vanuatu": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Vatican City": { states: [], registrationTypes: ["Vatican Entity"] },
+  "Venezuela": { states: [], registrationTypes: ["SA", "SRL", "Partnership", "Sole Proprietorship"] },
+  "Vietnam": { 
+    states: ["An Giang", "Ba Ria-Vung Tau", "Bac Giang", "Bac Kan", "Bac Lieu", "Bac Ninh", "Ben Tre", "Binh Dinh", "Binh Duong", "Binh Phuoc", "Binh Thuan", "Ca Mau", "Cao Bang", "Dak Lak", "Dak Nong", "Dien Bien", "Dong Nai", "Dong Thap", "Gia Lai", "Ha Giang", "Ha Nam", "Ha Tinh", "Hai Duong", "Hau Giang", "Hoa Binh", "Hung Yen", "Khanh Hoa", "Kien Giang", "Kon Tum", "Lai Chau", "Lam Dong", "Lang Son", "Lao Cai", "Long An", "Nam Dinh", "Nghe An", "Ninh Binh", "Ninh Thuan", "Phu Tho", "Phu Yen", "Quang Binh", "Quang Nam", "Quang Ngai", "Quang Ninh", "Quang Tri", "Soc Trang", "Son La", "Tay Ninh", "Thai Binh", "Thai Nguyen", "Thanh Hoa", "Thua Thien Hue", "Tien Giang", "Tra Vinh", "Tuyen Quang", "Vinh Long", "Vinh Phuc", "Yen Bai", "Can Tho", "Da Nang", "Hai Phong", "Hanoi", "Ho Chi Minh City"],
+    registrationTypes: ["LLC", "JSC", "Partnership", "Sole Proprietorship"] 
   },
-  "Germany": {
-    states: ["Baden-Württemberg", "Bavaria", "Berlin", "Brandenburg", "Bremen", "Hamburg", "Hesse", "Lower Saxony", "Mecklenburg-Vorpommern", "North Rhine-Westphalia", "Rhineland-Palatinate", "Saarland", "Saxony", "Saxony-Anhalt", "Schleswig-Holstein", "Thuringia"],
-    registrationTypes: ["GmbH", "AG", "UG", "KG", "OHG", "Einzelunternehmen"]
-  },
-  "France": {
-    states: ["Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté", "Brittany", "Centre-Val de Loire", "Corsica", "Grand Est", "Hauts-de-France", "Île-de-France", "Normandy", "Nouvelle-Aquitaine", "Occitania", "Pays de la Loire", "Provence-Alpes-Côte d'Azur"],
-    registrationTypes: ["SARL", "SAS", "SA", "EURL", "SNC", "Auto-entrepreneur"]
-  },
-  "India": {
-    states: ["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"],
-    registrationTypes: ["Private Limited Company", "Public Limited Company", "Limited Liability Partnership", "One Person Company", "Partnership Firm", "Sole Proprietorship"]
-  },
-  "Nigeria": {
-    states: ["Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Federal Capital Territory", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"],
-    registrationTypes: ["Private Limited Company", "Public Limited Company", "Limited by Guarantee", "Unlimited Company", "Partnership", "Sole Proprietorship"]
-  },
-  "South Africa": {
-    states: ["Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal", "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"],
-    registrationTypes: ["Private Company", "Public Company", "Personal Liability Company", "Close Corporation", "Sole Proprietorship", "Partnership"]
-  }
+  "Yemen": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Zambia": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] },
+  "Zimbabwe": { states: [], registrationTypes: ["Private Company", "Public Company", "Partnership", "Sole Proprietorship"] }
 };
 
 const COUNTRIES = Object.keys(COUNTRIES_STATES);

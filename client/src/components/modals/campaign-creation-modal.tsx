@@ -461,7 +461,7 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                             <SelectValue placeholder="Select country" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="max-h-60 overflow-y-auto">
                           {COUNTRIES.map((country) => (
                             <SelectItem key={country} value={country}>{country}</SelectItem>
                           ))}
@@ -485,7 +485,7 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                             <SelectValue placeholder="Select state/province" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="max-h-60 overflow-y-auto">
                           {form.watch("country") && COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.states?.map((state) => (
                             <SelectItem key={state} value={state}>{state}</SelectItem>
                           ))}

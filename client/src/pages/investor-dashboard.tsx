@@ -1574,6 +1574,7 @@ This SAFE Agreement has been digitally signed and executed.
               </div>
 
               {/* Payment Methods */}
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-6">
                   <div className="flex items-center gap-3">
@@ -1969,8 +1970,7 @@ This SAFE Agreement has been digitally signed and executed.
                 </div>
                 <div className="p-6 space-y-4">
                   <Button
-                    variant="outline"
-                    className="w-full justify-start"
+                    className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white justify-start"
                     onClick={handleExportData}
                     disabled={exportDataMutation.isPending}
                   >
@@ -1980,7 +1980,7 @@ This SAFE Agreement has been digitally signed and executed.
                   
                   <AlertDialog open={isDeactivateModalOpen} onOpenChange={setIsDeactivateModalOpen}>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700">
+                      <Button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white justify-start">
                         <AlertTriangle className="h-4 w-4 mr-2" />
                         Deactivate Account
                       </Button>
@@ -2048,6 +2048,43 @@ This SAFE Agreement has been digitally signed and executed.
           />
         </Elements>
       )}
+
+      {/* Edit Investment Modal */}
+      <Dialog open={editInvestmentModal.isOpen} onOpenChange={(open) => !open && setEditInvestmentModal({ isOpen: false, investment: null })}>
+        <DialogContent className="bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border border-orange-200 shadow-2xl rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-gray-900">Edit Investment</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Investment Amount</label>
+              <Input
+                type="number"
+                value={editInvestmentModal.amount}
+                onChange={(e) => setEditInvestmentModal(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+                min={25}
+                step={1}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setEditInvestmentModal({ isOpen: false, investment: null })}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => editInvestmentModal.investment && handleEditInvestment(editInvestmentModal.investment.id, editInvestmentModal.amount)}
+                className="flex-1 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white"
+                disabled={editInvestmentMutation.isPending}
+              >
+                {editInvestmentMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

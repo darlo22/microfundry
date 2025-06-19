@@ -162,7 +162,7 @@ export default function CampaignView() {
             {user && campaign.founderId === user.id && (
               <Button 
                 onClick={handleEdit}
-                className="flex items-center border-2 border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white transition-all duration-200 shadow-sm"
+                className="flex items-center border-2 border-fundry-orange text-white bg-fundry-orange hover:bg-orange-600 hover:text-white transition-all duration-200 shadow-sm"
               >
                 <Edit className="mr-2" size={16} />
                 Edit

@@ -1283,6 +1283,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Investment trends data
+  app.get('/api/analytics/investment-trends/:founderId', requireAuth, async (req: any, res) => {
+    try {
+      const { founderId } = req.params;
+      const userId = req.user.id;
+      
+      if (founderId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const trends = await storage.getInvestmentTrends(founderId);
+      res.json(trends);
+    } catch (error) {
+      console.error("Error fetching investment trends:", error);
+      res.status(500).json({ message: "Failed to fetch investment trends" });
+    }
+  });
+
+  // Investor distribution data
+  app.get('/api/analytics/investor-distribution/:founderId', requireAuth, async (req: any, res) => {
+    try {
+      const { founderId } = req.params;
+      const userId = req.user.id;
+      
+      if (founderId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const distribution = await storage.getInvestorDistribution(founderId);
+      res.json(distribution);
+    } catch (error) {
+      console.error("Error fetching investor distribution:", error);
+      res.status(500).json({ message: "Failed to fetch investor distribution" });
+    }
+  });
+
+  // Monthly growth data
+  app.get('/api/analytics/monthly-growth/:founderId', requireAuth, async (req: any, res) => {
+    try {
+      const { founderId } = req.params;
+      const userId = req.user.id;
+      
+      if (founderId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const growth = await storage.getMonthlyGrowth(founderId);
+      res.json(growth);
+    } catch (error) {
+      console.error("Error fetching monthly growth:", error);
+      res.status(500).json({ message: "Failed to fetch monthly growth" });
+    }
+  });
+
   app.get('/api/analytics/investor/:investorId', requireAuth, async (req: any, res) => {
     try {
       const { investorId } = req.params;

@@ -29,15 +29,21 @@ export default function FounderAnalytics() {
     enabled: !!user?.id,
   });
 
-  // Sample analytics data (in production, this would come from your analytics API)
-  const investmentTrends = [
-    { date: "Week 1", amount: 2500, investors: 3 },
-    { date: "Week 2", amount: 4200, investors: 5 },
-    { date: "Week 3", amount: 3800, investors: 4 },
-    { date: "Week 4", amount: 5600, investors: 7 },
-    { date: "Week 5", amount: 4900, investors: 6 },
-    { date: "Week 6", amount: 6200, investors: 8 },
-  ];
+  // Fetch live analytics data
+  const { data: investmentTrends = [], isLoading: trendsLoading } = useQuery({
+    queryKey: ["/api/analytics/investment-trends", user?.id],
+    enabled: !!user?.id,
+  });
+
+  const { data: investorDistribution = [], isLoading: distributionLoading } = useQuery({
+    queryKey: ["/api/analytics/investor-distribution", user?.id],
+    enabled: !!user?.id,
+  });
+
+  const { data: monthlyGrowth = [], isLoading: growthLoading } = useQuery({
+    queryKey: ["/api/analytics/monthly-growth", user?.id],
+    enabled: !!user?.id,
+  });
 
   const campaignPerformance = Array.isArray(campaigns) ? (campaigns as any[]).map((campaign: any) => ({
     name: campaign.title,
@@ -46,21 +52,6 @@ export default function FounderAnalytics() {
     investors: campaign.investorCount || 0,
     progress: campaign.progressPercent || 0,
   })) : [];
-
-  const investorDistribution = [
-    { name: "Small ($25-$500)", value: 45, color: "#22C55E" },
-    { name: "Medium ($500-$2K)", value: 35, color: "#F59E0B" },
-    { name: "Large ($2K+)", value: 20, color: "#EF4444" },
-  ];
-
-  const monthlyGrowth = [
-    { month: "Jan", campaigns: 1, investors: 12, revenue: 8400 },
-    { month: "Feb", campaigns: 2, investors: 28, revenue: 15600 },
-    { month: "Mar", campaigns: 2, investors: 35, revenue: 21200 },
-    { month: "Apr", campaigns: 3, investors: 48, revenue: 28900 },
-    { month: "May", campaigns: 3, investors: 62, revenue: 36500 },
-    { month: "Jun", campaigns: 4, investors: 75, revenue: 42100 },
-  ];
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -75,7 +66,7 @@ export default function FounderAnalytics() {
     return ((current - previous) / previous) * 100;
   };
 
-  if (statsLoading || campaignsLoading) {
+  if (statsLoading || campaignsLoading || trendsLoading || distributionLoading || growthLoading) {
     return (
       <div className="container mx-auto px-6 py-8">
         <div className="flex items-center justify-center h-64">

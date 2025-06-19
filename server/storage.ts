@@ -748,6 +748,169 @@ export class DatabaseStorage implements IStorage {
       return updated;
     }) as Promise<NotificationPreferences>;
   }
+
+  // Analytics methods
+  async getInvestmentTrends(founderId: string): Promise<Array<{ date: string; amount: number; investors: number }>> {
+    return safeDbOperation(async () => {
+      // Get founder's campaigns
+      const founderCampaigns = await db
+        .select()
+        .from(campaigns)
+        .where(eq(campaigns.founderId, founderId));
+
+      const campaignIds = founderCampaigns.map(c => c.id);
+      
+      if (campaignIds.length === 0) {
+        return Array.from({ length: 6 }, (_, i) => ({
+          date: `Week ${i + 1}`,
+          amount: 0,
+          investors: 0
+        }));
+      }
+
+      // Get investments grouped by week
+      const campaignInvestments = await db
+        .select()
+        .from(investments)
+        .where(sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`)
+        .orderBy(investments.createdAt);
+
+      // Group investments by week
+      const now = new Date();
+      const weeklyData = Array.from({ length: 6 }, (_, i) => {
+        const weekStart = new Date(now.getTime() - (5 - i) * 7 * 24 * 60 * 60 * 1000);
+        const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        const weekInvestments = campaignInvestments.filter(inv => {
+          const investmentDate = new Date(inv.createdAt || 0);
+          return investmentDate >= weekStart && investmentDate < weekEnd &&
+                 (inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed');
+        });
+
+        const totalAmount = weekInvestments.reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+        const uniqueInvestors = new Set(weekInvestments.map(inv => inv.investorId)).size;
+
+        return {
+          date: `Week ${i + 1}`,
+          amount: Math.round(totalAmount),
+          investors: uniqueInvestors
+        };
+      });
+
+      return weeklyData;
+    }) as Promise<Array<{ date: string; amount: number; investors: number }>>;
+  }
+
+  async getInvestorDistribution(founderId: string): Promise<Array<{ name: string; value: number; color: string }>> {
+    return safeDbOperation(async () => {
+      // Get founder's campaigns
+      const founderCampaigns = await db
+        .select()
+        .from(campaigns)
+        .where(eq(campaigns.founderId, founderId));
+
+      const campaignIds = founderCampaigns.map(c => c.id);
+      
+      if (campaignIds.length === 0) {
+        return [
+          { name: "Small ($25-$500)", value: 0, color: "#22C55E" },
+          { name: "Medium ($500-$2K)", value: 0, color: "#F59E0B" },
+          { name: "Large ($2K+)", value: 0, color: "#EF4444" },
+        ];
+      }
+
+      // Get all investments
+      const campaignInvestments = await db
+        .select()
+        .from(investments)
+        .where(sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)}) AND ${investments.status} IN ('committed', 'paid', 'completed')`);
+
+      let small = 0, medium = 0, large = 0;
+      
+      campaignInvestments.forEach((inv: any) => {
+        const amount = parseFloat(inv.amount);
+        if (amount >= 25 && amount < 500) small++;
+        else if (amount >= 500 && amount < 2000) medium++;
+        else if (amount >= 2000) large++;
+      });
+
+      const total = small + medium + large;
+      
+      if (total === 0) {
+        return [
+          { name: "Small ($25-$500)", value: 0, color: "#22C55E" },
+          { name: "Medium ($500-$2K)", value: 0, color: "#F59E0B" },
+          { name: "Large ($2K+)", value: 0, color: "#EF4444" },
+        ];
+      }
+
+      return [
+        { name: "Small ($25-$500)", value: Math.round((small / total) * 100), color: "#22C55E" },
+        { name: "Medium ($500-$2K)", value: Math.round((medium / total) * 100), color: "#F59E0B" },
+        { name: "Large ($2K+)", value: Math.round((large / total) * 100), color: "#EF4444" },
+      ];
+    }) as Promise<Array<{ name: string; value: number; color: string }>>;
+  }
+
+  async getMonthlyGrowth(founderId: string): Promise<Array<{ month: string; campaigns: number; investors: number; revenue: number }>> {
+    return safeDbOperation(async () => {
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      
+      // Get founder's campaigns
+      const founderCampaigns = await db
+        .select()
+        .from(campaigns)
+        .where(eq(campaigns.founderId, founderId));
+
+      const campaignIds = founderCampaigns.map(c => c.id);
+      
+      if (campaignIds.length === 0) {
+        return months.map(month => ({
+          month,
+          campaigns: 0,
+          investors: 0,
+          revenue: 0
+        }));
+      }
+
+      // Get all investments
+      const campaignInvestments = await db
+        .select()
+        .from(investments)
+        .where(sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)}) AND ${investments.status} IN ('committed', 'paid', 'completed')`);
+
+      const monthlyData = months.map((month, index) => {
+        const monthStart = new Date(currentYear, index, 1);
+        const monthEnd = new Date(currentYear, index + 1, 0);
+        
+        // Campaigns created in this month
+        const monthCampaigns = founderCampaigns.filter(campaign => {
+          const campaignDate = new Date(campaign.createdAt || 0);
+          return campaignDate >= monthStart && campaignDate <= monthEnd;
+        }).length;
+
+        // Investments made in this month
+        const monthInvestments = campaignInvestments.filter((inv: any) => {
+          const investmentDate = new Date(inv.createdAt || 0);
+          return investmentDate >= monthStart && investmentDate <= monthEnd;
+        });
+
+        const uniqueInvestors = new Set(monthInvestments.map((inv: any) => inv.investorId)).size;
+        const revenue = monthInvestments.reduce((sum: any, inv: any) => sum + parseFloat(inv.amount), 0);
+
+        return {
+          month,
+          campaigns: monthCampaigns,
+          investors: uniqueInvestors,
+          revenue: Math.round(revenue)
+        };
+      });
+
+      return monthlyData;
+    }) as Promise<Array<{ month: string; campaigns: number; investors: number; revenue: number }>>;
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -322,16 +322,22 @@ export default function InvestorDashboard() {
   const updateNotificationPreferencesMutation = useMutation({
     mutationFn: async (preferences: any) => {
       const response = await apiRequest('PUT', '/api/notification-preferences', preferences);
+      if (!response.ok) {
+        throw new Error('Failed to update preferences');
+      }
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notification-preferences'] });
+    onSuccess: (data) => {
+      // Update the cache with the response data
+      queryClient.setQueryData(['/api/notification-preferences'], data);
       toast({
         title: "Preferences Updated",
         description: "Your notification preferences have been updated.",
       });
     },
     onError: () => {
+      // Revert optimistic update by refetching
+      queryClient.invalidateQueries({ queryKey: ['/api/notification-preferences'] });
       toast({
         title: "Error",
         description: "Failed to update notification preferences. Please try again.",
@@ -466,6 +472,7 @@ export default function InvestorDashboard() {
   };
 
   const handleUpdateNotificationPreference = (key: string, value: boolean) => {
+    // Optimistic update
     queryClient.setQueryData(['/api/notification-preferences'], (old: any) => ({
       ...old,
       [key]: value,

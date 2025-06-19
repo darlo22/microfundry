@@ -9,6 +9,7 @@ import InvestmentModal from "@/components/modals/investment-modal";
 import { ShareCampaignModal } from "@/components/modals/share-campaign-modal";
 import { EditCampaignModal } from "@/components/modals/edit-campaign-modal";
 import { PitchDeckModal } from "@/components/modals/pitch-deck-modal";
+import { RobustVideoPlayer } from "@/components/RobustVideoPlayer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -196,107 +197,13 @@ export default function CampaignView() {
             <CardContent className="p-0">
               {/* Pitch Video/Cover Image - Prominent Display */}
               <div className="relative">
-                {campaign.pitchMediaUrl ? (
-                  <div className="aspect-video w-full bg-gray-900 relative overflow-hidden">
-                    {campaign.pitchMediaUrl.match(/\.(mp4|mov|avi|webm)$/i) ? (
-                      <video 
-                        controls 
-                        className="w-full h-full object-cover bg-black"
-                        preload="metadata"
-                        playsInline
-                        poster={campaign.logoUrl ? (campaign.logoUrl.startsWith('/') ? campaign.logoUrl : `/${campaign.logoUrl}`) : undefined}
-                        src={`/api/stream/${campaign.pitchMediaUrl.replace(/^\/uploads\//, '')}`}
-                        onLoadStart={() => console.log('Video loading started:', campaign.pitchMediaUrl)}
-                        onLoadedMetadata={(e) => {
-                          console.log('Video metadata loaded:', {
-                            duration: e.currentTarget.duration,
-                            videoWidth: e.currentTarget.videoWidth,
-                            videoHeight: e.currentTarget.videoHeight
-                          });
-                        }}
-                        onCanPlay={() => console.log('Video can play - ready for playback')}
-                        onError={(e) => {
-                          const video = e.currentTarget;
-                          console.error('Video playback failed:', {
-                            src: video.src,
-                            error: video.error?.code,
-                            message: video.error?.message,
-                            networkState: video.networkState,
-                            readyState: video.readyState
-                          });
-                        }}
-                      >
-                        Your browser does not support HTML5 video playback.
-                      </video>
-                    ) : (
-                      <img 
-                        src={campaign.pitchMediaUrl.startsWith('/') ? campaign.pitchMediaUrl : `/${campaign.pitchMediaUrl}`} 
-                        alt={`${campaign.title} - Cover Image`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          console.error('Image failed to load:', campaign.pitchMediaUrl);
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
-                      />
-                    )}
-                    
-                    {/* Logo Overlay on Media */}
-                    <div className="absolute bottom-4 left-4">
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white border-4 border-white rounded-xl flex items-center justify-center overflow-hidden shadow-2xl">
-                        {campaign.logoUrl ? (
-                          <img 
-                            src={campaign.logoUrl.startsWith('/') ? campaign.logoUrl : `/${campaign.logoUrl}`} 
-                            alt={campaign.title}
-                            className="w-full h-full object-contain p-1"
-                            onError={(e) => {
-                              console.log('Logo failed to load:', campaign.logoUrl);
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const fallback = target.parentElement?.querySelector('div');
-                              if (fallback) fallback.style.display = 'flex';
-                            }}
-                          />
-                        ) : null}
-                        <div className={`w-full h-full flex items-center justify-center ${campaign.logoUrl ? 'hidden' : 'flex'}`}>
-                          <span className="text-fundry-orange text-xl sm:text-2xl font-bold">
-                            {campaign.title.charAt(0)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  /* Fallback Header if no pitch media */
-                  <div className="aspect-video w-full bg-gradient-to-br from-fundry-navy via-blue-700 to-fundry-orange relative overflow-hidden flex items-center justify-center">
-                    <div className="text-center text-white z-10">
-                      <div className="w-28 h-28 sm:w-36 sm:h-36 bg-white border-4 border-white rounded-2xl flex items-center justify-center mx-auto mb-6 overflow-hidden shadow-2xl">
-                        {campaign.logoUrl ? (
-                          <img 
-                            src={campaign.logoUrl.startsWith('/') ? campaign.logoUrl : `/${campaign.logoUrl}`} 
-                            alt={campaign.title}
-                            className="w-full h-full object-contain p-2"
-                            onError={(e) => {
-                              console.log('Logo failed to load in fallback header:', campaign.logoUrl);
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const fallback = target.parentElement?.querySelector('div');
-                              if (fallback) fallback.style.display = 'flex';
-                            }}
-                          />
-                        ) : null}
-                        <div className={`w-full h-full flex items-center justify-center ${campaign.logoUrl ? 'hidden' : 'flex'}`}>
-                          <span className="text-fundry-orange text-3xl sm:text-4xl font-bold">
-                            {campaign.title.charAt(0)}
-                          </span>
-                        </div>
-                      </div>
-                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2">{campaign.title}</h1>
-                      <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">{campaign.shortPitch}</p>
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-white/10"></div>
-                  </div>
-                )}
+                <div className="aspect-video w-full bg-gray-900 relative overflow-hidden">
+                  <RobustVideoPlayer 
+                    videoUrl={campaign.pitchMediaUrl || ''}
+                    title={campaign.title}
+                    logoUrl={campaign.logoUrl}
+                  />
+                </div>
               </div>
 
               {/* Campaign Info Below Media */}

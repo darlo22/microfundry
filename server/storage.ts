@@ -571,49 +571,45 @@ export class DatabaseStorage implements IStorage {
     submittedAt: Date;
     data: any;
   }): Promise<void> {
-    await safeDbOperation(async () => {
+    try {
+      console.log('Updating KYC status for user:', userId, 'with data:', kycData);
+      
       // Check if KYC verification record exists
       const existingKyc = await this.getKycVerification(userId);
       
+      const kycRecord = {
+        status: kycData.status,
+        dateOfBirth: kycData.data.dateOfBirth ? new Date(kycData.data.dateOfBirth) : null,
+        address: kycData.data.address || null,
+        city: kycData.data.city || null,
+        state: kycData.data.state || null,
+        zipCode: kycData.data.zipCode || null,
+        employmentStatus: kycData.data.employmentStatus || null,
+        annualIncome: kycData.data.annualIncome || null,
+        investmentExperience: kycData.data.investmentExperience || null,
+        riskTolerance: kycData.data.riskTolerance || null,
+        governmentIdFiles: Array.isArray(kycData.data.governmentId) ? kycData.data.governmentId : [],
+        utilityBillFiles: Array.isArray(kycData.data.utilityBill) ? kycData.data.utilityBill : [],
+        otherDocumentFiles: Array.isArray(kycData.data.otherDocuments) ? kycData.data.otherDocuments : [],
+        submittedAt: kycData.submittedAt,
+      };
+      
       if (existingKyc) {
-        // Update existing record
-        await this.updateKycVerification(userId, {
-          status: kycData.status,
-          dateOfBirth: kycData.data.dateOfBirth ? new Date(kycData.data.dateOfBirth) : undefined,
-          address: kycData.data.address,
-          city: kycData.data.city,
-          state: kycData.data.state,
-          zipCode: kycData.data.zipCode,
-          employmentStatus: kycData.data.employmentStatus,
-          annualIncome: kycData.data.annualIncome,
-          investmentExperience: kycData.data.investmentExperience,
-          riskTolerance: kycData.data.riskTolerance,
-          governmentIdFiles: kycData.data.governmentId || [],
-          utilityBillFiles: kycData.data.utilityBill || [],
-          otherDocumentFiles: kycData.data.otherDocuments || [],
-          submittedAt: kycData.submittedAt,
-        });
+        console.log('Updating existing KYC record');
+        await this.updateKycVerification(userId, kycRecord);
       } else {
-        // Create new record
+        console.log('Creating new KYC record');
         await this.createKycVerification({
           userId,
-          status: kycData.status,
-          dateOfBirth: kycData.data.dateOfBirth ? new Date(kycData.data.dateOfBirth) : undefined,
-          address: kycData.data.address,
-          city: kycData.data.city,
-          state: kycData.data.state,
-          zipCode: kycData.data.zipCode,
-          employmentStatus: kycData.data.employmentStatus,
-          annualIncome: kycData.data.annualIncome,
-          investmentExperience: kycData.data.investmentExperience,
-          riskTolerance: kycData.data.riskTolerance,
-          governmentIdFiles: kycData.data.governmentId || [],
-          utilityBillFiles: kycData.data.utilityBill || [],
-          otherDocumentFiles: kycData.data.otherDocuments || [],
-          submittedAt: kycData.submittedAt,
+          ...kycRecord
         });
       }
-    });
+      
+      console.log('KYC status update completed successfully');
+    } catch (error) {
+      console.error('Error updating KYC status:', error);
+      throw error;
+    }
   }
 
   // Notification methods using direct SQL queries

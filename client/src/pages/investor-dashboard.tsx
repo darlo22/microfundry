@@ -1271,11 +1271,11 @@ export default function InvestorDashboard() {
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-fundry-orange"></div>
                   </div>
-                ) : investments && investments.length > 0 && investments.filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed').length > 0 ? (
+                ) : investments && investments.length > 0 && investments.filter(inv => inv.paymentStatus === 'completed').length > 0 ? (
                   <>
                     <div className="space-y-4">
                       {investments
-                        .filter(investment => investment.status === 'committed' || investment.status === 'paid' || investment.status === 'completed')
+                        .filter(investment => investment.paymentStatus === 'completed')
                         .map((investment) => (
                           <div key={investment.id} className="border rounded-lg p-6 hover:border-fundry-orange transition-colors bg-white">
                             <div className="flex items-start justify-between">
@@ -1371,7 +1371,7 @@ export default function InvestorDashboard() {
                       <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
                           <p className="text-2xl font-bold text-fundry-orange">
-                            {investments.filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed').length}
+                            {investments.filter(inv => inv.paymentStatus === 'completed').length}
                           </p>
                           <p className="text-xs text-gray-600">SAFE Agreements</p>
                         </div>
@@ -1379,7 +1379,7 @@ export default function InvestorDashboard() {
                           <p className="text-2xl font-bold text-fundry-navy">
                             {(() => {
                               const totalAmount = investments
-                                .filter(inv => inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed')
+                                .filter(inv => inv.paymentStatus === 'completed')
                                 .reduce((sum, inv) => sum + Number(inv.amount), 0);
                               return new Intl.NumberFormat('en-US', {
                                 style: 'currency',
@@ -1393,7 +1393,7 @@ export default function InvestorDashboard() {
                         </div>
                         <div>
                           <p className="text-2xl font-bold text-green-600">
-                            {investments.filter(inv => inv.status === 'completed').length}
+                            {investments.filter(inv => inv.paymentStatus === 'completed').length}
                           </p>
                           <p className="text-xs text-gray-600">Completed</p>
                         </div>

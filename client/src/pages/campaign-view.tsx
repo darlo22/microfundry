@@ -115,9 +115,7 @@ export default function CampaignView() {
     setShowPitchDeckModal(true);
   };
 
-  // Debug logo URL
-  console.log('Campaign logo URL:', campaign?.logoUrl);
-  console.log('Campaign data:', campaign);
+
 
   // Loading state
   if (isLoading || campaignLoading) {
@@ -214,7 +212,7 @@ export default function CampaignView() {
                       <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white border-4 border-white rounded-xl flex items-center justify-center overflow-hidden shadow-2xl">
                         {campaign.logoUrl ? (
                           <img 
-                            src={campaign.logoUrl} 
+                            src={campaign.logoUrl.startsWith('/') ? campaign.logoUrl : `/${campaign.logoUrl}`} 
                             alt={campaign.title}
                             className="w-full h-full object-contain p-1"
                             onError={(e) => {
@@ -241,7 +239,7 @@ export default function CampaignView() {
                       <div className="w-28 h-28 sm:w-36 sm:h-36 bg-white border-4 border-white rounded-2xl flex items-center justify-center mx-auto mb-6 overflow-hidden shadow-2xl">
                         {campaign.logoUrl ? (
                           <img 
-                            src={campaign.logoUrl} 
+                            src={campaign.logoUrl.startsWith('/') ? campaign.logoUrl : `/${campaign.logoUrl}`} 
                             alt={campaign.title}
                             className="w-full h-full object-contain p-2"
                             onError={(e) => {
@@ -375,16 +373,90 @@ export default function CampaignView() {
           </Card>
 
           {/* About This Campaign */}
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-fundry-orange to-orange-600 px-8 py-6">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  📖
+                </div>
+                About This Campaign
+              </h2>
+              <p className="text-orange-100 mt-2">Learn more about this investment opportunity</p>
+            </div>
+            
             <CardContent className="p-8">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">About This Campaign</h2>
-              </div>
-              <div className="prose max-w-none text-gray-700 leading-relaxed">
-                {campaign.fullPitch.split('\n').map((paragraph, index) => (
-                  <p key={index} className="mb-4 text-gray-700 leading-7">{paragraph}</p>
-                ))}
+              <div className="space-y-6">
+                {campaign.fullPitch.split('\r\n\r\n').map((paragraph, index) => {
+                  if (paragraph.trim() === '') return null;
+                  
+                  // Check if this is the intro paragraph
+                  if (index === 0 && paragraph.includes('"beyond payments"')) {
+                    return (
+                      <div key={index} className="bg-gradient-to-r from-fundry-navy to-blue-800 rounded-xl p-6 text-white">
+                        <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                            🎯
+                          </div>
+                          Company Vision
+                        </h3>
+                        <p className="text-blue-100 leading-relaxed text-lg">{paragraph.trim()}</p>
+                      </div>
+                    );
+                  }
+                  
+                  // Check if it contains key features
+                  if (paragraph.includes('Effortless') || paragraph.includes('Quick loans') || 
+                      paragraph.includes('Business-friendly') || paragraph.includes('Interactive')) {
+                    const features = paragraph.split('\r\n').filter(line => line.trim());
+                    return (
+                      <div key={index} className="bg-gradient-to-r from-blue-50 to-orange-50 rounded-xl p-6">
+                        <h3 className="text-xl font-semibold text-fundry-navy mb-6 flex items-center gap-3">
+                          <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            ✓
+                          </div>
+                          Key Features & Benefits
+                        </h3>
+                        <div className="grid gap-4">
+                          {features.map((feature, idx) => (
+                            <div key={idx} className="flex items-start gap-4 bg-white rounded-lg p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                              <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <span className="text-white text-lg">
+                                  {idx === 0 ? '💳' : idx === 1 ? '✈️' : idx === 2 ? '🏢' : '👥'}
+                                </span>
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-gray-800 font-medium leading-relaxed text-lg">{feature.trim()}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                  
+                  // Market positioning paragraph
+                  if (paragraph.includes('holistic fintech alternative')) {
+                    return (
+                      <div key={index} className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-6 border-l-4 border-emerald-500">
+                        <h3 className="text-lg font-semibold text-emerald-700 mb-3 flex items-center gap-2">
+                          <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm">
+                            📈
+                          </div>
+                          Market Position
+                        </h3>
+                        <p className="text-gray-700 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
+                      </div>
+                    );
+                  }
+                  
+                  // Regular paragraph with enhanced styling
+                  return (
+                    <div key={index} className="bg-gray-50 rounded-xl p-6 border-l-4 border-gray-300">
+                      <p className="text-gray-700 leading-relaxed text-lg">{paragraph.trim()}</p>
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

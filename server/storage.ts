@@ -590,6 +590,19 @@ export class DatabaseStorage implements IStorage {
       // Check if KYC verification record exists
       const existingKyc = await this.getKycVerification(userId);
       
+      // Properly handle array data for JSONB fields
+      const governmentIdFiles = Array.isArray(kycData.data.governmentId) 
+        ? kycData.data.governmentId 
+        : (kycData.data.governmentId ? [kycData.data.governmentId] : []);
+      
+      const utilityBillFiles = Array.isArray(kycData.data.utilityBill) 
+        ? kycData.data.utilityBill 
+        : (kycData.data.utilityBill ? [kycData.data.utilityBill] : []);
+      
+      const otherDocumentFiles = Array.isArray(kycData.data.otherDocuments) 
+        ? kycData.data.otherDocuments 
+        : (kycData.data.otherDocuments ? [kycData.data.otherDocuments] : []);
+
       const kycRecord = {
         status: kycData.status,
         dateOfBirth: kycData.data.dateOfBirth ? new Date(kycData.data.dateOfBirth) : null,
@@ -601,9 +614,9 @@ export class DatabaseStorage implements IStorage {
         annualIncome: kycData.data.annualIncome || null,
         investmentExperience: kycData.data.investmentExperience || null,
         riskTolerance: kycData.data.riskTolerance || null,
-        governmentIdFiles: Array.isArray(kycData.data.governmentId) ? kycData.data.governmentId : [],
-        utilityBillFiles: Array.isArray(kycData.data.utilityBill) ? kycData.data.utilityBill : [],
-        otherDocumentFiles: Array.isArray(kycData.data.otherDocuments) ? kycData.data.otherDocuments : [],
+        governmentIdFiles: governmentIdFiles,
+        utilityBillFiles: utilityBillFiles,
+        otherDocumentFiles: otherDocumentFiles,
         submittedAt: kycData.submittedAt,
       };
       

@@ -32,7 +32,7 @@ export function ShareCampaignModal({
     const campaignUrl = `${window.location.origin}/campaign/${campaign.id}`;
     const minInvestmentAmount = campaign.minimumInvestment;
     
-    return `🚀 **${campaignTitle}** is building **${shortPitch}**.
+    return `🚀 **${campaign.title}** is building **${campaign.shortPitch}**.
 
 They're raising their first $5,000 to get off the ground. Be one of their earliest backers and help bring this vision to life.
 
@@ -44,6 +44,7 @@ They're raising their first $5,000 to get off the ground. Be one of their earlie
   const investmentAppeal = generateInvestmentAppeal();
 
   const handleCopyLink = async () => {
+    const campaignUrl = `${window.location.origin}/campaign/${campaign.id}`;
     try {
       await navigator.clipboard.writeText(campaignUrl);
       setCopied(true);
@@ -96,11 +97,12 @@ They're raising their first $5,000 to get off the ground. Be one of their earlie
   };
 
   const handleNativeShare = async () => {
+    const campaignUrl = `${window.location.origin}/campaign/${campaign.id}`;
     if ('share' in navigator && typeof navigator.share === 'function') {
       try {
         await navigator.share({
-          title: campaignTitle,
-          text: shortPitch,
+          title: campaign.title,
+          text: campaign.shortPitch,
           url: campaignUrl,
         });
       } catch (err) {
@@ -112,13 +114,14 @@ They're raising their first $5,000 to get off the ground. Be one of their earlie
   };
 
   const encodedAppeal = encodeURIComponent(investmentAppeal);
+  const campaignUrl = `${window.location.origin}/campaign/${campaign.id}`;
   const encodedUrl = encodeURIComponent(campaignUrl);
 
   const shareLinks = {
     twitter: `https://twitter.com/intent/tweet?text=${encodedAppeal}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-    email: `mailto:?subject=${encodeURIComponent(`Investment Opportunity: ${campaignTitle}`)}&body=${encodedAppeal}`,
+    email: `mailto:?subject=${encodeURIComponent(`Investment Opportunity: ${campaign.title}`)}&body=${encodedAppeal}`,
     whatsapp: `https://wa.me/?text=${encodedAppeal}`,
   };
 
@@ -188,7 +191,7 @@ They're raising their first $5,000 to get off the ground. Be one of their earlie
             <label className="text-sm font-medium text-gray-700">Quick Share Link</label>
             <div className="flex gap-2">
               <Input 
-                value={campaignUrl} 
+                value={`${window.location.origin}/campaign/${campaign.id}`} 
                 readOnly 
                 className="flex-1 bg-white/80"
               />
@@ -267,8 +270,8 @@ They're raising their first $5,000 to get off the ground. Be one of their earlie
 
           {/* Campaign Preview */}
           <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="font-medium text-gray-900 mb-2">{campaignTitle}</h4>
-            <p className="text-sm text-gray-600">{shortPitch}</p>
+            <h4 className="font-medium text-gray-900 mb-2">{campaign.title}</h4>
+            <p className="text-sm text-gray-600">{campaign.shortPitch}</p>
           </div>
         </div>
       </DialogContent>

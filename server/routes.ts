@@ -19,6 +19,8 @@ import { emailService } from "./services/email";
 import { eq, and, gt } from "drizzle-orm";
 import { emailVerificationTokens } from "@shared/schema";
 import Stripe from "stripe";
+import pdf2pic from "pdf2pic";
+import fs from "fs";
 
 // Initialize Stripe
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -3191,6 +3193,68 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     } catch (error) {
       console.error("Error updating notification preferences:", error);
       res.status(500).json({ error: "Failed to update notification preferences" });
+    }
+  });
+
+  // PDF to PNG conversion endpoint
+  app.get('/api/pitch-deck-slides/:campaignId', async (req, res) => {
+    try {
+      const campaignId = parseInt(req.params.campaignId);
+      const campaign = await storage.getCampaign(campaignId);
+      
+      if (!campaign || !campaign.pitchDeckUrl) {
+        return res.status(404).json({ message: 'Campaign or pitch deck not found' });
+      }
+
+      const pdfPath = path.join(process.cwd(), campaign.pitchDeckUrl);
+      
+      if (!fs.existsSync(pdfPath)) {
+        return res.status(404).json({ message: 'Pitch deck file not found' });
+      }
+
+      // Create slides directory if it doesn't exist
+      const slidesDir = path.join(process.cwd(), 'uploads', 'slides', campaignId.toString());
+      if (!fs.existsSync(slidesDir)) {
+        fs.mkdirSync(slidesDir, { recursive: true });
+      }
+
+      // Check if slides already exist
+      const existingSlides = fs.readdirSync(slidesDir).filter(file => file.endsWith('.png'));
+      if (existingSlides.length > 0) {
+        const slideUrls = existingSlides
+          .sort((a, b) => {
+            const aNum = parseInt(a.match(/(\d+)/)?.[1] || '0');
+            const bNum = parseInt(b.match(/(\d+)/)?.[1] || '0');
+            return aNum - bNum;
+          })
+          .map(slide => `/uploads/slides/${campaignId}/${slide}`);
+        return res.json({ slides: slideUrls });
+      }
+
+      // Convert PDF to PNG slides
+      const convertOptions = {
+        density: 150,           // DPI
+        saveFilename: "slide",
+        savePath: slidesDir,
+        format: "png",
+        width: 800,
+        height: 600
+      };
+
+      const storeAsImage = pdf2pic.fromPath(pdfPath, convertOptions);
+      
+      // Convert all pages
+      const results = await storeAsImage.bulk(-1, { responseType: "image" });
+      
+      // Get the generated slide URLs
+      const slideUrls = results.map((result, index) => 
+        `/uploads/slides/${campaignId}/slide.${index + 1}.png`
+      );
+
+      res.json({ slides: slideUrls });
+    } catch (error) {
+      console.error('Error converting PDF to slides:', error);
+      res.status(500).json({ message: 'Failed to convert PDF to slides' });
     }
   });
 

@@ -185,6 +185,10 @@ export default function PaymentWithdrawal() {
 
   const { data: kycStatus, isLoading: kycLoading } = useQuery({
     queryKey: ["/api/kyc-status", user?.id],
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/kyc-status/${user?.id}`);
+      return response.json();
+    },
     enabled: !!user?.id,
   });
 
@@ -251,7 +255,7 @@ export default function PaymentWithdrawal() {
       setKycModalOpen(false);
       
       // Invalidate KYC status cache to refresh the data immediately
-      queryClient.invalidateQueries({ queryKey: ["/api/kyc-status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/kyc-status", user?.id] });
     },
     onError: (error: any) => {
       toast({
@@ -582,7 +586,7 @@ export default function PaymentWithdrawal() {
                   <div>
                     <p className="font-medium">Status: <span className={getKycStatusColor(kycStatus?.status || "not_started")}>
                       {kycStatus?.status === "under_review" ? "Under Review" : 
-                       kycStatus?.status ? kycStatus.status.charAt(0).toUpperCase() + kycStatus.status.slice(1) : "Not Started"}
+                       kycStatus?.status ? String(kycStatus.status).charAt(0).toUpperCase() + String(kycStatus.status).slice(1) : "Not Started"}
                     </span></p>
                     {kycStatus?.lastUpdated && (
                       <p className="text-sm text-gray-600">

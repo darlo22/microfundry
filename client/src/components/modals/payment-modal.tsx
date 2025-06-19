@@ -401,7 +401,18 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       });
 
       if (paymentMethodError) {
-        throw new Error(paymentMethodError.message);
+        // Reset to payment method selection for payment method errors
+        setShowStripeForm(false);
+        setCardholderName('');
+        setClientSecret('');
+        setIsProcessing(false);
+        
+        toast({
+          title: "Card Error",
+          description: `${paymentMethodError.message}. Please try a different payment method.`,
+          variant: "destructive",
+        });
+        return;
       }
 
       // Confirm payment intent with the payment method
@@ -411,7 +422,19 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
 
       if (error) {
         console.error('Stripe payment error:', error);
-        throw new Error(error.message);
+        
+        // Reset to payment method selection for card payment errors
+        setShowStripeForm(false);
+        setCardholderName('');
+        setClientSecret('');
+        setIsProcessing(false);
+        
+        toast({
+          title: "Card Payment Failed",
+          description: `${error.message}. Please try a different payment method.`,
+          variant: "destructive",
+        });
+        return;
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
@@ -431,13 +454,29 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         
         onClose();
       } else {
-        throw new Error('Payment not completed');
+        // Reset to payment method selection for incomplete payments
+        setShowStripeForm(false);
+        setCardholderName('');
+        setClientSecret('');
+        setIsProcessing(false);
+        
+        toast({
+          title: "Payment Incomplete",
+          description: "Payment was not completed. Please try again or use a different payment method.",
+          variant: "destructive",
+        });
       }
     } catch (error: any) {
       console.error('Payment processing error:', error);
+      
+      // Reset to payment method selection for any other errors
+      setShowStripeForm(false);
+      setCardholderName('');
+      setClientSecret('');
+      
       toast({
         title: "Payment Failed",
-        description: error.message || "Failed to process payment",
+        description: error.message || "Failed to process payment. Please try again or use a different payment method.",
         variant: "destructive",
       });
     } finally {

@@ -334,8 +334,16 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     }
   };
 
-  const handleClose = () => {
+  const resetModalToPaymentSelection = () => {
+    setIsProcessing(false);
+    setIsProcessingNaira(false);
+    setShowStripeForm(false);
     setCardholderName('');
+    setClientSecret('');
+  };
+
+  const handleClose = () => {
+    resetModalToPaymentSelection();
     onClose();
   };
 
@@ -412,11 +420,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       if (paymentMethodError) {
         console.error('Payment method error:', paymentMethodError);
         
-        // Immediately reset processing state and form
-        setIsProcessing(false);
-        setShowStripeForm(false);
-        setCardholderName('');
-        setClientSecret('');
+        // Reset modal to payment selection
+        resetModalToPaymentSelection();
         
         toast({
           title: "Card Error",
@@ -434,11 +439,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       if (error) {
         console.error('Stripe payment error:', error);
         
-        // Immediately reset processing state and form to allow retry
-        setIsProcessing(false);
-        setShowStripeForm(false);
-        setCardholderName('');
-        setClientSecret('');
+        // Reset modal to payment selection
+        resetModalToPaymentSelection();
         
         toast({
           title: "Card Payment Failed",
@@ -465,11 +467,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         
         onClose();
       } else {
-        // Immediately reset processing state and form for incomplete payments
-        setIsProcessing(false);
-        setShowStripeForm(false);
-        setCardholderName('');
-        setClientSecret('');
+        // Reset modal to payment selection for incomplete payments
+        resetModalToPaymentSelection();
         
         toast({
           title: "Payment Incomplete",
@@ -669,6 +668,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                       setShowStripeForm(false);
                       setIsProcessing(false);
                       setCardholderName('');
+                      setClientSecret('');
                     }}
                     variant="outline"
                     className="flex-1"

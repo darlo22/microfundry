@@ -19,8 +19,11 @@ app.use(express.urlencoded({ extended: false }));
 
 // Serve static files from uploads directory with proper MIME types
 app.use('/uploads', express.static('uploads', {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.mp4')) {
+  setHeaders: (res, path, stat) => {
+    // Set video MIME type for large files (likely videos)
+    if (stat.size > 1024 * 1024) {
+      res.setHeader('Content-Type', 'video/mp4');
+    } else if (path.endsWith('.mp4')) {
       res.setHeader('Content-Type', 'video/mp4');
     } else if (path.endsWith('.mov')) {
       res.setHeader('Content-Type', 'video/quicktime');
@@ -31,6 +34,7 @@ app.use('/uploads', express.static('uploads', {
     }
     // Enable range requests for video streaming
     res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
   }
 }));
 

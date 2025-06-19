@@ -74,32 +74,7 @@ const safeHandler = (handler: Function) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Serve uploaded files statically from uploads directory
-  app.get('/uploads/:filename', safeHandler((req: express.Request, res: express.Response) => {
-    const filename = req.params.filename;
-    const filePath = path.join(process.cwd(), 'uploads', filename);
-    
-    // Check if this is a video file by looking up in database
-    // For now, set video MIME type for files that are likely videos based on size
-    fs.stat(filePath, (err, stats) => {
-      if (err) {
-        return res.status(404).json({ message: 'File not found' });
-      }
-      
-      // Files larger than 1MB are likely videos
-      if (stats.size > 1024 * 1024) {
-        res.setHeader('Content-Type', 'video/mp4');
-        res.setHeader('Accept-Ranges', 'bytes');
-        res.setHeader('Cache-Control', 'public, max-age=3600');
-      }
-      
-      res.sendFile(filePath, (err: any) => {
-        if (err && !res.headersSent) {
-          res.status(404).json({ message: 'File not found' });
-        }
-      });
-    });
-  }));
+
 
   // Serve slide files from nested directories
   app.get('/uploads/slides/:campaignId/:filename', safeHandler((req: express.Request, res: express.Response) => {

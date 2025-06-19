@@ -1569,18 +1569,24 @@ This SAFE Agreement has been digitally signed and executed.
                       </div>
                     </DialogContent>
                   </Dialog>
-                </CardContent>
-              </Card>
+                  </div>
+                </div>
+              </div>
 
               {/* Payment Methods */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    Payment Methods
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                      <CreditCard className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-white">Payment Methods</h3>
+                      <p className="text-green-100 text-sm">Manage your payment options</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6">
                   {isLoadingPaymentMethods ? (
                     <div className="flex justify-center py-4">
                       <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
@@ -1840,18 +1846,23 @@ This SAFE Agreement has been digitally signed and executed.
                       </div>
                     </DialogContent>
                   </Dialog>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Notification Preferences */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="h-5 w-5" />
-                    Notification Preferences
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Bell className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-white">Notification Preferences</h3>
+                      <p className="text-purple-100 text-sm">Customize your alerts</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 space-y-4">
                   {isLoadingNotificationPreferences ? (
                     <div className="flex justify-center py-4">
                       <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
@@ -1940,18 +1951,23 @@ This SAFE Agreement has been digitally signed and executed.
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Account Management */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    Account Management
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-red-600 to-red-700 px-6 py-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Settings className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-white">Account Management</h3>
+                      <p className="text-red-100 text-sm">Account settings and data</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 space-y-4">
                   <Button
                     variant="outline"
                     className="w-full justify-start"
@@ -2012,8 +2028,8 @@ This SAFE Agreement has been digitally signed and executed.
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

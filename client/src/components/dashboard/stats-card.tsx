@@ -18,18 +18,18 @@ export default function StatsCard({
   title,
   value,
   icon: Icon,
-  iconBgColor = "bg-gradient-to-br from-blue-50 to-blue-100",
-  iconColor = "text-blue-600",
+  iconBgColor = "bg-blue-500/20",
+  iconColor = "text-blue-400",
   trend,
   subtitle,
 }: StatsCardProps) {
   return (
-    <Card className="bg-white hover:shadow-lg transition-all duration-300 border-0 shadow-md group hover:scale-105">
+    <Card className="bg-slate-800 border-slate-700 hover:shadow-xl transition-all duration-300 shadow-lg group hover:scale-105">
       <CardContent className="p-4 sm:p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-gray-500 text-xs sm:text-sm font-medium mb-1 sm:mb-2">{title}</p>
-            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 group-hover:text-fundry-navy transition-colors duration-300">{value}</p>
+            <p className="text-slate-300 text-xs sm:text-sm font-medium mb-1 sm:mb-2">{title}</p>
+            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white group-hover:text-fundry-orange transition-colors duration-300">{value}</p>
           </div>
           <div className={`w-10 h-10 sm:w-12 sm:h-12 ${iconBgColor} rounded-xl flex items-center justify-center ${iconColor} group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
             <Icon size={20} className="sm:w-6 sm:h-6" />
@@ -41,7 +41,7 @@ export default function StatsCard({
               {trend.value}
             </span>
             {subtitle && (
-              <span className="text-gray-400 text-xs sm:text-sm">
+              <span className="text-slate-400 text-xs sm:text-sm">
                 {subtitle}
               </span>
             )}
@@ -49,7 +49,7 @@ export default function StatsCard({
         )}
         {subtitle && !trend && (
           <div className="mt-3 sm:mt-4">
-            <span className="text-gray-400 text-xs sm:text-sm font-medium">
+            <span className="text-slate-400 text-xs sm:text-sm font-medium">
               {subtitle}
             </span>
           </div>

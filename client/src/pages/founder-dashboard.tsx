@@ -164,9 +164,9 @@ export default function FounderDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <Card className="mb-6 sm:mb-8 bg-white shadow-lg border-0">
-          <CardHeader className="bg-gradient-to-r from-fundry-orange/10 to-fundry-navy/10 rounded-t-lg">
-            <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+        <Card className="mb-6 sm:mb-8 bg-slate-800 border-slate-700 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20 rounded-t-lg">
+            <CardTitle className="text-lg sm:text-xl font-bold text-white flex items-center">
               <TrendingUp className="mr-2 text-fundry-orange" size={24} />
               Quick Actions
             </CardTitle>
@@ -175,29 +175,29 @@ export default function FounderDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <Button
                 variant="outline"
-                className="flex items-center p-4 sm:p-6 h-auto bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 hover:border-fundry-orange hover:shadow-lg group transition-all duration-300 hover:scale-105"
+                className="flex items-center p-4 sm:p-6 h-auto bg-slate-700 border-2 border-slate-600 hover:border-fundry-orange hover:shadow-lg group transition-all duration-300 hover:scale-105"
                 onClick={() => setShowCampaignModal(true)}
               >
                 <div className="w-12 h-12 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
                   <Plus className="text-white" size={24} />
                 </div>
                 <div className="text-left flex-1">
-                  <div className="font-bold text-gray-900 group-hover:text-fundry-orange transition-colors duration-300 text-sm sm:text-base">Create Campaign</div>
-                  <div className="text-xs sm:text-sm text-gray-600">Start a new fundraising campaign</div>
+                  <div className="font-bold text-white group-hover:text-fundry-orange transition-colors duration-300 text-sm sm:text-base">Create Campaign</div>
+                  <div className="text-xs sm:text-sm text-slate-300">Start a new fundraising campaign</div>
                 </div>
               </Button>
 
               <Button
                 variant="outline"
-                className="flex items-center p-4 sm:p-6 h-auto bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 hover:border-fundry-navy hover:shadow-lg group transition-all duration-300 hover:scale-105"
+                className="flex items-center p-4 sm:p-6 h-auto bg-slate-700 border-2 border-slate-600 hover:border-fundry-navy hover:shadow-lg group transition-all duration-300 hover:scale-105"
                 onClick={() => setShowShareModal(true)}
               >
                 <div className="w-12 h-12 bg-gradient-to-br from-fundry-navy to-blue-700 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
                   <Share className="text-white" size={24} />
                 </div>
                 <div className="text-left flex-1">
-                  <div className="font-bold text-gray-900 group-hover:text-fundry-navy transition-colors duration-300 text-sm sm:text-base">Share Campaign</div>
-                  <div className="text-xs sm:text-sm text-gray-600">Get your private campaign link</div>
+                  <div className="font-bold text-white group-hover:text-fundry-navy transition-colors duration-300 text-sm sm:text-base">Share Campaign</div>
+                  <div className="text-xs sm:text-sm text-slate-300">Get your private campaign link</div>
                 </div>
               </Button>
 
@@ -220,13 +220,13 @@ export default function FounderDashboard() {
         </Card>
 
         {/* Active Campaigns */}
-        <Card className="bg-white shadow-lg border-0">
-          <CardHeader className="bg-gradient-to-r from-fundry-orange/10 to-fundry-navy/10 rounded-t-lg flex flex-row items-center justify-between">
-            <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+        <Card className="bg-slate-800 border-slate-700 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20 rounded-t-lg flex flex-row items-center justify-between">
+            <CardTitle className="text-lg sm:text-xl font-bold text-white flex items-center">
               <Rocket className="mr-2 text-fundry-orange" size={24} />
               Active Campaigns
             </CardTitle>
-            <Button variant="link" className="text-fundry-orange hover:text-orange-600 font-semibold">
+            <Button variant="link" className="text-fundry-orange hover:text-orange-400 font-semibold">
               View All
             </Button>
           </CardHeader>
@@ -249,10 +249,10 @@ export default function FounderDashboard() {
               </div>
             ) : (
               <div className="text-center py-8 sm:py-12">
-                <div className="bg-gradient-to-br from-orange-50 to-blue-50 rounded-2xl p-6 sm:p-8 border border-orange-100">
+                <div className="bg-slate-700 rounded-2xl p-6 sm:p-8 border border-slate-600">
                   <Rocket className="mx-auto mb-4 text-fundry-orange" size={48} />
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Ready to Launch?</h3>
-                  <p className="text-gray-600 mb-6 text-sm sm:text-base">No campaigns yet. Create your first campaign to start raising funds!</p>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Ready to Launch?</h3>
+                  <p className="text-slate-300 mb-6 text-sm sm:text-base">No campaigns yet. Create your first campaign to start raising funds!</p>
                   <Button 
                     onClick={() => setShowCampaignModal(true)}
                     className="bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"

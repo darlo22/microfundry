@@ -369,15 +369,15 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       const { clientSecret: secret } = await response.json();
       setClientSecret(secret);
       setShowStripeForm(true);
+      setIsProcessing(false); // Reset processing state when form is shown
     } catch (error: any) {
       console.error('Payment setup error:', error);
+      setIsProcessing(false); // Reset processing state on error
       toast({
         title: "Payment Setup Failed",
         description: error.message || "Failed to setup payment",
         variant: "destructive",
       });
-    } finally {
-      setIsProcessing(false);
     }
   };
 

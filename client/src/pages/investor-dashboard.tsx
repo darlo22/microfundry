@@ -929,7 +929,22 @@ export default function InvestorDashboard() {
                   <div className="flex justify-center py-12">
                     <div className="animate-spin w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full" />
                   </div>
-                ) : filteredCampaigns.length > 0 ? (
+                ) : (
+                  <div className="mb-4 text-sm text-gray-600">
+                    Debug: Found {campaigns?.length || 0} total campaigns, {filteredCampaigns.length} after filtering
+                    {campaigns?.length > 0 && (
+                      <div className="mt-2">
+                        <details>
+                          <summary>Campaign Data Sample</summary>
+                          <pre className="text-xs bg-gray-100 p-2 mt-2 rounded overflow-auto">
+                            {JSON.stringify(campaigns[0], null, 2)}
+                          </pre>
+                        </details>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {!isLoadingCampaigns && filteredCampaigns.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {filteredCampaigns.map((campaign: any) => (
                       <div key={campaign.id} className="border border-gray-200 rounded-lg p-4 hover:border-orange-300 hover:shadow-md transition-all duration-300">

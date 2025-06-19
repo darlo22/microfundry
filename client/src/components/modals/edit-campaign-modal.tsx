@@ -304,9 +304,106 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information */}
+          {/* Business Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
+            <h3 className="text-lg font-medium text-gray-900">Business Information</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="companyName">Company/Business Name</Label>
+                <Input
+                  id="companyName"
+                  value={formData.companyName}
+                  onChange={(e) => handleInputChange('companyName', e.target.value)}
+                  placeholder="Enter your company name"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="country">Country</Label>
+                <Select value={formData.country} onValueChange={(value) => handleInputChange('country', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60 overflow-y-auto">
+                    {Object.keys(COUNTRIES_AND_STATES).map((country) => (
+                      <SelectItem key={country} value={country}>{country}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* State/Province - Only show if country has states */}
+              {formData.country && COUNTRIES_AND_STATES[formData.country as keyof typeof COUNTRIES_AND_STATES]?.states?.length > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="state">State/Province</Label>
+                  <Select value={formData.state} onValueChange={(value) => handleInputChange('state', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select state/province" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      {COUNTRIES_AND_STATES[formData.country as keyof typeof COUNTRIES_AND_STATES]?.states?.map((state) => (
+                        <SelectItem key={state} value={state}>{state}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              
+              {/* Show message for countries without states */}
+              {formData.country && COUNTRIES_AND_STATES[formData.country as keyof typeof COUNTRIES_AND_STATES]?.states?.length === 0 && (
+                <div className="text-sm text-gray-500 italic">
+                  No state/province subdivision for {formData.country}
+                </div>
+              )}
+
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor="businessAddress">Business Address</Label>
+                <Textarea
+                  id="businessAddress"
+                  value={formData.businessAddress}
+                  onChange={(e) => handleInputChange('businessAddress', e.target.value)}
+                  placeholder="Enter full business address including street, city, postal code"
+                  rows={3}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="registrationStatus">Registration Status</Label>
+                <Select value={formData.registrationStatus} onValueChange={(value) => handleInputChange('registrationStatus', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="registered">Registered</SelectItem>
+                    <SelectItem value="in-process">In Process</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="registrationType">Registration Type</Label>
+                <Select value={formData.registrationType} onValueChange={(value) => handleInputChange('registrationType', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LLC">LLC</SelectItem>
+                    <SelectItem value="Corporation">Corporation</SelectItem>
+                    <SelectItem value="Partnership">Partnership</SelectItem>
+                    <SelectItem value="Sole Proprietorship">Sole Proprietorship</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* Basic Campaign Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900">Campaign Information</h3>
             
             <div className="space-y-2">
               <Label htmlFor="title">Campaign Title</Label>

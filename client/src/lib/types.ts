@@ -31,10 +31,20 @@ export interface CampaignWithStats {
   currentRevenue?: string;
   customers?: string;
   previousFunding?: string;
+  keyMilestones?: string;
+  updatedAt?: string;
+  businessProfileId?: number;
+  // Business Strategy fields
+  problemStatement?: string;
+  solution?: string;
+  marketOpportunity?: string;
   businessModel?: string;
-  useOfFunds?: string;
-  marketSize?: string;
+  goToMarketStrategy?: string;
   competitiveLandscape?: string;
+  // Use of Funds
+  useOfFunds?: string | any[];
+  // Legacy fields for compatibility
+  marketSize?: string;
   riskFactors?: string;
 }
 

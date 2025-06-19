@@ -590,6 +590,33 @@ export default function CampaignView() {
                 </div>
                 {renderTractionMetrics()}
                 <div className="space-y-6">
+                  {campaign.problemStatement && (
+                    <div className="p-6 bg-gradient-to-br from-red-50 via-white to-rose-50/30 rounded-2xl border border-red-100 shadow-sm">
+                      <h3 className="font-bold text-lg text-fundry-navy mb-3 flex items-center">
+                        <div className="w-2 h-6 bg-red-500 rounded-full mr-3"></div>
+                        Problem Statement
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.problemStatement}</p>
+                    </div>
+                  )}
+                  {campaign.solution && (
+                    <div className="p-6 bg-gradient-to-br from-green-50 via-white to-emerald-50/30 rounded-2xl border border-green-100 shadow-sm">
+                      <h3 className="font-bold text-lg text-fundry-navy mb-3 flex items-center">
+                        <div className="w-2 h-6 bg-green-500 rounded-full mr-3"></div>
+                        Solution
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.solution}</p>
+                    </div>
+                  )}
+                  {campaign.marketOpportunity && (
+                    <div className="p-6 bg-gradient-to-br from-cyan-50 via-white to-teal-50/30 rounded-2xl border border-cyan-100 shadow-sm">
+                      <h3 className="font-bold text-lg text-fundry-navy mb-3 flex items-center">
+                        <div className="w-2 h-6 bg-cyan-500 rounded-full mr-3"></div>
+                        Market Opportunity
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.marketOpportunity}</p>
+                    </div>
+                  )}
                   {campaign.businessModel && (
                     <div className="p-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50/30 rounded-2xl border border-blue-100 shadow-sm">
                       <h3 className="font-bold text-lg text-fundry-navy mb-3 flex items-center">
@@ -597,6 +624,24 @@ export default function CampaignView() {
                         Business Model
                       </h3>
                       <p className="text-gray-700 leading-relaxed">{campaign.businessModel}</p>
+                    </div>
+                  )}
+                  {campaign.goToMarketStrategy && (
+                    <div className="p-6 bg-gradient-to-br from-yellow-50 via-white to-amber-50/30 rounded-2xl border border-yellow-100 shadow-sm">
+                      <h3 className="font-bold text-lg text-fundry-navy mb-3 flex items-center">
+                        <div className="w-2 h-6 bg-yellow-500 rounded-full mr-3"></div>
+                        Go-To-Market Strategy
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.goToMarketStrategy}</p>
+                    </div>
+                  )}
+                  {campaign.competitiveLandscape && (
+                    <div className="p-6 bg-gradient-to-br from-purple-50 via-white to-violet-50/30 rounded-2xl border border-purple-100 shadow-sm">
+                      <h3 className="font-bold text-lg text-fundry-navy mb-3 flex items-center">
+                        <div className="w-2 h-6 bg-purple-500 rounded-full mr-3"></div>
+                        Competitive Landscape
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.competitiveLandscape}</p>
                     </div>
                   )}
                   {campaign.useOfFunds && Array.isArray(campaign.useOfFunds) && campaign.useOfFunds.length > 0 && (

@@ -131,6 +131,12 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
     discountRate: campaign.discountRate,
     valuationCap: campaign.valuationCap,
     businessSector: campaign.businessSector || '',
+    problemStatement: campaign.problemStatement || '',
+    solution: campaign.solution || '',
+    marketOpportunity: campaign.marketOpportunity || '',
+    businessModel: campaign.businessModel || '',
+    goToMarketStrategy: campaign.goToMarketStrategy || '',
+    competitiveLandscape: campaign.competitiveLandscape || '',
     startupStage: campaign.startupStage || '',
     currentRevenue: campaign.currentRevenue || '',
     customers: campaign.customers || '',
@@ -440,6 +446,79 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                   onChange={(e) => handleInputChange('customers', e.target.value)}
                   placeholder="100"
                 />
+              </div>
+            </div>
+
+            {/* Business Strategy */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-medium text-gray-900">Business Strategy</h4>
+              
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="problemStatement">Problem Statement</Label>
+                  <Textarea
+                    id="problemStatement"
+                    rows={4}
+                    placeholder="Describe the specific, real-world problem your target users face..."
+                    value={formData.problemStatement}
+                    onChange={(e) => handleInputChange('problemStatement', e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="solution">Solution</Label>
+                  <Textarea
+                    id="solution"
+                    rows={4}
+                    placeholder="Present your product or service as the answer to the problem..."
+                    value={formData.solution}
+                    onChange={(e) => handleInputChange('solution', e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="marketOpportunity">Market Opportunity</Label>
+                  <Textarea
+                    id="marketOpportunity"
+                    rows={4}
+                    placeholder="Define who your target customers are. Present TAM, SAM, and SOM if possible..."
+                    value={formData.marketOpportunity}
+                    onChange={(e) => handleInputChange('marketOpportunity', e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="businessModel">Business Model</Label>
+                  <Textarea
+                    id="businessModel"
+                    rows={4}
+                    placeholder="Explain how your startup makes money (subscriptions, transaction fees, SaaS, etc.)..."
+                    value={formData.businessModel}
+                    onChange={(e) => handleInputChange('businessModel', e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="goToMarketStrategy">Go-To-Market Strategy</Label>
+                  <Textarea
+                    id="goToMarketStrategy"
+                    rows={4}
+                    placeholder="Explain how you'll acquire users or customers. Include marketing channels, partnerships..."
+                    value={formData.goToMarketStrategy}
+                    onChange={(e) => handleInputChange('goToMarketStrategy', e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="competitiveLandscape">Competitive Landscape</Label>
+                  <Textarea
+                    id="competitiveLandscape"
+                    rows={4}
+                    placeholder="Identify key competitors. Show how you're different (price, UX, technology, community, etc.)..."
+                    value={formData.competitiveLandscape}
+                    onChange={(e) => handleInputChange('competitiveLandscape', e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 

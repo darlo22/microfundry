@@ -3260,16 +3260,19 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         console.log('Could not determine page count, using default of 11');
       }
 
-      // Convert PDF to PNG slides with optimized parameters for all pages
-      const command = `convert -limit memory 1GB -limit map 2GB -density 200 "${pdfPath}" -resize 1000x750 -quality 90 "${slidesDir}/slide-%03d.png"`;
+      // Convert PDF to PNG slides with enhanced parameters for all pages
+      const command = `convert -limit memory 2GB -limit map 4GB -limit disk 8GB -density 150 "${pdfPath}" -background white -flatten -resize 1000x750> -quality 85 "${slidesDir}/slide-%03d.png"`;
       
       console.log(`Converting PDF with command: ${command}`);
+      console.log(`Expected to generate ${pageCount} slides`);
       
       try {
-        // Set a longer timeout for conversion based on page count
-        const timeout = Math.max(30000, pageCount * 5000); // 5 seconds per page, minimum 30 seconds
+        // Set a much longer timeout for conversion based on page count
+        const timeout = Math.max(60000, pageCount * 8000); // 8 seconds per page, minimum 60 seconds
+        console.log(`Using timeout: ${timeout}ms for ${pageCount} pages`);
         const result = await execAsync(command, { timeout });
         console.log('PDF conversion completed:', result.stdout);
+        console.log('PDF conversion stderr:', result.stderr);
         
         // Verify all slides were created successfully and remove empty files
         let allSlideFiles = fs.readdirSync(slidesDir)

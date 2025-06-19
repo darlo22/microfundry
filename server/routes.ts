@@ -75,7 +75,7 @@ const safeHandler = (handler: Function) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
-  // Enhanced video streaming endpoint
+  // Enhanced video streaming endpoint with improved buffering
   app.get('/api/stream/:filename', (req: express.Request, res: express.Response) => {
     try {
       const filename = req.params.filename;
@@ -89,28 +89,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fileSize = stat.size;
       const range = req.headers.range;
       
-      // Always set proper video headers
+      // Set proper video headers for better streaming
       res.setHeader('Content-Type', 'video/mp4');
       res.setHeader('Accept-Ranges', 'bytes');
-      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
       res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Headers', 'Range');
       
       if (range) {
         // Parse range header
         const ranges = range.replace(/bytes=/, '').split('-');
         const start = parseInt(ranges[0], 10) || 0;
-        const end = parseInt(ranges[1], 10) || fileSize - 1;
+        const end = parseInt(ranges[1], 10) || Math.min(start + 1024 * 1024, fileSize - 1); // 1MB chunks
         const chunkSize = (end - start) + 1;
         
         // Validate range
-        if (start >= fileSize || end >= fileSize) {
+        if (start >= fileSize || end >= fileSize || start > end) {
           res.writeHead(416, {
             'Content-Range': `bytes */${fileSize}`
           });
           return res.end();
         }
         
-        // Send partial content
+        // Send partial content with proper headers
         res.writeHead(206, {
           'Content-Range': `bytes ${start}-${end}/${fileSize}`,
           'Content-Length': chunkSize,
@@ -118,20 +119,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         const stream = fs.createReadStream(filePath, { start, end });
+        
+        stream.on('error', (err) => {
+          console.error('Stream error:', err);
+          if (!res.headersSent) {
+            res.status(500).end();
+          }
+        });
+        
         stream.pipe(res);
       } else {
-        // Send entire file
+        // Send entire file for non-range requests
         res.writeHead(200, {
           'Content-Length': fileSize,
           'Content-Type': 'video/mp4'
         });
         
         const stream = fs.createReadStream(filePath);
+        
+        stream.on('error', (err) => {
+          console.error('Stream error:', err);
+          if (!res.headersSent) {
+            res.status(500).end();
+          }
+        });
+        
         stream.pipe(res);
       }
     } catch (error) {
       console.error('Video streaming error:', error);
-      res.status(500).json({ error: 'Video streaming failed' });
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Video streaming failed' });
+      }
     }
   });
 

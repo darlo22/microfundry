@@ -56,6 +56,10 @@ export function RobustVideoPlayer({ videoUrl, title, logoUrl }: RobustVideoPlaye
       // Set the primary video source
       video.src = `/api/stream/${videoUrl.replace(/^\/uploads\//, '')}`;
       
+      // Enhanced video settings for better playback
+      video.preload = 'auto';
+      video.crossOrigin = 'anonymous';
+      
       // Force load attempt
       video.load();
       
@@ -66,6 +70,22 @@ export function RobustVideoPlayer({ videoUrl, title, logoUrl }: RobustVideoPlaye
       });
     }
   }, [videoUrl]);
+
+  // Enhanced play/pause handler
+  const togglePlay = async () => {
+    if (!videoRef.current) return;
+    
+    try {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        await videoRef.current.play();
+      }
+    } catch (error) {
+      console.error('Playback error:', error);
+      setHasError(true);
+    }
+  };
 
   const handlePlay = async () => {
     if (videoRef.current) {
@@ -215,15 +235,25 @@ export function RobustVideoPlayer({ videoUrl, title, logoUrl }: RobustVideoPlaye
       <video
         ref={videoRef}
         className={`w-full h-full object-cover ${hasError ? 'hidden' : ''}`}
-        preload="metadata"
+        preload="auto"
         playsInline
         muted={isMuted}
+        controls={false}
         poster={logoUrl ? (logoUrl.startsWith('/') ? logoUrl : `/${logoUrl}`) : undefined}
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onEnded={() => setIsPlaying(false)}
+        onPlay={() => {
+          console.log('Video started playing');
+          setIsPlaying(true);
+        }}
+        onPause={() => {
+          console.log('Video paused');
+          setIsPlaying(false);
+        }}
+        onEnded={() => {
+          console.log('Video ended');
+          setIsPlaying(false);
+        }}
         onError={(e) => {
           const video = videoRef.current;
           console.log('Video failed, switching to image fallback');
@@ -236,10 +266,28 @@ export function RobustVideoPlayer({ videoUrl, title, logoUrl }: RobustVideoPlaye
           setHasError(false);
         }}
         onLoadStart={() => {
+          console.log('Video loading started');
           setIsLoading(true);
         }}
-        onWaiting={() => setIsLoading(true)}
-        onCanPlayThrough={() => setIsLoading(false)}
+        onWaiting={() => {
+          console.log('Video buffering');
+          setIsLoading(true);
+        }}
+        onCanPlayThrough={() => {
+          console.log('Video can play through without buffering');
+          setIsLoading(false);
+        }}
+        onProgress={() => {
+          // Track buffering progress
+          if (videoRef.current) {
+            const buffered = videoRef.current.buffered;
+            if (buffered.length > 0) {
+              const bufferedEnd = buffered.end(buffered.length - 1);
+              const duration = videoRef.current.duration;
+              console.log(`Buffered: ${(bufferedEnd / duration * 100).toFixed(1)}%`);
+            }
+          }
+        }}
       />
 
       {/* Image Fallback */}

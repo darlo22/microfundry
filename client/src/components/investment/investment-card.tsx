@@ -1,14 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Eye } from "lucide-react";
+import { FileText, Eye, Edit2, Trash2, CreditCard } from "lucide-react";
 import { Link } from "wouter";
 import type { InvestmentWithCampaign } from "@/lib/types";
 
 interface InvestmentCardProps {
   investment: InvestmentWithCampaign;
+  onPayNow?: (investment: InvestmentWithCampaign) => void;
+  onEdit?: (id: number, amount: number) => void;
+  onDelete?: (id: number) => void;
 }
 
-export default function InvestmentCard({ investment }: InvestmentCardProps) {
+export default function InvestmentCard({ investment, onPayNow, onEdit, onDelete }: InvestmentCardProps) {
   // Guard against null/undefined investment or campaign data
   if (!investment || !investment.campaign) {
     return null;
@@ -98,6 +101,45 @@ export default function InvestmentCard({ investment }: InvestmentCardProps) {
                 View Campaign
               </Button>
             </Link>
+          )}
+          
+          {/* Action buttons for pending investments */}
+          {investment.paymentStatus === "pending" && (
+            <>
+              {onPayNow && (
+                <Button 
+                  onClick={() => onPayNow(investment)}
+                  className="bg-green-600 hover:bg-green-700 text-white text-sm"
+                >
+                  <CreditCard className="mr-2" size={16} />
+                  Pay Now
+                </Button>
+              )}
+              
+              {onEdit && (
+                <Button 
+                  onClick={() => onEdit(investment.id, parseFloat(investment.amount))}
+                  variant="outline" 
+                  size="sm"
+                  className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                >
+                  <Edit2 className="mr-2" size={16} />
+                  Edit
+                </Button>
+              )}
+              
+              {onDelete && (
+                <Button 
+                  onClick={() => onDelete(investment.id)}
+                  variant="outline" 
+                  size="sm"
+                  className="border-red-300 text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="mr-2" size={16} />
+                  Delete
+                </Button>
+              )}
+            </>
           )}
           
           {investment.agreementSigned && (

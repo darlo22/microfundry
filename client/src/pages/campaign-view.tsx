@@ -1242,7 +1242,7 @@ export default function CampaignView() {
         <InvestmentModal
           isOpen={showInvestmentModal}
           onClose={() => setShowInvestmentModal(false)}
-          campaign={campaign as CampaignWithStats}
+          campaign={campaign}
         />
       )}
 

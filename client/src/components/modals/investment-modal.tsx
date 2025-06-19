@@ -36,13 +36,6 @@ declare global {
   }
 }
 
-
-interface CampaignWithStats extends Campaign {
-  totalRaised: string;
-  investorCount: number;
-  progressPercent: number;
-}
-
 interface InvestmentModalProps {
   isOpen: boolean;
   onClose: () => void;

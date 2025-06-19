@@ -22,7 +22,7 @@ import {
   users, 
   campaigns, 
   investments, 
-  adminLogs 
+  adminLogs
 } from "@shared/schema";
 import Stripe from "stripe";
 import fs from "fs";
@@ -3460,6 +3460,74 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
     next();
   };
+
+  // Admin login endpoint
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      // Find user by email
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+
+      if (!user) {
+        return res.status(401).json({ message: "Invalid admin credentials" });
+      }
+
+      // Check if user is admin
+      if (user.userType !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Admin privileges required." });
+      }
+
+      // Verify password
+      const isValid = await comparePasswords(password, user.password);
+      if (!isValid) {
+        return res.status(401).json({ message: "Invalid admin credentials" });
+      }
+
+      // Check if email is verified
+      if (!user.isEmailVerified) {
+        return res.status(401).json({ message: "Please verify your email before accessing admin panel" });
+      }
+
+      // Log successful admin login
+      await db.insert(adminLogs).values({
+        adminId: user.id,
+        action: 'admin_login',
+        details: JSON.stringify({ 
+          email: user.email,
+          timestamp: new Date().toISOString(),
+          ip: req.ip || 'unknown'
+        })
+      });
+
+      // Create session
+      req.logIn(user, (err) => {
+        if (err) {
+          console.error('Session creation error:', err);
+          return res.status(500).json({ message: "Session creation failed" });
+        }
+        
+        res.json({ 
+          message: "Admin authentication successful",
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            userType: user.userType
+          }
+        });
+      });
+
+    } catch (error) {
+      console.error('Admin login error:', error);
+      res.status(500).json({ message: "Authentication system error" });
+    }
+  });
 
   // Admin API endpoints
   app.get('/api/admin/stats', requireAdmin, async (req: any, res) => {

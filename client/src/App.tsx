@@ -29,6 +29,7 @@ import FounderUpdates from "@/pages/founder-updates";
 import PaymentWithdrawal from "@/pages/payment-withdrawal";
 import InvestorDashboard from "@/pages/investor-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
+import AdminLogin from "@/pages/admin-login";
 import CampaignView from "@/pages/campaign-view";
 import EmailVerification from "@/pages/email-verification";
 import InvestmentSuccess from "@/pages/investment-success";
@@ -69,6 +70,7 @@ function Router() {
       <Route path="/campaign/:id" component={CampaignView} />
       <Route path="/campaigns/:id" component={CampaignView} />
       <Route path="/c/:privateLink" component={CampaignView} />
+      <Route path="/admin-login" component={AdminLogin} />
       
       {/* Authenticated routes */}
       {isAuthenticated && (

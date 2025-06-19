@@ -1191,6 +1191,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current user's investments
+  app.get('/api/investments/user', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const investments = await storage.getInvestmentsByInvestor(userId);
+      res.json(investments);
+    } catch (error) {
+      console.error("Error fetching user investments:", error);
+      res.status(500).json({ message: "Failed to fetch investments" });
+    }
+  });
+
   app.get('/api/investments/investor/:investorId', requireAuth, async (req: any, res) => {
     try {
       const { investorId } = req.params;

@@ -72,8 +72,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const filename = req.params.filename;
     const filePath = path.join(process.cwd(), 'uploads', filename);
     res.sendFile(filePath, (err: any) => {
-      if (err) {
+      if (err && !res.headersSent) {
         res.status(404).json({ message: 'File not found' });
+      }
+    });
+  }));
+
+  // Serve slide files from nested directories
+  app.get('/uploads/slides/:campaignId/:filename', safeHandler((req: express.Request, res: express.Response) => {
+    const { campaignId, filename } = req.params;
+    const filePath = path.join(process.cwd(), 'uploads', 'slides', campaignId, filename);
+    res.sendFile(filePath, (err: any) => {
+      if (err && !res.headersSent) {
+        res.status(404).json({ message: 'Slide not found' });
       }
     });
   }));

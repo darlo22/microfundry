@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, X, Download } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -45,11 +45,14 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] p-0 bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border-0 shadow-2xl">
+      <DialogContent className="max-w-7xl max-h-[95vh] w-[95vw] p-0 bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border-0 shadow-2xl">
         <DialogHeader className="p-6 pb-3 bg-gradient-to-r from-fundry-navy to-blue-800 text-white">
           <DialogTitle className="text-xl font-semibold text-white">
             {campaignTitle} - Pitch Deck
           </DialogTitle>
+          <DialogDescription className="text-blue-100">
+            View the campaign pitch deck slides or download the original PDF document
+          </DialogDescription>
           <Button
             variant="ghost"
             size="sm"
@@ -96,12 +99,16 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
           ) : (
             <>
               {/* Slide Display */}
-              <div className="flex-1 flex items-center justify-center p-4 bg-gray-50">
-                <div className="relative max-w-4xl w-full">
+              <div className="flex-1 flex items-center justify-center p-6 bg-gray-50">
+                <div className="relative w-full max-w-6xl">
                   <img
                     src={slides[currentSlide]}
                     alt={`Slide ${currentSlide + 1}`}
-                    className="w-full h-auto max-h-[60vh] object-contain rounded-lg shadow-lg bg-white"
+                    className="w-full h-auto max-h-[75vh] min-h-[400px] object-contain rounded-lg shadow-lg bg-white border border-gray-200"
+                    onError={(e) => {
+                      console.error('Failed to load slide:', slides[currentSlide]);
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
                   
                   {/* Navigation Arrows */}
@@ -140,21 +147,28 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
                     
                     {/* Slide Thumbnails */}
                     {slides.length > 1 && (
-                      <div className="flex gap-2 max-w-lg overflow-x-auto">
-                        {slides.map((slide, index) => (
+                      <div className="flex gap-2 max-w-2xl overflow-x-auto py-1">
+                        {slides.map((slide: string, index: number) => (
                           <button
                             key={index}
                             onClick={() => setCurrentSlide(index)}
-                            className={`flex-shrink-0 w-16 h-12 rounded border-2 overflow-hidden ${
+                            className={`flex-shrink-0 w-20 h-14 rounded border-2 overflow-hidden transition-all ${
                               index === currentSlide 
-                                ? 'border-fundry-orange' 
+                                ? 'border-fundry-orange ring-2 ring-orange-200' 
                                 : 'border-gray-200 hover:border-gray-300'
                             }`}
                           >
                             <img
                               src={slide}
                               alt={`Slide ${index + 1}`}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover bg-white"
+                              onError={(e) => {
+                                e.currentTarget.style.background = '#f3f4f6';
+                                e.currentTarget.style.display = 'flex';
+                                e.currentTarget.style.alignItems = 'center';
+                                e.currentTarget.style.justifyContent = 'center';
+                                e.currentTarget.textContent = `${index + 1}`;
+                              }}
                             />
                           </button>
                         ))}

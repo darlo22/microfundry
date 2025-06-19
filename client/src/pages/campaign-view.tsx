@@ -386,7 +386,7 @@ export default function CampaignView() {
                 </div>
                 About This Campaign
               </h2>
-              <p className="text-orange-100 mt-2">Learn more about this investment opportunity</p>
+              <p className="text-white font-medium mt-2">Learn more about this investment opportunity</p>
             </div>
             
             <CardContent className="p-8 bg-white">

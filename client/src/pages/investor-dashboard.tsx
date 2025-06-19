@@ -86,6 +86,13 @@ export default function InvestorDashboard() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedInvestmentForPayment, setSelectedInvestmentForPayment] = useState<any>(null);
 
+  // Edit investment modal state
+  const [editInvestmentModal, setEditInvestmentModal] = useState({
+    isOpen: false,
+    investment: null as InvestmentWithCampaign | null,
+    amount: 0
+  });
+
   // Password data state
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -1572,9 +1579,10 @@ This SAFE Agreement has been digitally signed and executed.
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Payment Methods */}
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            {/* Payment Methods */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-6">
                   <div className="flex items-center gap-3">

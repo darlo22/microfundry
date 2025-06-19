@@ -38,9 +38,33 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  const downloadPDF = () => {
-    // Download original PDF if available
-    window.open(`/api/campaigns/${campaignId}/pitch-deck`, '_blank');
+  const downloadPDF = async () => {
+    try {
+      // Fetch the PDF file
+      const response = await fetch(`/api/campaigns/${campaignId}/pitch-deck`);
+      if (!response.ok) throw new Error('Failed to download PDF');
+      
+      // Get the PDF as a blob
+      const blob = await response.blob();
+      
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${campaignTitle?.replace(/[^a-zA-Z0-9]/g, '_') || 'pitch-deck'}.pdf`;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
+      // Fallback to opening in new tab if download fails
+      window.open(`/api/campaigns/${campaignId}/pitch-deck`, '_blank');
+    }
   };
 
   return (
@@ -104,7 +128,7 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
                   <img
                     src={slides[currentSlide]}
                     alt={`Slide ${currentSlide + 1}`}
-                    className="w-full h-auto max-h-[60vh] min-h-[300px] object-contain rounded-lg shadow-lg bg-white border border-gray-200"
+                    className="w-full h-auto max-h-[70vh] min-h-[400px] object-contain rounded-lg shadow-lg bg-white border border-gray-200"
                     onError={(e) => {
                       console.error('Failed to load slide:', slides[currentSlide]);
                       e.currentTarget.style.display = 'none';

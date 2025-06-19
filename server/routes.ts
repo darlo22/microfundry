@@ -3245,8 +3245,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.json({ slides: slideUrls });
       }
 
-      // Convert PDF to PNG slides using ImageMagick with better error handling
-      const command = `convert -limit memory 512MB -limit map 1GB -density 150 "${pdfPath}" -resize 800x600 -quality 80 "${slidesDir}/slide-%03d.png"`;
+      // Convert PDF to PNG slides using ImageMagick with enhanced quality and size
+      const command = `convert -limit memory 1GB -limit map 2GB -density 300 "${pdfPath}" -resize 1200x900 -quality 95 -unsharp 0x0.75+0.75+0.008 "${slidesDir}/slide-%03d.png"`;
       
       try {
         // Set a 45-second timeout for conversion

@@ -541,14 +541,79 @@ export class DatabaseStorage implements IStorage {
   }
 
   // KYC operations
+  async getKycVerification(userId: string): Promise<KycVerification | undefined> {
+    return safeDbOperation(async () => {
+      const [kyc] = await db.select().from(kycVerifications).where(eq(kycVerifications.userId, userId));
+      return kyc;
+    });
+  }
+
+  async createKycVerification(kycData: InsertKycVerification): Promise<KycVerification> {
+    return safeDbOperation(async () => {
+      const [kyc] = await db.insert(kycVerifications).values(kycData).returning();
+      return kyc;
+    }) as Promise<KycVerification>;
+  }
+
+  async updateKycVerification(userId: string, kycData: Partial<InsertKycVerification>): Promise<KycVerification | undefined> {
+    return safeDbOperation(async () => {
+      const [kyc] = await db
+        .update(kycVerifications)
+        .set({ ...kycData, updatedAt: new Date() })
+        .where(eq(kycVerifications.userId, userId))
+        .returning();
+      return kyc;
+    });
+  }
+
   async updateUserKycStatus(userId: string, kycData: {
     status: string;
     submittedAt: Date;
     data: any;
   }): Promise<void> {
-    // In a real implementation, this would update a KYC table
-    // For now, we'll simulate storing the KYC status
-    console.log(`Updating KYC status for user ${userId}:`, kycData);
+    await safeDbOperation(async () => {
+      // Check if KYC verification record exists
+      const existingKyc = await this.getKycVerification(userId);
+      
+      if (existingKyc) {
+        // Update existing record
+        await this.updateKycVerification(userId, {
+          status: kycData.status,
+          dateOfBirth: kycData.data.dateOfBirth ? new Date(kycData.data.dateOfBirth) : undefined,
+          address: kycData.data.address,
+          city: kycData.data.city,
+          state: kycData.data.state,
+          zipCode: kycData.data.zipCode,
+          employmentStatus: kycData.data.employmentStatus,
+          annualIncome: kycData.data.annualIncome,
+          investmentExperience: kycData.data.investmentExperience,
+          riskTolerance: kycData.data.riskTolerance,
+          governmentIdFiles: kycData.data.governmentId || [],
+          utilityBillFiles: kycData.data.utilityBill || [],
+          otherDocumentFiles: kycData.data.otherDocuments || [],
+          submittedAt: kycData.submittedAt,
+        });
+      } else {
+        // Create new record
+        await this.createKycVerification({
+          userId,
+          status: kycData.status,
+          dateOfBirth: kycData.data.dateOfBirth ? new Date(kycData.data.dateOfBirth) : undefined,
+          address: kycData.data.address,
+          city: kycData.data.city,
+          state: kycData.data.state,
+          zipCode: kycData.data.zipCode,
+          employmentStatus: kycData.data.employmentStatus,
+          annualIncome: kycData.data.annualIncome,
+          investmentExperience: kycData.data.investmentExperience,
+          riskTolerance: kycData.data.riskTolerance,
+          governmentIdFiles: kycData.data.governmentId || [],
+          utilityBillFiles: kycData.data.utilityBill || [],
+          otherDocumentFiles: kycData.data.otherDocuments || [],
+          submittedAt: kycData.submittedAt,
+        });
+      }
+    });
   }
 
   // Notification methods using direct SQL queries

@@ -26,8 +26,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Simple in-memory store for KYC submissions (in production, this would be in database)
-const kycSubmissions = new Map<string, any>();
+// KYC submissions are now handled via database storage
 
 // Configure multer for file uploads
 const upload = multer({
@@ -854,31 +853,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Not authorized to access this information" });
       }
 
-      // In a real implementation, this would fetch KYC status from database
-      // For now, we'll simulate based on user profile completeness
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Check if user has submitted KYC data
-      const kycSubmission = kycSubmissions.get(userId);
+      // Get KYC verification from database
+      const kycVerification = await storage.getKycVerification(userId);
       
       let status = "not_started";
       let lastUpdated = null;
       let completionPercentage = 0;
+      let submittedData = null;
 
-      if (kycSubmission) {
-        status = kycSubmission.status;
-        lastUpdated = kycSubmission.submittedAt;
+      if (kycVerification) {
+        status = kycVerification.status || "not_started";
+        lastUpdated = kycVerification.submittedAt;
         completionPercentage = status === "verified" ? 100 : (status === "pending" || status === "under_review") ? 85 : 0;
+        
+        // Prepare submitted data for display
+        if (kycVerification.submittedAt) {
+          submittedData = {
+            dateOfBirth: kycVerification.dateOfBirth,
+            address: kycVerification.address,
+            city: kycVerification.city,
+            state: kycVerification.state,
+            zipCode: kycVerification.zipCode,
+            employmentStatus: kycVerification.employmentStatus,
+            annualIncome: kycVerification.annualIncome,
+            investmentExperience: kycVerification.investmentExperience,
+            riskTolerance: kycVerification.riskTolerance,
+            governmentId: kycVerification.governmentIdFiles || [],
+            utilityBill: kycVerification.utilityBillFiles || [],
+            otherDocuments: kycVerification.otherDocumentFiles || []
+          };
+        }
       }
 
       res.json({
         status,
         lastUpdated,
         completionPercentage,
-        submittedData: kycSubmission?.data || null
+        submittedData
       });
     } catch (error) {
       console.error("Error fetching KYC status:", error);
@@ -902,16 +913,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Store KYC submission in memory (in production, this would be in database)
-      kycSubmissions.set(userId, {
-        status: "under_review",
-        submittedAt: new Date(),
-        data: kycData
-      });
-
-      // Store KYC data and update status to "Under Review"
+      // Store KYC data in database with "under_review" status
       await storage.updateUserKycStatus(userId, {
-        status: "pending",
+        status: "under_review",
         submittedAt: new Date(),
         data: kycData
       });

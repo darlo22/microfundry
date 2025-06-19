@@ -823,7 +823,12 @@ export class DatabaseStorage implements IStorage {
       const campaignInvestments = await db
         .select()
         .from(investments)
-        .where(sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)}) AND ${investments.status} IN ('committed', 'paid', 'completed')`);
+        .where(
+          and(
+            sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`,
+            sql`${investments.status} IN ('committed', 'paid', 'completed')`
+          )
+        );
 
       let small = 0, medium = 0, large = 0;
       
@@ -879,7 +884,12 @@ export class DatabaseStorage implements IStorage {
       const campaignInvestments = await db
         .select()
         .from(investments)
-        .where(sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)}) AND ${investments.status} IN ('committed', 'paid', 'completed')`);
+        .where(
+          and(
+            sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`,
+            sql`${investments.status} IN ('committed', 'paid', 'completed')`
+          )
+        );
 
       const monthlyData = months.map((month, index) => {
         const monthStart = new Date(currentYear, index, 1);

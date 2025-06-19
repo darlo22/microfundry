@@ -1,17 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { CreditCard, Lock, Shield } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { CreditCard, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { apiRequest } from '@/lib/queryClient';
+import { useQueryClient } from '@tanstack/react-query';
+import { convertUsdToNgn, type ExchangeRate } from '@/lib/currency';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
-import { convertUsdToNgn, formatCurrency, type ExchangeRate } from '@/lib/currency';
+
+const CARD_ELEMENT_OPTIONS = {
+  style: {
+    base: {
+      fontSize: '16px',
+      color: '#424770',
+      '::placeholder': {
+        color: '#aab7c4',
+      },
+    },
+  },
+};
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -24,21 +35,6 @@ interface PaymentModalProps {
   };
 }
 
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#424770',
-      '::placeholder': {
-        color: '#aab7c4',
-      },
-    },
-    invalid: {
-      color: '#9e2146',
-    },
-  },
-};
-
 export default function PaymentModal({ isOpen, onClose, investment }: PaymentModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -47,6 +43,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   const { user } = useAuth();
   
   const [isProcessingNaira, setIsProcessingNaira] = useState(false);
+  const [isProcessingStripe, setIsProcessingStripe] = useState(false);
   const [cardholderName, setCardholderName] = useState('');
   const [ngnAmount, setNgnAmount] = useState<number | null>(null);
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
@@ -59,6 +56,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     if (isOpen) {
       // Reset all state when modal opens
       setIsProcessingNaira(false);
+      setIsProcessingStripe(false);
       setCardholderName('');
       setShowStripeForm(false);
       setClientSecret('');
@@ -85,253 +83,9 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     }
   }, [isOpen, investment.amount]);
 
-  const processPaymentMutation = useMutation({
-    mutationFn: async (paymentMethodId: string) => {
-      const response = await apiRequest('POST', `/api/investments/${investment.id}/process-payment`, {
-        paymentMethodId,
-        cardholderName
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Payment Successful!",
-        description: `Your investment of $${investment.amount} has been processed successfully.`,
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-      onClose();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process payment",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const handlePayment = async () => {
-    if (!stripe || !elements) {
-      toast({
-        title: "Payment System Error",
-        description: "Payment system is not ready. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!cardholderName.trim()) {
-      toast({
-        title: "Missing Information",
-        description: "Please enter the cardholder name",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      // First create payment intent
-      const paymentIntentResponse = await fetch('/api/create-payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: parseFloat(investment.amount),
-          investmentId: investment.id
-        })
-      });
-
-      if (!paymentIntentResponse.ok) {
-        const errorData = await paymentIntentResponse.json();
-        throw new Error(errorData.message || 'Failed to create payment intent');
-      }
-
-      const { clientSecret } = await paymentIntentResponse.json();
-
-      const cardElement = elements.getElement(CardElement);
-      if (!cardElement) {
-        throw new Error('Card element not found');
-      }
-
-      // Confirm payment with Stripe
-      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardElement,
-          billing_details: {
-            name: cardholderName,
-            email: user?.email,
-          },
-        },
-      });
-
-      if (error) {
-        console.error('Stripe payment error:', error);
-        throw new Error(error.message);
-      }
-
-      if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Update investment status on backend
-        await apiRequest('PUT', `/api/investments/${investment.id}/status`, {
-          status: 'paid'
-        });
-
-        toast({
-          title: "Payment Successful!",
-          description: `Payment of $${investment.amount} completed successfully`,
-        });
-        
-        // Invalidate queries to refresh data
-        queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-        
-        onClose();
-      } else {
-        throw new Error('Payment not completed');
-      }
-    } catch (error: any) {
-      console.error('Payment processing error:', error);
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process payment",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-
-  
-  const handleNairaPayment = async () => {
-    // Prevent simultaneous processing with USD payment
-
-    
-    if (!ngnAmount) {
-      toast({
-        title: "Currency Error",
-        description: "Naira amount not available",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsProcessingNaira(true);
-
-    try {
-      // Create Budpay payment configuration for modal
-      const budpayConfig = {
-        key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,
-        email: user?.email || 'investor@fundry.com',
-        amount: ngnAmount, // Amount in Naira (not kobo for modal)
-        currency: 'NGN',
-        ref: `pay_${investment.id}_${Date.now()}`,
-        callback: async (response: any) => {
-          console.log('Budpay modal callback:', response);
-          if (response.status === 'success') {
-            // Process the payment on the backend
-            const backendResponse = await apiRequest('POST', '/api/budpay-payment', {
-              campaignId: investment.campaignId,
-              amount: investment.amount,
-              ngnAmount: ngnAmount,
-              budpayReference: response.reference,
-              budpayTransactionId: response.trans,
-              paymentMethod: 'budpay'
-            });
-
-            const result = await backendResponse.json();
-
-            if (result.success) {
-              toast({
-                title: "Payment Successful!",
-                description: `Payment of ₦${ngnAmount.toLocaleString()} completed successfully`,
-              });
-              
-              // Invalidate queries to refresh data
-              queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-              queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-              
-              onClose();
-            } else {
-              throw new Error(result.message || 'Payment verification failed');
-            }
-          } else {
-            throw new Error('Payment was cancelled or failed');
-          }
-        },
-        onClose: () => {
-          setIsProcessingNaira(false);
-        }
-      };
-
-      // Create Budpay payment using backend API instead of frontend widget
-      console.log('Creating Budpay payment via backend API...');
-      
-      const paymentResponse = await fetch('/api/create-budpay-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          campaignId: investment.campaignId,
-          amount: investment.amount,
-          ngnAmount: ngnAmount,
-          email: user?.email || '',
-          reference: `pay_${investment.id}_${Date.now()}`,
-          paymentMethod: 'budpay',
-          investorDetails: {}
-        })
-      });
-
-      const paymentResult = await paymentResponse.json();
-      
-      if (!paymentResult.success) {
-        throw new Error(paymentResult.message || 'Failed to create payment');
-      }
-
-      console.log('Budpay payment URL:', paymentResult.paymentUrl);
-      
-      // Open payment URL in a popup window
-      const popup = window.open(
-        paymentResult.paymentUrl,
-        'budpay-payment',
-        'width=600,height=700,scrollbars=yes,resizable=yes'
-      );
-
-      if (!popup) {
-        throw new Error('Popup blocked. Please allow popups for this site.');
-      }
-
-      // Monitor popup for completion
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          setIsProcessingNaira(false);
-          
-          // Refresh investment data
-          queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-          
-          toast({
-            title: "Payment Window Closed",
-            description: "Please check your investment status in the dashboard.",
-          });
-          
-          onClose();
-        }
-      }, 1000);
-
-    } catch (error: any) {
-      console.error('Budpay payment error:', error);
-      toast({
-        title: "Payment Error",
-        description: error.message || "Payment failed. Please try again.",
-        variant: "destructive",
-      });
-      setIsProcessingNaira(false);
-    }
-  };
-
   const resetModalToPaymentSelection = () => {
     setIsProcessingNaira(false);
+    setIsProcessingStripe(false);
     setShowStripeForm(false);
     setCardholderName('');
     setClientSecret('');
@@ -373,8 +127,76 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     }
   };
 
+  const handleNairaPayment = async () => {
+    if (!ngnAmount) {
+      toast({
+        title: "Currency Error",
+        description: "Unable to calculate Naira amount. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingNaira(true);
+    
+    try {
+      // Initialize BudPay checkout
+      if (typeof window !== 'undefined' && window.BudPayCheckout) {
+        window.BudPayCheckout({
+          key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,
+          email: user?.email || '',
+          amount: Math.round(ngnAmount * 100), // Convert to kobo
+          currency: 'NGN',
+          reference: `inv_${investment.id}_${Date.now()}`,
+          callback: async function(response: any) {
+            try {
+              // Verify payment with backend
+              const verifyResponse = await apiRequest('POST', '/api/verify-budpay-payment', {
+                reference: response.reference,
+                investmentId: investment.id
+              });
+
+              if (verifyResponse.ok) {
+                toast({
+                  title: "Payment Successful!",
+                  description: `Your investment of ₦${ngnAmount.toLocaleString('en-NG')} has been processed successfully.`,
+                });
+                
+                queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+                onClose();
+              } else {
+                throw new Error('Payment verification failed');
+              }
+            } catch (error) {
+              console.error('Payment verification error:', error);
+              toast({
+                title: "Payment Verification Failed",
+                description: "Payment was processed but verification failed. Please contact support.",
+                variant: "destructive",
+              });
+            }
+          },
+          onClose: function() {
+            setIsProcessingNaira(false);
+          }
+        });
+      } else {
+        throw new Error('BudPay checkout not available');
+      }
+    } catch (error: any) {
+      console.error('Naira payment error:', error);
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process Naira payment",
+        variant: "destructive",
+      });
+      setIsProcessingNaira(false);
+    }
+  };
+
   const handleStripePayment = async () => {
-    if (!stripe || !elements || !clientSecret) {
+    if (!stripe || !elements) {
       toast({
         title: "Payment System Error",
         description: "Payment system is not ready. Please try again.",
@@ -386,23 +208,19 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     if (!cardholderName.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please enter the cardholder name",
+        description: "Please enter the cardholder name.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsProcessing(true);
+    setIsProcessingStripe(true);
+    
     try {
-      const cardElement = elements.getElement(CardElement);
-      if (!cardElement) {
-        throw new Error('Card element not found');
-      }
-
-      // Create payment method with Stripe Elements
+      // Create payment method
       const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
-        card: cardElement,
+        card: elements.getElement(CardElement)!,
         billing_details: {
           name: cardholderName,
           email: user?.email,
@@ -411,10 +229,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
 
       if (paymentMethodError) {
         console.error('Payment method error:', paymentMethodError);
-        
-        // Reset modal to payment selection
         resetModalToPaymentSelection();
-        
         toast({
           title: "Card Error",
           description: `${paymentMethodError.message}. Please try a different payment method.`,
@@ -423,17 +238,14 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         return;
       }
 
-      // Confirm payment intent with the payment method
+      // Confirm payment
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: paymentMethod.id,
       });
 
       if (error) {
         console.error('Stripe payment error:', error);
-        
-        // Reset modal to payment selection
         resetModalToPaymentSelection();
-        
         toast({
           title: "Card Payment Failed",
           description: `${error.message}. Please try a different payment method.`,
@@ -443,25 +255,21 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Update investment status on backend
-        await apiRequest('PUT', `/api/investments/${investment.id}/status`, {
+        // Update investment status in backend
+        await apiRequest('PATCH', `/api/investments/${investment.id}`, {
           status: 'paid'
         });
 
         toast({
           title: "Payment Successful!",
-          description: `Payment of $${investment.amount} completed successfully`,
+          description: `Your investment of $${investment.amount} has been processed successfully.`,
         });
         
-        // Invalidate queries to refresh data
         queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
         queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-        
         onClose();
       } else {
-        // Reset modal to payment selection for incomplete payments
         resetModalToPaymentSelection();
-        
         toast({
           title: "Payment Incomplete",
           description: "Payment was not completed. Please try again or use a different payment method.",
@@ -470,19 +278,16 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       }
     } catch (error: any) {
       console.error('Payment processing error:', error);
-      
-      // Reset modal to payment selection for any other errors
       resetModalToPaymentSelection();
-      
       toast({
         title: "Payment Failed",
         description: error.message || "Failed to process payment. Please try again or use a different payment method.",
         variant: "destructive",
       });
+    } finally {
+      setIsProcessingStripe(false);
     }
   };
-
-
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -508,49 +313,31 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                 <p>
                   Naira Equivalent: <span className="font-semibold text-green-700">₦{ngnAmount.toLocaleString('en-NG')}</span>
                 </p>
-                <p className="text-xs text-gray-500">
-                  Rate: $1 = ₦{exchangeRate.usdToNgn.toLocaleString('en-NG')} ({exchangeRate.source})
-                </p>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-sm text-gray-500">Exchange Rate:</span>
+                  <span className="text-sm text-gray-600">$1 = ₦{exchangeRate.usdToNgn.toLocaleString('en-NG')}</span>
+                </div>
               </div>
             ) : null}
           </div>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Investment Summary */}
-          <Card className="border-2 border-orange-100 bg-white/90">
-            <CardHeader>
-              <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
-                <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 text-sm font-bold">$</div>
-                Investment Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                <span className="text-gray-600 font-medium">USD Amount:</span>
-                <span className="font-bold text-xl text-gray-900">${investment.amount}</span>
-              </div>
-              
-              {isLoadingRate ? (
-                <div className="flex justify-between items-center py-3">
-                  <span className="text-gray-600 font-medium">NGN Equivalent:</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-gray-500">Loading...</span>
-                  </div>
+          <Card className="border border-gray-200 shadow-sm">
+            <CardContent className="p-4">
+              <h4 className="font-medium text-gray-900 mb-2">Investment Summary</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Investment Amount:</span>
+                  <span className="font-medium">${investment.amount}</span>
                 </div>
-              ) : ngnAmount && exchangeRate ? (
-                <>
-                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                    <span className="text-gray-600 font-medium">NGN Equivalent:</span>
-                    <span className="font-bold text-xl text-green-700">₦{ngnAmount.toLocaleString('en-NG')}</span>
+                {ngnAmount && (
+                  <div className="flex justify-between">
+                    <span>Naira Equivalent:</span>
+                    <span className="font-medium">₦{ngnAmount.toLocaleString('en-NG')}</span>
                   </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-gray-500">Exchange Rate:</span>
-                    <span className="text-sm text-gray-600">$1 = ₦{exchangeRate.usdToNgn.toLocaleString('en-NG')}</span>
-                  </div>
-                </>
-              ) : null}
+                )}
+              </div>
             </CardContent>
           </Card>
 
@@ -600,47 +387,35 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                 <div className="text-right">
                   {isProcessingNaira ? (
                     <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : ngnAmount ? (
+                    <span className="font-bold text-lg">₦{ngnAmount.toLocaleString('en-NG')}</span>
                   ) : (
-                    <span className="font-bold text-lg">
-                      {ngnAmount ? `₦${ngnAmount.toLocaleString('en-NG')}` : '...'}
-                    </span>
+                    <span className="text-sm opacity-75">Loading...</span>
                   )}
                 </div>
               </Button>
             </div>
           ) : (
-            /* Stripe Payment Form */
-            <Card className="border-2 border-blue-100 bg-white/90">
-              <CardHeader>
-                <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
-                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">$</div>
-                  Pay ${investment.amount} with USD
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cardholderName">Cardholder Name</Label>
+            /* Stripe Form */
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
+                Complete Payment
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label>Cardholder Name</Label>
                   <Input
-                    id="cardholderName"
-                    name="cardholderName"
-                    type="text"
-                    placeholder="Enter cardholder name"
                     value={cardholderName}
-                    onChange={(e) => {
-                      const newValue = e.target.value;
-                      console.log('Cardholder name input:', newValue);
-                      setCardholderName(newValue);
-                    }}
-                    onBlur={(e) => console.log('Cardholder name on blur:', e.target.value)}
-                    disabled={isProcessing}
+                    onChange={(e) => setCardholderName(e.target.value)}
+                    placeholder="Enter cardholder name"
                     autoComplete="cc-name"
-                    className="w-full bg-white border-gray-300 focus:border-blue-500"
-                    required
-                    data-testid="cardholder-name-input"
+                    disabled={isProcessingStripe}
                   />
                 </div>
                 
-                <div className="space-y-2">
+                <div>
                   <Label>Card Information</Label>
                   <div className="p-3 border border-gray-300 rounded-md bg-white">
                     <CardElement options={CARD_ELEMENT_OPTIONS} />
@@ -651,57 +426,35 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                   <Button
                     onClick={() => {
                       setShowStripeForm(false);
-                      setIsProcessing(false);
                       setCardholderName('');
                       setClientSecret('');
                     }}
                     variant="outline"
                     className="flex-1"
-                    disabled={isProcessing}
+                    disabled={isProcessingStripe}
                   >
                     Back
                   </Button>
                   <Button
                     onClick={handleStripePayment}
-                    disabled={isProcessing}
+                    disabled={isProcessingStripe}
                     className="flex-1 bg-blue-600 hover:bg-blue-700"
                   >
-                    {isProcessing ? (
+                    {isProcessingStripe ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                     ) : (
                       <Lock className="w-4 h-4 mr-2" />
                     )}
-                    {isProcessing ? 'Processing...' : `Pay $${investment.amount}`}
+                    {isProcessingStripe ? 'Processing...' : `Pay $${investment.amount}`}
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Security Notice */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <Lock className="w-5 h-5 text-blue-600 mt-0.5" />
-              <div className="text-sm text-blue-800">
-                <p className="font-medium">Secure Payment</p>
-                <p>Your payment information is encrypted and secure. We use Stripe for secure payment processing.</p>
               </div>
             </div>
-          </div>
-        </div>
+          )}
 
-        {/* Action Buttons */}
-        <div className="space-y-4 pt-6 border-t">
-          <div className="flex justify-center">
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              disabled={isProcessing || isProcessingNaira}
-              className="px-8"
-            >
-              Cancel
-            </Button>
-          </div>
+          <p className="text-xs text-gray-500 text-center">
+            Your payment information is secure and encrypted. You can complete your investment payment later via your dashboard.
+          </p>
         </div>
       </DialogContent>
     </Dialog>

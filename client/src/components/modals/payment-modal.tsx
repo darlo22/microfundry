@@ -571,7 +571,32 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
             </Button>
           </div>
           
-
+          <div className="space-y-3">
+            <Button
+              onClick={handlePayment}
+              disabled={isProcessing || processPaymentMutation.isPending || !stripe}
+              className="w-full bg-blue-900 hover:bg-blue-800"
+            >
+              {isProcessing || processPaymentMutation.isPending ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Processing...
+                </div>
+              ) : (
+                `Pay $${investment.amount} (USD)`
+              )}
+            </Button>
+            
+            {ngnAmount && !isLoadingRate && (
+              <Button
+                onClick={handleNairaPayment}
+                disabled={isProcessingNaira}
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                {isProcessingNaira ? 'Processing Payment...' : `Pay ₦${ngnAmount.toLocaleString()} (NGN)`}
+              </Button>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

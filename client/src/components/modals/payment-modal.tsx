@@ -480,67 +480,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
             </CardContent>
           </Card>
 
-          {/* Payment Method Selection or Stripe Form */}
-          {!showStripeForm ? (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
-                Choose Payment Method
-              </h3>
-              
-              {/* USD Payment Button */}
-              <Button
-                onClick={handleUSDPayment}
-                disabled={isProcessing}
-                className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold">$</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-base">Pay with USD</div>
-                    <div className="text-sm opacity-90">Powered by Stripe</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {isProcessing ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span className="font-bold text-lg">${investment.amount}</span>
-                  )}
-                </div>
-              </Button>
-
-              {/* NGN Payment Button */}
-              <Button
-                onClick={handleNairaPayment}
-                disabled={isProcessingNaira || !ngnAmount}
-                className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold">₦</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-base">Pay with Naira</div>
-                    <div className="text-sm opacity-90">Powered by Budpay</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {isProcessingNaira ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span className="font-bold text-lg">
-                      {ngnAmount ? `₦${ngnAmount.toLocaleString('en-NG')}` : '...'}
-                    </span>
-                  )}
-                </div>
-              </Button>
-            </div>
-          ) : (
-            /* Stripe Payment Form */
-            <Card className="border-2 border-blue-100 bg-white/90">
+          {/* Stripe Payment Form */}
+          <Card className="border-2 border-blue-100 bg-white/90">
               <CardHeader>
                 <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
                   <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">$</div>
@@ -605,7 +546,6 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                 </div>
               </CardContent>
             </Card>
-          )}
 
           {/* Security Notice */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -631,32 +571,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
             </Button>
           </div>
           
-          <div className="space-y-3">
-            <Button
-              onClick={handlePayment}
-              disabled={isProcessing || processPaymentMutation.isPending || !stripe}
-              className="w-full bg-blue-900 hover:bg-blue-800"
-            >
-              {isProcessing || processPaymentMutation.isPending ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Processing...
-                </div>
-              ) : (
-                `Pay $${investment.amount} (USD)`
-              )}
-            </Button>
-            
-            {ngnAmount && !isLoadingRate && (
-              <Button
-                onClick={handleNairaPayment}
-                disabled={isProcessingNaira}
-                className="w-full bg-green-600 hover:bg-green-700"
-              >
-                {isProcessingNaira ? 'Processing Payment...' : `Pay ₦${ngnAmount.toLocaleString()} (NGN)`}
-              </Button>
-            )}
-          </div>
+
         </div>
       </DialogContent>
     </Dialog>

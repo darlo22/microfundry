@@ -732,6 +732,19 @@ export default function InvestorDashboard() {
                     </div>
                   </div>
                   <div className="p-6">
+                    <div className="mb-4 text-sm text-gray-600">
+                      Debug: Total investments: {userInvestments.length}, Pending: {pendingInvestments.length}
+                      {userInvestments.length > 0 && (
+                        <div className="mt-2">
+                          <details>
+                            <summary>Investment Data Sample</summary>
+                            <pre className="text-xs bg-gray-100 p-2 mt-2 rounded overflow-auto max-h-32">
+                              {JSON.stringify(userInvestments.slice(0, 2), null, 2)}
+                            </pre>
+                          </details>
+                        </div>
+                      )}
+                    </div>
                     {isLoadingInvestments ? (
                       <div className="flex justify-center py-12">
                         <div className="animate-spin w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full" />

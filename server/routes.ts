@@ -75,49 +75,63 @@ const safeHandler = (handler: Function) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
-  // Custom video streaming endpoint with range support
-  app.get('/api/video/:filename', (req: express.Request, res: express.Response) => {
-    const filename = req.params.filename;
-    const filePath = path.join(process.cwd(), 'uploads', filename);
-    
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'Video not found' });
-    }
-    
-    const stat = fs.statSync(filePath);
-    const fileSize = stat.size;
-    const range = req.headers.range;
-    
-    // Set video headers
-    res.setHeader('Content-Type', 'video/mp4');
-    res.setHeader('Accept-Ranges', 'bytes');
-    res.setHeader('Cache-Control', 'public, max-age=3600');
-    
-    if (range) {
-      // Handle range requests for video streaming
-      const parts = range.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-      const chunksize = (end - start) + 1;
+  // Enhanced video streaming endpoint
+  app.get('/api/stream/:filename', (req: express.Request, res: express.Response) => {
+    try {
+      const filename = req.params.filename;
+      const filePath = path.join(process.cwd(), 'uploads', filename);
       
-      res.writeHead(206, {
-        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-        'Content-Length': chunksize,
-        'Content-Type': 'video/mp4',
-        'Accept-Ranges': 'bytes'
-      });
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: 'Video file not found' });
+      }
       
-      const file = fs.createReadStream(filePath, { start, end });
-      file.pipe(res);
-    } else {
-      // Send entire file
-      res.writeHead(200, {
-        'Content-Length': fileSize,
-        'Content-Type': 'video/mp4',
-        'Accept-Ranges': 'bytes'
-      });
-      fs.createReadStream(filePath).pipe(res);
+      const stat = fs.statSync(filePath);
+      const fileSize = stat.size;
+      const range = req.headers.range;
+      
+      // Always set proper video headers
+      res.setHeader('Content-Type', 'video/mp4');
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      
+      if (range) {
+        // Parse range header
+        const ranges = range.replace(/bytes=/, '').split('-');
+        const start = parseInt(ranges[0], 10) || 0;
+        const end = parseInt(ranges[1], 10) || fileSize - 1;
+        const chunkSize = (end - start) + 1;
+        
+        // Validate range
+        if (start >= fileSize || end >= fileSize) {
+          res.writeHead(416, {
+            'Content-Range': `bytes */${fileSize}`
+          });
+          return res.end();
+        }
+        
+        // Send partial content
+        res.writeHead(206, {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Content-Length': chunkSize,
+          'Content-Type': 'video/mp4'
+        });
+        
+        const stream = fs.createReadStream(filePath, { start, end });
+        stream.pipe(res);
+      } else {
+        // Send entire file
+        res.writeHead(200, {
+          'Content-Length': fileSize,
+          'Content-Type': 'video/mp4'
+        });
+        
+        const stream = fs.createReadStream(filePath);
+        stream.pipe(res);
+      }
+    } catch (error) {
+      console.error('Video streaming error:', error);
+      res.status(500).json({ error: 'Video streaming failed' });
     }
   });
 

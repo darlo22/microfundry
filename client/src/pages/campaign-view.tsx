@@ -195,16 +195,32 @@ export default function CampaignView() {
                     {campaign.pitchMediaUrl.match(/\.(mp4|mov|avi|webm)$/i) ? (
                       <video 
                         controls 
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover bg-black"
                         preload="metadata"
                         playsInline
+                        poster={campaign.logoUrl ? (campaign.logoUrl.startsWith('/') ? campaign.logoUrl : `/${campaign.logoUrl}`) : undefined}
                         src={campaign.pitchMediaUrl.startsWith('/') ? campaign.pitchMediaUrl : `/${campaign.pitchMediaUrl}`}
+                        onLoadStart={() => console.log('Video loading started:', campaign.pitchMediaUrl)}
+                        onLoadedMetadata={(e) => {
+                          console.log('Video metadata loaded:', {
+                            duration: e.currentTarget.duration,
+                            videoWidth: e.currentTarget.videoWidth,
+                            videoHeight: e.currentTarget.videoHeight
+                          });
+                        }}
+                        onCanPlay={() => console.log('Video can play - ready for playback')}
                         onError={(e) => {
-                          console.error('Video playback error:', e);
-                          console.error('Video URL:', campaign.pitchMediaUrl);
+                          const video = e.currentTarget;
+                          console.error('Video playback failed:', {
+                            src: video.src,
+                            error: video.error?.code,
+                            message: video.error?.message,
+                            networkState: video.networkState,
+                            readyState: video.readyState
+                          });
                         }}
                       >
-                        Your browser does not support the video tag.
+                        Your browser does not support HTML5 video playback.
                       </video>
                     ) : (
                       <img 

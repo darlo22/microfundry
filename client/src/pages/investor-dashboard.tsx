@@ -132,25 +132,17 @@ export default function InvestorDashboard() {
     passwordLastChanged: "2024-05-18T00:00:00Z",
   });
 
-  // Mock payment methods data
-  const [paymentMethods, setPaymentMethods] = useState([
-    {
-      id: 1,
-      type: "visa",
-      last4: "4242",
-      expiryMonth: "12",
-      expiryYear: "25",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      type: "mastercard",
-      last4: "8888",
-      expiryMonth: "06",
-      expiryYear: "26",
-      isDefault: false,
-    },
-  ]);
+  // Payment methods data from API
+  const { data: paymentMethods = [], isLoading: paymentMethodsLoading } = useQuery({
+    queryKey: ['/api/payment-methods'],
+    enabled: !!user?.id,
+  });
+
+  // Notification preferences data from API
+  const { data: notificationPreferences, isLoading: preferencesLoading } = useQuery({
+    queryKey: ['/api/notification-preferences'],
+    enabled: !!user?.id,
+  });
 
   const [newPaymentMethod, setNewPaymentMethod] = useState({
     cardNumber: "",
@@ -163,6 +155,81 @@ export default function InvestorDashboard() {
   const [editPaymentMethod, setEditPaymentMethod] = useState({
     expiryMonth: "",
     expiryYear: "",
+  });
+
+  // Payment method mutations
+  const addPaymentMethodMutation = useMutation({
+    mutationFn: async (paymentMethodId: string) => {
+      const response = await apiRequest('POST', '/api/payment-methods', { paymentMethodId });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/payment-methods'] });
+      setIsAddPaymentOpen(false);
+      setNewPaymentMethod({
+        cardNumber: "",
+        expiryMonth: "",
+        expiryYear: "",
+        cvv: "",
+        cardholderName: "",
+      });
+      toast({
+        title: "Payment Method Added",
+        description: "Your payment method has been successfully added.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add payment method. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const removePaymentMethodMutation = useMutation({
+    mutationFn: async (paymentMethodId: number) => {
+      const response = await apiRequest('DELETE', `/api/payment-methods/${paymentMethodId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/payment-methods'] });
+      setIsRemovePaymentOpen(false);
+      setSelectedPaymentMethod(null);
+      toast({
+        title: "Payment Method Removed",
+        description: "Your payment method has been successfully removed.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to remove payment method. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Notification preferences mutation
+  const updateNotificationPreferencesMutation = useMutation({
+    mutationFn: async (preferences: any) => {
+      const response = await apiRequest('PUT', '/api/notification-preferences', preferences);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notification-preferences'] });
+      toast({
+        title: "Preferences Updated",
+        description: "Your notification preferences have been saved.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update preferences. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   // Initialize form with user data
@@ -253,60 +320,23 @@ export default function InvestorDashboard() {
   });
 
 
-
-  // Add Payment Method Mutation
-  const addPaymentMethodMutation = useMutation({
-    mutationFn: async (data: typeof newPaymentMethod) => {
-      // In a real implementation, this would integrate with a payment processor like Stripe
-      return new Promise(resolve => setTimeout(resolve, 1000));
-    },
-    onSuccess: () => {
-      const newMethod = {
-        id: paymentMethods.length + 1,
-        type: newPaymentMethod.cardNumber.startsWith('4') ? 'visa' : 'mastercard',
-        last4: newPaymentMethod.cardNumber.slice(-4),
-        expiryMonth: newPaymentMethod.expiryMonth,
-        expiryYear: newPaymentMethod.expiryYear,
-        isDefault: paymentMethods.length === 0,
-      };
-      setPaymentMethods(prev => [...prev, newMethod]);
-      setNewPaymentMethod({
-        cardNumber: "",
-        expiryMonth: "",
-        expiryYear: "",
-        cvv: "",
-        cardholderName: "",
-      });
-      setIsAddPaymentOpen(false);
-      toast({
-        title: "Payment Method Added",
-        description: "Your payment method has been added successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to add payment method. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
   // Edit Payment Method Mutation
   const editPaymentMethodMutation = useMutation({
-    mutationFn: async (data: { id: number; expiryMonth: string; expiryYear: string }) => {
-      return new Promise(resolve => setTimeout(resolve, 1000));
+    mutationFn: async ({ id, expiryMonth, expiryYear }: { id: number; expiryMonth: string; expiryYear: string }) => {
+      const response = await apiRequest('PATCH', `/api/payment-methods/${id}`, {
+        expiryMonth,
+        expiryYear,
+      });
+      return response.json();
     },
-    onSuccess: (_, data) => {
-      setPaymentMethods(prev => prev.map(method => 
-        method.id === data.id 
-          ? { ...method, expiryMonth: data.expiryMonth, expiryYear: data.expiryYear }
-          : method
-      ));
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/payment-methods'] });
       setIsEditPaymentOpen(false);
+      setSelectedPaymentMethod(null);
+      setEditPaymentMethod({ expiryMonth: "", expiryYear: "" });
       toast({
         title: "Payment Method Updated",
-        description: "Your payment method has been updated successfully.",
+        description: "Your payment method has been successfully updated.",
       });
     },
     onError: () => {
@@ -318,26 +348,11 @@ export default function InvestorDashboard() {
     },
   });
 
-  // Remove Payment Method Mutation
-  const removePaymentMethodMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return new Promise(resolve => setTimeout(resolve, 1000));
-    },
-    onSuccess: (_, id) => {
-      setPaymentMethods(prev => prev.filter(method => method.id !== id));
-      setIsRemovePaymentOpen(false);
-      toast({
-        title: "Payment Method Removed",
-        description: "Your payment method has been removed successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to remove payment method. Please try again.",
-        variant: "destructive",
-      });
-    },
+  // Password data state
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   // Export data mutation

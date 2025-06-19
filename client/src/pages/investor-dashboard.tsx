@@ -24,7 +24,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle, Eye, EyeOff, Smartphone, Tablet, Clock, ExternalLink, Trash2 } from "lucide-react";
+import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle, Eye, EyeOff, Smartphone, Tablet, Clock, ExternalLink, Trash2, Target } from "lucide-react";
 import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 import TwoFactorSetupModal from "@/components/modals/two-factor-setup-modal";
@@ -871,24 +871,34 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           {/* Discover Tab */}
-          <TabsContent value="discover" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Discover Investment Opportunities</CardTitle>
-                <div className="flex flex-col sm:flex-row gap-4 mt-4">
+          <TabsContent value="discover" className="space-y-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="bg-gradient-to-r from-orange-500 to-blue-600 px-6 py-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <Search className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">Discover Investment Opportunities</h3>
+                    <p className="text-orange-100 text-sm">Find promising startups to invest in</p>
+                  </div>
+                </div>
+                
+                {/* Modern Search and Filter */}
+                <div className="flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                      placeholder="Search campaigns..."
+                      placeholder="Search by company name, industry, or keyword..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 bg-white border-white/20 focus:border-white focus:ring-white/50 placeholder-gray-400"
                     />
                   </div>
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-full sm:w-[200px]">
+                    <SelectTrigger className="w-full sm:w-[200px] bg-white border-white/20 text-gray-700">
                       <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Category" />
+                      <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="All Categories">All Categories</SelectItem>
@@ -900,58 +910,85 @@ export default function InvestorDashboard() {
                     </SelectContent>
                   </Select>
                 </div>
-              </CardHeader>
-              <CardContent>
+              </div>
+              <div className="p-6">
                 {isLoadingCampaigns ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+                  <div className="flex justify-center py-12">
+                    <div className="animate-spin w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full" />
                   </div>
                 ) : filteredCampaigns.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {filteredCampaigns.map((campaign: any) => (
-                      <CampaignCard key={campaign.id} campaign={campaign} />
+                      <div key={campaign.id} className="border border-gray-200 rounded-lg p-4 hover:border-orange-300 hover:shadow-md transition-all duration-300">
+                        <CampaignCard campaign={campaign} />
+                      </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Search className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>No campaigns found matching your criteria</p>
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Search className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">No campaigns found</h4>
+                    <p className="text-gray-500 mb-6">Try adjusting your search or filter criteria</p>
+                    <Button 
+                      onClick={() => {
+                        setSearchTerm("");
+                        setSelectedCategory("All Categories");
+                      }}
+                      variant="outline"
+                      className="border-orange-200 hover:border-orange-300 hover:bg-orange-50 text-gray-700 hover:text-orange-700"
+                    >
+                      Clear Filters
+                    </Button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </TabsContent>
 
           {/* Updates Tab */}
-          <TabsContent value="updates" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Campaign Updates</CardTitle>
-                <p className="text-sm text-gray-600">
-                  Updates from campaigns you've invested in
-                </p>
-              </CardHeader>
-              <CardContent>
+          <TabsContent value="updates" className="space-y-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <Bell className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">Campaign Updates</h3>
+                    <p className="text-blue-100 text-sm">Latest news from your investments</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
                 {isLoadingUpdates ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+                  <div className="flex justify-center py-12">
+                    <div className="animate-spin w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full" />
                   </div>
                 ) : (campaignUpdates as any[])?.length > 0 ? (
                   <div className="space-y-6">
                     {(campaignUpdates as any[]).map((update: any) => (
-                      <div key={update.id} className="border-b pb-6 last:border-b-0">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h3 className="font-semibold text-lg">{update.title}</h3>
-                            <p className="text-sm text-gray-600">
-                              {update.campaign?.companyName} • {new Date(update.createdAt).toLocaleDateString()}
-                            </p>
+                      <div key={update.id} className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg text-gray-900 mb-2">{update.title}</h3>
+                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                              <span className="font-medium">{update.campaign?.companyName}</span>
+                              <span>•</span>
+                              <span>{new Date(update.createdAt).toLocaleDateString()}</span>
+                            </div>
                           </div>
-                          <Badge variant={
-                            update.type === 'milestone' ? 'default' :
-                            update.type === 'financial' ? 'secondary' :
-                            update.type === 'announcement' ? 'destructive' : 'outline'
-                          }>
+                          <Badge 
+                            variant="outline"
+                            className={`
+                              ${update.type === 'milestone' ? 'border-green-200 text-green-700 bg-green-50' : ''}
+                              ${update.type === 'financial' ? 'border-blue-200 text-blue-700 bg-blue-50' : ''}
+                              ${update.type === 'announcement' ? 'border-orange-200 text-orange-700 bg-orange-50' : ''}
+                              ${update.type === 'general' ? 'border-gray-200 text-gray-700 bg-gray-50' : ''}
+                              capitalize
+                            `}
+                          >
                             {update.type}
                           </Badge>
                         </div>
@@ -975,16 +1012,22 @@ export default function InvestorDashboard() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>No updates available</p>
-                    <p className="text-sm mt-2">
-                      Updates will appear here once you invest in campaigns
-                    </p>
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Bell className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">No updates yet</h4>
+                    <p className="text-gray-500 mb-6">Updates will appear here once you invest in campaigns</p>
+                    <Button 
+                      onClick={() => setActiveTab("discover")} 
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                    >
+                      Find Campaigns to Invest
+                    </Button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </TabsContent>
 
           {/* Documents Tab */}

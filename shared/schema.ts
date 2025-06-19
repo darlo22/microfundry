@@ -96,6 +96,15 @@ export const campaigns = pgTable("campaigns", {
   valuationCap: decimal("valuation_cap", { precision: 15, scale: 2 }),
   privateLink: varchar("private_link").unique().notNull(),
   
+  // Business Information
+  companyName: varchar("company_name"),
+  country: varchar("country"),
+  state: varchar("state"),
+  businessAddress: text("business_address"),
+  registrationStatus: varchar("registration_status"), // "registered" or "in-process"
+  registrationType: varchar("registration_type"),
+  directors: jsonb("directors"), // Array of director objects
+  
   // Business Strategy Information
   problemStatement: text("problem_statement"),
   solution: text("solution"),

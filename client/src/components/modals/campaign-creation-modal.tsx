@@ -488,7 +488,10 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                         <SelectContent>
                           {form.watch("country") && COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.states?.map((state) => (
                             <SelectItem key={state} value={state}>{state}</SelectItem>
-                          )) || <SelectItem value="">Please select a country first</SelectItem>}
+                          ))}
+                          {(!form.watch("country") || !COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.states) && (
+                            <SelectItem value="none" disabled>Please select a country first</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -555,9 +558,12 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {form.watch("country") && COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.registrationTypes.map((type) => (
+                            {form.watch("country") && COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.registrationTypes?.map((type) => (
                               <SelectItem key={type} value={type}>{type}</SelectItem>
                             ))}
+                            {(!form.watch("country") || !COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.registrationTypes) && (
+                              <SelectItem value="none" disabled>Please select a country first</SelectItem>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />

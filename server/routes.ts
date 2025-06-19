@@ -3249,14 +3249,26 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.json({ slides: slideUrls });
       }
 
-      // Convert PDF to PNG slides using ImageMagick with enhanced parameters for all pages
-      const command = `convert -limit memory 2GB -limit map 4GB -density 300 "${pdfPath}"[0-50] -resize 1200x900 -quality 95 -unsharp 0x0.75+0.75+0.008 "${slidesDir}/slide-%03d.png"`;
+      // First, get the page count of the PDF to handle all pages
+      let pageCount = 11; // Default assumption based on user feedback
+      try {
+        const pageCountCommand = `identify "${pdfPath}" | wc -l`;
+        const pageResult = await execAsync(pageCountCommand, { timeout: 10000 });
+        pageCount = parseInt(pageResult.stdout.trim()) || 11;
+        console.log(`PDF has ${pageCount} pages`);
+      } catch (err) {
+        console.log('Could not determine page count, using default of 11');
+      }
+
+      // Convert PDF to PNG slides with optimized parameters for all pages
+      const command = `convert -limit memory 1GB -limit map 2GB -density 200 "${pdfPath}" -resize 1000x750 -quality 90 "${slidesDir}/slide-%03d.png"`;
       
       console.log(`Converting PDF with command: ${command}`);
       
       try {
-        // Set a 60-second timeout for conversion
-        const result = await execAsync(command, { timeout: 60000 });
+        // Set a longer timeout for conversion based on page count
+        const timeout = Math.max(30000, pageCount * 5000); // 5 seconds per page, minimum 30 seconds
+        const result = await execAsync(command, { timeout });
         console.log('PDF conversion completed:', result.stdout);
         
         // Verify all slides were created successfully and remove empty files
@@ -3298,11 +3310,23 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       } catch (conversionError: any) {
         console.error('PDF conversion failed:', conversionError);
         
+        // Clean up any partial conversion artifacts
+        try {
+          if (fs.existsSync(slidesDir)) {
+            const files = fs.readdirSync(slidesDir);
+            for (const file of files) {
+              fs.unlinkSync(path.join(slidesDir, file));
+            }
+          }
+        } catch (cleanupError) {
+          console.error('Error cleaning up failed conversion:', cleanupError);
+        }
+        
         // If conversion fails, return error but allow PDF download
         res.status(200).json({ 
           slides: [], 
-          error: 'PDF conversion failed - large file or timeout',
-          downloadUrl: `/uploads/${campaignId}/pitch-deck.pdf`
+          error: 'PDF conversion failed - please download the PDF to view all slides',
+          downloadUrl: `/api/campaigns/${campaignId}/pitch-deck`
         });
       }
     } catch (error) {

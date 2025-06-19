@@ -23,7 +23,10 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
       }
       return response.json();
     },
-    enabled: isOpen
+    enabled: isOpen,
+    retry: false, // Prevent endless retry loops
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false // Don't refetch on focus
   });
 
   const slides = slidesData?.slides || [];

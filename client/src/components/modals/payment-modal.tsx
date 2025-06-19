@@ -301,12 +301,12 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border-0 shadow-2xl">
-        <DialogHeader className="text-center pb-6">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mb-4">
-            <CreditCard className="w-8 h-8 text-white" />
+      <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border-0 shadow-2xl">
+        <DialogHeader className="text-center pb-4 sm:pb-6">
+          <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mb-3 sm:mb-4">
+            <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
           </div>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
+          <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
             Complete Payment
           </DialogTitle>
           <div className="mt-3 space-y-1">
@@ -359,44 +359,44 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                 Choose Payment Method
               </h3>
               
-              {/* USD Payment Button */}
+              {/* USD Payment Button - Mobile Responsive */}
               <Button
                 onClick={handleUSDPayment}
                 disabled={isProcessingNaira}
-                className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full p-3 sm:p-4 bg-blue-600 hover:bg-blue-700 text-white text-base sm:text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold">$</span>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-base sm:text-lg font-bold">$</span>
                   </div>
                   <div className="text-left">
-                    <div className="font-semibold text-base">Pay with USD</div>
-                    <div className="text-sm opacity-90">Powered by Stripe</div>
+                    <div className="font-semibold text-sm sm:text-base">Pay with USD</div>
+                    <div className="text-xs sm:text-sm opacity-90">Powered by Stripe</div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-lg">${investment.amount}</span>
+                  <span className="font-bold text-base sm:text-lg">${investment.amount}</span>
                 </div>
               </Button>
 
-              {/* NGN Payment Button */}
+              {/* NGN Payment Button - Mobile Responsive */}
               <Button
                 onClick={handleNairaPayment}
                 disabled={isProcessingNaira || !ngnAmount}
-                className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full p-3 sm:p-4 bg-green-600 hover:bg-green-700 text-white text-base sm:text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold">₦</span>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-base sm:text-lg font-bold">₦</span>
                   </div>
                   <div className="text-left">
-                    <div className="font-semibold text-base">Pay with Naira</div>
-                    <div className="text-sm opacity-90">Powered by Budpay</div>
+                    <div className="font-semibold text-sm sm:text-base">Pay with Naira</div>
+                    <div className="text-xs sm:text-sm opacity-90">Powered by Budpay</div>
                   </div>
                 </div>
                 <div className="text-right">
                   {isProcessingNaira ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : ngnAmount ? (
                     <span className="font-bold text-lg">₦{ngnAmount.toLocaleString('en-NG')}</span>
                   ) : (
@@ -407,32 +407,33 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
             </div>
           ) : (
             /* Stripe Form */
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs sm:text-sm font-bold">💳</div>
                 Complete Payment
               </h3>
               
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <Label>Cardholder Name</Label>
+                  <Label className="text-sm">Cardholder Name</Label>
                   <Input
                     value={cardholderName}
                     onChange={(e) => setCardholderName(e.target.value)}
                     placeholder="Enter cardholder name"
                     autoComplete="cc-name"
                     disabled={isProcessingStripe}
+                    className="text-sm"
                   />
                 </div>
                 
                 <div>
-                  <Label>Card Information</Label>
-                  <div className="p-3 border border-gray-300 rounded-md bg-white">
+                  <Label className="text-sm">Card Information</Label>
+                  <div className="p-2 sm:p-3 border border-gray-300 rounded-md bg-white">
                     <CardElement options={CARD_ELEMENT_OPTIONS} />
                   </div>
                 </div>
                 
-                <div className="flex gap-3 pt-4">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4">
                   <Button
                     onClick={() => {
                       setShowStripeForm(false);
@@ -440,7 +441,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                       setClientSecret('');
                     }}
                     variant="outline"
-                    className="flex-1"
+                    className="w-full sm:flex-1 text-sm"
                     disabled={isProcessingStripe}
                   >
                     Back
@@ -448,12 +449,12 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                   <Button
                     onClick={handleStripePayment}
                     disabled={isProcessingStripe}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 text-sm"
                   >
                     {isProcessingStripe ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                     ) : (
-                      <Lock className="w-4 h-4 mr-2" />
+                      <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                     )}
                     {isProcessingStripe ? 'Processing...' : `Pay $${investment.amount}`}
                   </Button>

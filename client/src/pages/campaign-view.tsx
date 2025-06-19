@@ -498,6 +498,21 @@ export default function CampaignView() {
                       value={campaign.progressPercent} 
                       className="h-3 bg-gray-200"
                     />
+                    
+                    {/* Commit to Investment Button */}
+                    <div className="mt-4">
+                      <Button 
+                        onClick={handleInvest}
+                        disabled={isProcessing}
+                        className="w-full bg-fundry-navy hover:bg-blue-800 text-white text-sm sm:text-base font-bold py-3 sm:py-4 shadow-lg hover:shadow-xl transition-all duration-200"
+                      >
+                        <DollarSign className="mr-2" size={18} />
+                        {isProcessing ? "Processing..." : "Commit to Investment"}
+                      </Button>
+                      <p className="text-xs text-gray-600 text-center mt-2 font-medium">
+                        Minimum investment: {formatCurrency(campaign.minimumInvestment)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -692,26 +707,26 @@ export default function CampaignView() {
             </Card>
           </div>
 
-          {/* Modern Investment Sidebar */}
-          <div className="space-y-6">
+          {/* Modern Investment Sidebar - Mobile Responsive */}
+          <div className="space-y-4 sm:space-y-6 order-first lg:order-last">
             {/* Enhanced Investment Card */}
-            <Card className="border-0 shadow-xl bg-gradient-to-br from-white via-orange-50/30 to-blue-50/20 backdrop-blur-sm overflow-hidden">
+            <Card className="border-0 shadow-xl bg-gradient-to-br from-white via-orange-50/30 to-blue-50/20 backdrop-blur-sm overflow-hidden lg:sticky lg:top-8">
               <CardContent className="p-0">
-                {/* Header with solid orange */}
-                <div className="bg-fundry-orange p-6 text-white relative overflow-hidden">
+                {/* Header with solid orange - Mobile Responsive */}
+                <div className="bg-fundry-orange p-4 sm:p-6 text-white relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-black/5 via-transparent to-white/5"></div>
                   <div className="relative z-10 text-center">
-                    <div className="text-4xl font-bold mb-2">
+                    <div className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
                       {formatCurrency(campaign.totalRaised)}
                     </div>
-                    <div className="text-white/90 font-medium">
+                    <div className="text-white/90 font-medium text-sm sm:text-base">
                       raised of <span className="font-bold text-white">{formatCurrency(campaign.fundingGoal)}</span> goal
                     </div>
                   </div>
                 </div>
 
-                {/* Main content */}
-                <div className="p-6">
+                {/* Main content - Mobile Responsive */}
+                <div className="p-4 sm:p-6">
                   <div className="mb-6">
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-sm font-semibold text-gray-700">Progress</span>
@@ -728,28 +743,28 @@ export default function CampaignView() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-8">
-                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50/30 rounded-xl border border-blue-100">
-                      <div className="text-2xl font-bold text-fundry-navy">{campaign.investorCount}</div>
-                      <div className="text-sm text-gray-600 font-medium">Investors</div>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                    <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-indigo-50/30 rounded-xl border border-blue-100">
+                      <div className="text-xl sm:text-2xl font-bold text-fundry-navy">{campaign.investorCount}</div>
+                      <div className="text-xs sm:text-sm text-gray-600 font-medium">Investors</div>
                     </div>
-                    <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50/30 rounded-xl border border-green-100">
-                      <div className="text-2xl font-bold text-green-600">
+                    <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-green-50 to-emerald-50/30 rounded-xl border border-green-100">
+                      <div className="text-xl sm:text-2xl font-bold text-green-600">
                         {campaign.investorCount > 0 
                           ? formatCurrency(Math.round(parseFloat(campaign.totalRaised) / campaign.investorCount))
                           : "$0"
                         }
                       </div>
-                      <div className="text-sm text-gray-600 font-medium">Avg. Investment</div>
+                      <div className="text-xs sm:text-sm text-gray-600 font-medium">Avg. Investment</div>
                     </div>
                   </div>
 
                   <Button 
                     onClick={handleInvest}
                     disabled={isProcessing}
-                    className="w-full bg-fundry-navy hover:bg-blue-800 text-white text-lg font-bold py-6 mb-4 shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="w-full bg-fundry-navy hover:bg-blue-800 text-white text-base sm:text-lg font-bold py-4 sm:py-6 mb-4 shadow-lg hover:shadow-xl transition-all duration-200"
                   >
-                    <DollarSign className="mr-3" size={24} />
+                    <DollarSign className="mr-2 sm:mr-3" size={20} />
                     {isProcessing ? "Processing..." : "Commit to Invest"}
                   </Button>
                   <p className="text-xs text-gray-600 text-center mb-6 font-medium">

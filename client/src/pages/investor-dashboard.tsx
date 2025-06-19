@@ -122,7 +122,7 @@ export default function InvestorDashboard() {
   });
 
   // Fetch notification preferences from API
-  const { data: notificationPreferences, isLoading: isLoadingNotificationPreferences } = useQuery({
+  const { data: notificationPreferences = {}, isLoading: isLoadingNotificationPreferences } = useQuery({
     queryKey: ['/api/notification-preferences'],
     enabled: !!user,
   });
@@ -1334,8 +1334,8 @@ This SAFE Agreement has been digitally signed and executed.
                                       <SelectContent>
                                         {selectedCountry && COUNTRIES_AND_STATES
                                           .find(c => c.code === selectedCountry)?.states?.map((state) => (
-                                          <SelectItem key={state} value={state}>
-                                            {state}
+                                          <SelectItem key={typeof state === 'string' ? state : state.code} value={typeof state === 'string' ? state : state.name}>
+                                            {typeof state === 'string' ? state : state.name}
                                           </SelectItem>
                                         ))}
                                       </SelectContent>
@@ -1908,84 +1908,65 @@ This SAFE Agreement has been digitally signed and executed.
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">Email Updates</p>
-                          <p className="text-sm text-gray-600">Receive updates via email</p>
+                          <p className="font-medium">Investment Updates</p>
+                          <p className="text-sm text-gray-600">Email updates about your investments</p>
                         </div>
                         <Switch
-                          checked={(notificationPreferences as any)?.emailUpdates || false}
-                          onCheckedChange={(checked) => handleUpdateNotificationPreference('emailUpdates', checked)}
+                          checked={notificationPreferences?.emailInvestmentUpdates || false}
+                          onCheckedChange={(checked) => handleUpdateNotificationPreference('emailInvestmentUpdates', checked)}
                         />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">SMS Alerts</p>
-                          <p className="text-sm text-gray-600">Receive alerts via SMS</p>
+                          <p className="font-medium">New Opportunities</p>
+                          <p className="text-sm text-gray-600">Email about new investment opportunities</p>
                         </div>
                         <Switch
-                          checked={notificationPreferences?.smsAlerts || false}
-                          onCheckedChange={(checked) => handleUpdateNotificationPreference('smsAlerts', checked)}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">Push Notifications</p>
-                          <p className="text-sm text-gray-600">Browser push notifications</p>
-                        </div>
-                        <Switch
-                          checked={notificationPreferences?.pushNotifications || false}
-                          onCheckedChange={(checked) => handleUpdateNotificationPreference('pushNotifications', checked)}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">Marketing Emails</p>
-                          <p className="text-sm text-gray-600">Promotional content and news</p>
-                        </div>
-                        <Switch
-                          checked={notificationPreferences?.marketingEmails || false}
-                          onCheckedChange={(checked) => handleUpdateNotificationPreference('marketingEmails', checked)}
+                          checked={notificationPreferences?.emailNewOpportunities || false}
+                          onCheckedChange={(checked) => handleUpdateNotificationPreference('emailNewOpportunities', checked)}
                         />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">Security Alerts</p>
-                          <p className="text-sm text-gray-600">Account security notifications</p>
+                          <p className="text-sm text-gray-600">Important security notifications</p>
                         </div>
                         <Switch
-                          checked={notificationPreferences?.securityAlerts || false}
-                          onCheckedChange={(checked) => handleUpdateNotificationPreference('securityAlerts', checked)}
+                          checked={notificationPreferences?.emailSecurityAlerts || false}
+                          onCheckedChange={(checked) => handleUpdateNotificationPreference('emailSecurityAlerts', checked)}
                         />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">Investment Updates</p>
-                          <p className="text-sm text-gray-600">Updates from your investments</p>
+                          <p className="font-medium">Marketing Communications</p>
+                          <p className="text-sm text-gray-600">Promotional content and platform news</p>
                         </div>
                         <Switch
-                          checked={notificationPreferences?.investmentUpdates || false}
-                          onCheckedChange={(checked) => handleUpdateNotificationPreference('investmentUpdates', checked)}
+                          checked={notificationPreferences?.emailMarketingCommunications || false}
+                          onCheckedChange={(checked) => handleUpdateNotificationPreference('emailMarketingCommunications', checked)}
                         />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">Campaign News</p>
-                          <p className="text-sm text-gray-600">News from campaign founders</p>
+                          <p className="font-medium">Campaign Updates</p>
+                          <p className="text-sm text-gray-600">Push notifications for campaign updates</p>
                         </div>
                         <Switch
-                          checked={notificationPreferences?.campaignNews || false}
-                          onCheckedChange={(checked) => handleUpdateNotificationPreference('campaignNews', checked)}
+                          checked={notificationPreferences?.pushCampaignUpdates || false}
+                          onCheckedChange={(checked) => handleUpdateNotificationPreference('pushCampaignUpdates', checked)}
                         />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">Monthly Reports</p>
-                          <p className="text-sm text-gray-600">Monthly investment summaries</p>
+                          <p className="font-medium">Investment Reminders</p>
+                          <p className="text-sm text-gray-600">Push reminders about pending investments</p>
                         </div>
                         <Switch
-                          checked={notificationPreferences?.monthlyReports || false}
-                          onCheckedChange={(checked) => handleUpdateNotificationPreference('monthlyReports', checked)}
+                          checked={notificationPreferences?.pushInvestmentReminders || false}
+                          onCheckedChange={(checked) => handleUpdateNotificationPreference('pushInvestmentReminders', checked)}
                         />
                       </div>
+
                     </div>
                   )}
                 </div>

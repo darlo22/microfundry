@@ -120,7 +120,7 @@ export default function CampaignView() {
   // Loading state
   if (isLoading || campaignLoading) {
     return (
-      <div className="min-h-screen bg-amber-800">
+      <div className="min-h-screen bg-fundry-navy">
         <Navbar />
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
@@ -135,7 +135,7 @@ export default function CampaignView() {
   // Error state
   if (error || !campaign) {
     return (
-      <div className="min-h-screen bg-amber-800">
+      <div className="min-h-screen bg-fundry-navy">
         <Navbar />
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
@@ -153,7 +153,7 @@ export default function CampaignView() {
   }
 
   return (
-    <div className="min-h-screen bg-amber-800">
+    <div className="min-h-screen bg-fundry-navy">
       <Navbar 
         showBackButton={true}
         onBackClick={handleBackToDashboard}

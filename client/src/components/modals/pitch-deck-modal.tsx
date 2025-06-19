@@ -45,7 +45,7 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[95vh] w-[95vw] p-0 bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border-0 shadow-2xl">
+      <DialogContent className="max-w-7xl max-h-[95vh] w-[95vw] h-[95vh] p-0 bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border-0 shadow-2xl overflow-hidden">
         <DialogHeader className="p-6 pb-3 bg-gradient-to-r from-fundry-navy to-blue-800 text-white">
           <DialogTitle className="text-xl font-semibold text-white">
             {campaignTitle} - Pitch Deck

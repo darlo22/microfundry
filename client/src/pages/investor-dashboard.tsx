@@ -779,6 +779,21 @@ export default function InvestorDashboard() {
     }
   };
 
+  // Scroll functions for the new tabs
+  const scrollToPendingCommitments = () => {
+    const element = document.getElementById('pending-commitments-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const scrollToActualInvestments = () => {
+    const element = document.getElementById('actual-investments-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -813,7 +828,7 @@ export default function InvestorDashboard() {
           {/* Portfolio Tab */}
           <TabsContent value="portfolio" className="space-y-8">
             {/* Portfolio Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div 
                 className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-fundry-orange transition-colors"
                 onClick={() => setActiveTab('portfolio')}
@@ -854,21 +869,34 @@ export default function InvestorDashboard() {
               </div>
 
               <div 
-                className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-fundry-orange transition-colors"
-                onClick={() => setActiveTab('profile')}
+                className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-orange-500 transition-colors"
+                onClick={() => scrollToPendingCommitments()}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Portfolio Value</p>
+                    <p className="text-sm font-medium text-gray-600">Pending Commitments</p>
                     <p className="text-3xl font-bold text-gray-900">
-                      {stats?.estimatedValue ? new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: 'USD',
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                      }).format(parseFloat(stats.estimatedValue)) : '$0.00'}
+                      {investments ? investments.filter(inv => inv.status === 'pending').length : 0}
                     </p>
-                    <p className="text-sm text-green-600 mt-1">+16.4% growth</p>
+                    <p className="text-sm text-orange-600 mt-1">Awaiting payment</p>
+                  </div>
+                  <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Clock className="h-6 w-6 text-orange-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div 
+                className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-green-500 transition-colors"
+                onClick={() => scrollToActualInvestments()}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Actual Paid Investments</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {investments ? investments.filter(inv => ['committed', 'paid', 'completed'].includes(inv.status)).length : 0}
+                    </p>
+                    <p className="text-sm text-green-600 mt-1">Fully invested</p>
                   </div>
                   <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <TrendingUp className="h-6 w-6 text-green-600" />
@@ -877,60 +905,88 @@ export default function InvestorDashboard() {
               </div>
             </div>
 
-            {/* Pending Commitments */}
-            {investments && investments.filter(inv => inv.status === 'pending').length > 0 && (
+            {/* Pending Commitments Section */}
+            <div id="pending-commitments-section">
+              {investments && investments.filter(inv => inv.status === 'pending').length > 0 ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-orange-600" />
+                      Pending Commitments
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">Complete your payments to finalize these investments</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {investments.filter(inv => inv.status === 'pending').map((investment) => (
+                        <PendingInvestmentCard key={investment.id} investment={investment} onPayNow={() => handlePayNow(investment)} />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-orange-600" />
+                      Pending Commitments
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">No pending commitments at the moment</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">All your investments are fully processed!</p>
+                      <Button 
+                        className="mt-4 bg-fundry-orange hover:bg-orange-600"
+                        onClick={handleDiscoverCampaigns}
+                      >
+                        Discover New Campaigns
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Actual Paid Investments Section */}
+            <div id="actual-investments-section">
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-orange-600" />
-                    Pending Commitments
+                    <TrendingUp className="h-5 w-5 text-green-600" />
+                    Actual Paid Investments
                   </CardTitle>
-                  <p className="text-sm text-gray-600">Complete your payments to finalize these investments</p>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm">All</Button>
+                    <Button variant="outline" size="sm">Active</Button>
+                    <Button variant="outline" size="sm">Completed</Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {investments.filter(inv => inv.status === 'pending').map((investment) => (
-                      <PendingInvestmentCard key={investment.id} investment={investment} onPayNow={() => handlePayNow(investment)} />
-                    ))}
-                  </div>
+                  {investmentsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-fundry-orange"></div>
+                    </div>
+                  ) : investments && investments.filter(inv => ['committed', 'paid', 'completed'].includes(inv.status)).length > 0 ? (
+                    <div className="space-y-4">
+                      {investments.filter(inv => ['committed', 'paid', 'completed'].includes(inv.status)).map((investment) => (
+                        <InvestmentCard key={investment.id} investment={investment} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No completed investments yet. Discover campaigns to get started!</p>
+                      <Button 
+                        className="mt-4 bg-fundry-orange hover:bg-orange-600"
+                        onClick={handleDiscoverCampaigns}
+                      >
+                        Discover Campaigns
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
-            )}
-
-            {/* Investment Portfolio */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Your Investments</CardTitle>
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">All</Button>
-                  <Button variant="outline" size="sm">Active</Button>
-                  <Button variant="outline" size="sm">Completed</Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {investmentsLoading ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-fundry-orange"></div>
-                  </div>
-                ) : investments && investments.filter(inv => inv.status !== 'pending').length > 0 ? (
-                  <div className="space-y-4">
-                    {investments.filter(inv => inv.status !== 'pending').map((investment) => (
-                      <InvestmentCard key={investment.id} investment={investment} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">No completed investments yet. Discover campaigns to get started!</p>
-                    <Button 
-                      className="mt-4 bg-fundry-orange hover:bg-orange-600"
-                      onClick={handleDiscoverCampaigns}
-                    >
-                      Discover Campaigns
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            </div>
 
             {/* Quick Actions */}
             <Card>

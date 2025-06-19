@@ -120,12 +120,12 @@ export default function CampaignView() {
   // Loading state
   if (isLoading || campaignLoading) {
     return (
-      <div className="min-h-screen bg-amber-100">
+      <div className="min-h-screen bg-amber-800">
         <Navbar />
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
             <div className="animate-spin w-12 h-12 border-4 border-fundry-orange border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">Loading campaign...</p>
+            <p className="text-gray-200 text-lg">Loading campaign...</p>
           </div>
         </div>
       </div>
@@ -135,12 +135,12 @@ export default function CampaignView() {
   // Error state
   if (error || !campaign) {
     return (
-      <div className="min-h-screen bg-amber-100">
+      <div className="min-h-screen bg-amber-800">
         <Navbar />
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Campaign Not Found</h1>
-            <p className="text-gray-600 mb-6">
+            <h1 className="text-2xl font-bold text-gray-100 mb-4">Campaign Not Found</h1>
+            <p className="text-gray-200 mb-6">
               The campaign you're looking for doesn't exist or has been removed.
             </p>
             <Button onClick={() => setLocation("/")} className="bg-fundry-orange hover:bg-orange-600">
@@ -153,7 +153,7 @@ export default function CampaignView() {
   }
 
   return (
-    <div className="min-h-screen bg-amber-100">
+    <div className="min-h-screen bg-amber-800">
       <Navbar 
         showBackButton={true}
         onBackClick={handleBackToDashboard}

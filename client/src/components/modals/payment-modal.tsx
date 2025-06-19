@@ -479,11 +479,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     } catch (error: any) {
       console.error('Payment processing error:', error);
       
-      // Immediately reset processing state and form for any other errors
-      setIsProcessing(false);
-      setShowStripeForm(false);
-      setCardholderName('');
-      setClientSecret('');
+      // Reset modal to payment selection for any other errors
+      resetModalToPaymentSelection();
       
       toast({
         title: "Payment Failed",

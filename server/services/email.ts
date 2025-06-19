@@ -11,6 +11,7 @@ interface EmailParams {
   subject: string;
   html: string;
   from?: string;
+  headers?: Record<string, string>;
 }
 
 export class EmailService {
@@ -18,13 +19,20 @@ export class EmailService {
 
   async sendEmail(params: EmailParams): Promise<boolean> {
     try {
-      const result = await resend.emails.send({
+      const emailData: any = {
         from: params.from || this.fromEmail,
         to: params.to,
         subject: params.subject,
         html: params.html,
-      });
-      
+        headers: {
+          'X-Mailer': 'Micro Fundry Platform',
+          'List-Unsubscribe': '<mailto:support@microfundry.com?subject=unsubscribe>',
+          'X-Entity-ID': 'micro-fundry-platform',
+          ...params.headers
+        }
+      };
+
+      const result = await resend.emails.send(emailData);
       console.log('Email sent successfully:', result);
       return true;
     } catch (error) {
@@ -240,9 +248,16 @@ export class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Verify Your Email Address - Micro Fundry',
+      subject: 'Complete Your Account Setup - Action Required',
       html,
-      from: 'Micro Fundry Support <support@microfundry.com>',
+      from: 'Micro Fundry Team <support@microfundry.com>',
+      headers: {
+        'X-Priority': '3',
+        'Importance': 'normal',
+        'X-Auto-Response-Suppress': 'OOF, DR, RN, NRN',
+        'X-Sender-ID': 'micro-fundry-verification',
+        'Message-ID': `<verification-${Date.now()}@microfundry.com>`,
+      },
     });
   }
 
@@ -464,9 +479,16 @@ export class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: `Welcome to Micro Fundry - Your ${userType} account is ready!`,
+      subject: `Your Fundry account is active - Start ${userType === 'founder' ? 'fundraising' : 'investing'} today`,
       html,
-      from: 'Micro Fundry Support <support@microfundry.com>',
+      from: 'Micro Fundry Team <support@microfundry.com>',
+      headers: {
+        'X-Priority': '3',
+        'Importance': 'normal',
+        'X-Auto-Response-Suppress': 'OOF, DR, RN, NRN',
+        'X-Sender-ID': 'micro-fundry-welcome',
+        'Message-ID': `<welcome-${Date.now()}@microfundry.com>`,
+      },
     });
   }
 }

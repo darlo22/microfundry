@@ -541,44 +541,44 @@ export default function CampaignView() {
 
                 {/* Discount Rate */}
                 <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-violet-600"></div>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-fundry-orange to-orange-600"></div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
                       </svg>
                     </div>
                   </div>
                   <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Discount Rate</h3>
-                  <p className="text-2xl font-bold text-purple-600">{campaign.discountRate}%</p>
+                  <p className="text-2xl font-bold text-fundry-orange">{campaign.discountRate}%</p>
                 </div>
 
                 {/* Valuation Cap */}
                 <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-fundry-navy to-blue-800"></div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 bg-gradient-to-br from-fundry-navy to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                     </div>
                   </div>
                   <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Valuation Cap</h3>
-                  <p className="text-2xl font-bold text-blue-600">{formatCurrency(campaign.valuationCap || "1000000")}</p>
+                  <p className="text-2xl font-bold text-fundry-navy">{formatCurrency(campaign.valuationCap || "1000000")}</p>
                 </div>
 
                 {/* Investors */}
                 <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-fundry-orange to-orange-600"></div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
                     </div>
                   </div>
                   <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Investors</h3>
-                  <p className="text-2xl font-bold text-cyan-600">{campaign.investorCount}</p>
+                  <p className="text-2xl font-bold text-fundry-orange">{campaign.investorCount}</p>
                 </div>
               </div>
             </CardContent>
@@ -596,15 +596,15 @@ export default function CampaignView() {
                 <div className="grid lg:grid-cols-2 gap-8">
                   {campaign.problemStatement && (
                     <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-500 to-rose-600"></div>
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-fundry-orange to-orange-600"></div>
                       <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <div className="w-14 h-14 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                           <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-red-700 mb-3">Problem Statement</h3>
+                          <h3 className="text-xl font-bold text-fundry-orange mb-3">Problem Statement</h3>
                           <p className="text-gray-800 leading-relaxed text-base font-medium">{campaign.problemStatement}</p>
                         </div>
                       </div>
@@ -613,15 +613,15 @@ export default function CampaignView() {
 
                   {campaign.solution && (
                     <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 to-green-600"></div>
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-fundry-navy to-blue-800"></div>
                       <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <div className="w-14 h-14 bg-gradient-to-br from-fundry-navy to-blue-800 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                           <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-emerald-700 mb-3">Solution</h3>
+                          <h3 className="text-xl font-bold text-fundry-navy mb-3">Solution</h3>
                           <p className="text-gray-800 leading-relaxed text-base font-medium">{campaign.solution}</p>
                         </div>
                       </div>
@@ -962,7 +962,7 @@ export default function CampaignView() {
                   <h2 className="text-3xl font-bold text-fundry-navy tracking-tight">Meet the Team</h2>
                 </div>
                 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-2 gap-8">
                   {campaign.teamMembers.map((member: any, index: number) => {
                     const colorSchemes = [
                       { bg: 'from-blue-500 to-indigo-600', accent: 'bg-blue-500', text: 'text-blue-700', ring: 'ring-blue-200' },
@@ -1027,13 +1027,20 @@ export default function CampaignView() {
                                 href={member.linkedinUrl} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className={`inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r ${scheme.bg} text-white rounded-full text-sm font-medium hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1`}
+                                className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-fundry-navy to-blue-800 text-white rounded-full text-sm font-medium hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
                               >
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                                 </svg>
                                 <span>LinkedIn Profile</span>
                               </a>
+                            </div>
+                          )}
+                          
+                          {/* Always show LinkedIn link if not provided */}
+                          {!member.linkedinUrl && (
+                            <div className="mt-6">
+                              <span className="text-sm text-gray-500 italic">LinkedIn profile not provided</span>
                             </div>
                           )}
                         </div>

@@ -489,40 +489,96 @@ export default function CampaignView() {
           </Card>
 
           {/* Investment Details */}
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardContent className="p-8">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
-                <h2 className="text-2xl font-bold text-fundry-navy">Investment Details</h2>
+          <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30">
+            <CardContent className="p-10">
+              <div className="flex items-center space-x-4 mb-8">
+                <div className="w-3 h-10 bg-gradient-to-b from-fundry-orange via-orange-500 to-orange-600 rounded-full shadow-md"></div>
+                <h2 className="text-3xl font-bold text-fundry-navy tracking-tight">Investment Details</h2>
               </div>
-              <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 px-3 sm:py-4 sm:px-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-lg border-l-4 border-fundry-orange">
-                    <span className="text-gray-700 font-medium text-sm sm:text-base">Funding Goal</span>
-                    <span className="font-bold text-base sm:text-lg text-fundry-navy mt-1 sm:mt-0">{formatCurrency(campaign.fundingGoal)}</span>
+              
+              <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
+                {/* Funding Goal */}
+                <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-fundry-orange to-orange-500"></div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 px-3 sm:py-4 sm:px-4 bg-gradient-to-r from-green-50 to-emerald-50/30 rounded-lg border-l-4 border-green-500">
-                    <span className="text-gray-700 font-medium text-sm sm:text-base">Amount Raised</span>
-                    <span className="font-bold text-base sm:text-lg text-green-600 mt-1 sm:mt-0">{formatCurrency(campaign.totalRaised)}</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 px-3 sm:py-4 sm:px-4 bg-gradient-to-r from-orange-50 to-amber-50/30 rounded-lg border-l-4 border-fundry-orange">
-                    <span className="text-gray-700 font-medium text-sm sm:text-base">Minimum Investment</span>
-                    <span className="font-bold text-base sm:text-lg text-fundry-orange mt-1 sm:mt-0">{formatCurrency(campaign.minimumInvestment)}</span>
-                  </div>
+                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Funding Goal</h3>
+                  <p className="text-2xl font-bold text-fundry-navy">{formatCurrency(campaign.fundingGoal)}</p>
                 </div>
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-purple-50 to-violet-50/30 rounded-lg border-l-4 border-purple-500">
-                    <span className="text-gray-700 font-medium">Discount Rate</span>
-                    <span className="font-bold text-lg text-purple-600">{campaign.discountRate}%</span>
+
+                {/* Amount Raised */}
+                <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-green-600"></div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-indigo-50 to-blue-50/30 rounded-lg border-l-4 border-indigo-500">
-                    <span className="text-gray-700 font-medium">Valuation Cap</span>
-                    <span className="font-bold text-lg text-indigo-600">{formatCurrency(campaign.valuationCap || "1000000")}</span>
+                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Amount Raised</h3>
+                  <p className="text-2xl font-bold text-emerald-600">{formatCurrency(campaign.totalRaised)}</p>
+                </div>
+
+                {/* Minimum Investment */}
+                <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-blue-50 to-cyan-50/30 rounded-lg border-l-4 border-blue-500">
-                    <span className="text-gray-700 font-medium">Investors</span>
-                    <span className="font-bold text-lg text-blue-600">{campaign.investorCount}</span>
+                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Minimum Investment</h3>
+                  <p className="text-2xl font-bold text-amber-600">{formatCurrency(campaign.minimumInvestment)}</p>
+                </div>
+
+                {/* Discount Rate */}
+                <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-violet-600"></div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
+                      </svg>
+                    </div>
                   </div>
+                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Discount Rate</h3>
+                  <p className="text-2xl font-bold text-purple-600">{campaign.discountRate}%</p>
+                </div>
+
+                {/* Valuation Cap */}
+                <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Valuation Cap</h3>
+                  <p className="text-2xl font-bold text-blue-600">{formatCurrency(campaign.valuationCap || "1000000")}</p>
+                </div>
+
+                {/* Investors */}
+                <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Investors</h3>
+                  <p className="text-2xl font-bold text-cyan-600">{campaign.investorCount}</p>
                 </div>
               </div>
             </CardContent>

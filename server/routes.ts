@@ -977,7 +977,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle team member photos and update teamMembers JSON
       if (updateData.teamMembers) {
         try {
-          const teamMembers = JSON.parse(updateData.teamMembers);
+          const teamMembers = typeof updateData.teamMembers === 'string' 
+            ? JSON.parse(updateData.teamMembers) 
+            : updateData.teamMembers;
           console.log('Processing team members:', teamMembers);
           console.log('Available files:', files.map(f => ({ fieldname: f.fieldname, filename: f.filename })));
           
@@ -1055,10 +1057,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pitchDeckUrl: files.pitchDeck?.[0]?.path,
         // Convert deadline string to Date object if provided
         deadline: req.body.deadline ? new Date(req.body.deadline) : null,
-        // Handle JSON fields
-        teamMembers: req.body.teamMembers ? JSON.parse(req.body.teamMembers) : null,
-        useOfFunds: req.body.useOfFunds ? JSON.parse(req.body.useOfFunds) : null,
-        directors: req.body.directors ? JSON.parse(req.body.directors) : [],
+        // Handle JSON fields - check if already parsed
+        teamMembers: req.body.teamMembers ? 
+          (typeof req.body.teamMembers === 'string' ? JSON.parse(req.body.teamMembers) : req.body.teamMembers) : null,
+        useOfFunds: req.body.useOfFunds ? 
+          (typeof req.body.useOfFunds === 'string' ? JSON.parse(req.body.useOfFunds) : req.body.useOfFunds) : null,
+        directors: req.body.directors ? 
+          (typeof req.body.directors === 'string' ? JSON.parse(req.body.directors) : req.body.directors) : [],
       };
 
       const validatedData = insertCampaignSchema.parse(campaignData);

@@ -1131,46 +1131,51 @@ This SAFE Agreement has been digitally signed and executed.
           </TabsContent>
 
           {/* Profile Tab */}
-          <TabsContent value="profile" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="profile" className="space-y-8">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
               {/* Profile Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Profile Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <Label className="text-gray-600">Name</Label>
-                      <p className="font-medium">{user.firstName} {user.lastName}</p>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                      <User className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <Label className="text-gray-600">Email</Label>
-                      <p className="font-medium">{user.email}</p>
+                      <h3 className="text-xl font-semibold text-white">Profile Information</h3>
+                      <p className="text-orange-100 text-sm">Manage your personal details</p>
                     </div>
-                    <div>
-                      <Label className="text-gray-600">Phone</Label>
-                      <p className="font-medium">{user.phone || "Not provided"}</p>
+                  </div>
+                </div>
+                <div className="p-6 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1">
+                      <Label className="text-sm font-medium text-gray-600">Name</Label>
+                      <p className="text-lg font-semibold text-gray-900">{user.firstName} {user.lastName}</p>
                     </div>
-                    <div>
-                      <Label className="text-gray-600">Location</Label>
-                      <p className="font-medium">
+                    <div className="space-y-1">
+                      <Label className="text-sm font-medium text-gray-600">Email</Label>
+                      <p className="text-lg font-semibold text-gray-900">{user.email}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-sm font-medium text-gray-600">Phone</Label>
+                      <p className="text-lg font-semibold text-gray-900">{user.phone || "Not provided"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-sm font-medium text-gray-600">Location</Label>
+                      <p className="text-lg font-semibold text-gray-900">
                         {user.country && user.state ? `${user.state}, ${user.country}` : 
                          user.country || "Not provided"}
                       </p>
                     </div>
                   </div>
-                  <div>
-                    <Label className="text-gray-600">Bio</Label>
-                    <p className="font-medium">{user.bio || "No bio provided"}</p>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-600">Bio</Label>
+                    <p className="text-gray-900 leading-relaxed">{user.bio || "No bio provided"}</p>
                   </div>
-                  <div className="pt-4 border-t">
+                  <div className="pt-6 border-t border-gray-200">
                     <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
                       <DialogTrigger asChild>
-                        <Button variant="outline" className="w-full">
+                        <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white">
                           <Edit className="h-4 w-4 mr-2" />
                           Edit Profile
                         </Button>
@@ -1401,22 +1406,25 @@ This SAFE Agreement has been digitally signed and executed.
                       </DialogContent>
                     </Dialog>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Security Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    Security Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Shield className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-white">Security Settings</h3>
+                      <p className="text-blue-100 text-sm">Secure your account</p>
+                    </div>
+                  </div>
+                </div>
+                  <div className="space-y-4">
                     <Button
-                      variant="outline"
-                      className="w-full justify-start"
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white justify-start"
                       onClick={() => setIsChangePasswordOpen(true)}
                     >
                       <Key className="h-4 w-4 mr-2" />

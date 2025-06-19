@@ -46,9 +46,25 @@ const upload = multer({
   },
 });
 
+// Helper function to wrap route handlers with error handling
+const safeHandler = (handler: Function) => {
+  return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    try {
+      await handler(req, res, next);
+    } catch (error) {
+      console.error('Route handler error:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ 
+          message: error instanceof Error ? error.message : 'Internal server error' 
+        });
+      }
+    }
+  };
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded files statically from uploads directory
-  app.get('/uploads/:filename', (req, res) => {
+  app.get('/uploads/:filename', safeHandler((req, res) => {
     const filename = req.params.filename;
     const filePath = path.join(process.cwd(), 'uploads', filename);
     res.sendFile(filePath, (err) => {
@@ -56,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(404).json({ message: 'File not found' });
       }
     });
-  });
+  }));
   
   // Auth middleware
   setupAuth(app);

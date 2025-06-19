@@ -518,6 +518,36 @@ export default function CampaignView() {
               </CardContent>
             </Card>
 
+            {/* Pitch Media Section */}
+            {campaign.pitchMediaUrl && (
+              <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-8">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Pitch Media</h2>
+                  </div>
+                  <div className="flex justify-center">
+                    {campaign.pitchMediaUrl.match(/\.(mp4|mov|avi|webm)$/i) ? (
+                      <video 
+                        controls 
+                        className="w-full max-w-4xl rounded-lg shadow-lg"
+                        poster={campaign.logoUrl}
+                      >
+                        <source src={campaign.pitchMediaUrl} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    ) : (
+                      <img 
+                        src={campaign.pitchMediaUrl} 
+                        alt="Pitch Media"
+                        className="w-full max-w-4xl rounded-lg shadow-lg object-cover"
+                      />
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Modern Campaign Description */}
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-8">

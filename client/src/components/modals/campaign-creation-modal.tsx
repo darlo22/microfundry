@@ -574,9 +574,6 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
       if (pitchMediaFile) {
         formData.append("pitchMedia", pitchMediaFile);
       }
-      if (pitchMediaFile) {
-        formData.append("pitchMedia", pitchMediaFile);
-      }
       if (pitchDeckFile) {
         formData.append("pitchDeck", pitchDeckFile);
       }

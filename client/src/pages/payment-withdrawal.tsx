@@ -318,9 +318,8 @@ export default function PaymentWithdrawal() {
                 <ArrowLeft className="h-4 w-4" />
                 Back to Dashboard
               </Button>
-            </div>
-            <div className="flex items-center">
-              <img src={fundryLogoNew} alt="Fundry" className="h-18" />
+              <Separator orientation="vertical" className="h-6" />
+              <img src={fundryLogoNew} alt="Fundry" className="h-12" />
             </div>
           </div>
         </div>

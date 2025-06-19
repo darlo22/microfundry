@@ -542,28 +542,41 @@ export class DatabaseStorage implements IStorage {
 
   // KYC operations
   async getKycVerification(userId: string): Promise<KycVerification | undefined> {
-    return safeDbOperation(async () => {
+    try {
       const [kyc] = await db.select().from(kycVerifications).where(eq(kycVerifications.userId, userId));
       return kyc;
-    });
+    } catch (error) {
+      console.error('Failed to get KYC verification:', error);
+      return undefined;
+    }
   }
 
   async createKycVerification(kycData: InsertKycVerification): Promise<KycVerification> {
-    return safeDbOperation(async () => {
+    try {
+      console.log('Creating KYC verification with data:', kycData);
       const [kyc] = await db.insert(kycVerifications).values(kycData).returning();
+      console.log('KYC verification created successfully:', kyc);
       return kyc;
-    }) as Promise<KycVerification>;
+    } catch (error) {
+      console.error('Failed to create KYC verification:', error);
+      throw error;
+    }
   }
 
   async updateKycVerification(userId: string, kycData: Partial<InsertKycVerification>): Promise<KycVerification | undefined> {
-    return safeDbOperation(async () => {
+    try {
+      console.log('Updating KYC verification for user:', userId, 'with data:', kycData);
       const [kyc] = await db
         .update(kycVerifications)
         .set({ ...kycData, updatedAt: new Date() })
         .where(eq(kycVerifications.userId, userId))
         .returning();
+      console.log('KYC verification updated successfully:', kyc);
       return kyc;
-    });
+    } catch (error) {
+      console.error('Failed to update KYC verification:', error);
+      throw error;
+    }
   }
 
   async updateUserKycStatus(userId: string, kycData: {

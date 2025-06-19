@@ -186,8 +186,8 @@ export default function CampaignView() {
         <div className="space-y-4 sm:space-y-6 lg:space-y-8">
           
           {/* Hero Section - Pitch Media First (Wefunder Style) */}
-          <div className="overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur-sm rounded-lg">
-            <div className="p-0">
+          <Card className="overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur-sm">
+            <CardContent className="p-0">
               {/* Pitch Video/Cover Image - Prominent Display */}
               <div className="relative">
                 {campaign.pitchMediaUrl ? (
@@ -355,8 +355,8 @@ export default function CampaignView() {
                   Minimum investment: {formatCurrency(campaign.minimumInvestment)}
                 </p>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* View Pitch Deck Section */}
           <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">

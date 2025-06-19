@@ -334,7 +334,7 @@ export default function CampaignView() {
                 <Button 
                   onClick={handleInvest}
                   disabled={isProcessing}
-                  className="w-full bg-fundry-navy hover:bg-blue-800 text-white font-bold py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="w-full bg-fundry-orange hover:bg-orange-600 text-white font-bold py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   <DollarSign className="mr-2" size={20} />
                   {isProcessing ? "Processing..." : "Commit to Investment"}

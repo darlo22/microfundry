@@ -203,6 +203,7 @@ The deployment uses:
 - June 19, 2025. Fixed About This Campaign section structure: eliminated duplicate "Key Features & Benefits" headers by restructuring content parsing logic to collect all features into a single consolidated section, improved content organization with logical flow (Company Vision → Key Features & Benefits → Market Position → Other Content), enhanced readability by removing repetitive headers
 - June 19, 2025. Updated campaign page background to Fundry Navy Blue: changed from semi-dark chocolate (bg-amber-800) to Fundry Navy Blue (bg-fundry-navy) for professional corporate appearance that aligns with brand colors, maintained optimal text contrast with light gray colors against the dark navy background
 - June 19, 2025. Updated About This Campaign section header text to Fundry Navy Blue: changed "About This Campaign" title and "Learn more about this investment opportunity" subtitle from orange to navy blue (text-fundry-navy) for improved brand consistency and professional appearance against the orange gradient background
+- June 19, 2025. Updated Commit to Investment button to Fundry orange: changed button background from navy blue (bg-fundry-navy) to Fundry orange (bg-fundry-orange) with orange-600 hover state, creating a prominent call-to-action that stands out against the navy blue page background
 
 ## User Preferences
 

@@ -9,9 +9,13 @@ import { Copy, Check, Share2, MessageCircle, Mail, Twitter, Facebook, Linkedin, 
 interface ShareCampaignModalProps {
   isOpen: boolean;
   onClose: () => void;
-  campaignTitle: string;
-  campaignUrl: string;
-  shortPitch: string;
+  campaign: {
+    id: number;
+    title: string;
+    shortPitch: string;
+    fundingGoal: string;
+    minimumInvestment: string;
+  };
 }
 
 export function ShareCampaignModal({ 

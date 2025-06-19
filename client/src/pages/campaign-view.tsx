@@ -409,8 +409,174 @@ export default function CampaignView() {
             </CardContent>
           </Card>
 
-          {/* Additional Campaign Sections */}
-          {campaign.teamMembers && campaign.teamMembers.length > 0 && (
+          {/* Business Strategy Section */}
+          {(campaign.problemStatement || campaign.solution || campaign.marketOpportunity || campaign.businessModel || campaign.goToMarketStrategy || campaign.competitiveLandscape) && (
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardContent className="p-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Business Strategy</h2>
+                </div>
+                <div className="grid md:grid-cols-2 gap-8">
+                  {campaign.problemStatement && (
+                    <div className="bg-red-50 rounded-xl p-6 border-l-4 border-red-500">
+                      <h3 className="text-lg font-semibold text-red-700 mb-3">Problem Statement</h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.problemStatement}</p>
+                    </div>
+                  )}
+                  {campaign.solution && (
+                    <div className="bg-green-50 rounded-xl p-6 border-l-4 border-green-500">
+                      <h3 className="text-lg font-semibold text-green-700 mb-3">Solution</h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.solution}</p>
+                    </div>
+                  )}
+                  {campaign.marketOpportunity && (
+                    <div className="bg-blue-50 rounded-xl p-6 border-l-4 border-blue-500">
+                      <h3 className="text-lg font-semibold text-blue-700 mb-3">Market Opportunity</h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.marketOpportunity}</p>
+                    </div>
+                  )}
+                  {campaign.businessModel && (
+                    <div className="bg-purple-50 rounded-xl p-6 border-l-4 border-purple-500">
+                      <h3 className="text-lg font-semibold text-purple-700 mb-3">Business Model</h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.businessModel}</p>
+                    </div>
+                  )}
+                  {campaign.goToMarketStrategy && (
+                    <div className="bg-orange-50 rounded-xl p-6 border-l-4 border-orange-500">
+                      <h3 className="text-lg font-semibold text-orange-700 mb-3">Go-To-Market Strategy</h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.goToMarketStrategy}</p>
+                    </div>
+                  )}
+                  {campaign.competitiveLandscape && (
+                    <div className="bg-indigo-50 rounded-xl p-6 border-l-4 border-indigo-500">
+                      <h3 className="text-lg font-semibold text-indigo-700 mb-3">Competitive Landscape</h3>
+                      <p className="text-gray-700 leading-relaxed">{campaign.competitiveLandscape}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Company Information */}
+          {(campaign.companyName || campaign.country || campaign.state || campaign.businessAddress || campaign.registrationStatus) && (
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardContent className="p-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Company Information</h2>
+                </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {campaign.companyName && (
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-lg border-l-4 border-fundry-orange">
+                      <span className="text-gray-700 font-medium">Company Name</span>
+                      <span className="font-bold text-fundry-navy">{campaign.companyName}</span>
+                    </div>
+                  )}
+                  {(campaign.country || campaign.state) && (
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-lg border-l-4 border-blue-500">
+                      <span className="text-gray-700 font-medium">Location</span>
+                      <span className="font-bold text-blue-600">
+                        {campaign.state && campaign.country ? `${campaign.state}, ${campaign.country}` : campaign.country || campaign.state}
+                      </span>
+                    </div>
+                  )}
+                  {campaign.businessAddress && (
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-green-50/30 rounded-lg border-l-4 border-green-500">
+                      <span className="text-gray-700 font-medium">Address</span>
+                      <span className="font-bold text-green-600">{campaign.businessAddress}</span>
+                    </div>
+                  )}
+                  {campaign.registrationStatus && (
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-purple-50/30 rounded-lg border-l-4 border-purple-500">
+                      <span className="text-gray-700 font-medium">Registration</span>
+                      <span className="font-bold text-purple-600 capitalize">{campaign.registrationStatus}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Traction & Growth */}
+          {(campaign.startupStage || campaign.currentRevenue || campaign.customers || campaign.previousFunding || campaign.keyMilestones) && (
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardContent className="p-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Traction & Growth</h2>
+                </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {campaign.startupStage && (
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-lg border-l-4 border-fundry-orange">
+                      <span className="text-gray-700 font-medium">Stage</span>
+                      <span className="font-bold text-fundry-navy capitalize">{campaign.startupStage}</span>
+                    </div>
+                  )}
+                  {campaign.currentRevenue && (
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-green-50/30 rounded-lg border-l-4 border-green-500">
+                      <span className="text-gray-700 font-medium">Current Revenue</span>
+                      <span className="font-bold text-green-600">{campaign.currentRevenue}</span>
+                    </div>
+                  )}
+                  {campaign.customers && (
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-purple-50/30 rounded-lg border-l-4 border-purple-500">
+                      <span className="text-gray-700 font-medium">Customers</span>
+                      <span className="font-bold text-purple-600">{campaign.customers}</span>
+                    </div>
+                  )}
+                  {campaign.previousFunding && (
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-indigo-50/30 rounded-lg border-l-4 border-indigo-500">
+                      <span className="text-gray-700 font-medium">Previous Funding</span>
+                      <span className="font-bold text-indigo-600">{campaign.previousFunding}</span>
+                    </div>
+                  )}
+                </div>
+                {campaign.keyMilestones && (
+                  <div className="mt-6 p-6 bg-gradient-to-r from-yellow-50 to-orange-50/30 rounded-xl border-l-4 border-yellow-500">
+                    <h3 className="text-lg font-semibold text-yellow-700 mb-3">Key Milestones</h3>
+                    <p className="text-gray-700 leading-relaxed">{campaign.keyMilestones}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Use of Funds */}
+          {campaign.useOfFunds && Array.isArray(campaign.useOfFunds) && campaign.useOfFunds.length > 0 && (
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardContent className="p-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Use of Funds</h2>
+                </div>
+                <div className="space-y-4">
+                  {campaign.useOfFunds.map((fund: any, index: number) => (
+                    <div key={index} className="bg-gray-50 rounded-xl p-6">
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-lg font-semibold text-fundry-navy">{fund.category}</h3>
+                        <span className="text-xl font-bold text-fundry-orange">{fund.percentage}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
+                        <div 
+                          className="bg-gradient-to-r from-fundry-orange to-orange-600 h-3 rounded-full transition-all duration-500"
+                          style={{ width: `${fund.percentage}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed">{fund.description}</p>
+                      <div className="mt-2 text-sm text-gray-600">
+                        Amount: <span className="font-semibold">{formatCurrency((parseFloat(campaign.fundingGoal) * fund.percentage) / 100)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Team Members */}
+          {campaign.teamMembers && Array.isArray(campaign.teamMembers) && campaign.teamMembers.length > 0 && (
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-8">
                 <div className="flex items-center space-x-3 mb-6">
@@ -424,12 +590,50 @@ export default function CampaignView() {
                         {member.photoUrl ? (
                           <img src={member.photoUrl} alt={member.name} className="w-full h-full rounded-full object-cover" />
                         ) : (
-                          member.name.charAt(0)
+                          member.name?.charAt(0) || 'T'
                         )}
                       </div>
-                      <h3 className="font-semibold text-fundry-navy mb-1">{member.name}</h3>
-                      <p className="text-sm text-fundry-orange font-medium mb-2">{member.role}</p>
-                      <p className="text-xs text-gray-600">{member.experience}</p>
+                      <h3 className="font-semibold text-fundry-navy mb-1">{member.name || 'Team Member'}</h3>
+                      <p className="text-sm text-fundry-orange font-medium mb-2">{member.role || 'Role'}</p>
+                      <p className="text-xs text-gray-600">{member.experience || ''}</p>
+                      {member.linkedinUrl && (
+                        <a 
+                          href={member.linkedinUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          LinkedIn Profile
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Directors Information */}
+          {campaign.directors && Array.isArray(campaign.directors) && campaign.directors.length > 0 && (
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardContent className="p-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Company Directors</h2>
+                </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {campaign.directors.map((director: any, index: number) => (
+                    <div key={index} className="bg-gray-50 rounded-xl p-6">
+                      <h3 className="font-semibold text-fundry-navy mb-2">{director.name || `Director ${index + 1}`}</h3>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <span className="font-medium">Position:</span> {director.position || 'Director'}
+                      </p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <span className="font-medium">Ownership:</span> {director.ownership || 'N/A'}%
+                      </p>
+                      {director.experience && (
+                        <p className="text-sm text-gray-700 mt-2">{director.experience}</p>
+                      )}
                     </div>
                   ))}
                 </div>

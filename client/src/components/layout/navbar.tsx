@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChartLine, Bell, LogOut } from "lucide-react";
+import { ChartLine, Bell, LogOut, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { FundryLogo } from "@/components/ui/fundry-logo";
@@ -17,9 +17,12 @@ interface NavbarProps {
   title?: string;
   showNotifications?: boolean;
   actions?: React.ReactNode;
+  showBackButton?: boolean;
+  onBackClick?: () => void;
+  rightContent?: React.ReactNode;
 }
 
-export default function Navbar({ title, showNotifications = true, actions }: NavbarProps) {
+export default function Navbar({ title, showNotifications = true, actions, showBackButton, onBackClick, rightContent }: NavbarProps) {
   const { user } = useAuth();
   const [location] = useLocation();
 
@@ -51,9 +54,20 @@ export default function Navbar({ title, showNotifications = true, actions }: Nav
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
+            {showBackButton && onBackClick && (
+              <Button 
+                variant="ghost" 
+                onClick={onBackClick}
+                className="flex items-center text-gray-700 hover:text-fundry-orange"
+              >
+                <ArrowLeft className="mr-2" size={16} />
+                Back
+              </Button>
+            )}
+            
             <FundryLogo className="h-10 w-auto" />
             
-            {!title && (
+            {!title && !showBackButton && (
               <div className="hidden md:flex space-x-6">
                 {getNavLinks().map((link) => (
                   <Link
@@ -77,7 +91,7 @@ export default function Navbar({ title, showNotifications = true, actions }: Nav
           </div>
 
           <div className="flex items-center space-x-4">
-            {actions}
+            {rightContent || actions}
             
             {showNotifications && <NotificationDropdown />}
 

@@ -18,11 +18,20 @@ export interface CampaignWithStats {
   founderId: string;
   logoUrl?: string;
   pitchDeckUrl?: string;
+  pitchMediaUrl?: string;
   deadline?: string;
   createdAt: string;
   totalRaised: string;
   investorCount: number;
   progressPercent: number;
+  // Business Information fields
+  companyName?: string;
+  country?: string;
+  state?: string;
+  businessAddress?: string;
+  registrationStatus?: string;
+  registrationType?: string;
+  directors?: any[];
   // Additional campaign creation fields
   businessSector?: string;
   startupStage?: string;

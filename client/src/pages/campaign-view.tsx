@@ -415,10 +415,10 @@ export default function CampaignView() {
         }
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Main Campaign Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
             {/* Modern Campaign Header */}
             <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white via-gray-50/50 to-blue-50/30 backdrop-blur-sm">
               <CardContent className="p-0">
@@ -426,43 +426,43 @@ export default function CampaignView() {
                 <div className="bg-orange-700 p-8 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-black/5 via-transparent to-white/5"></div>
                   <div className="relative z-10">
-                    <div className="flex items-start justify-between mb-6">
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <h1 className="text-4xl font-bold text-white drop-shadow-sm">{campaign.title}</h1>
-                          <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-colors">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+                          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white drop-shadow-sm">{campaign.title}</h1>
+                          <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-colors self-start">
                             {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                           </Badge>
                         </div>
-                        <p className="text-xl text-white/95 mb-6 font-medium leading-relaxed">{campaign.shortPitch}</p>
+                        <p className="text-lg sm:text-xl text-white/95 mb-6 font-medium leading-relaxed">{campaign.shortPitch}</p>
                         
-                        <div className="flex items-center space-x-6 text-white/80">
-                          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                            <Building className="mr-2" size={16} />
+                        <div className="flex flex-wrap items-center gap-3 text-white/80">
+                          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-3 py-2 text-sm">
+                            <Building className="mr-2" size={14} />
                             <span className="font-medium">{campaign.businessSector || 'Technology'}</span>
                           </div>
-                          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                            <MapPin className="mr-2" size={16} />
+                          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-3 py-2 text-sm">
+                            <MapPin className="mr-2" size={14} />
                             <span className="font-medium">{campaign.country && campaign.state ? `${campaign.state}, ${campaign.country}` : 'Location TBD'}</span>
                           </div>
-                          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                            <Calendar className="mr-2" size={16} />
+                          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-3 py-2 text-sm">
+                            <Calendar className="mr-2" size={14} />
                             <span className="font-medium">Started {formatDate(campaign.createdAt)}</span>
                           </div>
                         </div>
                       </div>
                       
-                      {/* Enhanced Company Logo */}
-                      <div className="w-28 h-28 bg-white/95 backdrop-blur-sm border-2 border-white/30 rounded-2xl flex items-center justify-center ml-8 overflow-hidden shadow-2xl">
+                      {/* Enhanced Company Logo - Responsive */}
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-white/95 backdrop-blur-sm border-2 border-white/30 rounded-2xl flex items-center justify-center lg:ml-8 mt-4 lg:mt-0 overflow-hidden shadow-2xl shrink-0">
                         {campaign.logoUrl ? (
                           <img 
                             src={campaign.logoUrl} 
                             alt={campaign.title}
-                            className="w-full h-full object-contain p-4"
+                            className="w-full h-full object-contain p-3 sm:p-4"
                             style={{ maxWidth: '100%', maxHeight: '100%' }}
                           />
                         ) : (
-                          <span className="text-fundry-orange text-3xl font-bold">
+                          <span className="text-fundry-orange text-xl sm:text-2xl lg:text-3xl font-bold">
                             {campaign.title.charAt(0)}
                           </span>
                         )}
@@ -471,20 +471,20 @@ export default function CampaignView() {
                   </div>
                 </div>
                 
-                {/* Stats Section */}
-                <div className="p-8 bg-white">
-                  <div className="grid grid-cols-3 gap-6">
+                {/* Stats Section - Mobile Responsive */}
+                <div className="p-4 sm:p-6 lg:p-8 bg-white">
+                  <div className="grid grid-cols-3 gap-3 sm:gap-6">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-fundry-navy mb-2">{formatCurrency(campaign.totalRaised)}</div>
-                      <div className="text-sm text-gray-600 font-medium">Raised</div>
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-fundry-navy mb-1 sm:mb-2">{formatCurrency(campaign.totalRaised)}</div>
+                      <div className="text-xs sm:text-sm text-gray-600 font-medium">Raised</div>
                     </div>
                     <div className="text-center border-l border-r border-gray-200">
-                      <div className="text-3xl font-bold text-fundry-orange mb-2">{campaign.progressPercent}%</div>
-                      <div className="text-sm text-gray-600 font-medium">Complete</div>
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-fundry-orange mb-1 sm:mb-2">{campaign.progressPercent}%</div>
+                      <div className="text-xs sm:text-sm text-gray-600 font-medium">Complete</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-green-600 mb-2">{formatCurrency(campaign.fundingGoal)}</div>
-                      <div className="text-sm text-gray-600 font-medium">Goal</div>
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600 mb-1 sm:mb-2">{formatCurrency(campaign.fundingGoal)}</div>
+                      <div className="text-xs sm:text-sm text-gray-600 font-medium">Goal</div>
                     </div>
                   </div>
                   
@@ -525,26 +525,26 @@ export default function CampaignView() {
                   <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
                   <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Investment Details</h2>
                 </div>
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-lg border-l-4 border-fundry-orange">
-                      <span className="text-gray-700 font-medium">Funding Goal</span>
-                      <span className="font-bold text-lg text-fundry-navy">{formatCurrency(campaign.fundingGoal)}</span>
+                <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 px-3 sm:py-4 sm:px-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-lg border-l-4 border-fundry-orange">
+                      <span className="text-gray-700 font-medium text-sm sm:text-base">Funding Goal</span>
+                      <span className="font-bold text-base sm:text-lg text-fundry-navy mt-1 sm:mt-0">{formatCurrency(campaign.fundingGoal)}</span>
                     </div>
-                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-green-50 to-emerald-50/30 rounded-lg border-l-4 border-green-500">
-                      <span className="text-gray-700 font-medium">Amount Raised</span>
-                      <span className="font-bold text-lg text-green-600">{formatCurrency(campaign.totalRaised)}</span>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 px-3 sm:py-4 sm:px-4 bg-gradient-to-r from-green-50 to-emerald-50/30 rounded-lg border-l-4 border-green-500">
+                      <span className="text-gray-700 font-medium text-sm sm:text-base">Amount Raised</span>
+                      <span className="font-bold text-base sm:text-lg text-green-600 mt-1 sm:mt-0">{formatCurrency(campaign.totalRaised)}</span>
                     </div>
-                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-orange-50 to-amber-50/30 rounded-lg border-l-4 border-fundry-orange">
-                      <span className="text-gray-700 font-medium">Minimum Investment</span>
-                      <span className="font-bold text-lg text-fundry-orange">{formatCurrency(campaign.minimumInvestment)}</span>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 px-3 sm:py-4 sm:px-4 bg-gradient-to-r from-orange-50 to-amber-50/30 rounded-lg border-l-4 border-fundry-orange">
+                      <span className="text-gray-700 font-medium text-sm sm:text-base">Minimum Investment</span>
+                      <span className="font-bold text-base sm:text-lg text-fundry-orange mt-1 sm:mt-0">{formatCurrency(campaign.minimumInvestment)}</span>
                     </div>
-                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-blue-50 to-indigo-50/30 rounded-lg border-l-4 border-blue-500">
-                      <span className="text-gray-700 font-medium">Maximum Ask</span>
-                      <span className="font-bold text-lg text-blue-600">{formatCurrency(campaign.fundingGoal)}</span>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 px-3 sm:py-4 sm:px-4 bg-gradient-to-r from-blue-50 to-indigo-50/30 rounded-lg border-l-4 border-blue-500">
+                      <span className="text-gray-700 font-medium text-sm sm:text-base">Maximum Ask</span>
+                      <span className="font-bold text-base sm:text-lg text-blue-600 mt-1 sm:mt-0">{formatCurrency(campaign.fundingGoal)}</span>
                     </div>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-purple-50 to-violet-50/30 rounded-lg border-l-4 border-purple-500">
                       <span className="text-gray-700 font-medium">Discount Rate</span>
                       <span className="font-bold text-lg text-purple-600">{campaign.discountRate}%</span>

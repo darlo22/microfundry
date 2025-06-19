@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Users, Eye, Calendar, Download, RefreshCw, Target, Award, Clock, ArrowLeft, LogOut } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Users, Eye, Calendar, Download, RefreshCw, Target, Award, Clock, ArrowLeft, LogOut, BarChart3 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import fundryLogoNew from "@assets/ChatGPT Image Jun 18, 2025, 07_16_52 AM_1750230510254.png";
@@ -91,19 +91,19 @@ export default function FounderAnalytics() {
   const conversionRate = (founderStats as any)?.conversionRate || 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
       {/* Navigation Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-6">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-orange-200 sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             {/* Left: Back Button */}
             <Button
               variant="ghost"
               onClick={() => setLocation("/founder-dashboard")}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-2 text-fundry-navy hover:text-fundry-orange transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
             </Button>
 
             {/* Center: Fundry Logo */}
@@ -114,126 +114,160 @@ export default function FounderAnalytics() {
               <img 
                 src={fundryLogoNew} 
                 alt="Fundry" 
-                className="h-32 w-auto"
+                className="h-12 w-auto"
               />
             </div>
 
-
+            <div className="w-32"></div> {/* Spacer for centering */}
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics</h1>
-            <p className="text-gray-600">Track your fundraising performance and growth</p>
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 gap-4">
+          <div className="bg-gradient-to-r from-fundry-orange to-fundry-navy p-6 rounded-2xl text-white flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2 flex items-center">
+              <BarChart3 className="mr-3 text-white" size={32} />
+              Analytics Dashboard
+            </h1>
+            <p className="text-orange-100 text-sm sm:text-base">Track your fundraising performance and growth</p>
           </div>
-        <div className="flex gap-3">
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Time range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-              <SelectItem value="1y">Last year</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All campaigns" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Campaigns</SelectItem>
-              {Array.isArray(campaigns) && (campaigns as any[]).map((campaign: any) => (
-                <SelectItem key={campaign.id} value={campaign.id.toString()}>
-                  {campaign.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export Report
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-0">
+            <Select value={timeRange} onValueChange={setTimeRange}>
+              <SelectTrigger className="w-full sm:w-[140px] border-orange-200 focus:border-fundry-orange">
+                <SelectValue placeholder="Time range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7d">Last 7 days</SelectItem>
+                <SelectItem value="30d">Last 30 days</SelectItem>
+                <SelectItem value="90d">Last 90 days</SelectItem>
+                <SelectItem value="1y">Last year</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
+              <SelectTrigger className="w-full sm:w-[180px] border-orange-200 focus:border-fundry-orange">
+                <SelectValue placeholder="All campaigns" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Campaigns</SelectItem>
+                {Array.isArray(campaigns) && (campaigns as any[]).map((campaign: any) => (
+                  <SelectItem key={campaign.id} value={campaign.id.toString()}>
+                    {campaign.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button 
+              variant="outline"
+              className="border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white transition-colors"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export Report
+            </Button>
+          </div>
         </div>
-      </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardContent className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Raised</p>
-                <p className="text-3xl font-bold text-gray-900">{formatCurrency(totalRaised)}</p>
+                <p className="text-xs sm:text-sm font-medium text-orange-100">Total Raised</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white">{formatCurrency(totalRaised)}</p>
                 <div className="flex items-center mt-2">
-                  <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                  <span className="text-sm text-green-600">+12.5% vs last month</span>
+                  <TrendingUp className="h-4 w-4 text-orange-100 mr-1" />
+                  <span className="text-xs sm:text-sm text-orange-100">+12.5% vs last month</span>
                 </div>
               </div>
-              <DollarSign className="h-8 w-8 text-fundry-orange" />
+              <div className="p-3 bg-white/20 rounded-full">
+                <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Investors</p>
-                <p className="text-3xl font-bold text-gray-900">{totalInvestors}</p>
+                <p className="text-xs sm:text-sm font-medium text-blue-100">Total Investors</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white">{totalInvestors}</p>
                 <div className="flex items-center mt-2">
-                  <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                  <span className="text-sm text-green-600">+8.3% vs last month</span>
+                  <TrendingUp className="h-4 w-4 text-blue-100 mr-1" />
+                  <span className="text-xs sm:text-sm text-blue-100">+8.3% vs last month</span>
                 </div>
               </div>
-              <Users className="h-8 w-8 text-blue-600" />
+              <div className="p-3 bg-white/20 rounded-full">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Campaigns</p>
-                <p className="text-3xl font-bold text-gray-900">{activeCampaigns}</p>
+                <p className="text-xs sm:text-sm font-medium text-purple-100">Active Campaigns</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white">{activeCampaigns}</p>
                 <div className="flex items-center mt-2">
-                  <Clock className="h-4 w-4 text-blue-600 mr-1" />
-                  <span className="text-sm text-blue-600">2 ending soon</span>
+                  <Clock className="h-4 w-4 text-purple-100 mr-1" />
+                  <span className="text-xs sm:text-sm text-purple-100">2 ending soon</span>
                 </div>
               </div>
-              <Target className="h-8 w-8 text-purple-600" />
+              <div className="p-3 bg-white/20 rounded-full">
+                <Target className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
-                <p className="text-3xl font-bold text-gray-900">{conversionRate.toFixed(1)}%</p>
+                <p className="text-xs sm:text-sm font-medium text-emerald-100">Conversion Rate</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white">{conversionRate.toFixed(1)}%</p>
                 <div className="flex items-center mt-2">
-                  <TrendingDown className="h-4 w-4 text-red-600 mr-1" />
-                  <span className="text-sm text-red-600">-2.1% vs last month</span>
+                  <TrendingDown className="h-4 w-4 text-emerald-100 mr-1" />
+                  <span className="text-xs sm:text-sm text-emerald-100">-2.1% vs last month</span>
                 </div>
               </div>
-              <Award className="h-8 w-8 text-green-600" />
+              <div className="p-3 bg-white/20 rounded-full">
+                <Award className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="campaigns">Campaign Performance</TabsTrigger>
-          <TabsTrigger value="investors">Investor Insights</TabsTrigger>
-          <TabsTrigger value="growth">Growth Metrics</TabsTrigger>
+        <TabsList className="bg-white shadow-sm border border-orange-200 rounded-xl p-1">
+          <TabsTrigger 
+            value="overview"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg font-medium"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger 
+            value="campaigns"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg font-medium"
+          >
+            Campaign Performance
+          </TabsTrigger>
+          <TabsTrigger 
+            value="investors"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg font-medium"
+          >
+            Investor Insights
+          </TabsTrigger>
+          <TabsTrigger 
+            value="growth"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg font-medium"
+          >
+            Growth Metrics
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">

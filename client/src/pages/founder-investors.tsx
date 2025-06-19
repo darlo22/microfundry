@@ -374,17 +374,38 @@ export default function FounderInvestors() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="detailed">Detailed View</TabsTrigger>
-          <TabsTrigger value="communications">Communications</TabsTrigger>
+        <TabsList className="bg-white shadow-sm border border-orange-200 rounded-xl p-1">
+          <TabsTrigger 
+            value="overview"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg font-medium"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger 
+            value="detailed"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg font-medium"
+          >
+            Detailed View
+          </TabsTrigger>
+          <TabsTrigger 
+            value="communications"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg font-medium"
+          >
+            Communications
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           {/* Search and Filters */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row gap-4">
+          <Card className="bg-white shadow-lg border-0 mb-6">
+            <CardHeader className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-t-lg pb-4">
+              <CardTitle className="text-lg font-bold text-gray-900 flex items-center">
+                <Search className="mr-2 text-blue-600" size={20} />
+                Search & Filter Investors
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -392,12 +413,12 @@ export default function FounderInvestors() {
                       placeholder="Search investors by name or email..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9"
+                      className="pl-9 border-gray-200 focus:border-fundry-orange focus:ring-fundry-orange"
                     />
                   </div>
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px] border-gray-200 focus:border-fundry-orange focus:ring-fundry-orange">
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -408,7 +429,7 @@ export default function FounderInvestors() {
                   </SelectContent>
                 </Select>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-full sm:w-[180px] border-gray-200 focus:border-fundry-orange focus:ring-fundry-orange">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
@@ -417,7 +438,10 @@ export default function FounderInvestors() {
                     <SelectItem value="name">Name</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline">
+                <Button 
+                  variant="outline" 
+                  className="border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white transition-colors"
+                >
                   <Download className="mr-2 h-4 w-4" />
                   Export
                 </Button>

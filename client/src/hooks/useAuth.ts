@@ -7,22 +7,48 @@ export function useAuth() {
   const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/user"],
     queryFn: async () => {
-      const res = await fetch("/api/user", {
-        credentials: "include",
-      });
-      
-      if (res.status === 401) {
+      try {
+        const res = await fetch("/api/user", {
+          credentials: "include",
+        });
+        
+        if (res.status === 401) {
+          setAuthChecked(true);
+          return null;
+        }
+        
+        if (!res.ok) {
+          // For session deserialization errors, try to clear the session
+          if (res.status === 500) {
+            try {
+              await fetch("/api/clear-session", {
+                method: "POST",
+                credentials: "include",
+              });
+            } catch (clearError) {
+              console.error("Failed to clear session:", clearError);
+            }
+          }
+          throw new Error(`${res.status}: ${res.statusText}`);
+        }
+        
+        const userData = await res.json();
         setAuthChecked(true);
+        return userData;
+      } catch (error) {
+        console.error("Authentication error:", error);
+        setAuthChecked(true);
+        // Try to clear session on persistent errors
+        try {
+          await fetch("/api/clear-session", {
+            method: "POST",
+            credentials: "include",
+          });
+        } catch (clearError) {
+          console.error("Failed to clear session after error:", clearError);
+        }
         return null;
       }
-      
-      if (!res.ok) {
-        throw new Error(`${res.status}: ${res.statusText}`);
-      }
-      
-      const userData = await res.json();
-      setAuthChecked(true);
-      return userData;
     },
     retry: false,
     staleTime: 10 * 60 * 1000, // 10 minutes

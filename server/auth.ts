@@ -87,9 +87,15 @@ export function setupAuth(app: Express) {
   passport.deserializeUser(async (id: string, done) => {
     try {
       const user = await storage.getUser(id);
+      if (!user) {
+        // User not found, clear the session
+        return done(null, false);
+      }
       done(null, user);
     } catch (error) {
-      done(error);
+      console.error('Session deserialization error:', error);
+      // Clear the session if there's an error retrieving the user
+      done(null, false);
     }
   });
 
@@ -182,12 +188,50 @@ export function setupAuth(app: Express) {
     });
   });
 
-  // Get current user
-  app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Not authenticated" });
+  // Get current user with enhanced error handling
+  app.get("/api/user", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      // Verify user still exists in database
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        // User no longer exists, clear session
+        req.logout((err) => {
+          if (err) console.error('Logout error:', err);
+        });
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error('User authentication check failed:', error);
+      // Clear session on error
+      req.logout((err) => {
+        if (err) console.error('Logout error:', err);
+      });
+      res.status(401).json({ message: "Not authenticated" });
     }
-    res.json(req.user);
+  });
+
+  // Session cleanup endpoint
+  app.post("/api/clear-session", (req, res) => {
+    req.logout((err) => {
+      if (err) {
+        console.error('Session clear error:', err);
+        return res.status(500).json({ message: 'Failed to clear session' });
+      }
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Session destroy error:', err);
+          return res.status(500).json({ message: 'Failed to destroy session' });
+        }
+        res.clearCookie('connect.sid');
+        res.json({ message: 'Session cleared successfully' });
+      });
+    });
   });
 }
 

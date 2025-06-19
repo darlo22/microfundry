@@ -417,6 +417,7 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [pitchMediaFile, setPitchMediaFile] = useState<File | null>(null);
   const [pitchDeckFile, setPitchDeckFile] = useState<File | null>(null);
   const [teamMemberPhotos, setTeamMemberPhotos] = useState<{[key: number]: string}>({});
 
@@ -569,6 +570,9 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
       if (logoFile) {
         formData.append("logo", logoFile);
       }
+      if (pitchMediaFile) {
+        formData.append("pitchMedia", pitchMediaFile);
+      }
       if (pitchDeckFile) {
         formData.append("pitchDeck", pitchDeckFile);
       }
@@ -596,6 +600,7 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
       onClose();
       form.reset();
       setLogoFile(null);
+      setPitchMediaFile(null);
       setPitchDeckFile(null);
       setTeamMemberPhotos({});
     },
@@ -627,6 +632,34 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
         return;
       }
       setLogoFile(file);
+    }
+  };
+
+  const handlePitchMediaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (10MB limit for videos/images)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Pitch video/image must be under 10MB. Please choose a smaller file.",
+          variant: "destructive",
+        });
+        event.target.value = ''; // Clear the input
+        return;
+      }
+      
+      // Check file type (video or image)
+      if (file.type.startsWith("video/") || file.type.startsWith("image/")) {
+        setPitchMediaFile(file);
+      } else {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a video (MP4, MOV) or image (PNG, JPG) file.",
+          variant: "destructive",
+        });
+        event.target.value = '';
+      }
     }
   };
 
@@ -1099,7 +1132,7 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                 />
 
                 <div>
-                  <Label>Campaign Logo/Cover Image</Label>
+                  <Label>Campaign Logo</Label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-fundry-orange transition-colors cursor-pointer">
                     <input
                       type="file"
@@ -1114,6 +1147,26 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                         {logoFile ? logoFile.name : "Click to upload or drag and drop"}
                       </p>
                       <p className="text-sm text-gray-500 mt-2">PNG, JPG up to 2MB</p>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>1 Minute Pitch Video/Startup AD or Cover Image</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-fundry-orange transition-colors cursor-pointer">
+                    <input
+                      type="file"
+                      accept="video/*,image/*"
+                      onChange={handlePitchMediaUpload}
+                      className="hidden"
+                      id="pitch-media-upload"
+                    />
+                    <label htmlFor="pitch-media-upload" className="cursor-pointer">
+                      <CloudUpload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <p className="text-gray-600">
+                        {pitchMediaFile ? pitchMediaFile.name : "Click to upload or drag and drop"}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-2">Video (MP4, MOV) or Image (PNG, JPG) up to 10MB</p>
                     </label>
                   </div>
                 </div>

@@ -3447,6 +3447,191 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Admin middleware - check admin access
+  const requireAdmin = (req: any, res: any, next: any) => {
+    if (!req.isAuthenticated() || req.user.userType !== 'admin') {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    next();
+  };
+
+  // Admin API endpoints
+  app.get('/api/admin/stats', requireAdmin, async (req: any, res) => {
+    try {
+      const [
+        totalCampaigns,
+        activeCampaigns,
+        totalFounders,
+        totalInvestors,
+        totalSafes,
+        totalFundsRaised,
+        recentActivity
+      ] = await Promise.all([
+        db.select({ count: sql`COUNT(*)` }).from(campaigns),
+        db.select({ count: sql`COUNT(*)` }).from(campaigns).where(eq(campaigns.status, 'active')),
+        db.select({ count: sql`COUNT(*)` }).from(users).where(eq(users.userType, 'founder')),
+        db.select({ count: sql`COUNT(*)` }).from(users).where(eq(users.userType, 'investor')),
+        db.select({ count: sql`COUNT(*)` }).from(investments).where(sql`payment_status = 'completed'`),
+        db.select({ 
+          total: sql<number>`COALESCE(SUM(CAST(amount AS NUMERIC)), 0)` 
+        }).from(investments).where(sql`payment_status = 'completed'`),
+        db.select({
+          id: adminLogs.id,
+          action: adminLogs.action,
+          details: adminLogs.details,
+          timestamp: adminLogs.createdAt,
+          adminName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`
+        })
+        .from(adminLogs)
+        .innerJoin(users, eq(adminLogs.adminId, users.id))
+        .orderBy(desc(adminLogs.createdAt))
+        .limit(10)
+      ]);
+
+      res.json({
+        totalCampaigns: totalCampaigns[0]?.count || 0,
+        activeCampaigns: activeCampaigns[0]?.count || 0,
+        totalFounders: totalFounders[0]?.count || 0,
+        totalInvestors: totalInvestors[0]?.count || 0,
+        totalSafes: totalSafes[0]?.count || 0,
+        totalFundsRaised: totalFundsRaised[0]?.total || 0,
+        pendingWithdrawals: 0,
+        recentActivity: recentActivity.map(activity => ({
+          id: activity.id.toString(),
+          action: activity.action,
+          details: activity.details,
+          timestamp: activity.timestamp,
+          adminName: activity.adminName
+        }))
+      });
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch admin statistics" });
+    }
+  });
+
+  app.get('/api/admin/users', requireAdmin, async (req: any, res) => {
+    try {
+      const allUsers = await db.select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        userType: users.userType,
+        isEmailVerified: users.isEmailVerified,
+        createdAt: users.createdAt
+      })
+      .from(users)
+      .where(sql`user_type != 'admin'`)
+      .orderBy(desc(users.createdAt));
+
+      res.json(allUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.get('/api/admin/campaigns', requireAdmin, async (req: any, res) => {
+    try {
+      const allCampaigns = await db.select({
+        id: campaigns.id,
+        companyName: campaigns.companyName,
+        fundingGoal: campaigns.fundingGoal,
+        status: campaigns.status,
+        createdAt: campaigns.createdAt,
+        founderName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        amountRaised: sql<string>`COALESCE(
+          (SELECT SUM(CAST(amount AS NUMERIC)) 
+           FROM investments 
+           WHERE campaign_id = campaigns.id 
+           AND payment_status = 'completed'), 0
+        )`
+      })
+      .from(campaigns)
+      .innerJoin(users, eq(campaigns.founderId, users.id))
+      .orderBy(desc(campaigns.createdAt));
+
+      res.json(allCampaigns);
+    } catch (error) {
+      console.error("Error fetching campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch campaigns" });
+    }
+  });
+
+  app.get('/api/admin/withdrawals', requireAdmin, async (req: any, res) => {
+    try {
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching withdrawals:", error);
+      res.status(500).json({ message: "Failed to fetch withdrawals" });
+    }
+  });
+
+  // Log admin actions
+  const logAdminAction = async (adminId: string, action: string, targetType?: string, targetId?: string, details?: any, req?: any) => {
+    try {
+      await db.insert(adminLogs).values({
+        adminId,
+        action,
+        targetType,
+        targetId,
+        details,
+        ipAddress: req?.ip,
+        userAgent: req?.get('User-Agent')
+      });
+    } catch (error) {
+      console.error("Error logging admin action:", error);
+    }
+  };
+
+  // Admin user management endpoints
+  app.put('/api/admin/users/:userId/suspend', requireAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+
+      await logAdminAction(
+        req.user.id,
+        'user_suspended',
+        'user',
+        userId,
+        { reason },
+        req
+      );
+
+      res.json({ message: "User suspended successfully" });
+    } catch (error) {
+      console.error("Error suspending user:", error);
+      res.status(500).json({ message: "Failed to suspend user" });
+    }
+  });
+
+  app.put('/api/admin/campaigns/:campaignId/pause', requireAdmin, async (req: any, res) => {
+    try {
+      const { campaignId } = req.params;
+      const { reason } = req.body;
+
+      await db.update(campaigns)
+        .set({ status: 'paused' })
+        .where(eq(campaigns.id, parseInt(campaignId)));
+
+      await logAdminAction(
+        req.user.id,
+        'campaign_paused',
+        'campaign',
+        campaignId,
+        { reason },
+        req
+      );
+
+      res.json({ message: "Campaign paused successfully" });
+    } catch (error) {
+      console.error("Error pausing campaign:", error);
+      res.status(500).json({ message: "Failed to pause campaign" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -1,0 +1,140 @@
+Prompt Title:
+🧭 Fundry Admin Command Centre — Full Access Dashboard for Platform Oversight
+
+Prompt Goal:
+Create a secure, intuitive, and responsive Admin Command Centre for Fundry, enabling platform administrators to oversee founders, investors, campaigns, transactions, SAFE agreements, and platform activity. The admin tool must allow granular control, real-time updates, and moderation capabilities.
+
+🔐 Authentication & Access Control
+Implement admin login authentication
+
+Use JWT, session storage, or Supabase Auth (if integrated)
+
+Redirect non-admin users to homepage or login
+
+🔍 Admin Dashboard Structure
+📊 1. Overview Dashboard
+Total campaigns launched (active, closed, funded)
+
+Total funds raised
+
+Total investors & founders onboarded
+
+Active SAFEs signed
+
+Withdrawal requests (pending/approved)
+
+System alerts & recent activity logs
+
+🧑‍💼 2. Founder Management
+View all founders and their startups
+
+View KYC status (basic info, documents if any)
+
+Approve, suspend or deactivate accounts
+
+View campaigns launched per founder
+
+Reset founder accounts/passwords
+
+👥 3. Investor Management
+View all registered investors
+
+See investment history (amounts, campaigns, statuses)
+
+Suspend or blacklist accounts (with reason logs)
+
+View communication or complaints flagged
+
+📈 4. Campaign Oversight
+View all campaigns (active, paused, closed, cancelled)
+
+Search by status, founder, or title
+
+Edit campaign details or forcibly pause/cancel
+
+View investment logs and SAFE generation status
+
+Export campaign data (CSV, PDF)
+
+📄 5. SAFE Agreements Manager
+List all generated SAFE documents
+
+Search/filter by campaign or investor
+
+View document status (signed, unsigned)
+
+Download or resend SAFEs
+
+Audit trail: timestamp, IP, signature status
+
+💸 6. Transactions & Withdrawals
+View total and per-campaign transactions
+
+Approve or reject withdrawal requests
+
+View payment destination info per founder
+
+Export transaction logs
+
+🧾 7. Content Management & Announcements
+Post updates or global announcements (displayed on all dashboards)
+
+Manage footer links (Terms, Policy, Blog)
+
+Approve/Moderate featured campaigns or press stories
+
+⚙️ 8. Platform Settings & Flags
+Adjust global minimum/maximum investment
+
+Set platform fee percentage
+
+Toggle KYC enforcement
+
+Manage account verification thresholds
+
+Configure email templates (welcome, SAFE notifications, etc.)
+
+🧪 9. Logs & Activity Monitoring
+View login attempts (founders/investors)
+
+See critical action logs: campaign edits, signature events, withdrawals
+
+Flag suspicious activity or abnormal behavior
+
+📁 File/Storage Access (If Using Supabase or Local Storage)
+Access Supabase buckets for pitch decks & SAFEs
+
+Link campaign data with storage folders
+
+Trigger re-upload or file deletion from admin panel
+
+🧱 Tech Stack & Tools
+Layer	Tool/Suggestion
+Auth	Supabase Auth / Express JWT
+Backend	Node.js (Express) or Python (Flask/FastAPI)
+Database	Supabase PostgreSQL
+Frontend	React + Tailwind or plain HTML/CSS/JS
+File Storage	Supabase Storage / Cloudinary
+PDF Handling	pdf-lib / pdfkit / pdf2image
+Export	jsPDF / CSV download utils
+
+✅ Admin UX Requirements
+Mobile-responsive, clean interface
+
+Persistent left sidebar nav
+
+Use badges, color indicators (e.g. for status)
+
+Fast loading and real-time updates (use polling or socket for key stats)
+
+🔒 Security
+All actions logged with timestamps
+
+Admin-only access to critical actions
+
+Data validation for all fields
+
+Rate limit actions like withdrawals or changes to campaign status
+
+📦 Outcome
+This Admin Command Centre gives the Fundry team full control over the platform’s operations — from campaign curation to investor security and agreement tracking — enabling regulatory compliance and platform trust.

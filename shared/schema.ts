@@ -43,7 +43,7 @@ export const users = pgTable("users", {
   password: varchar("password"),
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
-  userType: varchar("user_type", { enum: ["founder", "investor"] }).notNull(),
+  userType: varchar("user_type", { enum: ["founder", "investor", "admin"] }).notNull(),
   profileImageUrl: varchar("profile_image_url"),
   phone: varchar("phone"),
   country: varchar("country"),
@@ -438,6 +438,50 @@ export type NotificationPreferences = typeof notificationPreferences.$inferSelec
 export type InsertNotificationPreferences = typeof notificationPreferences.$inferInsert;
 export type UpdateReply = typeof updateReplies.$inferSelect;
 export type InsertUpdateReply = typeof updateReplies.$inferInsert;
+
+// Admin activity logs table
+export const adminLogs = pgTable("admin_logs", {
+  id: serial("id").primaryKey(),
+  adminId: varchar("admin_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  action: varchar("action").notNull(), // login, user_suspend, campaign_edit, withdrawal_approve, etc.
+  targetType: varchar("target_type"), // user, campaign, investment, etc.
+  targetId: varchar("target_id"), // ID of the affected entity
+  details: jsonb("details"), // Additional context about the action
+  ipAddress: varchar("ip_address"),
+  userAgent: varchar("user_agent"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const adminLogsRelations = relations(adminLogs, ({ one }) => ({
+  admin: one(users, {
+    fields: [adminLogs.adminId],
+    references: [users.id],
+  }),
+}));
+
+export type AdminLog = typeof adminLogs.$inferSelect;
+export type InsertAdminLog = typeof adminLogs.$inferInsert;
+
+// Platform settings table
+export const platformSettings = pgTable("platform_settings", {
+  id: serial("id").primaryKey(),
+  key: varchar("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedBy: varchar("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const platformSettingsRelations = relations(platformSettings, ({ one }) => ({
+  updatedByUser: one(users, {
+    fields: [platformSettings.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export type PlatformSetting = typeof platformSettings.$inferSelect;
+export type InsertPlatformSetting = typeof platformSettings.$inferInsert;
 
 export const insertBusinessProfileSchema = createInsertSchema(businessProfiles).omit({
   id: true,

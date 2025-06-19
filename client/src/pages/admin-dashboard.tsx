@@ -76,7 +76,6 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Redirect if not admin
   // Check admin authentication directly with dedicated query
   const { data: adminUser, isLoading: adminLoading, error: adminError } = useQuery<{
     id: string;
@@ -89,12 +88,6 @@ export default function AdminDashboard() {
     retry: false,
     staleTime: 0
   });
-
-  useEffect(() => {
-    if (user && user.userType !== "admin") {
-      setLocation("/");
-    }
-  }, [user, setLocation]);
 
   // Admin stats query
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
@@ -119,6 +112,12 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/withdrawals'],
     enabled: adminUser?.userType === "admin" && activeTab === "withdrawals"
   });
+
+  useEffect(() => {
+    if (user && user.userType !== "admin") {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
 
   if (adminLoading) {
     return (

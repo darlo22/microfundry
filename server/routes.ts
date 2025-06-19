@@ -3483,6 +3483,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       }
 
       // Verify password
+      if (!user.password) {
+        return res.status(401).json({ message: "Invalid admin credentials" });
+      }
+      
       const isValid = await comparePasswords(password, user.password);
       if (!isValid) {
         return res.status(401).json({ message: "Invalid admin credentials" });

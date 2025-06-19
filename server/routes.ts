@@ -3245,15 +3245,15 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.json({ slides: slideUrls });
       }
 
-      // Convert PDF to PNG slides using ImageMagick with timeout and optimization
-      const command = `convert -limit memory 256MB -limit map 512MB -density 100 "${pdfPath}[0-4]" -resize 600x450 -quality 70 "${slidesDir}/slide-%03d.png"`;
+      // Convert PDF to PNG slides using ImageMagick with better error handling
+      const command = `convert -limit memory 512MB -limit map 1GB -density 150 "${pdfPath}" -resize 800x600 -quality 80 "${slidesDir}/slide-%03d.png"`;
       
       try {
-        // Set a 30-second timeout for conversion
-        await execAsync(command, { timeout: 30000 });
+        // Set a 45-second timeout for conversion
+        await execAsync(command, { timeout: 45000 });
         
-        // Get the generated slide files
-        const slideFiles = fs.readdirSync(slidesDir)
+        // Verify all slides were created successfully and remove empty files
+        let allSlideFiles = fs.readdirSync(slidesDir)
           .filter(file => file.endsWith('.png'))
           .sort((a, b) => {
             const aNum = parseInt(a.match(/(\d+)/)?.[1] || '0');
@@ -3261,12 +3261,32 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             return aNum - bNum;
           });
         
-        const slideUrls = slideFiles.map(file => `/uploads/slides/${campaignId}/${file}`);
+        // Check for empty files and remove them
+        for (const slideFile of allSlideFiles) {
+          const slidePath = path.join(slidesDir, slideFile);
+          const stats = fs.statSync(slidePath);
+          if (stats.size === 0) {
+            console.log(`Removing empty slide: ${slideFile}`);
+            fs.unlinkSync(slidePath);
+          }
+        }
+        
+        // Get final valid slides
+        const validSlideFiles = fs.readdirSync(slidesDir)
+          .filter(file => file.endsWith('.png'))
+          .sort((a, b) => {
+            const aNum = parseInt(a.match(/(\d+)/)?.[1] || '0');
+            const bNum = parseInt(b.match(/(\d+)/)?.[1] || '0');
+            return aNum - bNum;
+          });
+        
+        const slideUrls = validSlideFiles.map(file => `/uploads/slides/${campaignId}/${file}`);
         
         if (slideUrls.length === 0) {
-          throw new Error('No slides were generated from PDF');
+          throw new Error('No valid slides were generated from PDF');
         }
 
+        console.log(`Successfully generated ${slideUrls.length} slides for campaign ${campaignId}`);
         res.json({ slides: slideUrls });
       } catch (conversionError: any) {
         console.error('PDF conversion failed:', conversionError);

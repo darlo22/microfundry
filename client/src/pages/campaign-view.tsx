@@ -886,31 +886,68 @@ export default function CampaignView() {
 
           {/* Use of Funds */}
           {campaign.useOfFunds && Array.isArray(campaign.useOfFunds) && campaign.useOfFunds.length > 0 && (
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardContent className="p-8">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-fundry-navy">Use of Funds</h2>
+            <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30">
+              <CardContent className="p-10">
+                <div className="flex items-center space-x-4 mb-8">
+                  <div className="w-3 h-10 bg-gradient-to-b from-fundry-orange via-orange-500 to-orange-600 rounded-full shadow-md"></div>
+                  <h2 className="text-3xl font-bold text-fundry-navy tracking-tight">Use of Funds</h2>
                 </div>
-                <div className="space-y-4">
-                  {campaign.useOfFunds.map((fund: any, index: number) => (
-                    <div key={index} className="bg-gray-50 rounded-xl p-6">
-                      <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-lg font-semibold text-fundry-navy">{fund.category}</h3>
-                        <span className="text-xl font-bold text-fundry-orange">{fund.percentage}%</span>
+                
+                <div className="grid gap-8">
+                  {campaign.useOfFunds.map((fund: any, index: number) => {
+                    const colorSchemes = [
+                      { gradient: 'from-blue-500 to-indigo-600', bg: 'from-blue-500 to-indigo-600', text: 'text-blue-700' },
+                      { gradient: 'from-emerald-500 to-green-600', bg: 'from-emerald-500 to-green-600', text: 'text-emerald-700' },
+                      { gradient: 'from-purple-500 to-violet-600', bg: 'from-purple-500 to-violet-600', text: 'text-purple-700' },
+                      { gradient: 'from-amber-500 to-orange-600', bg: 'from-amber-500 to-orange-600', text: 'text-amber-700' },
+                      { gradient: 'from-rose-500 to-pink-600', bg: 'from-rose-500 to-pink-600', text: 'text-rose-700' },
+                    ];
+                    const scheme = colorSchemes[index % colorSchemes.length];
+                    
+                    return (
+                      <div key={index} className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                        <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${scheme.gradient}`}></div>
+                        
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center space-x-4">
+                            <div className={`w-14 h-14 bg-gradient-to-br ${scheme.bg} rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0`}>
+                              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h3 className={`text-2xl font-bold ${scheme.text} mb-1`}>{fund.category}</h3>
+                              <p className="text-gray-600 text-sm">Allocation</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className={`text-4xl font-bold ${scheme.text} mb-1`}>{fund.percentage}%</div>
+                            <div className="text-lg font-semibold text-gray-800">
+                              {formatCurrency((parseFloat(campaign.fundingGoal) * fund.percentage) / 100)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-6">
+                          <div className="flex justify-between items-center mb-3">
+                            <span className="text-sm font-medium text-gray-600">Progress</span>
+                            <span className={`text-sm font-semibold ${scheme.text}`}>{fund.percentage}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-4 shadow-inner">
+                            <div 
+                              className={`bg-gradient-to-r ${scheme.gradient} h-4 rounded-full transition-all duration-1000 ease-out shadow-sm`}
+                              style={{ width: `${fund.percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gradient-to-br from-slate-50 to-gray-100/50 rounded-xl p-6 border border-slate-200/50">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-3">Description</h4>
+                          <p className="text-gray-700 leading-relaxed text-base">{fund.description}</p>
+                        </div>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-                        <div 
-                          className="bg-gradient-to-r from-fundry-orange to-orange-600 h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${fund.percentage}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-gray-700 leading-relaxed">{fund.description}</p>
-                      <div className="mt-2 text-sm text-gray-600">
-                        Amount: <span className="font-semibold">{formatCurrency((parseFloat(campaign.fundingGoal) * fund.percentage) / 100)}</span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

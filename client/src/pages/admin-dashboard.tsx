@@ -106,22 +106,40 @@ export default function AdminDashboard() {
     }
   }, [user, setLocation]);
 
+  // Debug logging
+  console.log('Admin Dashboard - User:', user);
+  console.log('Admin Dashboard - Loading:', userLoading);
+  console.log('Admin Dashboard - User Type:', user?.userType);
+
   if (userLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange"></div>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange"></div>
+          <p className="text-gray-600">Loading admin dashboard...</p>
+        </div>
       </div>
     );
   }
 
-  if (!user || user.userType !== "admin") {
+  if (!user) {
+    console.log('No user found, redirecting to admin login');
+    setLocation("/admin-login");
+    return null;
+  }
+
+  if (user.userType !== "admin") {
+    console.log('User is not admin:', user.userType);
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <CardTitle className="text-red-600">Access Denied</CardTitle>
-            <CardDescription>You don't have admin privileges to access this area.</CardDescription>
+            <CardDescription>
+              You don't have admin privileges to access this area.
+              Current user type: {user.userType}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">

@@ -123,17 +123,19 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
           ) : (
             <>
               {/* Slide Display */}
-              <div className="flex-1 flex items-center justify-center p-6 bg-gray-50 min-h-0">
-                <div className="relative w-full max-w-6xl">
-                  <img
-                    src={slides[currentSlide]}
-                    alt={`Slide ${currentSlide + 1}`}
-                    className="w-full h-auto max-h-[70vh] min-h-[400px] object-contain rounded-lg shadow-lg bg-white border border-gray-200"
-                    onError={(e) => {
-                      console.error('Failed to load slide:', slides[currentSlide]);
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+              <div className="flex-1 p-6 bg-gray-50 min-h-0 overflow-auto">
+                <div className="relative w-full max-w-6xl mx-auto">
+                  <div className="overflow-auto max-h-[calc(85vh-200px)] rounded-lg bg-white border border-gray-200 shadow-lg">
+                    <img
+                      src={slides[currentSlide]}
+                      alt={`Slide ${currentSlide + 1}`}
+                      className="w-full h-auto object-contain min-h-[600px]"
+                      onError={(e) => {
+                        console.error('Failed to load slide:', slides[currentSlide]);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
                   
                   {/* Navigation Arrows */}
                   {slides.length > 1 && (
@@ -142,7 +144,7 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
                         variant="outline"
                         size="sm"
                         onClick={previousSlide}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg z-10"
                         disabled={slides.length <= 1}
                       >
                         <ChevronLeft className="h-4 w-4" />
@@ -151,7 +153,7 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
                         variant="outline"
                         size="sm"
                         onClick={nextSlide}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg z-10"
                         disabled={slides.length <= 1}
                       >
                         <ChevronRight className="h-4 w-4" />

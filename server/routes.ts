@@ -3304,6 +3304,34 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Download pitch deck PDF endpoint
+  app.get('/api/campaigns/:id/pitch-deck', async (req, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const campaign = await storage.getCampaign(campaignId);
+      
+      if (!campaign || !campaign.pitchDeckUrl) {
+        return res.status(404).json({ message: 'Campaign or pitch deck not found' });
+      }
+
+      const pdfPath = path.join(process.cwd(), campaign.pitchDeckUrl);
+      
+      if (!fs.existsSync(pdfPath)) {
+        return res.status(404).json({ message: 'Pitch deck file not found' });
+      }
+
+      // Set proper headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${campaign.title.replace(/[^a-zA-Z0-9]/g, '_')}_pitch_deck.pdf"`);
+      
+      // Send the PDF file
+      res.sendFile(pdfPath);
+    } catch (error) {
+      console.error('Error downloading pitch deck:', error);
+      res.status(500).json({ message: 'Failed to download pitch deck' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

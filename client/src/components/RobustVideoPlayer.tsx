@@ -16,11 +16,14 @@ export function RobustVideoPlayer({ videoUrl, title, logoUrl }: RobustVideoPlaye
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
+  const [isVideoDetected, setIsVideoDetected] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const isVideoFile = videoUrl.match(/\.(mp4|mov|avi|webm|mkv)$/i);
+  // Enhanced video detection - check file extension AND size/content
+  const hasVideoExtension = videoUrl.match(/\.(mp4|mov|avi|webm|mkv)$/i);
+  const hasVideoInPath = videoUrl.includes('pitchMedia') || videoUrl.includes('video');
   
-  // Multiple video source URLs to try
+  // Multiple video source URLs to try with different formats
   const videoSources = [
     `/api/stream/${videoUrl.replace(/^\/uploads\//, '')}`,
     videoUrl.startsWith('/') ? videoUrl : `/${videoUrl}`,
@@ -44,6 +47,25 @@ export function RobustVideoPlayer({ videoUrl, title, logoUrl }: RobustVideoPlaye
       }
     }
   };
+
+  // Initialize video on mount
+  useEffect(() => {
+    if (videoRef.current && videoUrl) {
+      const video = videoRef.current;
+      
+      // Set the primary video source
+      video.src = `/api/stream/${videoUrl.replace(/^\/uploads\//, '')}`;
+      
+      // Force load attempt
+      video.load();
+      
+      console.log('Video initialization:', {
+        videoUrl,
+        src: video.src,
+        readyState: video.readyState
+      });
+    }
+  }, [videoUrl]);
 
   const handlePlay = async () => {
     if (videoRef.current) {
@@ -104,20 +126,24 @@ export function RobustVideoPlayer({ videoUrl, title, logoUrl }: RobustVideoPlaye
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // If it's not a video file, show image
-  if (!isVideoFile) {
+  // Auto-detect video by trying to load as video first
+  useEffect(() => {
+    if (videoUrl && !isVideoDetected && !hasError) {
+      // Try loading as video first, regardless of extension
+      setIsVideoDetected(true);
+      setIsLoading(true);
+    }
+  }, [videoUrl, isVideoDetected, hasError]);
+
+  // If no video URL provided, show placeholder
+  if (!videoUrl) {
     return (
       <div className="w-full h-full relative bg-gray-900 flex items-center justify-center">
-        <img 
-          src={videoUrl.startsWith('/') ? videoUrl : `/${videoUrl}`} 
-          alt={`${title} - Cover Image`}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            console.error('Image failed to load:', videoUrl);
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-          }}
-        />
+        <div className="text-center text-white">
+          <div className="text-6xl mb-4">🎬</div>
+          <h3 className="text-xl font-semibold">No Media Available</h3>
+          <p className="text-gray-300">This campaign doesn't have a pitch video or cover image.</p>
+        </div>
         {/* Logo Overlay */}
         <div className="absolute bottom-4 left-4">
           <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white border-4 border-white rounded-xl flex items-center justify-center overflow-hidden shadow-2xl">
@@ -185,12 +211,13 @@ export function RobustVideoPlayer({ videoUrl, title, logoUrl }: RobustVideoPlaye
 
   return (
     <div className="w-full h-full relative bg-black group">
-      {/* Video Element with Multiple Sources */}
+      {/* Video Element - Always try first */}
       <video
         ref={videoRef}
-        className="w-full h-full object-cover"
+        className={`w-full h-full object-cover ${hasError ? 'hidden' : ''}`}
         preload="metadata"
         playsInline
+        muted={isMuted}
         poster={logoUrl ? (logoUrl.startsWith('/') ? logoUrl : `/${logoUrl}`) : undefined}
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}
@@ -198,28 +225,38 @@ export function RobustVideoPlayer({ videoUrl, title, logoUrl }: RobustVideoPlaye
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
         onError={(e) => {
-          console.error('Video error occurred:', {
-            currentSrc: videoRef.current?.currentSrc,
-            error: videoRef.current?.error,
-            networkState: videoRef.current?.networkState,
-            readyState: videoRef.current?.readyState
-          });
+          const video = videoRef.current;
+          console.log('Video failed, switching to image fallback');
           setHasError(true);
           setIsLoading(false);
         }}
         onCanPlay={() => {
+          console.log('Video ready to play');
           setIsLoading(false);
           setHasError(false);
         }}
+        onLoadStart={() => {
+          setIsLoading(true);
+        }}
         onWaiting={() => setIsLoading(true)}
         onCanPlayThrough={() => setIsLoading(false)}
-      >
-        {/* Multiple source formats */}
-        {videoSources.map((src, index) => (
-          <source key={index} src={src} type="video/mp4" />
-        ))}
-        Your browser does not support the video tag.
-      </video>
+      />
+
+      {/* Image Fallback */}
+      {hasError && (
+        <img 
+          src={videoUrl.startsWith('/') ? videoUrl : `/${videoUrl}`} 
+          alt={`${title} - Cover Image`}
+          className="w-full h-full object-cover"
+          onLoad={() => {
+            setIsLoading(false);
+          }}
+          onError={(e) => {
+            console.error('Both video and image failed to load');
+            setIsLoading(false);
+          }}
+        />
+      )}
 
       {/* Loading Overlay */}
       {isLoading && !hasError && (

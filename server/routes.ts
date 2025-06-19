@@ -2954,6 +2954,98 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Payment Methods API endpoints
+  app.get("/api/payment-methods", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
+
+    try {
+      const paymentMethods = await storage.getPaymentMethods(req.user.id);
+      res.json(paymentMethods);
+    } catch (error) {
+      console.error("Error fetching payment methods:", error);
+      res.status(500).json({ error: "Failed to fetch payment methods" });
+    }
+  });
+
+  app.post("/api/payment-methods", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
+
+    try {
+      const { paymentMethodId } = req.body;
+      
+      // Retrieve payment method from Stripe
+      const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
+      
+      if (paymentMethod.customer !== req.user.stripeCustomerId) {
+        return res.status(403).json({ error: "Payment method not owned by user" });
+      }
+
+      const newPaymentMethod = await storage.addPaymentMethod({
+        userId: req.user.id,
+        stripePaymentMethodId: paymentMethodId,
+        type: paymentMethod.type,
+        cardBrand: paymentMethod.card?.brand || '',
+        cardLast4: paymentMethod.card?.last4 || '',
+        cardExpMonth: paymentMethod.card?.exp_month || null,
+        cardExpYear: paymentMethod.card?.exp_year || null,
+        isDefault: false,
+      });
+
+      res.json(newPaymentMethod);
+    } catch (error) {
+      console.error("Error adding payment method:", error);
+      res.status(500).json({ error: "Failed to add payment method" });
+    }
+  });
+
+  app.delete("/api/payment-methods/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
+
+    try {
+      const paymentMethodId = parseInt(req.params.id);
+      await storage.removePaymentMethod(paymentMethodId, req.user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing payment method:", error);
+      res.status(500).json({ error: "Failed to remove payment method" });
+    }
+  });
+
+  // Notification Preferences API endpoints
+  app.get("/api/notification-preferences", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
+
+    try {
+      const preferences = await storage.getNotificationPreferences(req.user.id);
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error fetching notification preferences:", error);
+      res.status(500).json({ error: "Failed to fetch notification preferences" });
+    }
+  });
+
+  app.put("/api/notification-preferences", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
+
+    try {
+      const preferences = await storage.updateNotificationPreferences(req.user.id, req.body);
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error updating notification preferences:", error);
+      res.status(500).json({ error: "Failed to update notification preferences" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

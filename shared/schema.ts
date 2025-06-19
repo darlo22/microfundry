@@ -332,6 +332,57 @@ export const updateRepliesRelations = relations(updateReplies, ({ one }) => ({
 
 export type UpdateInteraction = typeof updateInteractions.$inferSelect;
 export type InsertUpdateInteraction = typeof updateInteractions.$inferInsert;
+
+// Payment methods table
+export const paymentMethods = pgTable("payment_methods", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  stripePaymentMethodId: varchar("stripe_payment_method_id").notNull().unique(),
+  type: varchar("type").notNull(), // 'card'
+  cardBrand: varchar("card_brand"), // 'visa', 'mastercard', etc.
+  cardLast4: varchar("card_last4").notNull(),
+  cardExpMonth: integer("card_exp_month"),
+  cardExpYear: integer("card_exp_year"),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const paymentMethodsRelations = relations(paymentMethods, ({ one }) => ({
+  user: one(users, {
+    fields: [paymentMethods.userId],
+    references: [users.id],
+  }),
+}));
+
+export type PaymentMethod = typeof paymentMethods.$inferSelect;
+export type InsertPaymentMethod = typeof paymentMethods.$inferInsert;
+
+// Notification preferences table
+export const notificationPreferences = pgTable("notification_preferences", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+  // Email notifications
+  emailInvestmentUpdates: boolean("email_investment_updates").default(true),
+  emailNewOpportunities: boolean("email_new_opportunities").default(true),
+  emailSecurityAlerts: boolean("email_security_alerts").default(true),
+  emailMarketingCommunications: boolean("email_marketing_communications").default(false),
+  // Push notifications
+  pushCampaignUpdates: boolean("push_campaign_updates").default(true),
+  pushInvestmentReminders: boolean("push_investment_reminders").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const notificationPreferencesRelations = relations(notificationPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [notificationPreferences.userId],
+    references: [users.id],
+  }),
+}));
+
+export type NotificationPreferences = typeof notificationPreferences.$inferSelect;
+export type InsertNotificationPreferences = typeof notificationPreferences.$inferInsert;
 export type UpdateReply = typeof updateReplies.$inferSelect;
 export type InsertUpdateReply = typeof updateReplies.$inferInsert;
 

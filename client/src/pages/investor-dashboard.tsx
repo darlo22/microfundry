@@ -539,152 +539,333 @@ export default function InvestorDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50/30 to-blue-50/30">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user.firstName}!
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Manage your investments and discover new opportunities
-          </p>
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Modern Header with Gradient */}
+        <div className="mb-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-600/10 via-orange-500/10 to-blue-700/10 rounded-2xl"></div>
+          <div className="relative p-6 md:p-8 bg-white rounded-2xl shadow-sm border border-orange-100/50">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex-1">
+                <h1 className="text-2xl md:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-orange-600 to-blue-700 bg-clip-text text-transparent mb-3">
+                  Welcome back, {user.firstName}!
+                </h1>
+                <p className="text-gray-600 text-base md:text-lg max-w-2xl">
+                  Manage your investments and discover new opportunities in the world of micro-investing
+                </p>
+              </div>
+              <div className="mt-6 lg:mt-0 lg:ml-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-r from-orange-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                    <span className="text-white font-bold text-lg md:text-xl">{user.firstName?.[0]}</span>
+                  </div>
+                  <div className="hidden sm:block">
+                    <p className="text-sm text-gray-500 font-medium">Investor</p>
+                    <p className="text-lg font-semibold text-gray-900">{user.firstName} {user.lastName}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatsCard
-            title="Total Invested"
-            value={userStats?.totalInvested || "$0"}
-            icon={<DollarSign className="h-6 w-6" />}
-            trend={0}
-          />
-          <StatsCard
-            title="Active Investments"
-            value={userStats?.activeInvestments?.toString() || "0"}
-            icon={<TrendingUp className="h-6 w-6" />}
-            trend={0}
-          />
-          <StatsCard
-            title="Pending Commitments"
-            value={pendingInvestments.length.toString()}
-            icon={<Clock className="h-6 w-6" />}
-            trend={0}
-          />
-          <StatsCard
-            title="Actual Paid Investments"
-            value={paidInvestments.length.toString()}
-            icon={<Wallet className="h-6 w-6" />}
-            trend={0}
-          />
+        {/* Modern Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 mb-8">
+          {/* Total Invested Card */}
+          <div className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-orange-200 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-xs md:text-sm text-gray-500 font-medium uppercase tracking-wide">Total Invested</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">{userStats?.totalInvested || "$0"}</p>
+              </div>
+            </div>
+            <div className="flex items-center text-sm">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <span className="text-green-600 font-medium">All time</span>
+            </div>
+          </div>
+
+          {/* Active Investments Card */}
+          <div className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-blue-200 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+                <TrendingUp className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-xs md:text-sm text-gray-500 font-medium uppercase tracking-wide">Active Investments</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">{userStats?.activeInvestments?.toString() || "0"}</p>
+              </div>
+            </div>
+            <div className="flex items-center text-sm">
+              <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+              <span className="text-blue-600 font-medium">Currently active</span>
+            </div>
+          </div>
+
+          {/* Pending Commitments Card */}
+          <div className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-amber-200 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+                <Clock className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-xs md:text-sm text-gray-500 font-medium uppercase tracking-wide">Pending Commitments</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">{pendingInvestments.length.toString()}</p>
+              </div>
+            </div>
+            <div className="flex items-center text-sm">
+              <div className="w-2 h-2 bg-amber-500 rounded-full mr-2"></div>
+              <span className="text-amber-600 font-medium">Awaiting payment</span>
+            </div>
+          </div>
+
+          {/* Paid Investments Card */}
+          <div className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-emerald-200 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+                <Wallet className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-xs md:text-sm text-gray-500 font-medium uppercase tracking-wide">Paid Investments</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">{paidInvestments.length.toString()}</p>
+              </div>
+            </div>
+            <div className="flex items-center text-sm">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
+              <span className="text-emerald-600 font-medium">Completed</span>
+            </div>
+          </div>
         </div>
 
-        {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="discover">Discover</TabsTrigger>
-            <TabsTrigger value="updates">Updates</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-          </TabsList>
+        {/* Modern Tab Navigation */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <div className="bg-white rounded-xl p-2 shadow-sm border border-gray-100">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 bg-transparent gap-1">
+              <TabsTrigger 
+                value="portfolio" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-lg px-4 py-2 text-sm font-medium"
+              >
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4" />
+                  <span className="hidden sm:inline">Portfolio</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="discover" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-lg px-4 py-2 text-sm font-medium"
+              >
+                <div className="flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  <span className="hidden sm:inline">Discover</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="updates" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-lg px-4 py-2 text-sm font-medium"
+              >
+                <div className="flex items-center gap-2">
+                  <Bell className="h-4 w-4" />
+                  <span className="hidden sm:inline">Updates</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="documents" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-lg px-4 py-2 text-sm font-medium"
+              >
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">Documents</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="profile" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-lg px-4 py-2 text-sm font-medium"
+              >
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">Profile</span>
+                </div>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Portfolio Tab */}
-          <TabsContent value="portfolio" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
+          <TabsContent value="portfolio" className="space-y-8">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+              <div className="xl:col-span-2 space-y-8">
                 {/* Pending Commitments */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Clock className="h-5 w-5" />
-                      Pending Commitments
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                        <Clock className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">Pending Commitments</h3>
+                        <p className="text-amber-100 text-sm">Investments awaiting payment</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
                     {isLoadingInvestments ? (
-                      <div className="flex justify-center py-8">
-                        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+                      <div className="flex justify-center py-12">
+                        <div className="animate-spin w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full" />
                       </div>
                     ) : pendingInvestments.length > 0 ? (
                       <div className="space-y-4">
                         {pendingInvestments.map((investment) => (
-                          <InvestmentCard
-                            key={investment.id}
-                            investment={investment}
-                            onPayNow={handlePayNow}
-                            onEdit={(id, amount) => editInvestmentMutation.mutate({ id, amount })}
-                            onDelete={(id) => deleteInvestmentMutation.mutate(id)}
-                          />
+                          <div key={investment.id} className="border border-gray-200 rounded-lg p-4 hover:border-orange-300 transition-colors">
+                            <InvestmentCard
+                              investment={investment}
+                              onPayNow={handlePayNow}
+                              onEdit={(id: number, amount: number) => editInvestmentMutation.mutate({ id, amount })}
+                              onDelete={(id: number) => deleteInvestmentMutation.mutate(id)}
+                            />
+                          </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <Clock className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <p>No pending commitments</p>
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Clock className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">No pending commitments</h4>
+                        <p className="text-gray-500 mb-6">All your investments are up to date</p>
+                        <Button 
+                          onClick={() => setActiveTab("discover")} 
+                          className="bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white"
+                        >
+                          Discover New Opportunities
+                        </Button>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
                 {/* Actual Paid Investments */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Wallet className="h-5 w-5" />
-                      Actual Paid Investments
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                        <Wallet className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">Paid Investments</h3>
+                        <p className="text-emerald-100 text-sm">Successfully completed investments</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
                     {isLoadingInvestments ? (
-                      <div className="flex justify-center py-8">
-                        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+                      <div className="flex justify-center py-12">
+                        <div className="animate-spin w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full" />
                       </div>
                     ) : paidInvestments.length > 0 ? (
                       <div className="space-y-4">
                         {paidInvestments.map((investment) => (
-                          <InvestmentCard
-                            key={investment.id}
-                            investment={investment}
-                            onPayNow={handlePayNow}
-                            onEdit={(id, amount) => editInvestmentMutation.mutate({ id, amount })}
-                            onDelete={(id) => deleteInvestmentMutation.mutate(id)}
-                          />
+                          <div key={investment.id} className="border border-gray-200 rounded-lg p-4 hover:border-emerald-300 transition-colors">
+                            <InvestmentCard
+                              investment={investment}
+                              onPayNow={handlePayNow}
+                              onEdit={(id: number, amount: number) => editInvestmentMutation.mutate({ id, amount })}
+                              onDelete={(id: number) => deleteInvestmentMutation.mutate(id)}
+                            />
+                          </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <Wallet className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <p>No paid investments yet</p>
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Wallet className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">No paid investments yet</h4>
+                        <p className="text-gray-500 mb-6">Start investing to see your portfolio here</p>
+                        <Button 
+                          onClick={() => setActiveTab("discover")} 
+                          className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white"
+                        >
+                          Browse Opportunities
+                        </Button>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
 
-              {/* Quick Actions */}
+              {/* Modern Quick Actions Sidebar */}
               <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button onClick={goToDiscover} className="w-full">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center">
+                        <Target className="h-4 w-4 text-white" />
+                      </div>
+                      Quick Actions
+                    </h3>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    <Button 
+                      onClick={goToDiscover} 
+                      className="w-full bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                    >
                       <Search className="h-4 w-4 mr-2" />
                       Discover Campaigns
                     </Button>
-                    <Button onClick={goToDocuments} variant="outline" className="w-full">
+                    <Button 
+                      onClick={goToDocuments} 
+                      variant="outline" 
+                      className="w-full border-orange-200 hover:border-orange-300 hover:bg-orange-50 text-gray-700 hover:text-orange-700 transition-all duration-300"
+                    >
                       <FileText className="h-4 w-4 mr-2" />
                       View Documents
                     </Button>
-                    <Button onClick={goToProfile} variant="outline" className="w-full">
+                    <Button 
+                      onClick={goToProfile} 
+                      variant="outline" 
+                      className="w-full border-blue-200 hover:border-blue-300 hover:bg-blue-50 text-gray-700 hover:text-blue-700 transition-all duration-300"
+                    >
                       <User className="h-4 w-4 mr-2" />
                       Edit Profile
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
+
+                {/* Investment Summary Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-4">
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center">
+                        <PieChart className="h-4 w-4 text-white" />
+                      </div>
+                      Portfolio Summary
+                    </h3>
+                  </div>
+                  <div className="p-6">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="text-sm text-gray-600">Total Invested</span>
+                        <span className="font-semibold text-gray-900">{userStats?.totalInvested || "$0"}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="text-sm text-gray-600">Active Investments</span>
+                        <span className="font-semibold text-blue-600">{userStats?.activeInvestments || 0}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="text-sm text-gray-600">Pending Payments</span>
+                        <span className="font-semibold text-amber-600">{pendingInvestments.length}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-sm text-gray-600">Completed</span>
+                        <span className="font-semibold text-emerald-600">{paidInvestments.length}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -1632,7 +1813,7 @@ This SAFE Agreement has been digitally signed and executed.
                           <p className="text-sm text-gray-600">Receive updates via email</p>
                         </div>
                         <Switch
-                          checked={notificationPreferences?.emailUpdates || false}
+                          checked={(notificationPreferences as any)?.emailUpdates || false}
                           onCheckedChange={(checked) => handleUpdateNotificationPreference('emailUpdates', checked)}
                         />
                       </div>

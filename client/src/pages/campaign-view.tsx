@@ -955,37 +955,91 @@ export default function CampaignView() {
 
           {/* Team Members */}
           {campaign.teamMembers && Array.isArray(campaign.teamMembers) && campaign.teamMembers.length > 0 && (
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardContent className="p-8">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-fundry-navy">Meet the Team</h2>
+            <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30">
+              <CardContent className="p-10">
+                <div className="flex items-center space-x-4 mb-8">
+                  <div className="w-3 h-10 bg-gradient-to-b from-fundry-orange via-orange-500 to-orange-600 rounded-full shadow-md"></div>
+                  <h2 className="text-3xl font-bold text-fundry-navy tracking-tight">Meet the Team</h2>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {campaign.teamMembers.map((member: any, index: number) => (
-                    <div key={index} className="text-center bg-gray-50 rounded-xl p-6">
-                      <div className="w-20 h-20 bg-fundry-orange rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">
-                        {member.photoUrl ? (
-                          <img src={member.photoUrl} alt={member.name} className="w-full h-full rounded-full object-cover" />
-                        ) : (
-                          member.name?.charAt(0) || 'T'
-                        )}
+                
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {campaign.teamMembers.map((member: any, index: number) => {
+                    const colorSchemes = [
+                      { bg: 'from-blue-500 to-indigo-600', accent: 'bg-blue-500', text: 'text-blue-700', ring: 'ring-blue-200' },
+                      { bg: 'from-emerald-500 to-green-600', accent: 'bg-emerald-500', text: 'text-emerald-700', ring: 'ring-emerald-200' },
+                      { bg: 'from-purple-500 to-violet-600', accent: 'bg-purple-500', text: 'text-purple-700', ring: 'ring-purple-200' },
+                      { bg: 'from-amber-500 to-orange-600', accent: 'bg-amber-500', text: 'text-amber-700', ring: 'ring-amber-200' },
+                      { bg: 'from-rose-500 to-pink-600', accent: 'bg-rose-500', text: 'text-rose-700', ring: 'ring-rose-200' },
+                      { bg: 'from-cyan-500 to-blue-600', accent: 'bg-cyan-500', text: 'text-cyan-700', ring: 'ring-cyan-200' },
+                    ];
+                    const scheme = colorSchemes[index % colorSchemes.length];
+                    
+                    return (
+                      <div key={index} className="group relative overflow-hidden bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                        <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${scheme.bg}`}></div>
+                        
+                        <div className="text-center">
+                          <div className="relative mb-6">
+                            <div className={`w-28 h-28 mx-auto rounded-full ring-4 ${scheme.ring} shadow-lg overflow-hidden`}>
+                              {member.photoUrl ? (
+                                <img 
+                                  src={member.photoUrl} 
+                                  alt={member.name} 
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    target.nextElementSibling!.classList.remove('hidden');
+                                  }}
+                                />
+                              ) : null}
+                              <div className={`${member.photoUrl ? 'hidden' : ''} w-full h-full bg-gradient-to-br ${scheme.bg} flex items-center justify-center`}>
+                                <span className="text-white text-3xl font-bold">
+                                  {member.name?.charAt(0) || 'T'}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div className={`absolute -bottom-2 -right-2 w-8 h-8 ${scheme.accent} rounded-full flex items-center justify-center shadow-lg`}>
+                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            <h3 className="text-xl font-bold text-gray-900">{member.name || 'Team Member'}</h3>
+                            <p className={`text-lg font-semibold ${scheme.text} uppercase tracking-wide text-sm`}>
+                              {member.role || 'Role'}
+                            </p>
+                          </div>
+                          
+                          {member.experience && (
+                            <div className="mt-6 bg-gradient-to-br from-slate-50 to-gray-100/50 rounded-2xl p-6 border border-slate-200/50">
+                              <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Experience</h4>
+                              <p className="text-gray-700 text-sm leading-relaxed">{member.experience}</p>
+                            </div>
+                          )}
+                          
+                          {member.linkedinUrl && (
+                            <div className="mt-6">
+                              <a 
+                                href={member.linkedinUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className={`inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r ${scheme.bg} text-white rounded-full text-sm font-medium hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1`}
+                              >
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                </svg>
+                                <span>LinkedIn Profile</span>
+                              </a>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <h3 className="font-semibold text-fundry-navy mb-1">{member.name || 'Team Member'}</h3>
-                      <p className="text-sm text-fundry-orange font-medium mb-2">{member.role || 'Role'}</p>
-                      <p className="text-xs text-gray-600">{member.experience || ''}</p>
-                      {member.linkedinUrl && (
-                        <a 
-                          href={member.linkedinUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm"
-                        >
-                          LinkedIn Profile
-                        </a>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

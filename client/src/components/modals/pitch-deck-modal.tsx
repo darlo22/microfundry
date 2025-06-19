@@ -27,6 +27,8 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
   });
 
   const slides = slidesData?.slides || [];
+  const hasConversionError = slidesData?.error;
+  const downloadUrl = slidesData?.downloadUrl;
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -69,6 +71,17 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
               <div className="text-center">
                 <p className="text-red-600 mb-4">Failed to load pitch deck slides</p>
                 <Button onClick={downloadPDF} variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Original PDF
+                </Button>
+              </div>
+            </div>
+          ) : hasConversionError ? (
+            <div className="flex items-center justify-center h-96">
+              <div className="text-center">
+                <p className="text-amber-600 mb-2">PDF conversion failed - large file or timeout</p>
+                <p className="text-gray-600 mb-4">Download the original pitch deck to view</p>
+                <Button onClick={downloadPDF} className="bg-fundry-orange hover:bg-orange-600 text-white">
                   <Download className="h-4 w-4 mr-2" />
                   Download Original PDF
                 </Button>

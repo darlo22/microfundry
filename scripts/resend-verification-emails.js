@@ -1,0 +1,286 @@
+import { neon } from '@neondatabase/serverless';
+import { Resend } from 'resend';
+
+// Database connection
+const sql = neon(process.env.DATABASE_URL);
+
+// Email service
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+function generateToken() {
+  return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+}
+
+async function resendVerificationEmails() {
+  try {
+    console.log('Resending verification emails with corrected URLs...');
+
+    // Find all users who need fresh verification emails
+    const users = await sql`
+      SELECT u.id, u.email, u.first_name, u.last_name 
+      FROM users u 
+      WHERE u.is_email_verified = false
+      AND u.email IS NOT NULL
+    `;
+
+    console.log(`Found ${users.length} users needing verification emails`);
+
+    if (users.length === 0) {
+      console.log('No users need verification emails');
+      return;
+    }
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const user of users) {
+      try {
+        // Delete any existing tokens for this user
+        await sql`
+          DELETE FROM email_verification_tokens 
+          WHERE user_id = ${user.id}
+        `;
+
+        // Generate new verification token
+        const token = generateToken();
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 24); // 24 hours expiry
+
+        const tokenId = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+        
+        // Insert verification token
+        await sql`
+          INSERT INTO email_verification_tokens (id, user_id, token, expires_at)
+          VALUES (${tokenId}, ${user.id}, ${token}, ${expiresAt})
+        `;
+
+        // Send verification email with correct URL
+        const baseUrl = process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS}` : 'http://localhost:5000';
+        const verificationUrl = `${baseUrl}/verify-email?token=${token}`;
+        
+        await resend.emails.send({
+          from: 'Micro Fundry Support <support@microfundry.com>',
+          to: user.email,
+          subject: 'Verify Your Fundry Account - Updated Link',
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Verify Your Fundry Account</title>
+              <style>
+                body { 
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+                  line-height: 1.6; 
+                  color: #1f2937; 
+                  margin: 0; 
+                  padding: 0; 
+                  background-color: #f3f4f6;
+                }
+                .container { 
+                  max-width: 600px; 
+                  margin: 0 auto; 
+                  padding: 20px; 
+                  background-color: #ffffff;
+                  border-radius: 12px;
+                  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+                .header { 
+                  text-align: center; 
+                  margin-bottom: 40px; 
+                  padding: 30px 20px;
+                  background: linear-gradient(135deg, #f97316 0%, #1e40af 100%);
+                  border-radius: 12px 12px 0 0;
+                  margin: -20px -20px 40px -20px;
+                }
+                .logo-container {
+                  width: 80px;
+                  height: 80px;
+                  background: rgba(255, 255, 255, 0.2);
+                  border-radius: 50%;
+                  margin: 0 auto 20px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  backdrop-filter: blur(10px);
+                }
+                .logo-text {
+                  color: white;
+                  font-size: 24px;
+                  font-weight: bold;
+                  letter-spacing: -0.5px;
+                }
+                .header-title {
+                  color: white;
+                  font-size: 28px;
+                  font-weight: 700;
+                  margin: 0;
+                  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+                .header-subtitle {
+                  color: rgba(255, 255, 255, 0.9);
+                  font-size: 16px;
+                  margin: 8px 0 0 0;
+                }
+                .content { 
+                  padding: 0 20px 30px; 
+                }
+                .welcome-text {
+                  font-size: 24px;
+                  font-weight: 600;
+                  color: #1e40af;
+                  margin-bottom: 24px;
+                  text-align: center;
+                }
+                .description {
+                  font-size: 16px;
+                  color: #4b5563;
+                  margin-bottom: 32px;
+                  text-align: center;
+                  line-height: 1.7;
+                }
+                .button-container {
+                  text-align: center;
+                  margin: 32px 0;
+                }
+                .button { 
+                  display: inline-block; 
+                  padding: 16px 32px; 
+                  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+                  color: white; 
+                  text-decoration: none; 
+                  border-radius: 8px; 
+                  font-weight: 600;
+                  font-size: 16px;
+                  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+                  transition: all 0.3s ease;
+                }
+                .button:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+                }
+                .link-fallback {
+                  background: #f8fafc;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 8px;
+                  padding: 16px;
+                  margin: 24px 0;
+                  text-align: center;
+                }
+                .link-text {
+                  font-size: 14px;
+                  color: #64748b;
+                  margin-bottom: 8px;
+                }
+                .verification-link {
+                  font-size: 14px;
+                  color: #f97316;
+                  word-break: break-all;
+                  font-family: monospace;
+                }
+                .expiry-notice {
+                  background: #fef3e2;
+                  border-left: 4px solid #f97316;
+                  padding: 16px;
+                  border-radius: 0 8px 8px 0;
+                  margin: 24px 0;
+                }
+                .expiry-text {
+                  color: #92400e;
+                  font-weight: 600;
+                  margin: 0;
+                }
+                .footer { 
+                  margin-top: 40px; 
+                  text-align: center; 
+                  color: #9ca3af; 
+                  font-size: 14px;
+                  border-top: 1px solid #e5e7eb;
+                  padding-top: 24px;
+                }
+                .footer p {
+                  margin: 4px 0;
+                }
+                .company-name {
+                  font-weight: 600;
+                  color: #6b7280;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <div class="logo-container">
+                    <div class="logo-text">F</div>
+                  </div>
+                  <h1 class="header-title">Updated Verification Link</h1>
+                  <p class="header-subtitle">New verification link with corrected URL</p>
+                </div>
+                
+                <div class="content">
+                  <h2 class="welcome-text">Hello ${user.first_name}!</h2>
+                  
+                  <p class="description">
+                    We've sent you an updated verification link with the correct URL. Please click the button below to verify your email address and complete your account setup:
+                  </p>
+                  
+                  <div class="button-container">
+                    <a href="${verificationUrl}" class="button">Verify My Email</a>
+                  </div>
+                  
+                  <div class="expiry-notice">
+                    <p class="expiry-text">Important: This verification link will expire in 24 hours for security purposes.</p>
+                  </div>
+                  
+                  <div class="link-fallback">
+                    <p class="link-text">If the button doesn't work, you can also copy and paste this link into your browser:</p>
+                    <p class="verification-link">${verificationUrl}</p>
+                  </div>
+                  
+                  <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+                  
+                  <p><strong>What changed?</strong></p>
+                  <p>We fixed the verification URLs to use the correct domain. Previous verification links may have pointed to localhost and wouldn't work.</p>
+                  
+                  <p style="color: #6b7280; font-size: 14px; margin-top: 24px;">
+                    If you didn't create a Fundry account, please ignore this email.
+                  </p>
+                </div>
+                
+                <div class="footer">
+                  <p class="company-name">© 2025 Micro Fundry. All rights reserved.</p>
+                  <p>This is an automated message from the Fundry platform.</p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `,
+        });
+
+        console.log(`✓ Verification email sent to ${user.email}`);
+        successCount++;
+
+      } catch (error) {
+        console.error(`✗ Failed to send email to ${user.email}:`, error.message);
+        errorCount++;
+      }
+    }
+
+    console.log(`\nEmail sending completed:`);
+    console.log(`- Success: ${successCount} emails sent`);
+    console.log(`- Errors: ${errorCount} emails failed`);
+
+  } catch (error) {
+    console.error('Error resending verification emails:', error);
+  }
+}
+
+// Run the script
+resendVerificationEmails().then(() => {
+  console.log('Script completed');
+  process.exit(0);
+}).catch((error) => {
+  console.error('Script failed:', error);
+  process.exit(1);
+});

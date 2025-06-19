@@ -35,7 +35,7 @@ export class EmailService {
   }
 
   async sendVerificationEmail(email: string, token: string, firstName: string): Promise<boolean> {
-    const baseUrl = process.env.REPL_ID ? `https://${process.env.REPL_ID}.replit.app` : 'http://localhost:5000';
+    const baseUrl = process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS}` : 'http://localhost:5000';
     const verificationUrl = `${baseUrl}/verify-email?token=${token}`;
     
     const html = `
@@ -247,7 +247,7 @@ export class EmailService {
   }
 
   async sendWelcomeEmail(email: string, firstName: string, userType: 'founder' | 'investor'): Promise<boolean> {
-    const dashboardUrl = process.env.REPL_ID ? `https://${process.env.REPL_ID}.replit.app/landing` : 'http://localhost:5000/landing';
+    const dashboardUrl = process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS}/landing` : 'http://localhost:5000/landing';
 
     const html = `
       <!DOCTYPE html>

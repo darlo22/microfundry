@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Edit, Upload, X, Plus, User, Trash2 } from "lucide-react";
 import { CampaignWithStats } from "@/lib/types";
+import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 
 interface TeamMember {
   id: string;
@@ -123,6 +124,15 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
   };
 
   const [formData, setFormData] = useState({
+    // Business Information
+    companyName: campaign.companyName || '',
+    country: campaign.country || '',
+    state: campaign.state || '',
+    businessAddress: campaign.businessAddress || '',
+    registrationStatus: campaign.registrationStatus || 'registered',
+    registrationType: campaign.registrationType || '',
+    
+    // Campaign Details
     title: campaign.title,
     shortPitch: campaign.shortPitch,
     fullPitch: campaign.fullPitch,

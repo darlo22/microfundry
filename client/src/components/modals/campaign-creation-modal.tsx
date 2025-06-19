@@ -355,7 +355,7 @@ const campaignSchema = z.object({
   // Business Information (First Section)
   companyName: z.string().min(1, "Company/Business name is required"),
   country: z.string().min(1, "Country is required"),
-  state: z.string().min(1, "State/Province is required"),
+  state: z.string().optional(),
   businessAddress: z.string().min(1, "Business address is required"),
   registrationStatus: z.enum(["registered", "in-process"], {
     required_error: "Registration status is required",
@@ -736,32 +736,38 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                   )}
                 />
 
-                {/* State/Province */}
-                <FormField
-                  control={form.control}
-                  name="state"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>State/Province *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select state/province" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="max-h-60 overflow-y-auto">
-                          {form.watch("country") && COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.states?.map((state) => (
-                            <SelectItem key={state} value={state}>{state}</SelectItem>
-                          ))}
-                          {(!form.watch("country") || !COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.states) && (
-                            <SelectItem value="none" disabled>Please select a country first</SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* State/Province - Only show if country has states */}
+                {form.watch("country") && COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.states?.length > 0 && (
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>State/Province *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select state/province" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="max-h-60 overflow-y-auto">
+                            {COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.states?.map((state) => (
+                              <SelectItem key={state} value={state}>{state}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                
+                {/* Show message for countries without states */}
+                {form.watch("country") && COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.states?.length === 0 && (
+                  <div className="text-sm text-gray-500 italic">
+                    No state/province subdivision for {form.watch("country")}
+                  </div>
+                )}
 
                 {/* Business Address */}
                 <div className="md:col-span-2">

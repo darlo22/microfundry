@@ -1037,7 +1037,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const founderId = req.user.id;
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
       
-
+      if (!founderId) {
+        return res.status(400).json({ message: 'User not authenticated properly' });
+      }
       
       // Generate unique private link
       const privateLink = nanoid(16);
@@ -1100,7 +1102,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const validatedData = insertCampaignSchema.parse(campaignData);
-      const campaign = await storage.createCampaign(validatedData, privateLink);
+      
+      // Add founderId back after validation (schema omits it)
+      const campaignWithFounderId = { ...validatedData, founderId };
+      
+      const campaign = await storage.createCampaign(campaignWithFounderId, privateLink);
       res.json(campaign);
     } catch (error) {
       console.error("Error creating campaign:", error);

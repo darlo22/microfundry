@@ -363,7 +363,7 @@ export default function CampaignView() {
             <CardContent className="p-8 text-center">
               <div className="flex items-center justify-center space-x-3 mb-6">
                 <div className="w-2 h-8 bg-gradient-to-b from-fundry-navy to-blue-600 rounded-full"></div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Pitch Deck</h2>
+                <h2 className="text-2xl font-bold text-fundry-navy">Pitch Deck</h2>
               </div>
               {campaign.pitchDeckUrl ? (
                 <div className="space-y-4">

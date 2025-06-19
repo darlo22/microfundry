@@ -353,7 +353,6 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       return;
     }
     
-    setIsProcessing(true);
     try {
       // Get payment intent from backend
       const response = await apiRequest('POST', '/api/create-payment-intent', {
@@ -369,10 +368,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       const { clientSecret: secret } = await response.json();
       setClientSecret(secret);
       setShowStripeForm(true);
-      setIsProcessing(false); // Reset processing state when form is shown
     } catch (error: any) {
       console.error('Payment setup error:', error);
-      setIsProcessing(false); // Reset processing state on error
       toast({
         title: "Payment Setup Failed",
         description: error.message || "Failed to setup payment",
@@ -573,7 +570,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
               {/* USD Payment Button */}
               <Button
                 onClick={handleUSDPayment}
-                disabled={isProcessing || isProcessingNaira}
+                disabled={isProcessingNaira}
                 className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-3">
@@ -586,11 +583,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                   </div>
                 </div>
                 <div className="text-right">
-                  {isProcessing ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span className="font-bold text-lg">${investment.amount}</span>
-                  )}
+                  <span className="font-bold text-lg">${investment.amount}</span>
                 </div>
               </Button>
 

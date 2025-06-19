@@ -1,26 +1,17 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+import { ReactElement } from "react";
 
 interface StatsCardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
-  iconBgColor: string;
-  iconColor: string;
-  subtitle?: string;
-  trend?: {
-    value: string;
-    color: string;
-  };
+  icon: ReactElement;
+  trend?: number;
 }
 
 export default function StatsCard({
   title,
   value,
-  icon: Icon,
-  iconBgColor,
-  iconColor,
-  subtitle,
+  icon,
   trend,
 }: StatsCardProps) {
   return (
@@ -31,22 +22,18 @@ export default function StatsCard({
             <p className="text-gray-600 text-sm">{title}</p>
             <p className="text-3xl font-bold text-gray-900">{value}</p>
           </div>
-          <div className={`w-12 h-12 ${iconBgColor} rounded-lg flex items-center justify-center`}>
-            <Icon className={iconColor} size={20} />
+          <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
+            {icon}
           </div>
         </div>
-        {(trend || subtitle) && (
+        {trend !== undefined && (
           <div className="mt-4 flex items-center">
-            {trend && (
-              <span className={`text-sm font-medium ${trend.color}`}>
-                {trend.value}
-              </span>
-            )}
-            {subtitle && (
-              <span className="text-gray-500 text-sm ml-2">
-                {subtitle}
-              </span>
-            )}
+            <span className={`text-sm font-medium ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {trend >= 0 ? '+' : ''}{trend}%
+            </span>
+            <span className="text-gray-500 text-sm ml-2">
+              vs last month
+            </span>
           </div>
         )}
       </CardContent>

@@ -1618,7 +1618,15 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                             placeholder="5000" 
                             max={100000}
                             {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const value = parseFloat(e.target.value) || 0;
+                              if (value <= 100000) {
+                                field.onChange(value);
+                              } else {
+                                field.onChange(100000);
+                                e.target.value = "100000";
+                              }
+                            }}
                           />
                         </div>
                       </FormControl>

@@ -457,7 +457,15 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                   id="fundingGoal"
                   type="number"
                   value={formData.fundingGoal}
-                  onChange={(e) => handleInputChange('fundingGoal', e.target.value)}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value) || 0;
+                    if (value <= 100000) {
+                      handleInputChange('fundingGoal', e.target.value);
+                    } else {
+                      handleInputChange('fundingGoal', '100000');
+                      e.target.value = '100000';
+                    }
+                  }}
                   placeholder="5000"
                   max="100000"
                   required

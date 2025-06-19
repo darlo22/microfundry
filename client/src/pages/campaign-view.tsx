@@ -199,7 +199,7 @@ export default function CampaignView() {
                         preload="metadata"
                         playsInline
                         poster={campaign.logoUrl ? (campaign.logoUrl.startsWith('/') ? campaign.logoUrl : `/${campaign.logoUrl}`) : undefined}
-                        src={campaign.pitchMediaUrl.startsWith('/') ? campaign.pitchMediaUrl : `/${campaign.pitchMediaUrl}`}
+                        src={`/api/stream/${campaign.pitchMediaUrl.replace(/^\/uploads\//, '')}`}
                         onLoadStart={() => console.log('Video loading started:', campaign.pitchMediaUrl)}
                         onLoadedMetadata={(e) => {
                           console.log('Video metadata loaded:', {

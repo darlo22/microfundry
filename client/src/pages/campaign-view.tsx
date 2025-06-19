@@ -377,9 +377,9 @@ export default function CampaignView() {
           </Card>
 
           {/* About This Campaign */}
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden bg-white/95 backdrop-blur-sm">
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden bg-gradient-to-r from-fundry-orange to-orange-600">
             {/* Header */}
-            <div className="bg-gradient-to-r from-fundry-orange to-orange-600 px-8 py-6">
+            <div className="px-8 py-6">
               <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                   📖

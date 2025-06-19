@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChartLine, Rocket, Shield, Users, BarChart, Smartphone, Headphones } from "lucide-react";
+import { ChartLine, Rocket, Shield, Users, BarChart, Smartphone, Headphones, Settings } from "lucide-react";
 import OnboardingModal from "@/components/modals/onboarding-modal";
 import LearnMoreModal from "@/components/modals/learn-more-modal";
 import InvestorInfoModal from "@/components/modals/investor-info-modal";
 import Footer from "@/components/layout/footer";
 import { FundryLogo } from "@/components/ui/fundry-logo";
 import { Link } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Landing() {
+  const { user, isAuthenticated } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [showLearnMoreModal, setShowLearnMoreModal] = useState(false);

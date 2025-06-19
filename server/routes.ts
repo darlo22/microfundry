@@ -16,8 +16,14 @@ import multer from "multer";
 import path from "path";
 import { TwoFactorService } from "./twoFactorService";
 import { emailService } from "./services/email";
-import { eq, and, gt } from "drizzle-orm";
-import { emailVerificationTokens } from "@shared/schema";
+import { eq, and, gt, sql, desc } from "drizzle-orm";
+import { 
+  emailVerificationTokens, 
+  users, 
+  campaigns, 
+  investments, 
+  adminLogs 
+} from "@shared/schema";
 import Stripe from "stripe";
 import fs from "fs";
 import { exec } from "child_process";

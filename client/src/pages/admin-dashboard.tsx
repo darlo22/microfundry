@@ -21,7 +21,7 @@ import {
   XCircle,
   Download
 } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 
 interface AdminStats {
@@ -72,7 +72,7 @@ interface WithdrawalRequest {
 }
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -127,8 +127,18 @@ export default function AdminDashboard() {
   }
 
   const handleLogout = async () => {
-    await logout();
-    setLocation("/");
+    try {
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (response.ok) {
+        setLocation("/");
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+      setLocation("/");
+    }
   };
 
   const formatCurrency = (amount: string | number) => {

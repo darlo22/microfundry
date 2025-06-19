@@ -321,7 +321,7 @@ export default function InvestorDashboard() {
   // Update notification preferences mutation
   const updateNotificationPreferencesMutation = useMutation({
     mutationFn: async (preferences: any) => {
-      const response = await apiRequest('PATCH', '/api/notification-preferences', preferences);
+      const response = await apiRequest('PUT', '/api/notification-preferences', preferences);
       return response.json();
     },
     onSuccess: () => {

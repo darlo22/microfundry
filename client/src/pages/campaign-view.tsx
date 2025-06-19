@@ -705,6 +705,26 @@ export default function CampaignView() {
                 )}
               </CardContent>
             </Card>
+
+            {/* SAFE Agreement Terms */}
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardContent className="p-6 sm:p-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">SAFE Agreement Terms</h2>
+                </div>
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="flex justify-between items-center py-3 sm:py-4 border-b border-gray-100">
+                    <span className="text-sm sm:text-base font-medium text-gray-700">Discount Rate:</span>
+                    <span className="text-lg sm:text-xl font-bold text-purple-600">{campaign.discountRate}%</span>
+                  </div>
+                  <div className="flex justify-between items-center py-3 sm:py-4">
+                    <span className="text-sm sm:text-base font-medium text-gray-700">Valuation Cap:</span>
+                    <span className="text-lg sm:text-xl font-bold text-blue-600">{formatCurrency(campaign.valuationCap)}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Modern Investment Sidebar - Mobile Responsive */}

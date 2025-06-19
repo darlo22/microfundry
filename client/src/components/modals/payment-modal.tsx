@@ -401,11 +401,13 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       });
 
       if (paymentMethodError) {
-        // Reset to payment method selection for payment method errors
+        console.error('Payment method error:', paymentMethodError);
+        
+        // Immediately reset processing state and form
+        setIsProcessing(false);
         setShowStripeForm(false);
         setCardholderName('');
         setClientSecret('');
-        setIsProcessing(false);
         
         toast({
           title: "Card Error",
@@ -423,11 +425,11 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       if (error) {
         console.error('Stripe payment error:', error);
         
-        // Reset to payment method selection for card payment errors
+        // Immediately reset processing state and form to allow retry
+        setIsProcessing(false);
         setShowStripeForm(false);
         setCardholderName('');
         setClientSecret('');
-        setIsProcessing(false);
         
         toast({
           title: "Card Payment Failed",
@@ -454,11 +456,11 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         
         onClose();
       } else {
-        // Reset to payment method selection for incomplete payments
+        // Immediately reset processing state and form for incomplete payments
+        setIsProcessing(false);
         setShowStripeForm(false);
         setCardholderName('');
         setClientSecret('');
-        setIsProcessing(false);
         
         toast({
           title: "Payment Incomplete",
@@ -469,7 +471,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     } catch (error: any) {
       console.error('Payment processing error:', error);
       
-      // Reset to payment method selection for any other errors
+      // Immediately reset processing state and form for any other errors
+      setIsProcessing(false);
       setShowStripeForm(false);
       setCardholderName('');
       setClientSecret('');
@@ -479,8 +482,6 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         description: error.message || "Failed to process payment. Please try again or use a different payment method.",
         variant: "destructive",
       });
-    } finally {
-      setIsProcessing(false);
     }
   };
 

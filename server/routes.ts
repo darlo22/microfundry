@@ -64,10 +64,10 @@ const safeHandler = (handler: Function) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded files statically from uploads directory
-  app.get('/uploads/:filename', safeHandler((req, res) => {
+  app.get('/uploads/:filename', safeHandler((req: express.Request, res: express.Response) => {
     const filename = req.params.filename;
     const filePath = path.join(process.cwd(), 'uploads', filename);
-    res.sendFile(filePath, (err) => {
+    res.sendFile(filePath, (err: any) => {
       if (err) {
         res.status(404).json({ message: 'File not found' });
       }

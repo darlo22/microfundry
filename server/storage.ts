@@ -26,6 +26,19 @@ import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
+// Helper function to wrap database operations with error handling
+const safeDbOperation = async <T>(operation: () => Promise<T>, fallback?: T): Promise<T | undefined> => {
+  try {
+    return await operation();
+  } catch (error) {
+    console.error('Database operation failed:', error);
+    if (fallback !== undefined) {
+      return fallback;
+    }
+    return undefined;
+  }
+};
+
 export interface IStorage {
   // User operations for email/password auth
   getUser(id: string): Promise<User | undefined>;
@@ -101,95 +114,115 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations (required for Replit Auth)
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    return safeDbOperation(async () => {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user;
+    });
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user;
+    return safeDbOperation(async () => {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      return user;
+    });
   }
 
   async createUser(userData: UpsertUser): Promise<User> {
-    const userId = nanoid();
-    const [user] = await db
-      .insert(users)
-      .values({
-        ...userData,
-        id: userId,
-      })
-      .returning();
-    return user;
+    return safeDbOperation(async () => {
+      const userId = nanoid();
+      const [user] = await db
+        .insert(users)
+        .values({
+          ...userData,
+          id: userId,
+        })
+        .returning();
+      return user;
+    }) as Promise<User>;
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
+    return safeDbOperation(async () => {
+      const [user] = await db
+        .insert(users)
+        .values(userData)
+        .onConflictDoUpdate({
+          target: users.id,
+          set: {
+            ...userData,
+            updatedAt: new Date(),
+          },
+        })
+        .returning();
+      return user;
+    }) as Promise<User>;
   }
 
   async updateUser(id: string, updates: Partial<UpsertUser>): Promise<User> {
-    const [user] = await db
-      .update(users)
-      .set({
-        ...updates,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, id))
-      .returning();
-    return user;
+    return safeDbOperation(async () => {
+      const [user] = await db
+        .update(users)
+        .set({
+          ...updates,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, id))
+        .returning();
+      return user;
+    }) as Promise<User>;
   }
 
   // Business profile operations
   async createBusinessProfile(profile: InsertBusinessProfile): Promise<BusinessProfile> {
-    const [businessProfile] = await db
-      .insert(businessProfiles)
-      .values(profile)
-      .returning();
-    return businessProfile;
+    return safeDbOperation(async () => {
+      const [businessProfile] = await db
+        .insert(businessProfiles)
+        .values(profile)
+        .returning();
+      return businessProfile;
+    }) as Promise<BusinessProfile>;
   }
 
   async getBusinessProfile(userId: string): Promise<BusinessProfile | undefined> {
-    const [profile] = await db
-      .select()
-      .from(businessProfiles)
-      .where(eq(businessProfiles.userId, userId));
-    return profile;
+    return safeDbOperation(async () => {
+      const [profile] = await db
+        .select()
+        .from(businessProfiles)
+        .where(eq(businessProfiles.userId, userId));
+      return profile;
+    });
   }
 
   async updateBusinessProfile(userId: string, updates: Partial<InsertBusinessProfile>): Promise<BusinessProfile> {
-    const [profile] = await db
-      .update(businessProfiles)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(businessProfiles.userId, userId))
-      .returning();
-    return profile;
+    return safeDbOperation(async () => {
+      const [profile] = await db
+        .update(businessProfiles)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(businessProfiles.userId, userId))
+        .returning();
+      return profile;
+    }) as Promise<BusinessProfile>;
   }
 
   // Campaign operations
   async createCampaign(campaign: InsertCampaign, privateLink: string): Promise<Campaign> {
-    const [newCampaign] = await db
-      .insert(campaigns)
-      .values({ ...campaign, privateLink })
-      .returning();
-    return newCampaign;
+    return safeDbOperation(async () => {
+      const [newCampaign] = await db
+        .insert(campaigns)
+        .values({ ...campaign, privateLink })
+        .returning();
+      return newCampaign;
+    }) as Promise<Campaign>;
   }
 
   async getCampaign(id: number): Promise<Campaign | undefined> {
-    const [campaign] = await db
-      .select()
-      .from(campaigns)
-      .where(eq(campaigns.id, id));
-    return campaign;
+    return safeDbOperation(async () => {
+      const [campaign] = await db
+        .select()
+        .from(campaigns)
+        .where(eq(campaigns.id, id));
+      return campaign;
+    });
   }
 
   async getCampaignByPrivateLink(privateLink: string): Promise<Campaign | undefined> {

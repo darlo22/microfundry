@@ -47,6 +47,14 @@ const campaignSchema = z.object({
   discountRate: z.number().min(0).max(50, "Discount rate must be between 0% and 50%"),
   valuationCap: z.number().min(10000, "Valuation cap must be at least $10,000"),
   
+  // Business Strategy Fields
+  problemStatement: z.string().min(10, "Problem statement is required"),
+  solution: z.string().min(10, "Solution is required"),
+  marketOpportunity: z.string().min(10, "Market opportunity is required"),
+  businessModel: z.string().min(10, "Business model is required"),
+  goToMarketStrategy: z.string().min(10, "Go-to-market strategy is required"),
+  competitiveLandscape: z.string().min(10, "Competitive landscape is required"),
+  
   // Traction & Stage
   startupStage: z.string().min(1, "Startup stage is required"),
   currentRevenue: z.string().optional(),
@@ -127,6 +135,12 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
       deadline: "",
       discountRate: 20,
       valuationCap: 1000000,
+      problemStatement: "",
+      solution: "",
+      marketOpportunity: "",
+      businessModel: "",
+      goToMarketStrategy: "",
+      competitiveLandscape: "",
       startupStage: "",
       currentRevenue: "",
       customers: "",
@@ -449,6 +463,120 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                     </label>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Business Strategy */}
+            <div className="border-b pb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Business Strategy</h3>
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="problemStatement"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Problem Statement</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          rows={4} 
+                          placeholder="Describe the specific, real-world problem your target users face. Make it relatable and urgent..."
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="solution"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Solution</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          rows={4} 
+                          placeholder="Present your product or service as the answer to the problem. Explain how it works at a high level and what makes it better, faster, or more efficient than current options..."
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="marketOpportunity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Market Opportunity</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          rows={4} 
+                          placeholder="Define who your target customers are. Present TAM, SAM, and SOM if possible to show market size. Emphasize the scale and potential of the opportunity..."
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="businessModel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Business Model</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          rows={4} 
+                          placeholder="Explain how your startup makes money (subscriptions, transaction fees, SaaS, etc.). Mention pricing strategy and key revenue streams. Include metrics or visuals to demonstrate momentum..."
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="goToMarketStrategy"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Go-To-Market Strategy</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          rows={4} 
+                          placeholder="Explain how you'll acquire users or customers. Include marketing channels, partnerships, and sales tactics..."
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="competitiveLandscape"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Competitive Landscape</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          rows={4} 
+                          placeholder="Identify key competitors. Show how you're different (price, UX, technology, community, etc.). Highlight any unfair advantage..."
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 

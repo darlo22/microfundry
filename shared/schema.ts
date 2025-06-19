@@ -96,6 +96,14 @@ export const campaigns = pgTable("campaigns", {
   valuationCap: decimal("valuation_cap", { precision: 15, scale: 2 }),
   privateLink: varchar("private_link").unique().notNull(),
   
+  // Business Strategy Information
+  problemStatement: text("problem_statement"),
+  solution: text("solution"),
+  marketOpportunity: text("market_opportunity"),
+  businessModel: text("business_model"),
+  goToMarketStrategy: text("go_to_market_strategy"),
+  competitiveLandscape: text("competitive_landscape"),
+  
   // Traction & Stage Information
   startupStage: varchar("startup_stage"),
   currentRevenue: varchar("current_revenue"),

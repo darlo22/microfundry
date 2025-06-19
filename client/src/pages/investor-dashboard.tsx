@@ -876,7 +876,7 @@ export default function InvestorDashboard() {
                   <div>
                     <p className="text-sm font-medium text-gray-600">Pending Commitments</p>
                     <p className="text-3xl font-bold text-gray-900">
-                      {investments ? investments.filter(inv => inv.status === 'pending').length : 0}
+                      {investments ? investments.filter(inv => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').length : 0}
                     </p>
                     <p className="text-sm text-orange-600 mt-1">Awaiting payment</p>
                   </div>
@@ -894,7 +894,7 @@ export default function InvestorDashboard() {
                   <div>
                     <p className="text-sm font-medium text-gray-600">Actual Paid Investments</p>
                     <p className="text-3xl font-bold text-gray-900">
-                      {investments ? investments.filter(inv => ['committed', 'paid', 'completed'].includes(inv.status)).length : 0}
+                      {investments ? investments.filter(inv => inv.paymentStatus === 'completed').length : 0}
                     </p>
                     <p className="text-sm text-green-600 mt-1">Fully invested</p>
                   </div>
@@ -907,7 +907,7 @@ export default function InvestorDashboard() {
 
             {/* Pending Commitments Section */}
             <div id="pending-commitments-section">
-              {investments && investments.filter(inv => inv.status === 'pending').length > 0 ? (
+              {investments && investments.filter(inv => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').length > 0 ? (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -918,7 +918,7 @@ export default function InvestorDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {investments.filter(inv => inv.status === 'pending').map((investment) => (
+                      {investments.filter(inv => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').map((investment) => (
                         <PendingInvestmentCard key={investment.id} investment={investment} onPayNow={() => handlePayNow(investment)} />
                       ))}
                     </div>
@@ -967,9 +967,9 @@ export default function InvestorDashboard() {
                     <div className="flex justify-center py-8">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-fundry-orange"></div>
                     </div>
-                  ) : investments && investments.filter(inv => ['committed', 'paid', 'completed'].includes(inv.status)).length > 0 ? (
+                  ) : investments && investments.filter(inv => inv.paymentStatus === 'completed').length > 0 ? (
                     <div className="space-y-4">
-                      {investments.filter(inv => ['committed', 'paid', 'completed'].includes(inv.status)).map((investment) => (
+                      {investments.filter(inv => inv.paymentStatus === 'completed').map((investment) => (
                         <InvestmentCard key={investment.id} investment={investment} />
                       ))}
                     </div>

@@ -459,7 +459,7 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                   value={formData.fundingGoal}
                   onChange={(e) => handleInputChange('fundingGoal', e.target.value)}
                   placeholder="5000"
-                  max="5000"
+                  max="100000"
                   required
                 />
               </div>

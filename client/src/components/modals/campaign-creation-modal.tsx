@@ -368,7 +368,7 @@ const campaignSchema = z.object({
   businessSector: z.string().min(1, "Business sector is required"),
   shortPitch: z.string().min(1, "Short pitch is required"),
   fullPitch: z.string().min(10, "Full pitch must be at least 10 characters"),
-  fundingGoal: z.number().min(100).max(5000, "Funding goal must be between $100 and $5,000"),
+  fundingGoal: z.number().min(100).max(100000, "Funding goal must be between $100 and $100,000"),
   minimumInvestment: z.number().min(25, "Minimum investment must be at least $25"),
   deadline: z.string().optional(),
   discountRate: z.number().min(0).max(50, "Discount rate must be between 0% and 50%"),
@@ -1616,13 +1616,13 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                             type="number" 
                             className="pl-8" 
                             placeholder="5000" 
-                            max={5000}
+                            max={100000}
                             {...field}
                             onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                           />
                         </div>
                       </FormControl>
-                      <p className="text-sm text-gray-500">Maximum: $5,000</p>
+                      <p className="text-sm text-gray-500">Maximum: $100,000</p>
                       <FormMessage />
                     </FormItem>
                   )}

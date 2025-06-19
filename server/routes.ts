@@ -1058,6 +1058,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Handle JSON fields
         teamMembers: req.body.teamMembers ? JSON.parse(req.body.teamMembers) : null,
         useOfFunds: req.body.useOfFunds ? JSON.parse(req.body.useOfFunds) : null,
+        directors: req.body.directors ? JSON.parse(req.body.directors) : [],
       };
 
       const validatedData = insertCampaignSchema.parse(campaignData);

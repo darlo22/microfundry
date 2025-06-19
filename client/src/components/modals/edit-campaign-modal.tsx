@@ -156,6 +156,7 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(parseTeamMembers());
   const [fundAllocations, setFundAllocations] = useState<FundAllocation[]>(parseFundAllocations());
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [pitchMediaFile, setPitchMediaFile] = useState<File | null>(null);
   const [pitchDeckFile, setPitchDeckFile] = useState<File | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -260,6 +261,10 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
     // Append files if selected
     if (logoFile) {
       submitData.append('logo', logoFile);
+    }
+    
+    if (pitchMediaFile) {
+      submitData.append('pitchMedia', pitchMediaFile);
     }
     if (pitchDeckFile) {
       submitData.append('pitchDeck', pitchDeckFile);
@@ -912,9 +917,9 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Assets</h3>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="logo">Company Logo</Label>
+                <Label htmlFor="logo">Campaign Logo</Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
                   <input
                     id="logo"
@@ -927,7 +932,7 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                         if (file.size > 2 * 1024 * 1024) {
                           toast({
                             title: "File too large",
-                            description: "Company logo must be under 2MB. Please choose a smaller image.",
+                            description: "Campaign logo must be under 2MB. Please choose a smaller image.",
                             variant: "destructive",
                           });
                           e.target.value = ''; // Clear the input
@@ -946,6 +951,43 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                       {logoFile ? logoFile.name : 'Upload new logo'}
                     </span>
                     <span className="text-xs text-gray-400">Max size: 2MB</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pitchMedia">1 Minute Pitch Video/Startup AD or Cover Image</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                  <input
+                    id="pitchMedia"
+                    type="file"
+                    accept="video/*,image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        // Check file size (10MB limit)
+                        if (file.size > 10 * 1024 * 1024) {
+                          toast({
+                            title: "File too large",
+                            description: "Pitch video/image must be under 10MB. Please choose a smaller file.",
+                            variant: "destructive",
+                          });
+                          e.target.value = ''; // Clear the input
+                          return;
+                        }
+                        setPitchMediaFile(file);
+                      } else {
+                        setPitchMediaFile(null);
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <label htmlFor="pitchMedia" className="cursor-pointer flex flex-col items-center gap-2">
+                    <Upload className="w-6 h-6 text-gray-400" />
+                    <span className="text-sm text-gray-600">
+                      {pitchMediaFile ? pitchMediaFile.name : 'Upload pitch media'}
+                    </span>
+                    <span className="text-xs text-gray-400">Max size: 10MB</span>
                   </label>
                 </div>
               </div>

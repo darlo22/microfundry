@@ -206,9 +206,10 @@ export default function CampaignView() {
                           controls 
                           className="w-full h-full object-cover relative z-20"
                           poster={campaign.logoUrl ? (campaign.logoUrl.startsWith('/') ? campaign.logoUrl : `/${campaign.logoUrl}`) : undefined}
-                          preload="metadata"
+                          preload="auto"
                           playsInline
                           controlsList="nodownload"
+                          crossOrigin="anonymous"
                           onLoadStart={() => {
                             console.log('Video loading started:', campaign.pitchMediaUrl);
                             const loadingEl = document.getElementById('video-loading');
@@ -241,21 +242,10 @@ export default function CampaignView() {
                             const errorEl = document.getElementById('video-error');
                             if (errorEl) errorEl.style.display = 'flex';
                           }}
+                          src={campaign.pitchMediaUrl.startsWith('/') ? campaign.pitchMediaUrl : `/${campaign.pitchMediaUrl}`}
                         >
-                        <source 
-                          src={campaign.pitchMediaUrl.startsWith('/') ? campaign.pitchMediaUrl : `/${campaign.pitchMediaUrl}`} 
-                          type="video/mp4" 
-                        />
-                        <source 
-                          src={campaign.pitchMediaUrl.startsWith('/') ? campaign.pitchMediaUrl : `/${campaign.pitchMediaUrl}`} 
-                          type="video/webm" 
-                        />
-                        <source 
-                          src={campaign.pitchMediaUrl.startsWith('/') ? campaign.pitchMediaUrl : `/${campaign.pitchMediaUrl}`} 
-                          type="video/quicktime" 
-                        />
-                        Your browser does not support the video tag.
-                      </video>
+                          Your browser does not support the video tag.
+                        </video>
                       
                       {/* Video Error Overlay */}
                       <div className="absolute inset-0 bg-gray-900 flex items-center justify-center z-30 hidden" id="video-error">

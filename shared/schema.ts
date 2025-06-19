@@ -87,6 +87,7 @@ export const campaigns = pgTable("campaigns", {
   shortPitch: text("short_pitch").notNull(),
   fullPitch: text("full_pitch").notNull(),
   logoUrl: varchar("logo_url"),
+  pitchMediaUrl: varchar("pitch_media_url"),
   pitchDeckUrl: varchar("pitch_deck_url"),
   fundingGoal: decimal("funding_goal", { precision: 10, scale: 2 }).notNull(),
   minimumInvestment: decimal("minimum_investment", { precision: 10, scale: 2 }).notNull().default("25"),

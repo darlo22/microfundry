@@ -958,6 +958,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.logoUrl = `/uploads/${logoFile.filename}`;
       }
 
+      // Handle pitch media file
+      const pitchMediaFile = files.find(file => file.fieldname === 'pitchMedia');
+      if (pitchMediaFile) {
+        // Check file size (10MB limit)
+        if (pitchMediaFile.size > 10 * 1024 * 1024) {
+          return res.status(400).json({ message: 'Pitch video/image file size must be under 10MB' });
+        }
+        updateData.pitchMediaUrl = `/uploads/${pitchMediaFile.filename}`;
+      }
+
       // Handle pitch deck file
       const pitchDeckFile = files.find(file => file.fieldname === 'pitchDeck');
       if (pitchDeckFile) {
@@ -1018,6 +1028,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/campaigns', requireAuth, upload.fields([
     { name: 'logo', maxCount: 1 },
+    { name: 'pitchMedia', maxCount: 1 },
     { name: 'pitchDeck', maxCount: 1 }
   ]), async (req: any, res) => {
     try {
@@ -1027,9 +1038,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique private link
       const privateLink = nanoid(16);
       
-      // Validate file sizes (2MB limit)
+      // Validate file sizes (2MB limit for logo, 10MB for pitch media)
       if (files.logo?.[0] && files.logo[0].size > 2 * 1024 * 1024) {
         return res.status(400).json({ message: 'Logo file size must be under 2MB' });
+      }
+      if (files.pitchMedia?.[0] && files.pitchMedia[0].size > 10 * 1024 * 1024) {
+        return res.status(400).json({ message: 'Pitch video/image file size must be under 10MB' });
       }
 
       const campaignData = {
@@ -1037,6 +1051,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         founderId,
         status: "active", // Set status to active so it appears in browse page
         logoUrl: files.logo?.[0]?.path,
+        pitchMediaUrl: files.pitchMedia?.[0]?.path,
         pitchDeckUrl: files.pitchDeck?.[0]?.path,
         // Convert deadline string to Date object if provided
         deadline: req.body.deadline ? new Date(req.body.deadline) : null,

@@ -391,30 +391,72 @@ export default function CampaignView() {
             
             <CardContent className="p-8 bg-white">
               <div className="space-y-6">
-                {campaign.fullPitch.split('\r\n\r\n').map((paragraph, index) => {
-                  if (paragraph.trim() === '') return null;
+                {(() => {
+                  const paragraphs = campaign.fullPitch.split('\r\n\r\n').filter(p => p.trim() !== '');
+                  const allFeatures = [];
+                  const processedContent = [];
                   
-                  // Check if this is the intro paragraph
-                  if (index === 0 && paragraph.includes('"beyond payments"')) {
-                    return (
-                      <div key={index} className="bg-gray-50 rounded-xl p-6 shadow-lg border border-gray-200">
-                        <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-gray-900">
-                          <div className="w-8 h-8 bg-fundry-orange rounded-lg flex items-center justify-center text-white">
-                            🎯
-                          </div>
-                          Company Vision
-                        </h3>
-                        <p className="text-gray-800 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
-                      </div>
-                    );
-                  }
+                  // Collect all features first
+                  paragraphs.forEach(paragraph => {
+                    if (paragraph.includes('Effortless') || paragraph.includes('Quick loans') || 
+                        paragraph.includes('Business-friendly') || paragraph.includes('Interactive')) {
+                      const features = paragraph.split('\r\n').filter(line => line.trim());
+                      allFeatures.push(...features);
+                    }
+                  });
                   
-                  // Check if it contains key features
-                  if (paragraph.includes('Effortless') || paragraph.includes('Quick loans') || 
-                      paragraph.includes('Business-friendly') || paragraph.includes('Interactive')) {
-                    const features = paragraph.split('\r\n').filter(line => line.trim());
-                    return (
-                      <div key={index} className="bg-gray-50 rounded-xl p-6 shadow-lg border border-gray-200">
+                  // Process content sections
+                  paragraphs.forEach((paragraph, index) => {
+                    if (paragraph.trim() === '') return;
+                    
+                    // Company Vision section
+                    if (index === 0 && paragraph.includes('"beyond payments"')) {
+                      processedContent.push(
+                        <div key={`vision-${index}`} className="bg-gray-50 rounded-xl p-6 shadow-lg border border-gray-200">
+                          <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-gray-900">
+                            <div className="w-8 h-8 bg-fundry-orange rounded-lg flex items-center justify-center text-white">
+                              🎯
+                            </div>
+                            Company Vision
+                          </h3>
+                          <p className="text-gray-800 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
+                        </div>
+                      );
+                    }
+                    // Skip feature paragraphs (we'll handle them separately)
+                    else if (paragraph.includes('Effortless') || paragraph.includes('Quick loans') || 
+                             paragraph.includes('Business-friendly') || paragraph.includes('Interactive')) {
+                      // Skip individual feature paragraphs
+                      return;
+                    }
+                    // Market positioning
+                    else if (paragraph.includes('holistic fintech alternative')) {
+                      processedContent.push(
+                        <div key={`market-${index}`} className="bg-gray-50 rounded-xl p-6 border-l-4 border-emerald-500 shadow-lg">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                            <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm">
+                              📈
+                            </div>
+                            Market Position
+                          </h3>
+                          <p className="text-gray-800 leading-relaxed text-lg font-semibold">{paragraph.trim()}</p>
+                        </div>
+                      );
+                    }
+                    // Regular content
+                    else {
+                      processedContent.push(
+                        <div key={`content-${index}`} className="bg-gray-50 rounded-xl p-6 border-l-4 border-gray-400 shadow-md">
+                          <p className="text-gray-900 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
+                        </div>
+                      );
+                    }
+                  });
+                  
+                  // Add consolidated features section after vision
+                  if (allFeatures.length > 0) {
+                    processedContent.splice(1, 0, 
+                      <div key="features" className="bg-gray-50 rounded-xl p-6 shadow-lg border border-gray-200">
                         <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-3">
                           <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center text-white text-sm font-bold">
                             ✓
@@ -422,7 +464,7 @@ export default function CampaignView() {
                           Key Features & Benefits
                         </h3>
                         <div className="grid gap-4">
-                          {features.map((feature, idx) => (
+                          {allFeatures.map((feature, idx) => (
                             <div key={idx} className="flex items-start gap-4 bg-white rounded-lg p-5 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
                               <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0">
                                 <span className="text-white text-lg">
@@ -439,28 +481,8 @@ export default function CampaignView() {
                     );
                   }
                   
-                  // Market positioning paragraph
-                  if (paragraph.includes('holistic fintech alternative')) {
-                    return (
-                      <div key={index} className="bg-gray-50 rounded-xl p-6 border-l-4 border-emerald-500 shadow-lg">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm">
-                            📈
-                          </div>
-                          Market Position
-                        </h3>
-                        <p className="text-gray-800 leading-relaxed text-lg font-semibold">{paragraph.trim()}</p>
-                      </div>
-                    );
-                  }
-                  
-                  // Regular paragraph with enhanced styling
-                  return (
-                    <div key={index} className="bg-gray-50 rounded-xl p-6 border-l-4 border-gray-400 shadow-md">
-                      <p className="text-gray-900 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
-                    </div>
-                  );
-                })}
+                  return processedContent;
+                })()}
               </div>
             </CardContent>
           </Card>

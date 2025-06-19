@@ -486,10 +486,11 @@ export default function InvestorDashboard() {
   };
 
   // Filter campaigns based on search and category
-  const filteredCampaigns = campaigns.filter((campaign: any) => {
-    const matchesSearch = campaign.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         campaign.tagline.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredCampaigns = (campaigns as any[] || []).filter((campaign: any) => {
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = (campaign.companyName?.toLowerCase()?.includes(searchLower)) ||
+                         (campaign.tagline?.toLowerCase()?.includes(searchLower)) ||
+                         (campaign.description?.toLowerCase()?.includes(searchLower));
     const matchesCategory = selectedCategory === "All Categories" || 
                            campaign.businessSector === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -558,13 +559,13 @@ export default function InvestorDashboard() {
             title="Total Invested"
             value={userStats?.totalInvested || "$0"}
             icon={<DollarSign className="h-6 w-6" />}
-            trend={userStats?.totalInvestedTrend || 0}
+            trend={0}
           />
           <StatsCard
             title="Active Investments"
             value={userStats?.activeInvestments?.toString() || "0"}
             icon={<TrendingUp className="h-6 w-6" />}
-            trend={userStats?.activeInvestmentsTrend || 0}
+            trend={0}
           />
           <StatsCard
             title="Pending Commitments"
@@ -754,9 +755,9 @@ export default function InvestorDashboard() {
                   <div className="flex justify-center py-8">
                     <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
                   </div>
-                ) : campaignUpdates.length > 0 ? (
+                ) : (campaignUpdates as any[])?.length > 0 ? (
                   <div className="space-y-6">
-                    {campaignUpdates.map((update: any) => (
+                    {(campaignUpdates as any[]).map((update: any) => (
                       <div key={update.id} className="border-b pb-6 last:border-b-0">
                         <div className="flex items-start justify-between mb-3">
                           <div>
@@ -1352,9 +1353,9 @@ This SAFE Agreement has been digitally signed and executed.
                     <div className="flex justify-center py-4">
                       <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
                     </div>
-                  ) : paymentMethods.length > 0 ? (
+                  ) : (paymentMethods as any[])?.length > 0 ? (
                     <div className="space-y-3">
-                      {paymentMethods.map((method: any) => (
+                      {(paymentMethods as any[]).map((method: any) => (
                         <div key={method.id} className="border rounded-lg p-4">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">

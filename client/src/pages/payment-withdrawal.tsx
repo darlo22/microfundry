@@ -602,10 +602,6 @@ export default function PaymentWithdrawal() {
                         <span className="ml-2 text-gray-600">{kycStatus.submittedData.dateOfBirth}</span>
                       </div>
                       <div>
-                        <span className="font-medium text-gray-700">SSN:</span>
-                        <span className="ml-2 text-gray-600">****</span>
-                      </div>
-                      <div>
                         <span className="font-medium text-gray-700">Address:</span>
                         <span className="ml-2 text-gray-600">{kycStatus.submittedData.address}</span>
                       </div>

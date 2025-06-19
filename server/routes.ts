@@ -893,8 +893,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('KYC Data received:', kycData); // Debug log
 
-      // Validate required KYC fields
-      const requiredFields = ['dateOfBirth', 'ssn', 'address', 'city', 'state', 'zipCode', 'employmentStatus', 'annualIncome', 'investmentExperience', 'riskTolerance'];
+      // Validate required KYC fields (SSN removed for privacy)
+      const requiredFields = ['dateOfBirth', 'address', 'city', 'state', 'zipCode', 'employmentStatus', 'annualIncome', 'investmentExperience', 'riskTolerance'];
       
       for (const field of requiredFields) {
         if (!kycData[field] || (typeof kycData[field] === 'string' && kycData[field].trim() === '')) {

@@ -9,6 +9,7 @@ import {
   notifications,
   paymentMethods,
   notificationPreferences,
+  kycVerifications,
   type User,
   type UpsertUser,
   type BusinessProfile,
@@ -27,6 +28,8 @@ import {
   type InsertPaymentMethod,
   type NotificationPreferences,
   type InsertNotificationPreferences,
+  type KycVerification,
+  type InsertKycVerification,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -112,6 +115,9 @@ export interface IStorage {
   }>;
 
   // KYC operations
+  getKycVerification(userId: string): Promise<KycVerification | undefined>;
+  createKycVerification(kycData: InsertKycVerification): Promise<KycVerification>;
+  updateKycVerification(userId: string, kycData: Partial<InsertKycVerification>): Promise<KycVerification | undefined>;
   updateUserKycStatus(userId: string, kycData: {
     status: string;
     submittedAt: Date;

@@ -176,6 +176,31 @@ export const fileUploads = pgTable("file_uploads", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// KYC verification data
+export const kycVerifications = pgTable("kyc_verifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  status: varchar("status").notNull().default("not_started"), // not_started, under_review, verified, rejected
+  dateOfBirth: timestamp("date_of_birth"),
+  address: text("address"),
+  city: varchar("city"),
+  state: varchar("state"),
+  zipCode: varchar("zip_code"),
+  employmentStatus: varchar("employment_status"),
+  annualIncome: varchar("annual_income"),
+  investmentExperience: varchar("investment_experience"),
+  riskTolerance: varchar("risk_tolerance"),
+  governmentIdFiles: jsonb("government_id_files"), // Array of file references
+  utilityBillFiles: jsonb("utility_bill_files"), // Array of file references
+  otherDocumentFiles: jsonb("other_document_files"), // Array of file references
+  rejectionReason: text("rejection_reason"),
+  reviewNotes: text("review_notes"),
+  submittedAt: timestamp("submitted_at"),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   businessProfile: one(businessProfiles, {
@@ -244,9 +269,18 @@ export const fileUploadsRelations = relations(fileUploads, ({ one }) => ({
   }),
 }));
 
+export const kycVerificationsRelations = relations(kycVerifications, ({ one }) => ({
+  user: one(users, {
+    fields: [kycVerifications.userId],
+    references: [users.id],
+  }),
+}));
+
 // Schema types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type KycVerification = typeof kycVerifications.$inferSelect;
+export type InsertKycVerification = typeof kycVerifications.$inferInsert;
 
 // Notifications table
 export const notifications = pgTable("notifications", {

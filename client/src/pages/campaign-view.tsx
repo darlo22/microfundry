@@ -493,7 +493,7 @@ export default function CampaignView() {
             <CardContent className="p-8">
               <div className="flex items-center space-x-3 mb-6">
                 <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Investment Details</h2>
+                <h2 className="text-2xl font-bold text-fundry-navy">Investment Details</h2>
               </div>
               <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                 <div className="space-y-3 sm:space-y-4">

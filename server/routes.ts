@@ -1337,6 +1337,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Investor insights data
+  app.get('/api/analytics/investor-insights/:founderId', requireAuth, async (req: any, res) => {
+    try {
+      const { founderId } = req.params;
+      const userId = req.user.id;
+      
+      if (founderId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const insights = await storage.getInvestorInsights(founderId);
+      res.json(insights);
+    } catch (error) {
+      console.error("Error fetching investor insights:", error);
+      res.status(500).json({ message: "Failed to fetch investor insights" });
+    }
+  });
+
   app.get('/api/analytics/investor/:investorId', requireAuth, async (req: any, res) => {
     try {
       const { investorId } = req.params;

@@ -45,6 +45,11 @@ export default function FounderAnalytics() {
     enabled: !!user?.id,
   });
 
+  const { data: investorInsights, isLoading: insightsLoading } = useQuery({
+    queryKey: ["/api/analytics/investor-insights", user?.id],
+    enabled: !!user?.id,
+  });
+
   const campaignPerformance = Array.isArray(campaigns) ? (campaigns as any[]).map((campaign: any) => ({
     name: campaign.title,
     raised: parseFloat(campaign.totalRaised || "0"),
@@ -398,24 +403,45 @@ export default function FounderAnalytics() {
                 <CardTitle>Investor Insights</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-gray-900 mb-2">
-                      {formatCurrency(totalRaised / Math.max(totalInvestors, 1))}
+                {insightsLoading ? (
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <div className="h-8 bg-gray-200 rounded animate-pulse mb-2"></div>
+                      <p className="text-sm text-gray-600">Average Investment Size</p>
                     </div>
-                    <p className="text-sm text-gray-600">Average Investment Size</p>
+                    <div className="text-center">
+                      <div className="h-8 bg-gray-200 rounded animate-pulse mb-2"></div>
+                      <p className="text-sm text-gray-600">Investor Retention Rate</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="h-8 bg-gray-200 rounded animate-pulse mb-2"></div>
+                      <p className="text-sm text-gray-600">Days Average Decision Time</p>
+                    </div>
                   </div>
-                  
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-gray-900 mb-2">72%</div>
-                    <p className="text-sm text-gray-600">Investor Retention Rate</p>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-gray-900 mb-2">
+                        {formatCurrency(investorInsights?.averageInvestmentSize || 0)}
+                      </div>
+                      <p className="text-sm text-gray-600">Average Investment Size</p>
+                    </div>
+                    
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-gray-900 mb-2">
+                        {investorInsights?.investorRetentionRate || 0}%
+                      </div>
+                      <p className="text-sm text-gray-600">Investor Retention Rate</p>
+                    </div>
+                    
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-gray-900 mb-2">
+                        {investorInsights?.averageDecisionTime || 0}
+                      </div>
+                      <p className="text-sm text-gray-600">Days Average Decision Time</p>
+                    </div>
                   </div>
-                  
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-gray-900 mb-2">4.2</div>
-                    <p className="text-sm text-gray-600">Days Average Decision Time</p>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -105,6 +105,11 @@ export interface IStorage {
     activeInvestments: number;
     estimatedValue: string;
   }>;
+  getInvestorInsights(founderId: string): Promise<{
+    averageInvestmentSize: number;
+    investorRetentionRate: number;
+    averageDecisionTime: number;
+  }>;
 
   // KYC operations
   updateUserKycStatus(userId: string, kycData: {
@@ -920,6 +925,93 @@ export class DatabaseStorage implements IStorage {
 
       return monthlyData;
     }) as Promise<Array<{ month: string; campaigns: number; investors: number; revenue: number }>>;
+  }
+
+  async getInvestorInsights(founderId: string): Promise<{
+    averageInvestmentSize: number;
+    investorRetentionRate: number;
+    averageDecisionTime: number;
+  }> {
+    return safeDbOperation(async () => {
+      // Get founder's campaigns
+      const founderCampaigns = await db
+        .select()
+        .from(campaigns)
+        .where(eq(campaigns.founderId, founderId));
+
+      if (founderCampaigns.length === 0) {
+        return {
+          averageInvestmentSize: 0,
+          investorRetentionRate: 0,
+          averageDecisionTime: 0
+        };
+      }
+
+      const campaignIds = founderCampaigns.map(c => c.id);
+
+      // Get all investments for these campaigns
+      const allInvestments = await db
+        .select()
+        .from(investments)
+        .where(
+          and(
+            sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`,
+            sql`${investments.status} IN ('committed', 'paid', 'completed')`
+          )
+        );
+
+      if (allInvestments.length === 0) {
+        return {
+          averageInvestmentSize: 0,
+          investorRetentionRate: 0,
+          averageDecisionTime: 0
+        };
+      }
+
+      // Calculate average investment size
+      const totalAmount = allInvestments.reduce((sum: any, inv: any) => sum + parseFloat(inv.amount), 0);
+      const averageInvestmentSize = Math.round(totalAmount / allInvestments.length);
+
+      // Calculate investor retention rate (investors who invested in multiple campaigns)
+      const investorCampaignCounts = new Map();
+      allInvestments.forEach((inv: any) => {
+        const count = investorCampaignCounts.get(inv.investorId) || 0;
+        investorCampaignCounts.set(inv.investorId, count + 1);
+      });
+
+      const repeatInvestors = Array.from(investorCampaignCounts.values()).filter(count => count > 1).length;
+      const totalUniqueInvestors = investorCampaignCounts.size;
+      const investorRetentionRate = totalUniqueInvestors > 0 ? Math.round((repeatInvestors / totalUniqueInvestors) * 100) : 0;
+
+      // Calculate average decision time (simplified - using creation time difference)
+      const decisionTimes = allInvestments.map((inv: any) => {
+        const campaign = founderCampaigns.find(c => c.id === inv.campaignId);
+        if (campaign && campaign.createdAt && inv.createdAt) {
+          const campaignStart = new Date(campaign.createdAt).getTime();
+          const investmentDate = new Date(inv.createdAt).getTime();
+          return Math.max(1, Math.round((investmentDate - campaignStart) / (1000 * 60 * 60 * 24))); // days
+        }
+        return 3; // default 3 days
+      });
+
+      const averageDecisionTime = Math.round(
+        decisionTimes.reduce((sum, time) => sum + time, 0) / decisionTimes.length
+      );
+
+      return {
+        averageInvestmentSize,
+        investorRetentionRate,
+        averageDecisionTime
+      };
+    }, {
+      averageInvestmentSize: 0,
+      investorRetentionRate: 0,
+      averageDecisionTime: 0
+    }) as Promise<{
+      averageInvestmentSize: number;
+      investorRetentionRate: number;
+      averageDecisionTime: number;
+    }>;
   }
 }
 

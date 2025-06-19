@@ -115,6 +115,10 @@ export default function CampaignView() {
     setShowPitchDeckModal(true);
   };
 
+  // Debug logo URL
+  console.log('Campaign logo URL:', campaign?.logoUrl);
+  console.log('Campaign data:', campaign);
+
   // Loading state
   if (isLoading || campaignLoading) {
     return (
@@ -207,18 +211,26 @@ export default function CampaignView() {
                     
                     {/* Logo Overlay on Media */}
                     <div className="absolute bottom-4 left-4">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-xl flex items-center justify-center overflow-hidden shadow-lg">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white border-4 border-white rounded-xl flex items-center justify-center overflow-hidden shadow-2xl">
                         {campaign.logoUrl ? (
                           <img 
                             src={campaign.logoUrl} 
                             alt={campaign.title}
-                            className="w-full h-full object-contain p-2"
+                            className="w-full h-full object-contain p-1"
+                            onError={(e) => {
+                              console.log('Logo failed to load:', campaign.logoUrl);
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const fallback = target.parentElement?.querySelector('div');
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
                           />
-                        ) : (
-                          <span className="text-fundry-orange text-lg sm:text-xl font-bold">
+                        ) : null}
+                        <div className={`w-full h-full flex items-center justify-center ${campaign.logoUrl ? 'hidden' : 'flex'}`}>
+                          <span className="text-fundry-orange text-xl sm:text-2xl font-bold">
                             {campaign.title.charAt(0)}
                           </span>
-                        )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -226,18 +238,26 @@ export default function CampaignView() {
                   /* Fallback Header if no pitch media */
                   <div className="aspect-video w-full bg-gradient-to-br from-fundry-navy via-blue-700 to-fundry-orange relative overflow-hidden flex items-center justify-center">
                     <div className="text-center text-white z-10">
-                      <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/95 backdrop-blur-sm border-4 border-white/50 rounded-2xl flex items-center justify-center mx-auto mb-6 overflow-hidden shadow-2xl">
+                      <div className="w-28 h-28 sm:w-36 sm:h-36 bg-white border-4 border-white rounded-2xl flex items-center justify-center mx-auto mb-6 overflow-hidden shadow-2xl">
                         {campaign.logoUrl ? (
                           <img 
                             src={campaign.logoUrl} 
                             alt={campaign.title}
-                            className="w-full h-full object-contain p-3"
+                            className="w-full h-full object-contain p-2"
+                            onError={(e) => {
+                              console.log('Logo failed to load in fallback header:', campaign.logoUrl);
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const fallback = target.parentElement?.querySelector('div');
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
                           />
-                        ) : (
-                          <span className="text-fundry-orange text-2xl sm:text-3xl font-bold">
+                        ) : null}
+                        <div className={`w-full h-full flex items-center justify-center ${campaign.logoUrl ? 'hidden' : 'flex'}`}>
+                          <span className="text-fundry-orange text-3xl sm:text-4xl font-bold">
                             {campaign.title.charAt(0)}
                           </span>
-                        )}
+                        </div>
                       </div>
                       <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2">{campaign.title}</h1>
                       <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">{campaign.shortPitch}</p>

@@ -68,9 +68,7 @@ export default function AdminLogin() {
       
       {/* Header */}
       <div className="absolute top-6 left-6">
-        <Link href="/landing">
-          <FundryLogo className="h-12 w-auto cursor-pointer" />
-        </Link>
+        <FundryLogo className="h-12 w-auto cursor-pointer" onClick={() => setLocation("/landing")} />
       </div>
 
       {/* Login Card */}

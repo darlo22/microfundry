@@ -1058,12 +1058,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Convert deadline string to Date object if provided
         deadline: req.body.deadline ? new Date(req.body.deadline) : null,
         // Handle JSON fields - check if already parsed
-        teamMembers: req.body.teamMembers ? 
-          (typeof req.body.teamMembers === 'string' ? JSON.parse(req.body.teamMembers) : req.body.teamMembers) : null,
-        useOfFunds: req.body.useOfFunds ? 
-          (typeof req.body.useOfFunds === 'string' ? JSON.parse(req.body.useOfFunds) : req.body.useOfFunds) : null,
-        directors: req.body.directors ? 
-          (typeof req.body.directors === 'string' ? JSON.parse(req.body.directors) : req.body.directors) : [],
+        teamMembers: (() => {
+          try {
+            return req.body.teamMembers ? 
+              (typeof req.body.teamMembers === 'string' ? JSON.parse(req.body.teamMembers) : req.body.teamMembers) : null;
+          } catch (e) {
+            console.error('Error parsing teamMembers:', e);
+            return null;
+          }
+        })(),
+        useOfFunds: (() => {
+          try {
+            return req.body.useOfFunds ? 
+              (typeof req.body.useOfFunds === 'string' ? JSON.parse(req.body.useOfFunds) : req.body.useOfFunds) : null;
+          } catch (e) {
+            console.error('Error parsing useOfFunds:', e);
+            return null;
+          }
+        })(),
+        directors: (() => {
+          try {
+            return req.body.directors ? 
+              (typeof req.body.directors === 'string' ? JSON.parse(req.body.directors) : req.body.directors) : [];
+          } catch (e) {
+            console.error('Error parsing directors:', e);
+            return [];
+          }
+        })(),
       };
 
       const validatedData = insertCampaignSchema.parse(campaignData);

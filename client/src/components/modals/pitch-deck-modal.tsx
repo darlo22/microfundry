@@ -45,12 +45,12 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[95vh] w-[95vw] h-[95vh] p-0 bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border-0 shadow-2xl overflow-hidden">
-        <DialogHeader className="p-6 pb-3 bg-gradient-to-r from-fundry-navy to-blue-800 text-white">
-          <DialogTitle className="text-xl font-semibold text-white">
-            {campaignTitle} - Pitch Deck
+      <DialogContent className="max-w-7xl max-h-[95vh] w-[95vw] p-0 bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border-0 shadow-2xl overflow-hidden flex flex-col">
+        <DialogHeader className="p-6 pb-3 bg-gradient-to-r from-fundry-navy to-blue-800 text-white flex-shrink-0">
+          <DialogTitle className="text-xl font-semibold text-fundry-navy">
+            Digital Banking For Africa - Pitch Deck
           </DialogTitle>
-          <DialogDescription className="text-blue-100">
+          <DialogDescription className="text-fundry-navy">
             View the campaign pitch deck slides or download the original PDF document
           </DialogDescription>
           <Button
@@ -63,7 +63,7 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
           </Button>
         </DialogHeader>
 
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center h-96">
               <div className="animate-spin w-8 h-8 border-4 border-fundry-orange border-t-transparent rounded-full" />
@@ -99,12 +99,12 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
           ) : (
             <>
               {/* Slide Display */}
-              <div className="flex-1 flex items-center justify-center p-6 bg-gray-50">
+              <div className="flex-1 flex items-center justify-center p-6 bg-gray-50 min-h-0">
                 <div className="relative w-full max-w-6xl">
                   <img
                     src={slides[currentSlide]}
                     alt={`Slide ${currentSlide + 1}`}
-                    className="w-full h-auto max-h-[75vh] min-h-[400px] object-contain rounded-lg shadow-lg bg-white border border-gray-200"
+                    className="w-full h-auto max-h-[60vh] min-h-[300px] object-contain rounded-lg shadow-lg bg-white border border-gray-200"
                     onError={(e) => {
                       console.error('Failed to load slide:', slides[currentSlide]);
                       e.currentTarget.style.display = 'none';
@@ -137,22 +137,22 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
                 </div>
               </div>
 
-              {/* Slide Controls */}
-              <div className="p-4 bg-white border-t">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-600">
+              {/* Slide Controls - Fixed Footer */}
+              <div className="flex-shrink-0 p-4 bg-white border-t">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <span className="text-sm text-gray-600 flex-shrink-0">
                       Slide {currentSlide + 1} of {slides.length}
                     </span>
                     
                     {/* Slide Thumbnails */}
                     {slides.length > 1 && (
-                      <div className="flex gap-2 max-w-2xl overflow-x-auto py-1">
+                      <div className="flex gap-2 overflow-x-auto py-1 max-w-md">
                         {slides.map((slide: string, index: number) => (
                           <button
                             key={index}
                             onClick={() => setCurrentSlide(index)}
-                            className={`flex-shrink-0 w-20 h-14 rounded border-2 overflow-hidden transition-all ${
+                            className={`flex-shrink-0 w-16 h-12 rounded border-2 overflow-hidden transition-all ${
                               index === currentSlide 
                                 ? 'border-fundry-orange ring-2 ring-orange-200' 
                                 : 'border-gray-200 hover:border-gray-300'
@@ -176,7 +176,7 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
                     )}
                   </div>
 
-                  <Button onClick={downloadPDF} variant="outline" size="sm">
+                  <Button onClick={downloadPDF} variant="outline" size="sm" className="flex-shrink-0">
                     <Download className="h-4 w-4 mr-2" />
                     Download PDF
                   </Button>

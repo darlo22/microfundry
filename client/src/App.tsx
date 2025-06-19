@@ -66,6 +66,7 @@ function Router() {
       <Route path="/verify-email" component={EmailVerification} />
       <Route path="/investment-success" component={InvestmentSuccess} />
       <Route path="/campaign/:id" component={CampaignView} />
+      <Route path="/campaigns/:id" component={CampaignView} />
       <Route path="/c/:privateLink" component={CampaignView} />
       
       {/* Authenticated routes */}

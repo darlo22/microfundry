@@ -22,7 +22,7 @@ import {
   LogIn,
   UserPlus
 } from "lucide-react";
-import type { Campaign } from "@shared/schema";
+import type { CampaignWithStats } from "@/lib/types";
 import FundryLogo from "@/components/ui/fundry-logo";
 import { SafeDocumentViewer } from "./safe-document-viewer";
 import { loadStripe } from "@stripe/stripe-js";

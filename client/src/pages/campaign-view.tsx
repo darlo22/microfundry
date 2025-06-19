@@ -31,6 +31,12 @@ import {
 } from "lucide-react";
 import type { CampaignWithStats } from "@/lib/types";
 
+// Local interface to handle the specific campaign data structure
+interface CampaignData extends Omit<CampaignWithStats, 'country' | 'state'> {
+  country?: string | null;
+  state?: string | null;
+}
+
 export default function CampaignView() {
   const params = useParams();
   const [, setLocation] = useLocation();
@@ -1236,7 +1242,7 @@ export default function CampaignView() {
         <InvestmentModal
           isOpen={showInvestmentModal}
           onClose={() => setShowInvestmentModal(false)}
-          campaign={campaign}
+          campaign={campaign as CampaignWithStats}
         />
       )}
 

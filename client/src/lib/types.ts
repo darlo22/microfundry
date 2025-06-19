@@ -25,9 +25,9 @@ export interface CampaignWithStats {
   investorCount: number;
   progressPercent: number;
   // Business Information fields
-  companyName?: string;
-  country?: string;
-  state?: string;
+  companyName?: string | null;
+  country?: string | null;
+  state?: string | null;
   businessAddress?: string;
   registrationStatus?: string;
   registrationType?: string;

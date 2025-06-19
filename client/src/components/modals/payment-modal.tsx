@@ -44,6 +44,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   
   const [isProcessingNaira, setIsProcessingNaira] = useState(false);
   const [isProcessingStripe, setIsProcessingStripe] = useState(false);
+  const [isLoadingUSD, setIsLoadingUSD] = useState(false);
   const [cardholderName, setCardholderName] = useState('');
   const [ngnAmount, setNgnAmount] = useState<number | null>(null);
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
@@ -57,6 +58,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       // Reset all state when modal opens
       setIsProcessingNaira(false);
       setIsProcessingStripe(false);
+      setIsLoadingUSD(false);
       setCardholderName('');
       setShowStripeForm(false);
       setClientSecret('');
@@ -86,6 +88,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   const resetModalToPaymentSelection = () => {
     setIsProcessingNaira(false);
     setIsProcessingStripe(false);
+    setIsLoadingUSD(false);
     setShowStripeForm(false);
     setCardholderName('');
     setClientSecret('');
@@ -96,35 +99,42 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     onClose();
   };
 
-  const handleUSDPayment = async () => {
+  const handleUSDPayment = () => {
     // Prevent simultaneous processing with NGN payment
     if (isProcessingNaira) {
       return;
     }
     
-    try {
-      // Get payment intent from backend
-      const response = await apiRequest('POST', '/api/create-payment-intent', {
-        amount: investment.amount,
-        investmentId: investment.id
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create payment intent');
+    // Immediately show Stripe form and fetch payment intent in background
+    setShowStripeForm(true);
+    
+    // Get payment intent from backend
+    apiRequest('POST', '/api/create-payment-intent', {
+      amount: investment.amount,
+      investmentId: investment.id
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.clientSecret) {
+        setClientSecret(data.clientSecret);
+      } else {
+        toast({
+          title: "Payment Setup Failed",
+          description: "Failed to setup payment",
+          variant: "destructive",
+        });
+        setShowStripeForm(false);
       }
-
-      const { clientSecret: secret } = await response.json();
-      setClientSecret(secret);
-      setShowStripeForm(true);
-    } catch (error: any) {
+    })
+    .catch(error => {
       console.error('Payment setup error:', error);
       toast({
         title: "Payment Setup Failed",
-        description: error.message || "Failed to setup payment",
+        description: "Failed to setup payment",
         variant: "destructive",
       });
-    }
+      setShowStripeForm(false);
+    });
   };
 
   const handleNairaPayment = async () => {

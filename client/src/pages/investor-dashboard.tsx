@@ -501,11 +501,11 @@ export default function InvestorDashboard() {
   // Filter campaigns based on search and category
   const filteredCampaigns = (campaigns as any[] || []).filter((campaign: any) => {
     const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = (campaign.companyName?.toLowerCase()?.includes(searchLower)) ||
-                         (campaign.tagline?.toLowerCase()?.includes(searchLower)) ||
-                         (campaign.description?.toLowerCase()?.includes(searchLower));
+    const matchesSearch = (campaign.title?.toLowerCase()?.includes(searchLower)) ||
+                         (campaign.short_pitch?.toLowerCase()?.includes(searchLower)) ||
+                         (campaign.full_pitch?.toLowerCase()?.includes(searchLower));
     const matchesCategory = selectedCategory === "All Categories" || 
-                           campaign.businessSector === selectedCategory;
+                           campaign.business_sector === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -915,9 +915,9 @@ export default function InvestorDashboard() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="All Categories">All Categories</SelectItem>
+                      <SelectItem value="FinTech">FinTech</SelectItem>
                       <SelectItem value="Technology">Technology</SelectItem>
                       <SelectItem value="Healthcare">Healthcare</SelectItem>
-                      <SelectItem value="Finance">Finance</SelectItem>
                       <SelectItem value="Education">Education</SelectItem>
                       <SelectItem value="Retail">Retail</SelectItem>
                     </SelectContent>

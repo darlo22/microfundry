@@ -1037,6 +1037,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const founderId = req.user.id;
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
       
+      // Debug logging
+      console.log('Raw request body:', JSON.stringify(req.body, null, 2));
+      console.log('teamMembers type:', typeof req.body.teamMembers);
+      console.log('teamMembers value:', req.body.teamMembers);
+      console.log('useOfFunds type:', typeof req.body.useOfFunds);
+      console.log('useOfFunds value:', req.body.useOfFunds);
+      console.log('directors type:', typeof req.body.directors);
+      console.log('directors value:', req.body.directors);
+      
       // Generate unique private link
       const privateLink = nanoid(16);
       

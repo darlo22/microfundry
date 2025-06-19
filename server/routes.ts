@@ -3497,16 +3497,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(401).json({ message: "Please verify your email before accessing admin panel" });
       }
 
-      // Log successful admin login
-      await db.insert(adminLogs).values({
-        adminId: user.id,
-        action: 'admin_login',
-        details: JSON.stringify({ 
-          email: user.email,
-          timestamp: new Date().toISOString(),
-          ip: req.ip || 'unknown'
-        })
-      });
+      // Log successful admin login (simplified for now)
+      console.log(`Admin login successful: ${user.email} at ${new Date().toISOString()}`);
 
       // Create session
       req.logIn(user, (err) => {

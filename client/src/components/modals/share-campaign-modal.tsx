@@ -21,9 +21,7 @@ interface ShareCampaignModalProps {
 export function ShareCampaignModal({ 
   isOpen, 
   onClose, 
-  campaignTitle, 
-  campaignUrl, 
-  shortPitch 
+  campaign 
 }: ShareCampaignModalProps) {
   const [copied, setCopied] = useState(false);
   const [copiedAppeal, setCopiedAppeal] = useState(false);
@@ -31,7 +29,8 @@ export function ShareCampaignModal({
 
   // Generate compelling investment appeal message
   const generateInvestmentAppeal = () => {
-    const minInvestmentAmount = "$25";
+    const campaignUrl = `${window.location.origin}/campaign/${campaign.id}`;
+    const minInvestmentAmount = campaign.minimumInvestment;
     
     return `🚀 **${campaignTitle}** is building **${shortPitch}**.
 

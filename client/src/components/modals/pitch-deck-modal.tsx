@@ -125,11 +125,12 @@ export function PitchDeckModal({ isOpen, onClose, campaignId, campaignTitle }: P
               {/* Slide Display */}
               <div className="flex-1 p-6 bg-gray-50 min-h-0 overflow-auto">
                 <div className="relative w-full max-w-6xl mx-auto">
-                  <div className="overflow-auto max-h-[calc(85vh-200px)] rounded-lg bg-white border border-gray-200 shadow-lg">
+                  <div className="overflow-auto max-h-[calc(80vh-150px)] rounded-lg bg-white border border-gray-200 shadow-lg">
                     <img
                       src={slides[currentSlide]}
                       alt={`Slide ${currentSlide + 1}`}
-                      className="w-full h-auto object-contain min-h-[600px]"
+                      className="w-full h-auto object-contain min-h-[700px] max-w-none"
+                      style={{ imageRendering: 'crisp-edges' }}
                       onError={(e) => {
                         console.error('Failed to load slide:', slides[currentSlide]);
                         e.currentTarget.style.display = 'none';

@@ -3220,7 +3220,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(404).json({ message: 'Campaign or pitch deck not found' });
       }
 
-      const pdfPath = path.join(process.cwd(), campaign.pitchDeckUrl);
+      // Ensure proper path formatting - remove leading slash if present
+      const pitchDeckPath = campaign.pitchDeckUrl.startsWith('/') 
+        ? campaign.pitchDeckUrl.substring(1) 
+        : campaign.pitchDeckUrl;
+      const pdfPath = path.join(process.cwd(), pitchDeckPath);
       
       if (!fs.existsSync(pdfPath)) {
         return res.status(404).json({ message: 'Pitch deck file not found' });
@@ -3245,12 +3249,15 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.json({ slides: slideUrls });
       }
 
-      // Convert PDF to PNG slides using ImageMagick with enhanced quality and size
-      const command = `convert -limit memory 1GB -limit map 2GB -density 300 "${pdfPath}" -resize 1200x900 -quality 95 -unsharp 0x0.75+0.75+0.008 "${slidesDir}/slide-%03d.png"`;
+      // Convert PDF to PNG slides using ImageMagick with enhanced parameters for all pages
+      const command = `convert -limit memory 2GB -limit map 4GB -density 300 "${pdfPath}"[0-50] -resize 1200x900 -quality 95 -unsharp 0x0.75+0.75+0.008 "${slidesDir}/slide-%03d.png"`;
+      
+      console.log(`Converting PDF with command: ${command}`);
       
       try {
-        // Set a 45-second timeout for conversion
-        await execAsync(command, { timeout: 45000 });
+        // Set a 60-second timeout for conversion
+        const result = await execAsync(command, { timeout: 60000 });
+        console.log('PDF conversion completed:', result.stdout);
         
         // Verify all slides were created successfully and remove empty files
         let allSlideFiles = fs.readdirSync(slidesDir)
@@ -3314,9 +3321,14 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(404).json({ message: 'Campaign or pitch deck not found' });
       }
 
-      const pdfPath = path.join(process.cwd(), campaign.pitchDeckUrl);
+      // Ensure proper path formatting - remove leading slash if present
+      const pitchDeckPath = campaign.pitchDeckUrl.startsWith('/') 
+        ? campaign.pitchDeckUrl.substring(1) 
+        : campaign.pitchDeckUrl;
+      const pdfPath = path.join(process.cwd(), pitchDeckPath);
       
       if (!fs.existsSync(pdfPath)) {
+        console.log('PDF file not found at:', pdfPath);
         return res.status(404).json({ message: 'Pitch deck file not found' });
       }
 

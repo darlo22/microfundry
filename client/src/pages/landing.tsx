@@ -68,6 +68,14 @@ export default function Landing() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              {isAuthenticated && user?.userType === 'admin' && (
+                <Link href="/admin-dashboard">
+                  <Button variant="outline" className="border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Admin Centre
+                  </Button>
+                </Link>
+              )}
               <Button variant="ghost" onClick={handleSignIn} className="text-fundry-navy hover:text-fundry-orange">
                 Sign In
               </Button>

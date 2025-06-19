@@ -21,6 +21,48 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 
+// Countries and registration types data
+const COUNTRIES_STATES = {
+  "United States": {
+    states: ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"],
+    registrationTypes: ["C Corporation", "S Corporation", "LLC", "Partnership", "Sole Proprietorship", "Non-Profit Corporation"]
+  },
+  "United Kingdom": {
+    states: ["England", "Scotland", "Wales", "Northern Ireland"],
+    registrationTypes: ["Private Limited Company", "Public Limited Company", "Limited Liability Partnership", "Community Interest Company", "Sole Trader", "Partnership"]
+  },
+  "Canada": {
+    states: ["Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", "Northwest Territories", "Nova Scotia", "Nunavut", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan", "Yukon"],
+    registrationTypes: ["Corporation", "Partnership", "Sole Proprietorship", "Co-operative", "Not-for-profit Corporation"]
+  },
+  "Australia": {
+    states: ["New South Wales", "Victoria", "Queensland", "Western Australia", "South Australia", "Tasmania", "Australian Capital Territory", "Northern Territory"],
+    registrationTypes: ["Proprietary Limited Company", "Public Company", "Partnership", "Sole Trader", "Trust", "Co-operative"]
+  },
+  "Germany": {
+    states: ["Baden-Württemberg", "Bavaria", "Berlin", "Brandenburg", "Bremen", "Hamburg", "Hesse", "Lower Saxony", "Mecklenburg-Vorpommern", "North Rhine-Westphalia", "Rhineland-Palatinate", "Saarland", "Saxony", "Saxony-Anhalt", "Schleswig-Holstein", "Thuringia"],
+    registrationTypes: ["GmbH", "AG", "UG", "KG", "OHG", "Einzelunternehmen"]
+  },
+  "France": {
+    states: ["Auvergne-Rhône-Alpes", "Bourgogne-Franche-Comté", "Brittany", "Centre-Val de Loire", "Corsica", "Grand Est", "Hauts-de-France", "Île-de-France", "Normandy", "Nouvelle-Aquitaine", "Occitania", "Pays de la Loire", "Provence-Alpes-Côte d'Azur"],
+    registrationTypes: ["SARL", "SAS", "SA", "EURL", "SNC", "Auto-entrepreneur"]
+  },
+  "India": {
+    states: ["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"],
+    registrationTypes: ["Private Limited Company", "Public Limited Company", "Limited Liability Partnership", "One Person Company", "Partnership Firm", "Sole Proprietorship"]
+  },
+  "Nigeria": {
+    states: ["Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Federal Capital Territory", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"],
+    registrationTypes: ["Private Limited Company", "Public Limited Company", "Limited by Guarantee", "Unlimited Company", "Partnership", "Sole Proprietorship"]
+  },
+  "South Africa": {
+    states: ["Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal", "Limpopo", "Mpumalanga", "Northern Cape", "North West", "Western Cape"],
+    registrationTypes: ["Private Company", "Public Company", "Personal Liability Company", "Close Corporation", "Sole Proprietorship", "Partnership"]
+  }
+};
+
+const COUNTRIES = Object.keys(COUNTRIES_STATES);
+
 const teamMemberSchema = z.object({
   name: z.string().min(1, "Name is required"),
   role: z.string().min(1, "Role is required"),
@@ -36,7 +78,28 @@ const fundAllocationSchema = z.object({
   description: z.string().optional(),
 });
 
+const directorSchema = z.object({
+  name: z.string().min(1, "Director name is required"),
+  title: z.string().min(1, "Director title is required"),
+  nationality: z.string().min(1, "Nationality is required"),
+  address: z.string().min(1, "Address is required"),
+  email: z.string().email("Valid email is required").optional(),
+  phone: z.string().optional(),
+});
+
 const campaignSchema = z.object({
+  // Business Information (First Section)
+  companyName: z.string().min(1, "Company/Business name is required"),
+  country: z.string().min(1, "Country is required"),
+  state: z.string().min(1, "State/Province is required"),
+  businessAddress: z.string().min(1, "Business address is required"),
+  registrationStatus: z.enum(["registered", "in-process"], {
+    required_error: "Registration status is required",
+  }),
+  registrationType: z.string().optional(),
+  directors: z.array(directorSchema).min(1, "At least one director is required"),
+  
+  // Campaign Details
   title: z.string().min(1, "Campaign title is required"),
   businessSector: z.string().min(1, "Business sector is required"),
   shortPitch: z.string().min(1, "Short pitch is required"),
@@ -93,6 +156,35 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
   const [pitchDeckFile, setPitchDeckFile] = useState<File | null>(null);
   const [teamMemberPhotos, setTeamMemberPhotos] = useState<{[key: number]: string}>({});
 
+  // Director management functions
+  const addDirector = () => {
+    const currentDirectors = form.getValues("directors");
+    const newDirector = {
+      name: "",
+      title: "",
+      nationality: "",
+      address: "",
+      email: "",
+      phone: ""
+    };
+    form.setValue("directors", [...currentDirectors, newDirector]);
+  };
+
+  const removeDirector = (index: number) => {
+    const currentDirectors = form.getValues("directors");
+    if (currentDirectors.length > 1) {
+      form.setValue("directors", currentDirectors.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateDirector = (index: number, field: keyof typeof directorSchema._type, value: string) => {
+    const currentDirectors = form.getValues("directors");
+    const updatedDirectors = currentDirectors.map((director, i) =>
+      i === index ? { ...director, [field]: value } : director
+    );
+    form.setValue("directors", updatedDirectors);
+  };
+
   // Use of Funds management functions
   const addFundAllocation = () => {
     const currentAllocations = form.getValues("useOfFunds");
@@ -126,6 +218,23 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
   const form = useForm<CampaignFormData>({
     resolver: zodResolver(campaignSchema),
     defaultValues: {
+      // Business Information
+      companyName: "",
+      country: "",
+      state: "",
+      businessAddress: "",
+      registrationStatus: "registered" as const,
+      registrationType: "",
+      directors: [{
+        name: "",
+        title: "",
+        nationality: "",
+        address: "",
+        email: "",
+        phone: ""
+      }],
+      
+      // Campaign Details
       title: "",
       businessSector: "",
       shortPitch: "",
@@ -307,9 +416,298 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* Basic Information */}
+            {/* Business Information - First Section */}
             <div className="border-b pb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Basic Information</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center text-white font-bold mr-3">1</div>
+                Business Information
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Company Name */}
+                <div className="md:col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="companyName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company/Business Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., EcoTech Solar Solutions Ltd." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Country */}
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Country *</FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          form.setValue("state", ""); // Reset state when country changes
+                          form.setValue("registrationType", ""); // Reset registration type
+                        }} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select country" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {COUNTRIES.map((country) => (
+                            <SelectItem key={country} value={country}>{country}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* State/Province */}
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State/Province *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select state/province" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {form.watch("country") && COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.states?.map((state) => (
+                            <SelectItem key={state} value={state}>{state}</SelectItem>
+                          )) || <SelectItem value="">Please select a country first</SelectItem>}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Business Address */}
+                <div className="md:col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="businessAddress"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Business Address *</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Enter full business address including street, city, postal code" 
+                            {...field} 
+                            rows={3}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Registration Status */}
+                <FormField
+                  control={form.control}
+                  name="registrationStatus"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Registration Status *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="registered">Registered</SelectItem>
+                          <SelectItem value="in-process">In Process</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Registration Type - Only show if registered */}
+                {form.watch("registrationStatus") === "registered" && (
+                  <FormField
+                    control={form.control}
+                    name="registrationType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Registration Type *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select registration type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {form.watch("country") && COUNTRIES_STATES[form.watch("country") as keyof typeof COUNTRIES_STATES]?.registrationTypes.map((type) => (
+                              <SelectItem key={type} value={type}>{type}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </div>
+
+              {/* Directors Section */}
+              <div className="mt-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-semibold text-gray-900">Directors/Key Personnel</h4>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addDirector}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Director
+                  </Button>
+                </div>
+
+                {form.watch("directors").map((director, index) => (
+                  <Card key={index} className="mb-4">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h5 className="font-medium text-gray-900">Director {index + 1}</h5>
+                        {form.watch("directors").length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeDirector(index)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`directors.${index}.name` as any}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Full Name *</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="John Doe" 
+                                  {...field}
+                                  onChange={(e) => updateDirector(index, "name", e.target.value)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`directors.${index}.title` as any}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Title/Position *</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="CEO, CTO, Director, etc." 
+                                  {...field}
+                                  onChange={(e) => updateDirector(index, "title", e.target.value)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`directors.${index}.nationality` as any}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nationality *</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="e.g., American, British, Nigerian" 
+                                  {...field}
+                                  onChange={(e) => updateDirector(index, "nationality", e.target.value)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`directors.${index}.email` as any}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email (Optional)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="email"
+                                  placeholder="john@company.com" 
+                                  {...field}
+                                  onChange={(e) => updateDirector(index, "email", e.target.value)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="md:col-span-2">
+                          <FormField
+                            control={form.control}
+                            name={`directors.${index}.address` as any}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Address *</FormLabel>
+                                <FormControl>
+                                  <Textarea 
+                                    placeholder="Full residential address" 
+                                    {...field}
+                                    onChange={(e) => updateDirector(index, "address", e.target.value)}
+                                    rows={2}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Campaign Details - Second Section */}
+            <div className="border-b pb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center text-white font-bold mr-3">2</div>
+                Campaign Details
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
                   <FormField

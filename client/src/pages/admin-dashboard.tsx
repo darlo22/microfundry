@@ -72,54 +72,41 @@ interface WithdrawalRequest {
 }
 
 export default function AdminDashboard() {
-  const { user } = useAuth();
+  const { user, isLoading: userLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
-
-  // Check admin authentication directly with dedicated query
-  const { data: adminUser, isLoading: adminLoading, error: adminError } = useQuery<{
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    userType: string;
-  }>({
-    queryKey: ['/api/admin/verify'],
-    retry: false,
-    staleTime: 0
-  });
 
   // Admin stats query
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ['/api/admin/stats'],
-    enabled: adminUser?.userType === "admin"
+    enabled: user?.userType === "admin"
   });
 
   // Users query
   const { data: users, isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
-    enabled: adminUser?.userType === "admin" && activeTab === "users"
+    enabled: user?.userType === "admin" && activeTab === "users"
   });
 
   // Campaigns query
   const { data: campaigns, isLoading: campaignsLoading } = useQuery<Campaign[]>({
     queryKey: ['/api/admin/campaigns'],
-    enabled: adminUser?.userType === "admin" && activeTab === "campaigns"
+    enabled: user?.userType === "admin" && activeTab === "campaigns"
   });
 
   // Withdrawals query
   const { data: withdrawals, isLoading: withdrawalsLoading } = useQuery<WithdrawalRequest[]>({
     queryKey: ['/api/admin/withdrawals'],
-    enabled: adminUser?.userType === "admin" && activeTab === "withdrawals"
+    enabled: user?.userType === "admin" && activeTab === "withdrawals"
   });
 
   useEffect(() => {
     if (user && user.userType !== "admin") {
-      setLocation("/");
+      setLocation("/admin-login");
     }
   }, [user, setLocation]);
 
-  if (adminLoading) {
+  if (userLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange"></div>
@@ -127,7 +114,7 @@ export default function AdminDashboard() {
     );
   }
 
-  if (adminError || !adminUser || adminUser.userType !== "admin") {
+  if (!user || user.userType !== "admin") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">

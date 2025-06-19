@@ -553,31 +553,31 @@ export default function CampaignView() {
 
           {/* Company Information */}
           {(campaign.companyName || campaign.country || campaign.state || campaign.businessAddress || campaign.registrationStatus) && (
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardContent className="p-8">
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/95 backdrop-blur-sm">
+              <CardContent className="p-8 bg-gradient-to-br from-white via-slate-50/80 to-blue-50/60">
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Company Information</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">Company Information</h2>
                 </div>
                 <div className="grid md:grid-cols-2 gap-6">
                   {campaign.companyName && (
-                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-lg border-l-4 border-fundry-orange">
-                      <span className="text-gray-700 font-medium">Company Name</span>
-                      <span className="font-bold text-fundry-navy">{campaign.companyName}</span>
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-orange-50 to-amber-100 rounded-lg border-l-4 border-fundry-orange shadow-md">
+                      <span className="text-gray-800 font-semibold">Company Name</span>
+                      <span className="font-bold text-gray-900">{campaign.companyName}</span>
                     </div>
                   )}
                   {(campaign.country || campaign.state) && (
-                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-lg border-l-4 border-blue-500">
-                      <span className="text-gray-700 font-medium">Location</span>
-                      <span className="font-bold text-blue-600">
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-blue-50 to-sky-100 rounded-lg border-l-4 border-blue-500 shadow-md">
+                      <span className="text-gray-800 font-semibold">Location</span>
+                      <span className="font-bold text-gray-900">
                         {campaign.state && campaign.country ? `${campaign.state}, ${campaign.country}` : campaign.country || campaign.state}
                       </span>
                     </div>
                   )}
                   {campaign.businessAddress && (
-                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-green-50/30 rounded-lg border-l-4 border-green-500">
-                      <span className="text-gray-700 font-medium">Address</span>
-                      <span className="font-bold text-green-600">{campaign.businessAddress}</span>
+                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-green-50 to-emerald-100 rounded-lg border-l-4 border-green-500 shadow-md">
+                      <span className="text-gray-800 font-semibold">Address</span>
+                      <span className="font-bold text-gray-900">{campaign.businessAddress}</span>
                     </div>
                   )}
                   {campaign.registrationStatus && (

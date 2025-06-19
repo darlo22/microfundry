@@ -7,6 +7,8 @@ import {
   campaignUpdates,
   fileUploads,
   notifications,
+  paymentMethods,
+  notificationPreferences,
   type User,
   type UpsertUser,
   type BusinessProfile,
@@ -21,6 +23,10 @@ import {
   type InsertCampaignUpdate,
   type FileUpload,
   type InsertFileUpload,
+  type PaymentMethod,
+  type InsertPaymentMethod,
+  type NotificationPreferences,
+  type InsertNotificationPreferences,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -109,6 +115,15 @@ export interface IStorage {
 
   // Account management operations
   deactivateUser(userId: string, reason: string): Promise<void>;
+
+  // Payment methods operations
+  getPaymentMethods(userId: string): Promise<PaymentMethod[]>;
+  addPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod>;
+  removePaymentMethod(paymentMethodId: number, userId: string): Promise<void>;
+
+  // Notification preferences operations
+  getNotificationPreferences(userId: string): Promise<NotificationPreferences | undefined>;
+  updateNotificationPreferences(userId: string, preferences: Partial<InsertNotificationPreferences>): Promise<NotificationPreferences>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -676,6 +691,62 @@ export class DatabaseStorage implements IStorage {
           updated_at = NOW()
       WHERE id = ${userId}
     `);
+  }
+
+  // Payment methods operations
+  async getPaymentMethods(userId: string): Promise<PaymentMethod[]> {
+    return safeDbOperation(async () => {
+      const methods = await db.select().from(paymentMethods).where(eq(paymentMethods.userId, userId));
+      return methods;
+    }, []) as Promise<PaymentMethod[]>;
+  }
+
+  async addPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod> {
+    return safeDbOperation(async () => {
+      const [method] = await db.insert(paymentMethods).values(paymentMethod).returning();
+      return method;
+    }) as Promise<PaymentMethod>;
+  }
+
+  async removePaymentMethod(paymentMethodId: number, userId: string): Promise<void> {
+    await safeDbOperation(async () => {
+      await db.delete(paymentMethods).where(
+        and(eq(paymentMethods.id, paymentMethodId), eq(paymentMethods.userId, userId))
+      );
+    });
+  }
+
+  // Notification preferences operations
+  async getNotificationPreferences(userId: string): Promise<NotificationPreferences | undefined> {
+    return safeDbOperation(async () => {
+      const [preferences] = await db.select().from(notificationPreferences).where(eq(notificationPreferences.userId, userId));
+      
+      // If no preferences exist, create default ones
+      if (!preferences) {
+        const [newPreferences] = await db.insert(notificationPreferences).values({
+          userId: userId,
+          emailInvestmentUpdates: true,
+          emailNewOpportunities: true,
+          emailSecurityAlerts: true,
+          emailMarketingCommunications: false,
+          pushCampaignUpdates: true,
+          pushInvestmentReminders: false,
+        }).returning();
+        return newPreferences;
+      }
+      
+      return preferences;
+    });
+  }
+
+  async updateNotificationPreferences(userId: string, preferences: Partial<InsertNotificationPreferences>): Promise<NotificationPreferences> {
+    return safeDbOperation(async () => {
+      const [updated] = await db.update(notificationPreferences)
+        .set({ ...preferences, updatedAt: new Date() })
+        .where(eq(notificationPreferences.userId, userId))
+        .returning();
+      return updated;
+    }) as Promise<NotificationPreferences>;
   }
 }
 

@@ -266,21 +266,25 @@ export default function CampaignView() {
               </div>
 
               {/* Campaign Info Below Media */}
-              <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/80 to-blue-50/60">
+              <div className="p-6 sm:p-8 bg-gradient-to-br from-slate-800 via-slate-700 to-gray-800 relative overflow-hidden">
+                {/* Subtle pattern overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-transparent to-indigo-900/20"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)]"></div>
+                
                 {/* Title and Basic Info */}
-                <div className="mb-6">
+                <div className="mb-6 relative z-10">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-3 mb-3">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{campaign.title}</h1>
-                        <Badge className="bg-fundry-orange/10 text-fundry-orange border-fundry-orange/20">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-white">{campaign.title}</h1>
+                        <Badge className="bg-fundry-orange text-white border-fundry-orange">
                           {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                         </Badge>
                       </div>
-                      <p className="text-lg text-gray-800 mb-4 leading-relaxed font-medium">{campaign.shortPitch}</p>
+                      <p className="text-lg text-gray-100 mb-4 leading-relaxed font-medium">{campaign.shortPitch}</p>
                       
                       {/* Meta Information */}
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
                         <div className="flex items-center">
                           <Building className="mr-2 text-fundry-orange" size={16} />
                           <span>{campaign.businessSector || 'Technology'}</span>
@@ -299,30 +303,30 @@ export default function CampaignView() {
                 </div>
 
                 {/* Funding Stats - Compact Row */}
-                <div className="grid grid-cols-3 gap-6 p-6 bg-gray-50 rounded-xl mb-6">
+                <div className="grid grid-cols-3 gap-6 p-6 bg-white/10 backdrop-blur-sm rounded-xl mb-6 relative z-10">
                   <div className="text-center">
-                    <div className="text-2xl sm:text-3xl font-bold text-fundry-navy mb-1">{formatCurrency(campaign.totalRaised)}</div>
-                    <div className="text-sm text-gray-600 font-medium">Raised</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{formatCurrency(campaign.totalRaised)}</div>
+                    <div className="text-sm text-gray-300 font-medium">Raised</div>
                   </div>
-                  <div className="text-center border-l border-r border-gray-300">
+                  <div className="text-center border-l border-r border-gray-400/30">
                     <div className="text-2xl sm:text-3xl font-bold text-fundry-orange mb-1">{campaign.progressPercent}%</div>
-                    <div className="text-sm text-gray-600 font-medium">Complete</div>
+                    <div className="text-sm text-gray-300 font-medium">Complete</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-1">{formatCurrency(campaign.fundingGoal)}</div>
-                    <div className="text-sm text-gray-600 font-medium">Goal</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-emerald-400 mb-1">{formatCurrency(campaign.fundingGoal)}</div>
+                    <div className="text-sm text-gray-300 font-medium">Goal</div>
                   </div>
                 </div>
                 
                 {/* Progress Bar */}
-                <div className="mb-6">
+                <div className="mb-6 relative z-10">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-sm font-medium text-gray-700">Funding Progress</span>
+                    <span className="text-sm font-medium text-gray-200">Funding Progress</span>
                     <span className="text-sm font-bold text-fundry-orange">{campaign.progressPercent}%</span>
                   </div>
                   <Progress 
                     value={campaign.progressPercent} 
-                    className="h-3 bg-gray-200"
+                    className="h-3 bg-gray-600/50"
                   />
                 </div>
                 

@@ -46,7 +46,6 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   const elements = useElements();
   const { user } = useAuth();
   
-  const [isProcessing, setIsProcessing] = useState(false);
   const [isProcessingNaira, setIsProcessingNaira] = useState(false);
   const [cardholderName, setCardholderName] = useState('');
   const [ngnAmount, setNgnAmount] = useState<number | null>(null);
@@ -59,7 +58,6 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   useEffect(() => {
     if (isOpen) {
       // Reset all state when modal opens
-      setIsProcessing(false);
       setIsProcessingNaira(false);
       setCardholderName('');
       setShowStripeForm(false);
@@ -207,9 +205,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   
   const handleNairaPayment = async () => {
     // Prevent simultaneous processing with USD payment
-    if (isProcessing) {
-      return;
-    }
+
     
     if (!ngnAmount) {
       toast({
@@ -335,7 +331,6 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   };
 
   const resetModalToPaymentSelection = () => {
-    setIsProcessing(false);
     setIsProcessingNaira(false);
     setShowStripeForm(false);
     setCardholderName('');
@@ -590,7 +585,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
               {/* NGN Payment Button */}
               <Button
                 onClick={handleNairaPayment}
-                disabled={isProcessingNaira || isProcessing || !ngnAmount}
+                disabled={isProcessingNaira || !ngnAmount}
                 className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-3">

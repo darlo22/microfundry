@@ -308,7 +308,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       const checkClosed = setInterval(() => {
         if (popup.closed) {
           clearInterval(checkClosed);
-          setIsProcessing(false);
+          setIsProcessingNaira(false);
           
           // Refresh investment data
           queryClient.invalidateQueries({ queryKey: ['/api/investments'] });

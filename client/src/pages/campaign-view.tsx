@@ -96,11 +96,13 @@ export default function CampaignView() {
   };
 
   const handleInvest = () => {
+    console.log("Investment button clicked!", { isAuthenticated, user });
     if (!isAuthenticated) {
       // Redirect to landing page with investor onboarding auto-open
       setLocation("/landing?invest=true&type=investor");
       return;
     }
+    console.log("Opening investment modal...");
     setShowInvestmentModal(true);
   };
 
@@ -184,8 +186,8 @@ export default function CampaignView() {
         <div className="space-y-4 sm:space-y-6 lg:space-y-8">
           
           {/* Hero Section - Pitch Media First (Wefunder Style) */}
-          <Card className="overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur-sm">
-            <CardContent className="p-0">
+          <div className="overflow-hidden border-0 shadow-xl bg-white/95 backdrop-blur-sm rounded-lg">
+            <div className="p-0">
               {/* Pitch Video/Cover Image - Prominent Display */}
               <div className="relative">
                 {campaign.pitchMediaUrl ? (
@@ -332,20 +334,29 @@ export default function CampaignView() {
                 </div>
                 
                 {/* Investment CTA */}
-                <Button 
-                  onClick={handleInvest}
-                  disabled={isProcessing}
-                  className="w-full bg-fundry-orange hover:bg-orange-600 text-white font-bold py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  <DollarSign className="mr-2" size={20} />
-                  {isProcessing ? "Processing..." : "Commit to Investment"}
-                </Button>
+                <div className="relative z-20">
+                  <Button 
+                    onClick={handleInvest}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      console.log("Mouse down event triggered");
+                      handleInvest();
+                    }}
+                    disabled={isProcessing}
+                    className="w-full bg-fundry-orange hover:bg-orange-600 text-white font-bold py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer relative z-30 pointer-events-auto"
+                    type="button"
+                    style={{ touchAction: 'manipulation' }}
+                  >
+                    <DollarSign className="mr-2" size={20} />
+                    {isProcessing ? "Processing..." : "Commit to Investment"}
+                  </Button>
+                </div>
                 <p className="text-sm text-gray-600 text-center mt-3 font-medium">
                   Minimum investment: {formatCurrency(campaign.minimumInvestment)}
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* View Pitch Deck Section */}
           <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">

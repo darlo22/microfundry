@@ -448,9 +448,19 @@ export type BusinessProfile = typeof businessProfiles.$inferSelect;
 
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({
   id: true,
+  founderId: true,
   createdAt: true,
   updatedAt: true,
   privateLink: true,
+}).extend({
+  directors: z.array(z.object({
+    name: z.string().min(1, "Director name is required"),
+    title: z.string().min(1, "Director title is required"),
+    nationality: z.string().min(1, "Nationality is required"),
+    address: z.string().min(1, "Address is required"),
+    email: z.string().email("Valid email is required").optional(),
+    phone: z.string().optional(),
+  })).min(1, "At least one director is required").optional(),
 });
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type Campaign = typeof campaigns.$inferSelect;

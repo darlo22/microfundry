@@ -271,19 +271,19 @@ export default function FounderInvestors() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
       {/* Navigation Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-6">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-orange-200 sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             {/* Left: Back Button */}
             <Button
               variant="ghost"
               onClick={() => setLocation("/founder-dashboard")}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-2 text-fundry-navy hover:text-fundry-orange transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
             </Button>
 
             {/* Center: Fundry Logo */}
@@ -294,66 +294,79 @@ export default function FounderInvestors() {
               <img 
                 src={fundryLogoNew} 
                 alt="Fundry" 
-                className="h-32 w-auto"
+                className="h-12 w-auto"
               />
             </div>
 
-
+            <div className="w-32"></div> {/* Spacer for centering */}
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Investors</h1>
-          <p className="text-gray-600">Manage and track your investor relationships</p>
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <div className="bg-gradient-to-r from-fundry-orange to-fundry-navy p-6 rounded-2xl text-white mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2 flex items-center">
+              <Users className="mr-3 text-white" size={32} />
+              Investor Management
+            </h1>
+            <p className="text-orange-100 text-sm sm:text-base">Manage and track your investor relationships</p>
+          </div>
         </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardContent className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center">
-              <Users className="h-8 w-8 text-fundry-orange" />
+              <div className="p-3 bg-white/20 rounded-full">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Investors</p>
-                <p className="text-2xl font-bold text-gray-900">{totalInvestors}</p>
+                <p className="text-xs sm:text-sm font-medium text-orange-100">Total Investors</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{totalInvestors}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center">
-              <DollarSign className="h-8 w-8 text-green-600" />
+              <div className="p-3 bg-white/20 rounded-full">
+                <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Invested</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalInvested.toString())}</p>
+                <p className="text-xs sm:text-sm font-medium text-emerald-100">Total Invested</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{formatCurrency(totalInvested.toString())}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center">
-              <TrendingUp className="h-8 w-8 text-blue-600" />
+              <div className="p-3 bg-white/20 rounded-full">
+                <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Investors</p>
-                <p className="text-2xl font-bold text-gray-900">{activeInvestors}</p>
+                <p className="text-xs sm:text-sm font-medium text-blue-100">Active Investors</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{activeInvestors}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center">
-              <DollarSign className="h-8 w-8 text-purple-600" />
+              <div className="p-3 bg-white/20 rounded-full">
+                <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Avg. Investment</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(averageInvestment.toString())}</p>
+                <p className="text-xs sm:text-sm font-medium text-purple-100">Avg. Investment</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{formatCurrency(averageInvestment.toString())}</p>
               </div>
             </div>
           </CardContent>

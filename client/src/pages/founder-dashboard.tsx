@@ -75,38 +75,40 @@ export default function FounderDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user?.firstName || "Founder"}!
-          </h1>
-          <p className="text-gray-600 mt-2">Here's an overview of your fundraising activities.</p>
+        <div className="mb-6 sm:mb-8">
+          <div className="bg-gradient-to-r from-fundry-orange to-fundry-navy p-6 sm:p-8 rounded-2xl text-white shadow-xl">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
+              Welcome back, {user?.firstName || "Founder"}!
+            </h1>
+            <p className="text-orange-100 mt-2 text-sm sm:text-base">Here's an overview of your fundraising activities.</p>
+          </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-              <Link href="/founder-dashboard" className="border-fundry-orange text-fundry-orange whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+        <div className="mb-6 sm:mb-8">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-1">
+            <nav className="flex flex-wrap gap-1" aria-label="Tabs">
+              <Link href="/founder-dashboard" className="bg-gradient-to-r from-fundry-orange to-orange-500 text-white rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Campaigns
               </Link>
-              <Link href="/founder/investors" className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+              <Link href="/founder/investors" className="text-gray-600 hover:text-fundry-orange hover:bg-orange-50 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Investors
               </Link>
-              <Link href="/founder/analytics" className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+              <Link href="/founder/analytics" className="text-gray-600 hover:text-fundry-orange hover:bg-orange-50 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Analytics
               </Link>
-              <Link href="/founder/updates" className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+              <Link href="/founder/updates" className="text-gray-600 hover:text-fundry-orange hover:bg-orange-50 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Updates
               </Link>
-              <Link href="/founder/settings" className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+              <Link href="/founder/settings" className="text-gray-600 hover:text-fundry-orange hover:bg-orange-50 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Settings
               </Link>
-              <Link href="/payment-withdrawal" className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+              <Link href="/payment-withdrawal" className="text-gray-600 hover:text-fundry-orange hover:bg-orange-50 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Payments
               </Link>
             </nav>
@@ -114,7 +116,7 @@ export default function FounderDashboard() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <StatsCard
             title="Total Raised"
             value={new Intl.NumberFormat('en-US', {
@@ -124,7 +126,7 @@ export default function FounderDashboard() {
               maximumFractionDigits: 2,
             }).format(parseFloat(stats?.totalRaised || "0"))}
             icon={DollarSign}
-            iconBgColor="bg-green-100"
+            iconBgColor="bg-gradient-to-br from-green-50 to-emerald-100"
             iconColor="text-green-600"
             trend={{ 
               value: stats?.totalRaised && parseFloat(stats.totalRaised) > 0 ? "+12%" : "No change", 
@@ -136,7 +138,7 @@ export default function FounderDashboard() {
             title="Active Campaigns"
             value={stats?.activeCampaigns || 0}
             icon={Rocket}
-            iconBgColor="bg-fundry-orange-light"
+            iconBgColor="bg-gradient-to-br from-orange-50 to-orange-100"
             iconColor="text-fundry-orange"
             subtitle={campaigns && campaigns.length > 0 ? `${campaigns.length} total campaign${campaigns.length > 1 ? 's' : ''}` : "No campaigns yet"}
           />
@@ -144,7 +146,7 @@ export default function FounderDashboard() {
             title="Total Investors"
             value={stats?.totalInvestors || 0}
             icon={Users}
-            iconBgColor="bg-blue-100"
+            iconBgColor="bg-gradient-to-br from-blue-50 to-blue-100"
             iconColor="text-fundry-navy"
             trend={{ 
               value: stats?.totalInvestors && stats.totalInvestors > 0 ? "+5 this week" : "No investors yet", 
@@ -155,58 +157,61 @@ export default function FounderDashboard() {
             title="Conversion Rate"
             value={`${stats?.conversionRate || 0}%`}
             icon={BarChart}
-            iconBgColor="bg-purple-100"
+            iconBgColor="bg-gradient-to-br from-purple-50 to-purple-100"
             iconColor="text-purple-600"
             subtitle={stats?.conversionRate && stats.conversionRate > 50 ? "Above average" : "Building momentum"}
           />
         </div>
 
         {/* Quick Actions */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+        <Card className="mb-6 sm:mb-8 bg-white shadow-lg border-0">
+          <CardHeader className="bg-gradient-to-r from-fundry-orange/10 to-fundry-navy/10 rounded-t-lg">
+            <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+              <TrendingUp className="mr-2 text-fundry-orange" size={24} />
+              Quick Actions
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardContent className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <Button
                 variant="outline"
-                className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group"
+                className="flex items-center p-4 sm:p-6 h-auto bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 hover:border-fundry-orange hover:shadow-lg group transition-all duration-300 hover:scale-105"
                 onClick={() => setShowCampaignModal(true)}
               >
-                <div className="w-10 h-10 bg-fundry-orange rounded-lg flex items-center justify-center mr-4">
-                  <Plus className="text-white" size={20} />
+                <div className="w-12 h-12 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                  <Plus className="text-white" size={24} />
                 </div>
-                <div className="text-left">
-                  <div className="font-semibold text-gray-900 group-hover:text-fundry-orange">Create Campaign</div>
-                  <div className="text-sm text-gray-500">Start a new fundraising campaign</div>
+                <div className="text-left flex-1">
+                  <div className="font-bold text-gray-900 group-hover:text-fundry-orange transition-colors duration-300 text-sm sm:text-base">Create Campaign</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Start a new fundraising campaign</div>
                 </div>
               </Button>
 
               <Button
                 variant="outline"
-                className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group"
+                className="flex items-center p-4 sm:p-6 h-auto bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 hover:border-fundry-navy hover:shadow-lg group transition-all duration-300 hover:scale-105"
                 onClick={() => setShowShareModal(true)}
               >
-                <div className="w-10 h-10 bg-fundry-navy rounded-lg flex items-center justify-center mr-4">
-                  <Share className="text-white" size={20} />
+                <div className="w-12 h-12 bg-gradient-to-br from-fundry-navy to-blue-700 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                  <Share className="text-white" size={24} />
                 </div>
-                <div className="text-left">
-                  <div className="font-semibold text-gray-900 group-hover:text-fundry-orange">Share Campaign</div>
-                  <div className="text-sm text-gray-500">Get your private campaign link</div>
+                <div className="text-left flex-1">
+                  <div className="font-bold text-gray-900 group-hover:text-fundry-navy transition-colors duration-300 text-sm sm:text-base">Share Campaign</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Get your private campaign link</div>
                 </div>
               </Button>
 
-              <Link href="/payment-withdrawal">
+              <Link href="/payment-withdrawal" className="sm:col-span-2 lg:col-span-1">
                 <Button
                   variant="outline"
-                  className="flex items-center p-4 h-auto border-2 border-dashed hover:border-fundry-orange group w-full"
+                  className="flex items-center p-4 sm:p-6 h-auto bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-200 hover:border-green-500 hover:shadow-lg group w-full transition-all duration-300 hover:scale-105"
                 >
-                  <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4">
-                    <DollarSign className="text-white" size={20} />
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                    <DollarSign className="text-white" size={24} />
                   </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-gray-900 group-hover:text-fundry-orange">Payment Withdrawal</div>
-                    <div className="text-sm text-gray-500">Withdraw earnings and manage KYC</div>
+                  <div className="text-left flex-1">
+                    <div className="font-bold text-gray-900 group-hover:text-green-600 transition-colors duration-300 text-sm sm:text-base">Payment Withdrawal</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Withdraw earnings and manage KYC</div>
                   </div>
                 </Button>
               </Link>
@@ -215,20 +220,23 @@ export default function FounderDashboard() {
         </Card>
 
         {/* Active Campaigns */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Active Campaigns</CardTitle>
-            <Button variant="link" className="text-fundry-orange hover:text-orange-600">
+        <Card className="bg-white shadow-lg border-0">
+          <CardHeader className="bg-gradient-to-r from-fundry-orange/10 to-fundry-navy/10 rounded-t-lg flex flex-row items-center justify-between">
+            <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+              <Rocket className="mr-2 text-fundry-orange" size={24} />
+              Active Campaigns
+            </CardTitle>
+            <Button variant="link" className="text-fundry-orange hover:text-orange-600 font-semibold">
               View All
             </Button>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6">
             {campaignsLoading ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-fundry-orange"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-4 border-fundry-orange border-t-transparent"></div>
               </div>
             ) : campaigns && campaigns.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-4 sm:space-y-6">
                 {campaigns.map((campaign) => (
                   <CampaignCard 
                     key={campaign.id} 
@@ -240,14 +248,19 @@ export default function FounderDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No campaigns yet. Create your first campaign to get started!</p>
-                <Button 
-                  onClick={() => setShowCampaignModal(true)}
-                  className="mt-4 bg-fundry-orange hover:bg-orange-600"
-                >
-                  Create Campaign
-                </Button>
+              <div className="text-center py-8 sm:py-12">
+                <div className="bg-gradient-to-br from-orange-50 to-blue-50 rounded-2xl p-6 sm:p-8 border border-orange-100">
+                  <Rocket className="mx-auto mb-4 text-fundry-orange" size={48} />
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Ready to Launch?</h3>
+                  <p className="text-gray-600 mb-6 text-sm sm:text-base">No campaigns yet. Create your first campaign to start raising funds!</p>
+                  <Button 
+                    onClick={() => setShowCampaignModal(true)}
+                    className="bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    <Plus className="mr-2" size={20} />
+                    Create Your First Campaign
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>

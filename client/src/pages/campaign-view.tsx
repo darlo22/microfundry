@@ -706,6 +706,61 @@ export default function CampaignView() {
               </CardContent>
             </Card>
 
+            {/* Investment Summary Section */}
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardContent className="p-0">
+                {/* Header with solid orange */}
+                <div className="bg-fundry-orange p-6 text-white relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-black/5 via-transparent to-white/5"></div>
+                  <div className="relative z-10 text-center">
+                    <div className="text-3xl lg:text-4xl font-bold mb-2">
+                      {formatCurrency(campaign.totalRaised)}
+                    </div>
+                    <div className="text-white/90 font-medium">
+                      raised of <span className="font-bold text-white">{formatCurrency(campaign.fundingGoal)}</span> goal
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress and Stats */}
+                <div className="p-6">
+                  {/* Progress Bar */}
+                  <div className="mt-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-gray-700">Funding Progress</span>
+                      <span className="text-sm font-bold text-fundry-orange">{campaign.progressPercent}%</span>
+                    </div>
+                    <Progress 
+                      value={campaign.progressPercent} 
+                      className="h-3 bg-gray-200"
+                    />
+                    <div className="flex justify-between text-sm text-gray-600 mt-2">
+                      <span className="font-medium">{campaign.progressPercent}% funded</span>
+                      {campaign.deadline && (
+                        <span className="font-medium">
+                          {Math.ceil((new Date(campaign.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-4 mt-6">
+                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50/30 rounded-xl border border-blue-100">
+                      <div className="text-2xl font-bold text-fundry-navy">{campaign.investorCount}</div>
+                      <div className="text-sm text-gray-600 font-medium">Investors</div>
+                    </div>
+                    <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50/30 rounded-xl border border-green-100">
+                      <div className="text-2xl font-bold text-green-700">
+                        {campaign.investorCount > 0 ? formatCurrency(parseInt(campaign.totalRaised) / campaign.investorCount) : '$0'}
+                      </div>
+                      <div className="text-sm text-gray-600 font-medium">Avg. Investment</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* SAFE Agreement Terms */}
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-6 sm:p-8">

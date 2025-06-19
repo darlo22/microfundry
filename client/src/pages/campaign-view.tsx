@@ -460,25 +460,33 @@ export default function CampaignView() {
             </CardContent>
           </Card>
 
-          {/* About This Campaign */}
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden bg-gradient-to-r from-fundry-orange to-orange-600">
+          {/* About This Campaign - Modern Redesign */}
+          <Card className="border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
             {/* Header */}
-            <div className="px-8 py-6">
-              <h2 className="text-2xl font-bold text-fundry-navy flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  📖
-                </div>
-                About This Campaign
-              </h2>
-              <p className="text-fundry-navy font-medium mt-2">Learn more about this investment opportunity</p>
+            <div className="relative px-10 py-8 bg-gradient-to-br from-fundry-navy via-blue-800 to-slate-800 overflow-hidden">
+              {/* Background Pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-fundry-orange/5 via-transparent to-blue-500/5"></div>
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-fundry-orange/10 to-transparent rounded-full -translate-y-20 translate-x-20"></div>
+              
+              <div className="relative z-10">
+                <h2 className="text-4xl font-bold text-white flex items-center gap-4 mb-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-2xl flex items-center justify-center shadow-xl">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  </div>
+                  About This Campaign
+                </h2>
+                <p className="text-blue-100 font-medium text-lg">Discover the complete vision and strategy behind this investment opportunity</p>
+              </div>
             </div>
             
-            <CardContent className="p-8 bg-white">
-              <div className="space-y-6">
+            <CardContent className="p-10 bg-white">
+              <div className="space-y-8">
                 {(() => {
                   const paragraphs = campaign.fullPitch.split('\r\n\r\n').filter(p => p.trim() !== '');
-                  const allFeatures = [];
-                  const processedContent = [];
+                  const allFeatures: string[] = [];
+                  const processedContent: React.ReactNode[] = [];
                   
                   // Collect all features first
                   paragraphs.forEach(paragraph => {
@@ -496,14 +504,22 @@ export default function CampaignView() {
                     // Company Vision section
                     if (index === 0 && paragraph.includes('"beyond payments"')) {
                       processedContent.push(
-                        <div key={`vision-${index}`} className="bg-gray-50 rounded-xl p-6 shadow-lg border border-gray-200">
-                          <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-gray-900">
-                            <div className="w-8 h-8 bg-fundry-orange rounded-lg flex items-center justify-center text-white">
-                              🎯
+                        <div key={`vision-${index}`} className="relative bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-2xl p-8 shadow-xl border border-slate-200/50 overflow-hidden">
+                          {/* Background Pattern */}
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-fundry-orange/10 to-transparent rounded-full -translate-y-12 translate-x-12"></div>
+                          
+                          <div className="relative z-10">
+                            <div className="flex items-center gap-4 mb-6">
+                              <div className="w-12 h-12 bg-gradient-to-br from-fundry-navy to-blue-800 rounded-2xl flex items-center justify-center shadow-lg">
+                                <svg className="w-6 h-6 text-fundry-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              </div>
+                              <h3 className="text-2xl font-bold text-fundry-navy">Company Vision</h3>
                             </div>
-                            Company Vision
-                          </h3>
-                          <p className="text-gray-800 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
+                            <p className="text-gray-800 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
+                          </div>
                         </div>
                       );
                     }
@@ -516,21 +532,27 @@ export default function CampaignView() {
                     // Market positioning
                     else if (paragraph.includes('holistic fintech alternative')) {
                       processedContent.push(
-                        <div key={`market-${index}`} className="bg-gray-50 rounded-xl p-6 border-l-4 border-emerald-500 shadow-lg">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm">
-                              📈
+                        <div key={`market-${index}`} className="relative bg-gradient-to-br from-emerald-50 to-green-50/50 rounded-2xl p-8 border-l-4 border-emerald-500 shadow-xl overflow-hidden">
+                          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-emerald-400/10 to-transparent rounded-full -translate-y-10 translate-x-10"></div>
+                          
+                          <div className="relative z-10">
+                            <div className="flex items-center gap-4 mb-4">
+                              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                              </div>
+                              <h3 className="text-xl font-bold text-emerald-800">Market Position</h3>
                             </div>
-                            Market Position
-                          </h3>
-                          <p className="text-gray-800 leading-relaxed text-lg font-semibold">{paragraph.trim()}</p>
+                            <p className="text-gray-800 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
+                          </div>
                         </div>
                       );
                     }
                     // Regular content
                     else {
                       processedContent.push(
-                        <div key={`content-${index}`} className="bg-gray-50 rounded-xl p-6 border-l-4 border-gray-400 shadow-md">
+                        <div key={`content-${index}`} className="bg-gradient-to-br from-gray-50 to-slate-50/50 rounded-2xl p-8 border-l-4 border-gray-400 shadow-lg">
                           <p className="text-gray-900 leading-relaxed text-lg font-medium">{paragraph.trim()}</p>
                         </div>
                       );
@@ -540,26 +562,45 @@ export default function CampaignView() {
                   // Add consolidated features section after vision
                   if (allFeatures.length > 0) {
                     processedContent.splice(1, 0, 
-                      <div key="features" className="bg-gray-50 rounded-xl p-6 shadow-lg border border-gray-200">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-3">
-                          <div className="w-8 h-8 bg-fundry-orange rounded-full flex items-center justify-center text-white text-sm font-bold">
-                            ✓
-                          </div>
-                          Key Features & Benefits
-                        </h3>
-                        <div className="grid gap-4">
-                          {allFeatures.map((feature, idx) => (
-                            <div key={idx} className="flex items-start gap-4 bg-white rounded-lg p-5 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-                              <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                                <span className="text-white text-lg">
-                                  {idx === 0 ? '💳' : idx === 1 ? '✈️' : idx === 2 ? '🏢' : '👥'}
-                                </span>
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-gray-900 font-semibold leading-relaxed text-lg">{feature.trim()}</p>
-                              </div>
+                      <div key="features" className="relative bg-gradient-to-br from-orange-50 to-amber-50/50 rounded-2xl p-8 shadow-xl border border-orange-200/50 overflow-hidden">
+                        {/* Background Pattern */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-fundry-orange/5 via-transparent to-amber-500/5"></div>
+                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-fundry-orange/10 to-transparent rounded-full translate-y-16 -translate-x-16"></div>
+                        
+                        <div className="relative z-10">
+                          <div className="flex items-center gap-4 mb-8">
+                            <div className="w-12 h-12 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
+                              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
                             </div>
-                          ))}
+                            <h3 className="text-2xl font-bold text-fundry-navy">Key Features & Benefits</h3>
+                          </div>
+                          
+                          <div className="grid gap-6">
+                            {allFeatures.map((feature, idx) => (
+                              <div key={idx} className="group relative bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/50 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                                <div className="flex items-start gap-4">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-fundry-navy to-blue-800 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                    <svg className="w-6 h-6 text-fundry-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      {idx === 0 ? (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                      ) : idx === 1 ? (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                      ) : idx === 2 ? (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                      ) : (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                      )}
+                                    </svg>
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="text-gray-900 font-semibold leading-relaxed text-lg group-hover:text-fundry-navy transition-colors duration-300">{feature.trim()}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     );

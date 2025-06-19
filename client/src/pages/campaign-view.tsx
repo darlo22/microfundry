@@ -380,13 +380,13 @@ export default function CampaignView() {
           <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden bg-gradient-to-r from-fundry-orange to-orange-600">
             {/* Header */}
             <div className="px-8 py-6">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+              <h2 className="text-2xl font-bold text-fundry-orange flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                   📖
                 </div>
                 About This Campaign
               </h2>
-              <p className="text-white font-medium mt-2">Learn more about this investment opportunity</p>
+              <p className="text-fundry-orange font-medium mt-2">Learn more about this investment opportunity</p>
             </div>
             
             <CardContent className="p-8 bg-white">

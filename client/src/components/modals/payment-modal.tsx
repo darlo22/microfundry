@@ -206,6 +206,11 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
 
   
   const handleNairaPayment = async () => {
+    // Prevent simultaneous processing with USD payment
+    if (isProcessing) {
+      return;
+    }
+    
     if (!ngnAmount) {
       toast({
         title: "Currency Error",
@@ -325,7 +330,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         description: error.message || "Payment failed. Please try again.",
         variant: "destructive",
       });
-      setIsProcessing(false);
+      setIsProcessingNaira(false);
     }
   };
 
@@ -335,6 +340,11 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   };
 
   const handleUSDPayment = async () => {
+    // Prevent simultaneous processing with NGN payment
+    if (isProcessingNaira) {
+      return;
+    }
+    
     setIsProcessing(true);
     try {
       // Get payment intent from backend
@@ -351,7 +361,6 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       const { clientSecret: secret } = await response.json();
       setClientSecret(secret);
       setShowStripeForm(true);
-      setIsProcessing(false); // Reset processing state after successful setup
     } catch (error: any) {
       console.error('Payment setup error:', error);
       toast({
@@ -568,8 +577,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
               {/* USD Payment Button */}
               <Button
                 onClick={handleUSDPayment}
-                disabled={isProcessing}
-                className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
+                disabled={isProcessing || isProcessingNaira}
+                className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -592,8 +601,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
               {/* NGN Payment Button */}
               <Button
                 onClick={handleNairaPayment}
-                disabled={isProcessingNaira || !ngnAmount}
-                className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto"
+                disabled={isProcessingNaira || isProcessing || !ngnAmount}
+                className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">

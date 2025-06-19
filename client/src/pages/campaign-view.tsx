@@ -8,6 +8,7 @@ import Footer from "@/components/layout/footer";
 import InvestmentModal from "@/components/modals/investment-modal";
 import { ShareCampaignModal } from "@/components/modals/share-campaign-modal";
 import { EditCampaignModal } from "@/components/modals/edit-campaign-modal";
+import { PitchDeckModal } from "@/components/modals/pitch-deck-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -787,63 +788,14 @@ export default function CampaignView() {
       )}
 
       {/* Pitch Deck Modal */}
-      <Dialog open={showPitchDeckModal} onOpenChange={setShowPitchDeckModal}>
-        <DialogContent className="max-w-6xl w-[95vw] h-[90vh] p-6">
-          <DialogHeader className="pb-4 border-b">
-            <DialogTitle className="flex items-center justify-between text-xl font-bold text-fundry-navy">
-              <span>Pitch Deck - {campaign?.title}</span>
-              {campaign?.pitchDeckUrl && (
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const url = campaign.pitchDeckUrl.startsWith('/') ? campaign.pitchDeckUrl : `/${campaign.pitchDeckUrl}`;
-                      const link = document.createElement('a');
-                      link.href = url;
-                      link.download = `${campaign.title}-pitch-deck.pdf`;
-                      link.click();
-                    }}
-                    className="flex items-center gap-1"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const url = campaign.pitchDeckUrl.startsWith('/') ? campaign.pitchDeckUrl : `/${campaign.pitchDeckUrl}`;
-                      window.open(url, '_blank');
-                    }}
-                    className="flex items-center gap-1"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    Open in New Tab
-                  </Button>
-                </div>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="w-full h-[75vh] bg-gray-50 rounded-lg overflow-hidden border">
-            {campaign?.pitchDeckUrl ? (
-              <iframe
-                src={`${campaign.pitchDeckUrl.startsWith('/') ? campaign.pitchDeckUrl : `/${campaign.pitchDeckUrl}`}#toolbar=1&navpanes=1&scrollbar=1`}
-                className="w-full h-full border-0"
-                title="Pitch Deck Preview"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <FileText className="mx-auto h-16 w-16 mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No Pitch Deck Available</h3>
-                  <p>This campaign hasn't uploaded a pitch deck yet.</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {campaign && (
+        <PitchDeckModal 
+          isOpen={showPitchDeckModal}
+          onClose={() => setShowPitchDeckModal(false)}
+          campaignId={campaign.id}
+          campaignTitle={campaign.title}
+        />
+      )}
 
       <Footer />
     </div>

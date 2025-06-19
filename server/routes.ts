@@ -19,7 +19,7 @@ import { emailService } from "./services/email";
 import { eq, and, gt } from "drizzle-orm";
 import { emailVerificationTokens } from "@shared/schema";
 import Stripe from "stripe";
-import pdf2pic from "pdf2pic";
+import { fromPath } from "pdf2pic";
 import fs from "fs";
 
 // Initialize Stripe
@@ -3241,7 +3241,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         height: 600
       };
 
-      const storeAsImage = pdf2pic.fromPath(pdfPath, convertOptions);
+      const storeAsImage = fromPath(pdfPath, convertOptions);
       
       // Convert all pages
       const results = await storeAsImage.bulk(-1, { responseType: "image" });

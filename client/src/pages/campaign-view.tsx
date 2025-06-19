@@ -499,9 +499,9 @@ export default function CampaignView() {
               <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
                 {/* Funding Goal */}
                 <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-fundry-orange to-orange-500"></div>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-fundry-navy to-blue-600"></div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 bg-gradient-to-br from-fundry-navy to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                       </svg>
@@ -590,7 +590,7 @@ export default function CampaignView() {
               <CardContent className="p-8 bg-gradient-to-br from-white via-slate-50/80 to-blue-50/60">
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-gray-900">Business Strategy</h2>
+                  <h2 className="text-2xl font-bold text-fundry-navy">Business Strategy</h2>
                 </div>
                 <div className="grid md:grid-cols-2 gap-8">
                   {campaign.problemStatement && (

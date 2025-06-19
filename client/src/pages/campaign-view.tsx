@@ -959,7 +959,7 @@ export default function CampaignView() {
               <CardContent className="p-8">
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-fundry-navy to-blue-700 bg-clip-text text-transparent">Meet the Team</h2>
+                  <h2 className="text-2xl font-bold text-fundry-navy">Meet the Team</h2>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {campaign.teamMembers.map((member: any, index: number) => (

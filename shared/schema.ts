@@ -461,7 +461,7 @@ export const insertCampaignSchema = createInsertSchema(campaigns).omit({
     address: z.string().min(1, "Address is required"),
     email: z.string().email("Valid email is required").optional(),
     phone: z.string().optional(),
-  })).min(1, "At least one director is required").optional(),
+  })).optional(),
 });
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type Campaign = typeof campaigns.$inferSelect;

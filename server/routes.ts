@@ -1037,14 +1037,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const founderId = req.user.id;
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
       
-      // Debug logging
-      console.log('Raw request body:', JSON.stringify(req.body, null, 2));
-      console.log('teamMembers type:', typeof req.body.teamMembers);
-      console.log('teamMembers value:', req.body.teamMembers);
-      console.log('useOfFunds type:', typeof req.body.useOfFunds);
-      console.log('useOfFunds value:', req.body.useOfFunds);
-      console.log('directors type:', typeof req.body.directors);
-      console.log('directors value:', req.body.directors);
+
       
       // Generate unique private link
       const privateLink = nanoid(16);
@@ -1087,8 +1080,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })(),
         directors: (() => {
           try {
-            return req.body.directors ? 
-              (typeof req.body.directors === 'string' ? JSON.parse(req.body.directors) : req.body.directors) : [];
+            if (!req.body.directors) return [];
+            
+            // Handle the case where JavaScript objects become "[object Object]" strings
+            if (typeof req.body.directors === 'string') {
+              if (req.body.directors === '[object Object]' || req.body.directors.includes('[object Object]')) {
+                console.log('Detected [object Object] string, returning empty array');
+                return [];
+              }
+              return JSON.parse(req.body.directors);
+            }
+            
+            return req.body.directors;
           } catch (e) {
             console.error('Error parsing directors:', e);
             return [];

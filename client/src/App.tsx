@@ -71,6 +71,7 @@ function Router() {
       <Route path="/campaigns/:id" component={CampaignView} />
       <Route path="/c/:privateLink" component={CampaignView} />
       <Route path="/admin-login" component={AdminLogin} />
+      <Route path="/admin-dashboard" component={AdminDashboard} />
       
       {/* Authenticated routes */}
       {isAuthenticated && (
@@ -85,7 +86,6 @@ function Router() {
           <Route path="/payment-withdrawal" component={PaymentWithdrawal} />
           <Route path="/investor-dashboard" component={InvestorDashboard} />
           <Route path="/investor/dashboard" component={InvestorDashboard} />
-          <Route path="/admin-dashboard" component={AdminDashboard} />
         </>
       )}
       

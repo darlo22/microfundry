@@ -77,6 +77,19 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
   // Redirect if not admin
+  // Check admin authentication directly with dedicated query
+  const { data: adminUser, isLoading: adminLoading, error: adminError } = useQuery<{
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    userType: string;
+  }>({
+    queryKey: ['/api/admin/verify'],
+    retry: false,
+    staleTime: 0
+  });
+
   useEffect(() => {
     if (user && user.userType !== "admin") {
       setLocation("/");
@@ -86,28 +99,36 @@ export default function AdminDashboard() {
   // Admin stats query
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ['/api/admin/stats'],
-    enabled: user?.userType === "admin"
+    enabled: adminUser?.userType === "admin"
   });
 
   // Users query
   const { data: users, isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
-    enabled: user?.userType === "admin" && activeTab === "users"
+    enabled: adminUser?.userType === "admin" && activeTab === "users"
   });
 
   // Campaigns query
   const { data: campaigns, isLoading: campaignsLoading } = useQuery<Campaign[]>({
     queryKey: ['/api/admin/campaigns'],
-    enabled: user?.userType === "admin" && activeTab === "campaigns"
+    enabled: adminUser?.userType === "admin" && activeTab === "campaigns"
   });
 
   // Withdrawals query
   const { data: withdrawals, isLoading: withdrawalsLoading } = useQuery<WithdrawalRequest[]>({
     queryKey: ['/api/admin/withdrawals'],
-    enabled: user?.userType === "admin" && activeTab === "withdrawals"
+    enabled: adminUser?.userType === "admin" && activeTab === "withdrawals"
   });
 
-  if (!user || user.userType !== "admin") {
+  if (adminLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange"></div>
+      </div>
+    );
+  }
+
+  if (adminError || !adminUser || adminUser.userType !== "admin") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -118,7 +139,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/">Return to Homepage</Link>
+              <Link href="/admin-login">Return to Admin Login</Link>
             </Button>
           </CardContent>
         </Card>

@@ -8,6 +8,7 @@ import { Shield, Lock, Eye, EyeOff } from "lucide-react";
 import { FundryLogo } from "@/components/ui/fundry-logo";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 export default function AdminLogin() {
   const [, setLocation] = useLocation();
@@ -42,6 +43,9 @@ export default function AdminLogin() {
           title: "Admin Access Granted",
           description: "Welcome to the Admin Command Centre",
         });
+        // Invalidate auth cache to refresh authentication state
+        await queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+        await queryClient.invalidateQueries({ queryKey: ['/api/admin/verify'] });
         setLocation("/admin-dashboard");
       } else {
         setError(data.message || "Invalid admin credentials");

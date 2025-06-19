@@ -3461,6 +3461,31 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     next();
   };
 
+  // Admin verification endpoint
+  app.get("/api/admin/verify", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = req.user;
+      if (user.userType !== "admin") {
+        return res.status(403).json({ message: "Access denied. Admin privileges required." });
+      }
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        userType: user.userType
+      });
+    } catch (error) {
+      console.error('Admin verification error:', error);
+      res.status(500).json({ message: "Verification system error" });
+    }
+  });
+
   // Admin login endpoint
   app.post("/api/admin/login", async (req, res) => {
     try {

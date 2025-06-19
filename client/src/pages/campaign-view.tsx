@@ -720,7 +720,7 @@ export default function CampaignView() {
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-orange-700 mb-3">Company Name</h3>
+                          <h3 className="text-xl font-bold text-fundry-orange mb-3">Company Name</h3>
                           <p className="text-gray-800 leading-relaxed text-lg font-semibold">{campaign.companyName}</p>
                         </div>
                       </div>
@@ -729,16 +729,16 @@ export default function CampaignView() {
 
                   {(campaign.country || campaign.state) && (
                     <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-sky-600"></div>
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-fundry-navy to-blue-800"></div>
                       <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-sky-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <div className="w-14 h-14 bg-gradient-to-br from-fundry-navy to-blue-800 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                           <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-blue-700 mb-3">Location</h3>
+                          <h3 className="text-xl font-bold text-fundry-navy mb-3">Location</h3>
                           <p className="text-gray-800 leading-relaxed text-lg font-semibold">
                             {campaign.state && campaign.country ? `${campaign.state}, ${campaign.country}` : campaign.country || campaign.state}
                           </p>
@@ -749,15 +749,15 @@ export default function CampaignView() {
 
                   {campaign.businessAddress && (
                     <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 to-green-600"></div>
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-fundry-orange to-orange-600"></div>
                       <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <div className="w-14 h-14 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                           <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-emerald-700 mb-3">Business Address</h3>
+                          <h3 className="text-xl font-bold text-fundry-orange mb-3">Business Address</h3>
                           <p className="text-gray-800 leading-relaxed text-base font-medium">{campaign.businessAddress}</p>
                         </div>
                       </div>
@@ -766,15 +766,15 @@ export default function CampaignView() {
 
                   {campaign.registrationStatus && (
                     <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-violet-600"></div>
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-fundry-navy to-blue-800"></div>
                       <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <div className="w-14 h-14 bg-gradient-to-br from-fundry-navy to-blue-800 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                           <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-purple-700 mb-3">Registration Status</h3>
+                          <h3 className="text-xl font-bold text-fundry-navy mb-3">Registration Status</h3>
                           <p className="text-gray-800 leading-relaxed text-lg font-semibold capitalize">{campaign.registrationStatus}</p>
                         </div>
                       </div>
@@ -797,15 +797,15 @@ export default function CampaignView() {
                 <div className="grid lg:grid-cols-2 gap-8">
                   {campaign.startupStage && (
                     <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-fundry-orange to-orange-600"></div>
                       <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <div className="w-14 h-14 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                           <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-blue-700 mb-3">Startup Stage</h3>
+                          <h3 className="text-xl font-bold text-fundry-orange mb-3">Startup Stage</h3>
                           <p className="text-gray-800 leading-relaxed text-lg font-semibold capitalize">{campaign.startupStage}</p>
                         </div>
                       </div>
@@ -814,15 +814,15 @@ export default function CampaignView() {
 
                   {campaign.currentRevenue && (
                     <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 to-green-600"></div>
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-fundry-navy to-blue-800"></div>
                       <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <div className="w-14 h-14 bg-gradient-to-br from-fundry-navy to-blue-800 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                           <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-emerald-700 mb-3">Current Revenue</h3>
+                          <h3 className="text-xl font-bold text-fundry-navy mb-3">Current Revenue</h3>
                           <p className="text-gray-800 leading-relaxed text-lg font-semibold">{campaign.currentRevenue}</p>
                         </div>
                       </div>
@@ -831,15 +831,15 @@ export default function CampaignView() {
 
                   {campaign.customers && (
                     <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
-                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-violet-600"></div>
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-fundry-orange to-orange-600"></div>
                       <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <div className="w-14 h-14 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                           <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-purple-700 mb-3">Customer Base</h3>
+                          <h3 className="text-xl font-bold text-fundry-orange mb-3">Customer Base</h3>
                           <p className="text-gray-800 leading-relaxed text-lg font-semibold">{campaign.customers}</p>
                         </div>
                       </div>

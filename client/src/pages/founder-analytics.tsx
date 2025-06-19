@@ -91,16 +91,16 @@ export default function FounderAnalytics() {
   const conversionRate = (founderStats as any)?.conversionRate || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
+    <div className="min-h-screen bg-slate-900">
       {/* Navigation Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-orange-200 sticky top-0 z-50 shadow-sm">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-lg">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             {/* Left: Back Button */}
             <Button
               variant="ghost"
               onClick={() => setLocation("/founder-dashboard")}
-              className="flex items-center gap-2 text-fundry-navy hover:text-fundry-orange transition-colors"
+              className="flex items-center gap-2 text-gray-700 hover:text-fundry-orange transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Back to Dashboard</span>

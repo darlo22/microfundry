@@ -75,7 +75,7 @@ export default function FounderDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
+    <div className="min-h-screen bg-slate-900">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -91,24 +91,24 @@ export default function FounderDashboard() {
 
         {/* Navigation Tabs */}
         <div className="mb-6 sm:mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-1">
+          <div className="bg-slate-800 rounded-xl shadow-xl border border-slate-700 p-1">
             <nav className="flex flex-wrap gap-1" aria-label="Tabs">
-              <Link href="/founder-dashboard" className="bg-gradient-to-r from-fundry-orange to-orange-500 text-white rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
+              <Link href="/founder-dashboard" className="bg-gradient-to-r from-fundry-orange to-orange-500 text-white rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap shadow-lg">
                 Campaigns
               </Link>
-              <Link href="/founder/investors" className="text-gray-600 hover:text-fundry-orange hover:bg-orange-50 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
+              <Link href="/founder/investors" className="text-slate-200 hover:text-white hover:bg-slate-700 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Investors
               </Link>
-              <Link href="/founder/analytics" className="text-gray-600 hover:text-fundry-orange hover:bg-orange-50 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
+              <Link href="/founder/analytics" className="text-slate-200 hover:text-white hover:bg-slate-700 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Analytics
               </Link>
-              <Link href="/founder/updates" className="text-gray-600 hover:text-fundry-orange hover:bg-orange-50 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
+              <Link href="/founder/updates" className="text-slate-200 hover:text-white hover:bg-slate-700 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Updates
               </Link>
-              <Link href="/founder/settings" className="text-gray-600 hover:text-fundry-orange hover:bg-orange-50 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
+              <Link href="/founder/settings" className="text-slate-200 hover:text-white hover:bg-slate-700 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Settings
               </Link>
-              <Link href="/payment-withdrawal" className="text-gray-600 hover:text-fundry-orange hover:bg-orange-50 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
+              <Link href="/payment-withdrawal" className="text-slate-200 hover:text-white hover:bg-slate-700 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Payments
               </Link>
             </nav>

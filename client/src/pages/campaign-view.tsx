@@ -702,37 +702,82 @@ export default function CampaignView() {
 
           {/* Company Information */}
           {(campaign.companyName || campaign.country || campaign.state || campaign.businessAddress || campaign.registrationStatus) && (
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/95 backdrop-blur-sm">
-              <CardContent className="p-8 bg-gradient-to-br from-white via-slate-50/80 to-blue-50/60">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-fundry-navy">Company Information</h2>
+            <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30">
+              <CardContent className="p-10">
+                <div className="flex items-center space-x-4 mb-8">
+                  <div className="w-3 h-10 bg-gradient-to-b from-fundry-orange via-orange-500 to-orange-600 rounded-full shadow-md"></div>
+                  <h2 className="text-3xl font-bold text-fundry-navy tracking-tight">Company Information</h2>
                 </div>
-                <div className="grid md:grid-cols-2 gap-6">
+                
+                <div className="grid lg:grid-cols-2 gap-8">
                   {campaign.companyName && (
-                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-orange-50 to-amber-100 rounded-lg border-l-4 border-fundry-orange shadow-md">
-                      <span className="text-gray-800 font-semibold">Company Name</span>
-                      <span className="font-bold text-gray-900">{campaign.companyName}</span>
+                    <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-500 to-amber-600"></div>
+                      <div className="flex items-start space-x-4 mb-6">
+                        <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                          <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-orange-700 mb-3">Company Name</h3>
+                          <p className="text-gray-800 leading-relaxed text-lg font-semibold">{campaign.companyName}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
+
                   {(campaign.country || campaign.state) && (
-                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-blue-50 to-sky-100 rounded-lg border-l-4 border-blue-500 shadow-md">
-                      <span className="text-gray-800 font-semibold">Location</span>
-                      <span className="font-bold text-gray-900">
-                        {campaign.state && campaign.country ? `${campaign.state}, ${campaign.country}` : campaign.country || campaign.state}
-                      </span>
+                    <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-sky-600"></div>
+                      <div className="flex items-start space-x-4 mb-6">
+                        <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-sky-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                          <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-blue-700 mb-3">Location</h3>
+                          <p className="text-gray-800 leading-relaxed text-lg font-semibold">
+                            {campaign.state && campaign.country ? `${campaign.state}, ${campaign.country}` : campaign.country || campaign.state}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
+
                   {campaign.businessAddress && (
-                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-green-50 to-emerald-100 rounded-lg border-l-4 border-green-500 shadow-md">
-                      <span className="text-gray-800 font-semibold">Address</span>
-                      <span className="font-bold text-gray-900">{campaign.businessAddress}</span>
+                    <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 to-green-600"></div>
+                      <div className="flex items-start space-x-4 mb-6">
+                        <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                          <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-emerald-700 mb-3">Business Address</h3>
+                          <p className="text-gray-800 leading-relaxed text-base font-medium">{campaign.businessAddress}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
+
                   {campaign.registrationStatus && (
-                    <div className="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-gray-50 to-purple-50/30 rounded-lg border-l-4 border-purple-500">
-                      <span className="text-gray-700 font-medium">Registration</span>
-                      <span className="font-bold text-purple-600 capitalize">{campaign.registrationStatus}</span>
+                    <div className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-violet-600"></div>
+                      <div className="flex items-start space-x-4 mb-6">
+                        <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                          <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-purple-700 mb-3">Registration Status</h3>
+                          <p className="text-gray-800 leading-relaxed text-lg font-semibold capitalize">{campaign.registrationStatus}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

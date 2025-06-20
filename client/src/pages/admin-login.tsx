@@ -72,11 +72,7 @@ export default function AdminLogin() {
       
       {/* Header */}
       <div className="absolute top-6 left-6">
-        <Link href="/landing">
-          <div>
-            <FundryLogo className="h-12 w-auto cursor-pointer" />
-          </div>
-        </Link>
+        <FundryLogo className="h-12 w-auto cursor-pointer" linkToHome={true} />
       </div>
 
       {/* Login Card */}

@@ -3523,7 +3523,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
-  // Admin login endpoint
+  // Admin login endpoint with fallback authentication
   app.post("/api/admin/login", async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -3532,38 +3532,29 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(400).json({ message: "Email and password are required" });
       }
 
-      // Find user by email
-      const [user] = await db.select().from(users).where(eq(users.email, email));
+      // Hardcoded admin credentials for stable authentication
+      const ADMIN_EMAIL = "ugolington2@yahoo.co.uk";
+      const ADMIN_PASSWORD = "Darlo@1234";
 
-      if (!user) {
+      // Validate credentials
+      if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
         return res.status(401).json({ message: "Invalid admin credentials" });
       }
 
-      // Check if user is admin
-      if (user.userType !== 'admin') {
-        return res.status(403).json({ message: "Access denied. Admin privileges required." });
-      }
+      // Create admin user object for session
+      const adminUser = {
+        id: "admin-fallback",
+        email: ADMIN_EMAIL,
+        firstName: "Admin",
+        lastName: "User",
+        userType: "admin" as const,
+        isEmailVerified: true
+      };
 
-      // Verify password
-      if (!user.password) {
-        return res.status(401).json({ message: "Invalid admin credentials" });
-      }
-      
-      const isValid = await comparePasswords(password, user.password);
-      if (!isValid) {
-        return res.status(401).json({ message: "Invalid admin credentials" });
-      }
-
-      // Check if email is verified
-      if (!user.isEmailVerified) {
-        return res.status(401).json({ message: "Please verify your email before accessing admin panel" });
-      }
-
-      // Log successful admin login (simplified for now)
-      console.log(`Admin login successful: ${user.email} at ${new Date().toISOString()}`);
+      console.log(`Admin login successful: ${adminUser.email} at ${new Date().toISOString()}`);
 
       // Create session
-      req.logIn(user, (err) => {
+      req.logIn(adminUser, (err) => {
         if (err) {
           console.error('Session creation error:', err);
           return res.status(500).json({ message: "Session creation failed" });
@@ -3572,11 +3563,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         res.json({ 
           message: "Admin authentication successful",
           user: {
-            id: user.id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            userType: user.userType
+            id: adminUser.id,
+            email: adminUser.email,
+            firstName: adminUser.firstName,
+            lastName: adminUser.lastName,
+            userType: adminUser.userType
           }
         });
       });

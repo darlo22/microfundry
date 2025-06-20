@@ -496,14 +496,7 @@ export default function AdminDashboard() {
     setSelectedSpecificUsers(selectedSpecificUsers.filter(user => user.id !== userId));
   };
 
-  const filteredUsers = useMemo(() => {
-    if (!users || !userSearchQuery) return [];
-    return users.filter((user: User) => 
-      user.firstName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(userSearchQuery.toLowerCase())
-    );
-  }, [users, userSearchQuery]);
+
 
   // Check admin authentication on mount
   useEffect(() => {
@@ -567,10 +560,19 @@ export default function AdminDashboard() {
   });
 
   // Messages query for Message Center
-  const { data: messages, isLoading: messagesLoading } = useQuery({
+  const { data: messages, isLoading: messagesLoading } = useQuery<any[]>({
     queryKey: ['/api/admin/messages'],
     enabled: !!adminUser && activeTab === "message-center"
   });
+
+  const filteredUsers = useMemo(() => {
+    if (!users || !userSearchQuery) return [];
+    return users.filter((user: User) => 
+      user.firstName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(userSearchQuery.toLowerCase())
+    );
+  }, [users, userSearchQuery]);
 
   if (isLoading) {
     return (
@@ -1804,7 +1806,7 @@ export default function AdminDashboard() {
                           </div>
                           
                           {/* Search Results */}
-                          {userSearchQuery && filteredUsers.length > 0 && (
+                          {userSearchQuery && filteredUsers && filteredUsers.length > 0 && (
                             <div className="max-h-48 overflow-y-auto border rounded-lg bg-white">
                               {filteredUsers.slice(0, 10).map((user: User) => (
                                 <div

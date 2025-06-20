@@ -403,6 +403,17 @@ const campaignSchema = z.object({
       message: "Total percentage must equal 100%",
     }
   ),
+  
+  // Social Media Links
+  websiteUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  twitterUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  facebookUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  instagramUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  linkedinUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  youtubeUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  mediumUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  tiktokUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  snapchatUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
 });
 
 type CampaignFormData = z.infer<typeof campaignSchema>;

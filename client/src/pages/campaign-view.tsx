@@ -28,8 +28,10 @@ import {
   DollarSign,
   Edit,
   ExternalLink,
-  MessageSquare
+  MessageSquare,
+  Globe
 } from "lucide-react";
+import { FaTwitter, FaFacebook, FaInstagram, FaLinkedin, FaYoutube, FaMedium, FaTiktok, FaSnapchat } from "react-icons/fa";
 import type { CampaignWithStats } from "@/lib/types";
 
 // Local interface to handle the specific campaign data structure
@@ -300,6 +302,103 @@ export default function CampaignView() {
                       <span>Started {formatDate(campaign.createdAt)}</span>
                     </div>
                   </div>
+
+                  {/* Social Media Links */}
+                  {(campaign.websiteUrl || campaign.twitterUrl || campaign.facebookUrl || campaign.instagramUrl || 
+                    campaign.linkedinUrl || campaign.youtubeUrl || campaign.mediumUrl || campaign.tiktokUrl || campaign.snapchatUrl) && (
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 border-t pt-4 mt-4">
+                      {campaign.websiteUrl && (
+                        <a 
+                          href={campaign.websiteUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center text-gray-500 hover:text-fundry-orange transition-colors"
+                        >
+                          <Globe size={18} />
+                        </a>
+                      )}
+                      {campaign.twitterUrl && (
+                        <a 
+                          href={campaign.twitterUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center text-gray-500 hover:text-blue-500 transition-colors"
+                        >
+                          <FaTwitter size={18} />
+                        </a>
+                      )}
+                      {campaign.facebookUrl && (
+                        <a 
+                          href={campaign.facebookUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center text-gray-500 hover:text-blue-600 transition-colors"
+                        >
+                          <FaFacebook size={18} />
+                        </a>
+                      )}
+                      {campaign.instagramUrl && (
+                        <a 
+                          href={campaign.instagramUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center text-gray-500 hover:text-pink-500 transition-colors"
+                        >
+                          <FaInstagram size={18} />
+                        </a>
+                      )}
+                      {campaign.linkedinUrl && (
+                        <a 
+                          href={campaign.linkedinUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center text-gray-500 hover:text-blue-700 transition-colors"
+                        >
+                          <FaLinkedin size={18} />
+                        </a>
+                      )}
+                      {campaign.youtubeUrl && (
+                        <a 
+                          href={campaign.youtubeUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center text-gray-500 hover:text-red-600 transition-colors"
+                        >
+                          <FaYoutube size={18} />
+                        </a>
+                      )}
+                      {campaign.mediumUrl && (
+                        <a 
+                          href={campaign.mediumUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center text-gray-500 hover:text-green-600 transition-colors"
+                        >
+                          <FaMedium size={18} />
+                        </a>
+                      )}
+                      {campaign.tiktokUrl && (
+                        <a 
+                          href={campaign.tiktokUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center text-gray-500 hover:text-black transition-colors"
+                        >
+                          <FaTiktok size={18} />
+                        </a>
+                      )}
+                      {campaign.snapchatUrl && (
+                        <a 
+                          href={campaign.snapchatUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center text-gray-500 hover:text-yellow-400 transition-colors"
+                        >
+                          <FaSnapchat size={18} />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

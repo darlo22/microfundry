@@ -141,6 +141,17 @@ export const campaigns = pgTable("campaigns", {
   // Business sector for categorization
   businessSector: varchar("business_sector"),
   
+  // Social Media Links
+  websiteUrl: varchar("website_url"),
+  twitterUrl: varchar("twitter_url"),
+  facebookUrl: varchar("facebook_url"),
+  instagramUrl: varchar("instagram_url"),
+  linkedinUrl: varchar("linkedin_url"),
+  youtubeUrl: varchar("youtube_url"),
+  mediumUrl: varchar("medium_url"),
+  tiktokUrl: varchar("tiktok_url"),
+  snapchatUrl: varchar("snapchat_url"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

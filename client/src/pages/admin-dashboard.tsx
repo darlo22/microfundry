@@ -1126,7 +1126,7 @@ export default function AdminDashboard() {
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => handleResetPassword(user)}
+                              onClick={() => handleResetUserPassword(user)}
                               disabled={resetPasswordMutation.isPending}
                               className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
                             >
@@ -1428,7 +1428,7 @@ export default function AdminDashboard() {
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => handleResetPassword(user)}
+                              onClick={() => handleResetUserPassword(user)}
                               disabled={resetPasswordMutation.isPending}
                               className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
                             >
@@ -1525,7 +1525,7 @@ export default function AdminDashboard() {
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => handleResetPassword(user)}
+                              onClick={() => handleResetUserPassword(user)}
                               disabled={resetPasswordMutation.isPending}
                               className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
                             >
@@ -3389,7 +3389,7 @@ export default function AdminDashboard() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => handleResetPassword(member)}
+                                  onClick={() => handleResetTeamMemberPassword(member)}
                                   className="text-orange-600 border-orange-300 hover:bg-orange-50"
                                 >
                                   <Key className="w-4 h-4 mr-1" />

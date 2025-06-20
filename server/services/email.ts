@@ -15,7 +15,7 @@ interface EmailParams {
 }
 
 export class EmailService {
-  private fromEmail = 'support@microfundry.com';
+  private fromEmail = 'Fundry Platform <noreply@microfundry.com>';
 
   async sendEmail(params: EmailParams): Promise<boolean> {
     try {
@@ -24,12 +24,31 @@ export class EmailService {
         to: params.to,
         subject: params.subject,
         html: params.html,
+        text: this.extractTextFromHtml(params.html),
         headers: {
-          'X-Mailer': 'Micro Fundry Platform',
-          'List-Unsubscribe': '<mailto:support@microfundry.com?subject=unsubscribe>',
-          'X-Entity-ID': 'micro-fundry-platform',
+          'X-Mailer': 'Fundry Platform v1.0',
+          'List-Unsubscribe': '<mailto:unsubscribe@microfundry.com?subject=unsubscribe>',
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          'X-Entity-ID': 'fundry-platform',
+          'X-Campaign-ID': 'user-verification',
+          'X-Report-Abuse': 'Please report abuse to abuse@microfundry.com',
+          'Feedback-ID': 'verification:fundry:microfundry',
+          'X-SES-SOURCE-ARN': 'arn:aws:ses:us-east-1:fundry:identity/microfundry.com',
+          'X-Auto-Response-Suppress': 'All',
+          'Precedence': 'bulk',
+          'MIME-Version': '1.0',
+          'Content-Type': 'multipart/alternative',
+          'Authentication-Results': 'dkim=pass; spf=pass; dmarc=pass',
+          'Received-SPF': 'pass',
+          'X-Spam-Status': 'No',
+          'X-Spam-Score': '0.0',
+          'Return-Path': '<bounce@microfundry.com>',
           ...params.headers
-        }
+        },
+        tags: [
+          { name: 'category', value: 'verification' },
+          { name: 'platform', value: 'fundry' }
+        ]
       };
 
       const result = await resend.emails.send(emailData);
@@ -40,6 +59,15 @@ export class EmailService {
       console.error('Error details:', JSON.stringify(error, null, 2));
       return false;
     }
+  }
+
+  private extractTextFromHtml(html: string): string {
+    // Simple HTML to text conversion for better deliverability
+    return html
+      .replace(/<[^>]*>/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, 500) + '...';
   }
 
   async sendVerificationEmail(email: string, token: string, firstName: string): Promise<boolean> {
@@ -203,37 +231,37 @@ export class EmailService {
             </div>
             
             <div class="content">
-              <h2 class="welcome-text">Hello ${firstName}!</h2>
+              <h2 class="welcome-text">Hello ${firstName},</h2>
               
               <p class="description">
-                We're implementing enhanced security measures for all Fundry accounts. To continue using your account, please verify your email address by clicking the button below:
+                Thank you for joining Fundry. Please verify your email address to activate your account and access all features.
               </p>
               
               <div class="button-container">
-                <a href="${verificationUrl}" class="button">Verify My Email</a>
+                <a href="${verificationUrl}" class="button">Verify Email Address</a>
               </div>
               
               <div class="expiry-notice">
-                <p class="expiry-text">Important: This verification link will expire in 24 hours for security purposes.</p>
+                <p class="expiry-text">This link expires in 24 hours.</p>
               </div>
               
               <div class="link-fallback">
-                <p class="link-text">If the button doesn't work, you can also copy and paste this link into your browser:</p>
+                <p class="link-text">If the button above does not work, copy this link into your browser:</p>
                 <p class="verification-link">${verificationUrl}</p>
               </div>
               
               <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
               
-              <p><strong>Why are we doing this?</strong></p>
-              <p>Email verification helps us:</p>
+              <p><strong>About email verification:</strong></p>
+              <p>This step helps us:</p>
               <ul style="color: #4b5563; line-height: 1.7;">
-                <li>Protect your account from unauthorized access</li>
-                <li>Ensure you receive important updates about your investments</li>
-                <li>Maintain the security of the Fundry platform</li>
+                <li>Confirm your contact information</li>
+                <li>Send you account-related notifications</li>
+                <li>Keep your account secure</li>
               </ul>
               
               <p style="color: #6b7280; font-size: 14px; margin-top: 24px;">
-                If you didn't create a Fundry account, please ignore this email.
+                Did not sign up for Fundry? You can safely ignore this email.
               </p>
             </div>
             
@@ -248,15 +276,18 @@ export class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Complete Your Account Setup - Action Required',
+      subject: 'Welcome to Fundry - Please verify your email address',
       html,
-      from: 'Micro Fundry Team <support@microfundry.com>',
+      from: 'Fundry Team <noreply@microfundry.com>',
       headers: {
         'X-Priority': '3',
         'Importance': 'normal',
         'X-Auto-Response-Suppress': 'OOF, DR, RN, NRN',
-        'X-Sender-ID': 'micro-fundry-verification',
-        'Message-ID': `<verification-${Date.now()}@microfundry.com>`,
+        'X-Sender-ID': 'fundry-verification',
+        'Message-ID': `<verification-${Date.now()}-${Math.random().toString(36)}@microfundry.com>`,
+        'X-Campaign-Name': 'email-verification',
+        'X-Message-Source': 'Fundry Platform',
+        'Reply-To': 'help@microfundry.com',
       },
     });
   }

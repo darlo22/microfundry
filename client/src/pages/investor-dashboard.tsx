@@ -47,7 +47,6 @@ const editProfileSchema = z.object({
 
 type EditProfileFormData = z.infer<typeof editProfileSchema>;
 
-// Initialize Stripe
 export default function InvestorDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();

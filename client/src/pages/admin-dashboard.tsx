@@ -496,6 +496,14 @@ export default function AdminDashboard() {
               Overview
             </Button>
             <Button 
+              variant={activeTab === "users" ? "default" : "ghost"} 
+              className="w-full justify-start"
+              onClick={() => setActiveTab("users")}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              User Management
+            </Button>
+            <Button 
               variant={activeTab === "founders" ? "default" : "ghost"} 
               className="w-full justify-start"
               onClick={() => setActiveTab("founders")}
@@ -766,10 +774,14 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {users?.filter(user => user.userType === 'founder').map((user) => (
+                      {users?.filter(user => user.userType === 'founder').length > 0 ? 
+                        users.filter(user => user.userType === 'founder').map((user) => (
                         <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
-                            <p className="font-medium">{user.firstName} {user.lastName}</p>
+                            <div className="flex items-center space-x-3">
+                              <p className="font-medium">{user.firstName} {user.lastName}</p>
+                              <Badge variant="default">Founder</Badge>
+                            </div>
                             <p className="text-sm text-gray-600">{user.email}</p>
                             <div className="flex items-center space-x-4 mt-2">
                               <Badge variant={user.isEmailVerified ? "default" : "destructive"}>
@@ -778,8 +790,13 @@ export default function AdminDashboard() {
                               <span className="text-sm text-gray-500">
                                 Joined: {new Date(user.createdAt).toLocaleDateString()}
                               </span>
-                              <span className="text-sm text-gray-500">
-                                {user.country && `Location: ${user.country}`}
+                              {user.country && (
+                                <span className="text-sm text-gray-500">
+                                  Location: {user.country}
+                                </span>
+                              )}
+                              <span className="text-sm font-medium text-blue-600">
+                                Campaigns: {campaigns?.filter(c => c.founderId === user.id).length || 0}
                               </span>
                             </div>
                           </div>
@@ -802,6 +819,28 @@ export default function AdminDashboard() {
                               <Key className="w-4 h-4 mr-1" />
                               Reset Password
                             </Button>
+                            {!user.isEmailVerified && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleSendVerification(user)}
+                                disabled={sendVerificationMutation.isPending}
+                                className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                              >
+                                <Mail className="w-4 h-4 mr-1" />
+                                Send Verification
+                              </Button>
+                            )}
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleSendNotification(user)}
+                              disabled={sendNotificationMutation.isPending}
+                              className="bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200"
+                            >
+                              <Bell className="w-4 h-4 mr-1" />
+                              Notify
+                            </Button>
                             <Button 
                               size="sm" 
                               variant="destructive" 
@@ -813,7 +852,7 @@ export default function AdminDashboard() {
                             </Button>
                           </div>
                         </div>
-                      )) || <p className="text-gray-500 text-center py-4">No founders found</p>}
+                      )) : <p className="text-gray-500 text-center py-4">No founders found</p>}
                     </div>
                   )}
                 </CardContent>
@@ -955,6 +994,167 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       )) || <p className="text-gray-500 text-center py-4">No investors found</p>}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "users" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">User Management</h2>
+                <p className="text-gray-600">Manage all platform users, founders, and investors</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Platform Users</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{(stats?.totalFounders || 0) + (stats?.totalInvestors || 0)}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Total registered users
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Founders</CardTitle>
+                    <User className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-600">{stats?.totalFounders || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Startup founders
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Investors</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-green-600">{stats?.totalInvestors || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Active investors
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Verified Users</CardTitle>
+                    <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-orange-600">
+                      {users?.filter(user => user.isEmailVerified).length || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Email verified
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Platform Users</CardTitle>
+                  <CardDescription>Complete user management for founders and investors</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {usersLoading ? (
+                    <div className="animate-pulse space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="h-16 bg-gray-200 rounded"></div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {users?.map((user) => (
+                        <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <div className="flex items-center space-x-3">
+                              <p className="font-medium">{user.firstName} {user.lastName}</p>
+                              <Badge variant={user.userType === 'founder' ? 'default' : 'secondary'}>
+                                {user.userType}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600">{user.email}</p>
+                            <div className="flex items-center space-x-4 mt-2">
+                              <Badge variant={user.isEmailVerified ? "default" : "destructive"}>
+                                {user.isEmailVerified ? "Verified" : "Unverified"}
+                              </Badge>
+                              <span className="text-sm text-gray-500">
+                                Joined: {new Date(user.createdAt).toLocaleDateString()}
+                              </span>
+                              {user.country && (
+                                <span className="text-sm text-gray-500">
+                                  Location: {user.country}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline" onClick={() => handleViewUser(user)}>
+                              <Eye className="w-4 h-4 mr-1" />
+                              View
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => handleEditUser(user)}>
+                              <Edit className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleResetPassword(user)}
+                              disabled={resetPasswordMutation.isPending}
+                              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                            >
+                              <Key className="w-4 h-4 mr-1" />
+                              Reset Password
+                            </Button>
+                            {!user.isEmailVerified && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleSendVerification(user)}
+                                disabled={sendVerificationMutation.isPending}
+                                className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                              >
+                                <Mail className="w-4 h-4 mr-1" />
+                                Send Verification
+                              </Button>
+                            )}
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleSendNotification(user)}
+                              disabled={sendNotificationMutation.isPending}
+                              className="bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200"
+                            >
+                              <Bell className="w-4 h-4 mr-1" />
+                              Notify
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              onClick={() => handleSuspendUser(user)}
+                              disabled={user.status === "suspended"}
+                            >
+                              <Ban className="w-4 h-4 mr-1" />
+                              {user.status === "suspended" ? "Suspended" : "Suspend"}
+                            </Button>
+                          </div>
+                        </div>
+                      )) || <p className="text-gray-500 text-center py-4">No users found</p>}
                     </div>
                   )}
                 </CardContent>

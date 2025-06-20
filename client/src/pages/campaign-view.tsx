@@ -207,10 +207,10 @@ export default function CampaignView() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         
         {/* Hero Section - Two Column Layout like Wefunder */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 mb-12">
           
-          {/* Left Column - Video/Cover Image (3/5 width - 60%) */}
-          <div className="lg:col-span-3">
+          {/* Left Column - Video/Cover Image (7/10 width - 70%) */}
+          <div className="lg:col-span-7">
             <Card className="border-0 shadow-xl bg-white overflow-hidden">
               <CardContent className="p-0">
                 {/* Media Section */}
@@ -404,8 +404,8 @@ export default function CampaignView() {
             </Card>
           </div>
 
-          {/* Right Column - Investment Information (2/5 width - 40%) */}
-          <div className="lg:col-span-2">
+          {/* Right Column - Investment Information (3/10 width - 30%) */}
+          <div className="lg:col-span-3">
             <Card className="border-0 shadow-xl bg-white sticky top-8">
               <CardContent className="p-6">
                 {/* Status Badge */}

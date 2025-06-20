@@ -242,6 +242,7 @@ The deployment uses:
 - June 20, 2025. Cleaned up investment sidebar interface: removed investor perks section displaying various investment tiers, changed INVEST button color from red to Fundry orange (bg-fundry-orange) for better brand consistency and visual appeal
 - June 20, 2025. Enhanced status badge with dynamic messaging and Fundry branding: changed badge color from red to Fundry orange, implemented conditional logic to show "ALMOST SOLD OUT" when campaign reaches 75% of target, displays "ACCEPTING INVESTMENTS" when below 75% threshold
 - June 20, 2025. Streamlined investment sidebar interface: removed "WATCH FOR UPDATES" button to create cleaner, more focused investment experience with just essential investment functionality
+- June 20, 2025. Adjusted campaign view page layout proportions: increased video/cover section from 60% to 70% width (7/10 columns) and reduced investment sidebar from 40% to 30% width (3/10 columns) for better visual balance and enhanced media prominence
 
 ## User Preferences
 

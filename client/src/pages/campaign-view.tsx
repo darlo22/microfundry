@@ -244,7 +244,7 @@ export default function CampaignView() {
                 {/* Status Badge */}
                 <div className="mb-4">
                   <Badge className="bg-fundry-orange text-white border-fundry-orange px-3 py-1 text-xs font-semibold">
-                    {campaign.progressPercent >= 75 ? "ALMOST SOLD OUT" : "ACCEPTING INVESTMENT"}
+                    {campaign.progressPercent >= 75 ? "ALMOST SOLD OUT" : "ACCEPTING INVESTMENTS"}
                   </Badge>
                 </div>
 

@@ -86,11 +86,14 @@ export function setupAuth(app: Express) {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser(async (id: string, done) => {
     try {
+      console.log('Deserializing user with ID:', id);
       const user = await storage.getUser(String(id));
       if (!user) {
+        console.log('User not found during deserialization:', id);
         // User not found, clear the session
         return done(null, false);
       }
+      console.log('User deserialized successfully:', user.id);
       done(null, user);
     } catch (error) {
       console.error('Session deserialization error:', error);
@@ -191,13 +194,20 @@ export function setupAuth(app: Express) {
   // Get current user with enhanced error handling
   app.get("/api/user", async (req, res) => {
     try {
+      console.log('User authentication check:', {
+        isAuthenticated: req.isAuthenticated(),
+        hasUser: !!req.user,
+        userId: req.user?.id
+      });
+
       if (!req.isAuthenticated() || !req.user) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
       // Verify user still exists in database
-      const user = await storage.getUser(req.user.id);
+      const user = await storage.getUser(String(req.user.id));
       if (!user) {
+        console.log('User not found in database:', req.user.id);
         // User no longer exists, clear session
         req.logout((err) => {
           if (err) console.error('Logout error:', err);
@@ -205,6 +215,7 @@ export function setupAuth(app: Express) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
+      console.log('User authenticated successfully:', user.id);
       res.json(user);
     } catch (error) {
       console.error('User authentication check failed:', error);

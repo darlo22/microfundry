@@ -194,15 +194,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Serve slide files from nested directories
-  app.get('/uploads/slides/:campaignId/:filename', safeHandler((req: express.Request, res: express.Response) => {
-    const { campaignId, filename } = req.params;
-    const filePath = path.join(process.cwd(), 'uploads', 'slides', campaignId, filename);
-    res.sendFile(filePath, (err: any) => {
-      if (err && !res.headersSent) {
-        res.status(404).json({ message: 'Slide not found' });
-      }
-    });
-  }));
+  app.get('/uploads/slides/:campaignId/:filename', async (req: express.Request, res: express.Response) => {
+    try {
+      const { campaignId, filename } = req.params;
+      const filePath = path.join(process.cwd(), 'uploads', 'slides', campaignId, filename);
+      res.sendFile(filePath, (err: any) => {
+        if (err && !res.headersSent) {
+          res.status(404).json({ message: 'Slide not found' });
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
   
   // Auth middleware
   setupAuth(app);

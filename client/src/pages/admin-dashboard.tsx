@@ -3442,26 +3442,47 @@ export default function AdminDashboard() {
                         <DollarSign className="w-5 h-5 text-green-600" />
                         <span>Base Platform Fees</span>
                       </h3>
-                      <div className="space-y-3">
-                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-medium text-green-800">Standard Tier (Under $1,000)</div>
-                              <div className="text-sm text-green-600">Free platform access</div>
-                            </div>
-                            <div className="text-2xl font-bold text-green-700">0%</div>
-                          </div>
+                      {globalSettingsLoading ? (
+                        <div className="space-y-3">
+                          <div className="animate-pulse h-20 bg-gray-200 rounded-lg"></div>
+                          <div className="animate-pulse h-20 bg-gray-200 rounded-lg"></div>
                         </div>
-                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-medium text-blue-800">Premium Tier ($1,000+)</div>
-                              <div className="text-sm text-blue-600">Enhanced platform features</div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium text-green-800">Standard Tier (Under $1,000)</div>
+                                <div className="text-sm text-green-600">Free platform access</div>
+                              </div>
+                              <div className="text-2xl font-bold text-green-700">0%</div>
                             </div>
-                            <div className="text-2xl font-bold text-blue-700">5%</div>
                           </div>
+                          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium text-blue-800">Premium Tier ($1,000+)</div>
+                                <div className="text-sm text-blue-600">Enhanced platform features</div>
+                              </div>
+                              <div className="text-2xl font-bold text-blue-700">
+                                {globalSettingsData?.globalSettings?.defaultPlatformFee || 5}%
+                              </div>
+                            </div>
+                          </div>
+                          {globalSettingsData?.tiers?.map((tier: any, index: number) => (
+                            <div key={tier.id || index} className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-medium text-purple-800">{tier.name}</div>
+                                  <div className="text-sm text-purple-600">{tier.minAmount} - {tier.maxAmount}</div>
+                                  <div className="text-xs text-gray-500">{tier.region}</div>
+                                </div>
+                                <div className="text-2xl font-bold text-purple-700">{tier.feePercentage}%</div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      </div>
+                      )}
                     </div>
 
                     <div className="space-y-4">
@@ -3469,26 +3490,45 @@ export default function AdminDashboard() {
                         <Globe className="w-5 h-5 text-purple-600" />
                         <span>Regional Fee Adjustments</span>
                       </h3>
-                      <div className="space-y-3">
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium">North America & Europe</span>
-                            <span className="text-green-600 font-semibold">Standard Rates</span>
-                          </div>
+                      {globalSettingsLoading ? (
+                        <div className="space-y-3">
+                          <div className="animate-pulse h-12 bg-gray-200 rounded-lg"></div>
+                          <div className="animate-pulse h-12 bg-gray-200 rounded-lg"></div>
+                          <div className="animate-pulse h-12 bg-gray-200 rounded-lg"></div>
                         </div>
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium">Asia-Pacific</span>
-                            <span className="text-blue-600 font-semibold">-10% Adjustment</span>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">North America & Europe</span>
+                              <span className="text-green-600 font-semibold">Standard Rates</span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium">Emerging Markets</span>
-                            <span className="text-purple-600 font-semibold">-25% Adjustment</span>
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">Asia-Pacific</span>
+                              <span className="text-blue-600 font-semibold">-10% Adjustment</span>
+                            </div>
                           </div>
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">Emerging Markets</span>
+                              <span className="text-purple-600 font-semibold">-25% Adjustment</span>
+                            </div>
+                          </div>
+                          {globalSettingsData?.markets?.map((market: any, index: number) => (
+                            <div key={market.id || index} className="p-3 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg border border-amber-200">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium">{market.name}</span>
+                                <span className="text-amber-600 font-semibold">{market.platformFee}% Fee</span>
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Currency: {market.currency} | Min: {market.minInvestment}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
 

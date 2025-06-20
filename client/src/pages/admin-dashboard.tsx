@@ -2536,6 +2536,48 @@ export default function AdminDashboard() {
                   </CardHeader>
                   <CardContent className="space-y-4 p-6">
                     <div className="space-y-4">
+                      {/* Withdrawal Settings */}
+                      <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                        <div className="mb-3">
+                          <label className="font-medium text-blue-800">Withdrawal Requirements</label>
+                          <p className="text-sm text-blue-700">Configure minimum withdrawal amounts and campaign requirements</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="min-withdrawal">Minimum Withdrawal Amount ($)</Label>
+                            <Input
+                              id="min-withdrawal"
+                              type="number"
+                              step="1"
+                              min="1"
+                              max="1000"
+                              value={platformSettings.minimumWithdrawal || 25}
+                              onChange={(e) => setPlatformSettings({
+                                ...platformSettings,
+                                minimumWithdrawal: parseFloat(e.target.value)
+                              })}
+                            />
+                            <p className="text-xs text-blue-600 mt-1">Minimum amount founders can withdraw</p>
+                          </div>
+                          <div>
+                            <Label htmlFor="min-goal-percentage">Minimum Goal Achievement (%)</Label>
+                            <Input
+                              id="min-goal-percentage"
+                              type="number"
+                              step="1"
+                              min="0"
+                              max="100"
+                              value={platformSettings.minimumGoalPercentage || 20}
+                              onChange={(e) => setPlatformSettings({
+                                ...platformSettings,
+                                minimumGoalPercentage: parseFloat(e.target.value)
+                              })}
+                            />
+                            <p className="text-xs text-blue-600 mt-1">Required % of funding goal to enable withdrawals</p>
+                          </div>
+                        </div>
+                      </div>
+
                       {/* Fee Tier 1: Below $1,000 */}
                       <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
                         <div className="flex justify-between items-center mb-3">

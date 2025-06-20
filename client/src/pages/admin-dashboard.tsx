@@ -932,8 +932,8 @@ export default function AdminDashboard() {
                   <CardContent>
                     <div className="text-2xl font-bold text-blue-600">
                       {formatCurrency(
-                        investments?.filter(inv => inv.paymentStatus === 'completed')
-                          .reduce((sum, inv) => sum + parseFloat(inv.amount), 0) || 0
+                        investments?.filter((inv: Investment) => inv.paymentStatus === 'completed')
+                          .reduce((sum: number, inv: Investment) => sum + parseFloat(inv.amount), 0) || 0
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -957,7 +957,7 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {investments?.filter(inv => inv.paymentStatus === 'completed').map((investment) => (
+                      {investments?.filter((inv: Investment) => inv.paymentStatus === 'completed').map((investment: Investment) => (
                         <div key={investment.id} className="flex items-center justify-between p-4 border rounded-lg bg-white">
                           <div className="flex-1">
                             <div className="flex items-center space-x-4">

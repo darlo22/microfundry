@@ -44,6 +44,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   
   const [isProcessingNaira, setIsProcessingNaira] = useState(false);
   const [isProcessingStripe, setIsProcessingStripe] = useState(false);
+  const [isLoadingUSD, setIsLoadingUSD] = useState(false);
   const [cardholderName, setCardholderName] = useState('');
   const [ngnAmount, setNgnAmount] = useState<number | null>(null);
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
@@ -57,6 +58,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       // Reset all state when modal opens
       setIsProcessingNaira(false);
       setIsProcessingStripe(false);
+      setIsLoadingUSD(false);
       setCardholderName('');
       setShowStripeForm(false);
       setClientSecret('');
@@ -86,6 +88,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   const resetModalToPaymentSelection = () => {
     setIsProcessingNaira(false);
     setIsProcessingStripe(false);
+    setIsLoadingUSD(false);
     setShowStripeForm(false);
     setCardholderName('');
     setClientSecret('');
@@ -360,120 +363,154 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                 <span className="inline-block w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></span>
                 Loading Naira equivalent...
               </p>
-            ) : (
-              <p className="text-sm text-gray-500">
-                Equivalent: <span className="font-medium">₦{ngnAmount?.toLocaleString('en-NG')}</span>
-                {exchangeRate && (
-                  <span className="text-xs text-gray-400 ml-2">
-                    (Rate: {exchangeRate.usdToNgn})
-                  </span>
-                )}
-              </p>
-            )}
+            ) : ngnAmount && exchangeRate ? (
+              <div className="text-sm text-gray-600 space-y-1">
+                <p>
+                  Naira Equivalent: <span className="font-semibold text-green-700">₦{ngnAmount.toLocaleString('en-NG')}</span>
+                </p>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-sm text-gray-500">Exchange Rate:</span>
+                  <span className="text-sm text-gray-600">$1 = ₦{exchangeRate.usdToNgn.toLocaleString('en-NG')}</span>
+                </div>
+              </div>
+            ) : null}
           </div>
         </DialogHeader>
 
-        <div className="space-y-4 sm:space-y-6">
-          {!showStripeForm ? (
-            <>
-              {/* Payment Method Selection */}
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 text-center">Choose Payment Method</h3>
-                
-                {/* USD Payment Button */}
-                <Button
-                  onClick={handleUSDPayment}
-                  disabled={isProcessingNaira || isLoadingRate}
-                  className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
-                  Pay ${investment.amount} (USD)
-                </Button>
-
-                {/* NGN Payment Button */}
-                <Button
-                  onClick={handleNairaPayment}
-                  disabled={isProcessingStripe || isLoadingRate || !ngnAmount}
-                  className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  {isProcessingNaira ? (
-                    <span className="inline-block w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 sm:mr-3"></span>
-                  ) : (
-                    <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
-                  )}
-                  {isProcessingNaira ? 'Processing...' : `Pay ₦${ngnAmount?.toLocaleString('en-NG')} (NGN)`}
-                </Button>
-              </div>
-
-              {/* Security Notice */}
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
-                <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-                  <Lock className="w-4 h-4" />
-                  <span>Your payment information is secure and encrypted</span>
+        <div className="space-y-6">
+          <Card className="border border-gray-200 shadow-sm">
+            <CardContent className="p-4">
+              <h4 className="font-medium text-gray-900 mb-2">Investment Summary</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Investment Amount:</span>
+                  <span className="font-medium">${investment.amount}</span>
                 </div>
+                {ngnAmount && (
+                  <div className="flex justify-between">
+                    <span>Naira Equivalent:</span>
+                    <span className="font-medium">₦{ngnAmount.toLocaleString('en-NG')}</span>
+                  </div>
+                )}
               </div>
-            </>
+            </CardContent>
+          </Card>
+
+          {/* Payment Method Selection or Stripe Form */}
+          {!showStripeForm ? (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
+                Choose Payment Method
+              </h3>
+              
+              {/* USD Payment Button - Mobile Responsive */}
+              <Button
+                onClick={handleUSDPayment}
+                disabled={isProcessingNaira}
+                className="w-full p-3 sm:p-4 bg-blue-600 hover:bg-blue-700 text-white text-base sm:text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-base sm:text-lg font-bold">$</span>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-sm sm:text-base">Pay with USD</div>
+                    <div className="text-xs sm:text-sm opacity-90">Powered by Stripe</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="font-bold text-base sm:text-lg">${investment.amount}</span>
+                </div>
+              </Button>
+
+              {/* NGN Payment Button - Mobile Responsive */}
+              <Button
+                onClick={handleNairaPayment}
+                disabled={isProcessingNaira || !ngnAmount}
+                className="w-full p-3 sm:p-4 bg-green-600 hover:bg-green-700 text-white text-base sm:text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-base sm:text-lg font-bold">₦</span>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-sm sm:text-base">Pay with Naira</div>
+                    <div className="text-xs sm:text-sm opacity-90">Powered by Budpay</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  {isProcessingNaira ? (
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : ngnAmount ? (
+                    <span className="font-bold text-lg">₦{ngnAmount.toLocaleString('en-NG')}</span>
+                  ) : (
+                    <span className="text-sm opacity-75">Loading...</span>
+                  )}
+                </div>
+              </Button>
+            </div>
           ) : (
-            <>
-              {/* Stripe Form */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Card Payment</h3>
+            /* Stripe Form */
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs sm:text-sm font-bold">💳</div>
+                Complete Payment
+              </h3>
+              
+              <div className="space-y-3 sm:space-y-4">
+                <div>
+                  <Label className="text-sm">Cardholder Name</Label>
+                  <Input
+                    value={cardholderName}
+                    onChange={(e) => setCardholderName(e.target.value)}
+                    placeholder="Enter cardholder name"
+                    autoComplete="cc-name"
+                    disabled={isProcessingStripe}
+                    className="text-sm"
+                  />
+                </div>
+                
+                <div>
+                  <Label className="text-sm">Card Information</Label>
+                  <div className="p-2 sm:p-3 border border-gray-300 rounded-md bg-white">
+                    <CardElement options={CARD_ELEMENT_OPTIONS} />
+                  </div>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4">
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowStripeForm(false)}
-                    className="text-gray-500 hover:text-gray-700"
+                    onClick={() => {
+                      setShowStripeForm(false);
+                      setCardholderName('');
+                      setClientSecret('');
+                    }}
+                    variant="outline"
+                    className="w-full sm:flex-1 text-sm"
+                    disabled={isProcessingStripe}
                   >
                     Back
                   </Button>
+                  <Button
+                    onClick={handleStripePayment}
+                    disabled={isProcessingStripe}
+                    className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 text-sm"
+                  >
+                    {isProcessingStripe ? (
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    ) : (
+                      <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                    )}
+                    {isProcessingStripe ? 'Processing...' : `Pay $${investment.amount}`}
+                  </Button>
                 </div>
-
-                <Card>
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="cardholderName" className="text-sm font-medium text-gray-700">
-                          Cardholder Name
-                        </Label>
-                        <Input
-                          id="cardholderName"
-                          value={cardholderName}
-                          onChange={(e) => setCardholderName(e.target.value)}
-                          placeholder="Enter cardholder name"
-                          disabled={isProcessingStripe}
-                          className="mt-1"
-                          autoComplete="cc-name"
-                        />
-                      </div>
-
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700">
-                          Card Details
-                        </Label>
-                        <div className="mt-1 p-3 border border-gray-300 rounded-md">
-                          <CardElement options={CARD_ELEMENT_OPTIONS} />
-                        </div>
-                      </div>
-
-                      <Button
-                        onClick={handleStripePayment}
-                        disabled={!clientSecret || isProcessingStripe}
-                        className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
-                      >
-                        {isProcessingStripe ? (
-                          <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-                        ) : (
-                          <CreditCard className="w-5 h-5 mr-2" />
-                        )}
-                        {isProcessingStripe ? 'Processing...' : `Pay $${investment.amount}`}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
-            </>
+            </div>
           )}
+
+          <p className="text-xs text-gray-500 text-center">
+            Your payment information is secure and encrypted. You can complete your investment payment later via your dashboard.
+          </p>
         </div>
       </DialogContent>
     </Dialog>

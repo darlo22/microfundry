@@ -3686,6 +3686,80 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Campaign management endpoints
+  app.put('/api/admin/campaigns/:id/status', requireAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const { status, reason } = req.body;
+
+      if (!status) {
+        return res.status(400).json({ message: "Status is required" });
+      }
+
+      // Update campaign status
+      const [updatedCampaign] = await db
+        .update(campaigns)
+        .set({ status })
+        .where(eq(campaigns.id, campaignId))
+        .returning();
+
+      if (!updatedCampaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+
+      // Log admin activity
+      await logAdminActivity(
+        req.user.id, 
+        'Campaign Management', 
+        `Changed campaign status to ${status}`,
+        'campaign',
+        campaignId.toString()
+      );
+
+      res.json({ message: "Campaign status updated successfully", campaign: updatedCampaign });
+    } catch (error) {
+      console.error("Error updating campaign status:", error);
+      res.status(500).json({ message: "Failed to update campaign status" });
+    }
+  });
+
+  app.put('/api/admin/campaigns/:id', requireAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const updates = req.body;
+
+      // Remove any fields that shouldn't be updated directly
+      delete updates.id;
+      delete updates.founderId;
+      delete updates.createdAt;
+
+      // Update campaign
+      const [updatedCampaign] = await db
+        .update(campaigns)
+        .set(updates)
+        .where(eq(campaigns.id, campaignId))
+        .returning();
+
+      if (!updatedCampaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+
+      // Log admin activity
+      await logAdminActivity(
+        req.user.id, 
+        'Campaign Management', 
+        `Updated campaign details`,
+        'campaign',
+        campaignId.toString()
+      );
+
+      res.json({ message: "Campaign updated successfully", campaign: updatedCampaign });
+    } catch (error) {
+      console.error("Error updating campaign:", error);
+      res.status(500).json({ message: "Failed to update campaign" });
+    }
+  });
+
   // Log admin actions
   const logAdminAction = async (adminId: string, action: string, targetType?: string, targetId?: string, details?: any, req?: any) => {
     try {

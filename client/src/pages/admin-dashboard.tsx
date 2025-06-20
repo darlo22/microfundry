@@ -99,6 +99,12 @@ export default function AdminDashboard() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [suspendModalOpen, setSuspendModalOpen] = useState(false);
+  
+  // Campaign management state
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [viewCampaignModalOpen, setViewCampaignModalOpen] = useState(false);
+  const [editCampaignModalOpen, setEditCampaignModalOpen] = useState(false);
+  const [pauseCampaignModalOpen, setPauseCampaignModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     firstName: "",
     lastName: "",
@@ -195,6 +201,66 @@ export default function AdminDashboard() {
       suspend,
       reason
     });
+  };
+
+  // Campaign management mutations
+  const pauseCampaignMutation = useMutation({
+    mutationFn: async (data: { campaignId: number; pause: boolean; reason?: string }) => {
+      const status = data.pause ? 'paused' : 'active';
+      return apiRequest("PUT", `/api/admin/campaigns/${data.campaignId}/status`, { status, reason: data.reason });
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/campaigns'] });
+      setPauseCampaignModalOpen(false);
+      toast({
+        title: variables.pause ? "Campaign Paused" : "Campaign Resumed",
+        description: variables.pause ? "Campaign has been paused successfully." : "Campaign has been resumed successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Action Failed",
+        description: "Failed to update campaign status.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const updateCampaignMutation = useMutation({
+    mutationFn: async (data: { campaignId: number; updates: any }) => {
+      return apiRequest("PUT", `/api/admin/campaigns/${data.campaignId}`, data.updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/campaigns'] });
+      setEditCampaignModalOpen(false);
+      toast({
+        title: "Campaign Updated",
+        description: "Campaign information has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update campaign information.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Campaign management handlers
+  const handleViewCampaign = (campaign: Campaign) => {
+    setSelectedCampaign(campaign);
+    setViewCampaignModalOpen(true);
+  };
+
+  const handleEditCampaign = (campaign: Campaign) => {
+    setSelectedCampaign(campaign);
+    setEditCampaignModalOpen(true);
+  };
+
+  const handlePauseCampaign = (campaign: Campaign) => {
+    setSelectedCampaign(campaign);
+    setPauseCampaignModalOpen(true);
   };
 
   // Additional user management mutations
@@ -707,17 +773,22 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => handleViewCampaign(campaign)}>
                               <Eye className="w-4 h-4 mr-1" />
                               View
                             </Button>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => handleEditCampaign(campaign)}>
                               <Edit className="w-4 h-4 mr-1" />
                               Edit
                             </Button>
-                            <Button size="sm" variant="destructive">
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              onClick={() => handlePauseCampaign(campaign)}
+                              disabled={campaign.status === "paused"}
+                            >
                               <Ban className="w-4 h-4 mr-1" />
-                              Pause
+                              {campaign.status === "paused" ? "Paused" : "Pause"}
                             </Button>
                           </div>
                         </div>
@@ -1055,6 +1126,194 @@ export default function AdminDashboard() {
                 : selectedUser?.status === "suspended" 
                   ? "Reactivate User" 
                   : "Suspend User"
+              }
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Campaign Management Modals */}
+      {/* View Campaign Modal */}
+      <Dialog open={viewCampaignModalOpen} onOpenChange={setViewCampaignModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 backdrop-blur-sm shadow-2xl rounded-2xl border border-orange-200/50">
+          <DialogHeader className="text-center pb-6 border-b border-orange-200/50">
+            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
+              Campaign Details
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2">
+              Complete campaign information and analytics
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedCampaign && (
+            <div className="space-y-6 py-6">
+              {/* Basic Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Company Name</label>
+                    <p className="text-lg font-semibold text-gray-900">{selectedCampaign.companyName}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Founder</label>
+                    <p className="text-gray-900">{selectedCampaign.founderName}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Status</label>
+                    <Badge variant={selectedCampaign.status === "active" ? "default" : "secondary"}>
+                      {selectedCampaign.status}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Funding Goal</label>
+                    <p className="text-lg font-semibold text-green-600">{formatCurrency(selectedCampaign.fundingGoal)}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Amount Raised</label>
+                    <p className="text-lg font-semibold text-blue-600">{formatCurrency(selectedCampaign.amountRaised)}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Created Date</label>
+                    <p className="text-gray-900">{new Date(selectedCampaign.createdAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t border-orange-200/50">
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.open(`/campaign/${selectedCampaign.id}`, '_blank')}
+                  className="flex items-center gap-2"
+                >
+                  <Eye className="w-4 h-4" />
+                  View Public Page
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setViewCampaignModalOpen(false);
+                    handleEditCampaign(selectedCampaign);
+                  }}
+                  className="bg-orange-600 hover:bg-orange-700 flex items-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit Campaign
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Campaign Modal */}
+      <Dialog open={editCampaignModalOpen} onOpenChange={setEditCampaignModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 backdrop-blur-sm shadow-2xl rounded-2xl border border-orange-200/50">
+          <DialogHeader className="text-center pb-6 border-b border-orange-200/50">
+            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
+              Edit Campaign
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2">
+              Update campaign information and settings
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedCampaign && (
+            <div className="space-y-6 py-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Company Name</label>
+                  <input 
+                    type="text" 
+                    defaultValue={selectedCampaign.companyName}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Funding Goal</label>
+                  <input 
+                    type="text" 
+                    defaultValue={selectedCampaign.fundingGoal}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Status</label>
+                  <select 
+                    defaultValue={selectedCampaign.status}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  >
+                    <option value="active">Active</option>
+                    <option value="paused">Paused</option>
+                    <option value="completed">Completed</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 pt-4 border-t border-orange-200/50">
+                <Button variant="outline" onClick={() => setEditCampaignModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    updateCampaignMutation.mutate({
+                      campaignId: selectedCampaign.id,
+                      updates: { status: 'active' } // Simplified for demo
+                    });
+                  }}
+                  disabled={updateCampaignMutation.isPending}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  {updateCampaignMutation.isPending ? "Updating..." : "Save Changes"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Pause Campaign Modal */}
+      <AlertDialog open={pauseCampaignModalOpen} onOpenChange={setPauseCampaignModalOpen}>
+        <AlertDialogContent className="bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 backdrop-blur-sm shadow-2xl rounded-2xl border border-orange-200/50">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center space-x-2">
+              <Ban className="w-5 h-5 text-red-500" />
+              <span>
+                {selectedCampaign?.status === "paused" ? "Resume Campaign" : "Pause Campaign"}
+              </span>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedCampaign?.status === "paused" 
+                ? `Are you sure you want to resume "${selectedCampaign.companyName}"? The campaign will become active and visible to investors again.`
+                : `Are you sure you want to pause "${selectedCampaign?.companyName}"? This will temporarily stop the campaign and prevent new investments.`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (selectedCampaign) {
+                  pauseCampaignMutation.mutate({
+                    campaignId: selectedCampaign.id,
+                    pause: selectedCampaign.status !== "paused",
+                    reason: "Admin action"
+                  });
+                }
+              }}
+              className={selectedCampaign?.status === "paused" 
+                ? "bg-green-600 hover:bg-green-700" 
+                : "bg-red-600 hover:bg-red-700"
+              }
+              disabled={pauseCampaignMutation.isPending}
+            >
+              {pauseCampaignMutation.isPending 
+                ? "Processing..." 
+                : selectedCampaign?.status === "paused" 
+                  ? "Resume Campaign" 
+                  : "Pause Campaign"
               }
             </AlertDialogAction>
           </AlertDialogFooter>

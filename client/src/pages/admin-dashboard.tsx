@@ -2485,32 +2485,130 @@ export default function AdminDashboard() {
                       Platform Fees
                     </CardTitle>
                     <CardDescription className="text-orange-100">
-                      Configure investment fees and processing charges
+                      Configure tiered platform fees based on campaign goals
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4 p-6">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-orange-200">
-                        <div>
-                          <label className="font-medium text-gray-800">Platform Fee Percentage</label>
-                          <p className="text-sm text-gray-600">Fee charged to investors</p>
+                    <div className="space-y-4">
+                      {/* Fee Tier 1: Below $1,000 */}
+                      <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+                        <div className="flex justify-between items-center mb-3">
+                          <div>
+                            <label className="font-medium text-green-800">Tier 1: Small Campaigns</label>
+                            <p className="text-sm text-green-700">Campaigns below $1,000</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="number"
+                              className="w-20 text-center border-green-300"
+                              value={platformSettings?.fee_tier_1_percentage?.value || '0'}
+                              onChange={(e) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.fee_tier_1_percentage) newSettings.fee_tier_1_percentage = {};
+                                newSettings.fee_tier_1_percentage.value = e.target.value;
+                                setPlatformSettings(newSettings);
+                              }}
+                              min="0"
+                              max="10"
+                              step="0.1"
+                            />
+                            <span className="text-green-700 font-medium">%</span>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            type="number"
-                            className="w-20 text-center"
-                            value={platformSettings?.platform_fee_percentage?.value || '0'}
-                            onChange={(e) => {
-                              const newSettings = { ...platformSettings };
-                              if (!newSettings.platform_fee_percentage) newSettings.platform_fee_percentage = {};
-                              newSettings.platform_fee_percentage.value = e.target.value;
-                              setPlatformSettings(newSettings);
-                            }}
-                            min="0"
-                            max="10"
-                            step="0.1"
-                          />
-                          <span className="text-gray-600">%</span>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-green-600">Maximum campaign goal:</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-green-700">$</span>
+                            <Input
+                              type="number"
+                              className="w-24 text-center text-sm border-green-300"
+                              value={platformSettings?.fee_tier_1_max?.value || '1000'}
+                              onChange={(e) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.fee_tier_1_max) newSettings.fee_tier_1_max = {};
+                                newSettings.fee_tier_1_max.value = e.target.value;
+                                setPlatformSettings(newSettings);
+                              }}
+                              min="100"
+                              max="5000"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Fee Tier 2: $1,000 - $50,000 */}
+                      <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                        <div className="flex justify-between items-center mb-3">
+                          <div>
+                            <label className="font-medium text-blue-800">Tier 2: Medium Campaigns</label>
+                            <p className="text-sm text-blue-700">Campaigns $1,000 - $50,000</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="number"
+                              className="w-20 text-center border-blue-300"
+                              value={platformSettings?.fee_tier_2_percentage?.value || '3'}
+                              onChange={(e) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.fee_tier_2_percentage) newSettings.fee_tier_2_percentage = {};
+                                newSettings.fee_tier_2_percentage.value = e.target.value;
+                                setPlatformSettings(newSettings);
+                              }}
+                              min="0"
+                              max="10"
+                              step="0.1"
+                            />
+                            <span className="text-blue-700 font-medium">%</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-blue-600">Maximum campaign goal:</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-blue-700">$</span>
+                            <Input
+                              type="number"
+                              className="w-24 text-center text-sm border-blue-300"
+                              value={platformSettings?.fee_tier_2_max?.value || '50000'}
+                              onChange={(e) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.fee_tier_2_max) newSettings.fee_tier_2_max = {};
+                                newSettings.fee_tier_2_max.value = e.target.value;
+                                setPlatformSettings(newSettings);
+                              }}
+                              min="1000"
+                              max="75000"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Fee Tier 3: Above $50,000 */}
+                      <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                        <div className="flex justify-between items-center mb-3">
+                          <div>
+                            <label className="font-medium text-purple-800">Tier 3: Large Campaigns</label>
+                            <p className="text-sm text-purple-700">Campaigns above $50,000</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="number"
+                              className="w-20 text-center border-purple-300"
+                              value={platformSettings?.fee_tier_3_percentage?.value || '5'}
+                              onChange={(e) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.fee_tier_3_percentage) newSettings.fee_tier_3_percentage = {};
+                                newSettings.fee_tier_3_percentage.value = e.target.value;
+                                setPlatformSettings(newSettings);
+                              }}
+                              min="0"
+                              max="15"
+                              step="0.1"
+                            />
+                            <span className="text-purple-700 font-medium">%</span>
+                          </div>
+                        </div>
+                        <div className="text-sm text-purple-600">
+                          Applied to all campaigns exceeding Tier 2 maximum
                         </div>
                       </div>
                       
@@ -2566,8 +2664,24 @@ export default function AdminDashboard() {
                         setIsUpdatingSettings(true);
                         Promise.all([
                           updatePlatformSettingMutation.mutateAsync({
-                            settingKey: 'platform_fee_percentage',
-                            settingValue: platformSettings?.platform_fee_percentage?.value || '0'
+                            settingKey: 'fee_tier_1_percentage',
+                            settingValue: platformSettings?.fee_tier_1_percentage?.value || '0'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'fee_tier_1_max',
+                            settingValue: platformSettings?.fee_tier_1_max?.value || '1000'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'fee_tier_2_percentage',
+                            settingValue: platformSettings?.fee_tier_2_percentage?.value || '3'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'fee_tier_2_max',
+                            settingValue: platformSettings?.fee_tier_2_max?.value || '50000'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'fee_tier_3_percentage',
+                            settingValue: platformSettings?.fee_tier_3_percentage?.value || '5'
                           }),
                           updatePlatformSettingMutation.mutateAsync({
                             settingKey: 'minimum_investment',
@@ -2594,7 +2708,7 @@ export default function AdminDashboard() {
                       ) : (
                         <>
                           <Save className="w-4 h-4 mr-2" />
-                          Save Fee Settings
+                          Save Tiered Fee Settings
                         </>
                       )}
                     </Button>
@@ -2876,8 +2990,16 @@ export default function AdminDashboard() {
                   <CardContent className="space-y-4 p-6">
                     <div className="space-y-2">
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">Platform Fee:</span>
-                        <span className="font-medium">{platformSettings?.platform_fee_percentage?.value || '0'}%</span>
+                        <span className="text-gray-600">Tier 1 Fee (&lt; ${platformSettings?.fee_tier_1_max?.value || '1,000'}):</span>
+                        <span className="font-medium text-green-700">{platformSettings?.fee_tier_1_percentage?.value || '0'}%</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">Tier 2 Fee (${platformSettings?.fee_tier_1_max?.value || '1,000'} - ${platformSettings?.fee_tier_2_max?.value || '50,000'}):</span>
+                        <span className="font-medium text-blue-700">{platformSettings?.fee_tier_2_percentage?.value || '3'}%</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">Tier 3 Fee (&gt; ${platformSettings?.fee_tier_2_max?.value || '50,000'}):</span>
+                        <span className="font-medium text-purple-700">{platformSettings?.fee_tier_3_percentage?.value || '5'}%</span>
                       </div>
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-gray-600">Investment Range:</span>

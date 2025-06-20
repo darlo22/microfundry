@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
 
 export function useAuth() {
   const { data: user, isLoading } = useQuery({

@@ -240,6 +240,23 @@ export const kycVerifications = pgTable("kyc_verifications", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Admin messages for in-app communication
+export const adminMessages = pgTable("admin_messages", {
+  id: serial("id").primaryKey(),
+  adminId: varchar("admin_id").references(() => users.id).notNull(),
+  recipientType: varchar("recipient_type").notNull(), // 'all', 'founders', 'investors', 'specific'
+  recipientIds: jsonb("recipient_ids"), // Array of user IDs for specific recipients
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  priority: varchar("priority").notNull().default("normal"), // 'low', 'normal', 'high', 'urgent'
+  category: varchar("category").notNull().default("general"), // 'general', 'announcement', 'update', 'reminder', 'security'
+  scheduledFor: timestamp("scheduled_for"),
+  sentAt: timestamp("sent_at"),
+  status: varchar("status").notNull().default("draft"), // 'draft', 'scheduled', 'sent'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   businessProfile: one(businessProfiles, {
@@ -503,6 +520,21 @@ export const platformSettingsRelations = relations(platformSettings, ({ one }) =
 
 export type PlatformSetting = typeof platformSettings.$inferSelect;
 export type InsertPlatformSetting = typeof platformSettings.$inferInsert;
+
+// Admin messages exports
+export type AdminMessage = typeof adminMessages.$inferSelect;
+export type InsertAdminMessage = typeof adminMessages.$inferInsert;
+
+export const insertAdminMessageSchema = createInsertSchema(adminMessages);
+export const adminMessageFormSchema = insertAdminMessageSchema.pick({
+  recipientType: true,
+  recipientIds: true,
+  title: true,
+  message: true,
+  priority: true,
+  category: true,
+  scheduledFor: true,
+});
 
 // Campaign comments table
 export const campaignComments = pgTable("campaign_comments", {

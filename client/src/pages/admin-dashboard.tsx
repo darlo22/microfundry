@@ -588,6 +588,14 @@ export default function AdminDashboard() {
               SAFE Agreements
             </Button>
             <Button 
+              variant={activeTab === "message-center" ? "default" : "ghost"} 
+              className="w-full justify-start"
+              onClick={() => setActiveTab("message-center")}
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Message Center
+            </Button>
+            <Button 
               variant={activeTab === "content" ? "default" : "ghost"} 
               className="w-full justify-start"
               onClick={() => setActiveTab("content")}
@@ -1624,6 +1632,223 @@ export default function AdminDashboard() {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          )}
+
+          {activeTab === "message-center" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Message Center</h2>
+                <p className="text-gray-600">Send in-app messages to founders and investors</p>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Send className="w-5 h-5 mr-2 text-orange-600" />
+                    Compose Message
+                  </CardTitle>
+                  <CardDescription>Send targeted messages to platform users</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* Message Form */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Recipients</label>
+                        <select className="w-full p-3 border rounded-lg bg-white">
+                          <option value="all">All Users</option>
+                          <option value="founders">All Founders</option>
+                          <option value="investors">All Investors</option>
+                          <option value="specific">Specific Users</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Priority</label>
+                        <select className="w-full p-3 border rounded-lg bg-white">
+                          <option value="normal">Normal</option>
+                          <option value="high">High</option>
+                          <option value="urgent">Urgent</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Message Category</label>
+                      <select className="w-full p-3 border rounded-lg bg-white">
+                        <option value="general">General</option>
+                        <option value="announcement">Announcement</option>
+                        <option value="update">Platform Update</option>
+                        <option value="reminder">Reminder</option>
+                        <option value="security">Security Notice</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Message Title</label>
+                      <input 
+                        type="text" 
+                        placeholder="Enter message title..."
+                        className="w-full p-3 border rounded-lg"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Message Content</label>
+                      <textarea 
+                        placeholder="Enter your message content..."
+                        rows={6}
+                        className="w-full p-3 border rounded-lg resize-none"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <div className="flex items-center space-x-4">
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" className="rounded" />
+                          <span className="text-sm">Schedule for later</span>
+                        </label>
+                        <input 
+                          type="datetime-local" 
+                          className="p-2 border rounded-lg text-sm"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Button variant="outline">
+                          Save Draft
+                        </Button>
+                        <Button className="bg-orange-600 hover:bg-orange-700">
+                          <Send className="w-4 h-4 mr-2" />
+                          Send Message
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Message History */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Clock className="w-5 h-5 mr-2 text-blue-600" />
+                    Recent Messages
+                  </CardTitle>
+                  <CardDescription>Previously sent messages and drafts</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Sample message entries */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <h4 className="font-medium">Platform Maintenance Notice</h4>
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Announcement</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">Sent to All Users • 2 days ago</p>
+                        <p className="text-sm text-gray-500 mt-1">Scheduled maintenance on June 25th from 2:00 AM to 4:00 AM EST...</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="outline" size="sm">
+                          View
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          Resend
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                          <h4 className="font-medium">New Feature: Enhanced Analytics</h4>
+                          <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">Update</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">Sent to All Founders • 5 days ago</p>
+                        <p className="text-sm text-gray-500 mt-1">We're excited to announce new analytics features for your campaigns...</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="outline" size="sm">
+                          View
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          Resend
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                          <h4 className="font-medium">Payment Processing Update</h4>
+                          <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">High Priority</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">Sent to All Investors • 1 week ago</p>
+                        <p className="text-sm text-gray-500 mt-1">Important updates to our payment processing system...</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="outline" size="sm">
+                          View
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          Resend
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 text-center">
+                    <Button variant="outline">
+                      Load More Messages
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Message Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Messages Sent Today</CardTitle>
+                    <Send className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">12</div>
+                    <p className="text-xs text-muted-foreground">
+                      +2 from yesterday
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Recipients</CardTitle>
+                    <User className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">1,247</div>
+                    <p className="text-xs text-muted-foreground">
+                      Across all user types
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Scheduled Messages</CardTitle>
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">3</div>
+                    <p className="text-xs text-muted-foreground">
+                      Pending delivery
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           )}
 

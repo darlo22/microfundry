@@ -173,6 +173,10 @@ export default function AdminDashboard() {
   const [selectedSpecificUsers, setSelectedSpecificUsers] = useState<User[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
+
+  // Global Admin Settings state
+  const [showGlobalSettings, setShowGlobalSettings] = useState(false);
+  const [globalSettingsTab, setGlobalSettingsTab] = useState("fees");
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -2443,7 +2447,135 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === "settings" && (
-            <GlobalAdminSettings />
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Global Platform Settings</h2>
+                  <p className="text-gray-600">Configure multi-country fundraising operations and compliance</p>
+                </div>
+                <Button onClick={() => setShowGlobalSettings(true)} className="bg-fundry-orange hover:bg-orange-600">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Manage Global Settings
+                </Button>
+              </div>
+
+              {/* Global Settings Overview Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center space-x-2 text-lg">
+                      <Globe className="w-5 h-5 text-blue-600" />
+                      <span>Regional Coverage</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-600">195+</div>
+                    <p className="text-sm text-gray-600">Countries Supported</p>
+                    <div className="mt-2">
+                      <div className="text-sm text-gray-500">Active Regions</div>
+                      <div className="text-xs text-gray-400">North America, Europe, Asia-Pacific, LATAM</div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center space-x-2 text-lg">
+                      <Percent className="w-5 h-5 text-green-600" />
+                      <span>Fee Structure</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-green-600">Tiered</div>
+                    <p className="text-sm text-gray-600">Multi-Currency Fees</p>
+                    <div className="mt-2">
+                      <div className="text-sm text-gray-500">Base Platform Fee</div>
+                      <div className="text-xs text-gray-400">5% above $1,000, Free below</div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center space-x-2 text-lg">
+                      <Shield className="w-5 h-5 text-purple-600" />
+                      <span>Compliance</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-purple-600">Active</div>
+                    <p className="text-sm text-gray-600">Global KYC & AML</p>
+                    <div className="mt-2">
+                      <div className="text-sm text-gray-500">Regulatory Standards</div>
+                      <div className="text-xs text-gray-400">SEC, FCA, ASIC Compliant</div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quick Settings Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <CreditCard className="w-5 h-5 text-blue-600" />
+                      <span>Payment Gateways</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <DollarSign className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <div className="font-medium">Stripe (USD)</div>
+                          <div className="text-sm text-gray-600">Global USD Processing</div>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-bold text-orange-600">₦</span>
+                        </div>
+                        <div>
+                          <div className="font-medium">Budpay (NGN)</div>
+                          <div className="text-sm text-gray-600">Nigeria Local Processing</div>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="w-5 h-5 text-purple-600" />
+                      <span>Legal Framework</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <div className="font-medium">SAFE Agreements</div>
+                        <div className="text-sm text-gray-600">YC Standard Templates</div>
+                      </div>
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Current</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <div className="font-medium">Regional Compliance</div>
+                        <div className="text-sm text-gray-600">Multi-Jurisdiction Support</div>
+                      </div>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Updated</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           )}
         </main>
       </div>
@@ -3004,6 +3136,945 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Global Admin Settings Modal */}
+      <Dialog open={showGlobalSettings} onOpenChange={setShowGlobalSettings}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border border-orange-200/50 shadow-2xl">
+          <DialogHeader className="border-b border-orange-200/50 pb-4">
+            <DialogTitle className="flex items-center space-x-3 text-2xl font-bold">
+              <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-full flex items-center justify-center">
+                <Settings className="w-5 h-5 text-white" />
+              </div>
+              <span className="bg-gradient-to-r from-fundry-navy to-blue-800 bg-clip-text text-transparent">
+                Global Platform Settings
+              </span>
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 text-lg">
+              Configure multi-country fundraising operations, compliance, and regional settings
+            </DialogDescription>
+          </DialogHeader>
+
+          <Tabs value={globalSettingsTab} onValueChange={setGlobalSettingsTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-6 bg-gradient-to-r from-orange-100 to-blue-100 p-1 rounded-xl">
+              <TabsTrigger value="fees" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+                <Percent className="w-4 h-4 mr-2" />
+                Fee Tiers
+              </TabsTrigger>
+              <TabsTrigger value="kyc" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+                <Shield className="w-4 h-4 mr-2" />
+                KYC Rules
+              </TabsTrigger>
+              <TabsTrigger value="regions" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+                <Globe className="w-4 h-4 mr-2" />
+                Regions
+              </TabsTrigger>
+              <TabsTrigger value="payments" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+                <CreditCard className="w-4 h-4 mr-2" />
+                Payments
+              </TabsTrigger>
+              <TabsTrigger value="legal" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+                <FileText className="w-4 h-4 mr-2" />
+                Legal Docs
+              </TabsTrigger>
+              <TabsTrigger value="withdrawals" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+                <DollarSign className="w-4 h-4 mr-2" />
+                Withdrawals
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Global Fee Tiers Management */}
+            <TabsContent value="fees" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-orange-200/50">
+                <CardHeader className="bg-gradient-to-r from-orange-50 to-blue-50 border-b border-orange-200/50">
+                  <CardTitle className="flex items-center space-x-2">
+                    <Calculator className="w-5 h-5 text-orange-600" />
+                    <span>Global Fee Structure Management</span>
+                  </CardTitle>
+                  <CardDescription>Configure tiered platform fees for different investment levels and countries</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  {/* Base Platform Fees */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                        <DollarSign className="w-5 h-5 text-green-600" />
+                        <span>Base Platform Fees</span>
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-green-800">Standard Tier (Under $1,000)</div>
+                              <div className="text-sm text-green-600">Free platform access</div>
+                            </div>
+                            <div className="text-2xl font-bold text-green-700">0%</div>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-blue-800">Premium Tier ($1,000+)</div>
+                              <div className="text-sm text-blue-600">Enhanced platform features</div>
+                            </div>
+                            <div className="text-2xl font-bold text-blue-700">5%</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                        <Globe className="w-5 h-5 text-purple-600" />
+                        <span>Regional Fee Adjustments</span>
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">North America & Europe</span>
+                            <span className="text-green-600 font-semibold">Standard Rates</span>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">Asia-Pacific</span>
+                            <span className="text-blue-600 font-semibold">-10% Adjustment</span>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">Emerging Markets</span>
+                            <span className="text-purple-600 font-semibold">-25% Adjustment</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Add New Fee Tier */}
+                  <div className="border-t pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Custom Fee Tiers</h3>
+                      <Button className="bg-fundry-orange hover:bg-orange-600">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Custom Tier
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="min-amount">Minimum Amount</Label>
+                        <Input
+                          id="min-amount"
+                          placeholder="$5,000"
+                          className="border-orange-200 focus:border-orange-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="fee-rate">Fee Rate (%)</Label>
+                        <Input
+                          id="fee-rate"
+                          placeholder="3.5"
+                          type="number"
+                          step="0.1"
+                          className="border-orange-200 focus:border-orange-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="tier-region">Apply to Region</Label>
+                        <Select>
+                          <SelectTrigger className="border-orange-200 focus:border-orange-400">
+                            <SelectValue placeholder="Select region" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="global">Global</SelectItem>
+                            <SelectItem value="north-america">North America</SelectItem>
+                            <SelectItem value="europe">Europe</SelectItem>
+                            <SelectItem value="asia-pacific">Asia-Pacific</SelectItem>
+                            <SelectItem value="latam">Latin America</SelectItem>
+                            <SelectItem value="africa">Africa</SelectItem>
+                            <SelectItem value="middle-east">Middle East</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* KYC Policy Settings */}
+            <TabsContent value="kyc" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-orange-200/50">
+                <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-200/50">
+                  <CardTitle className="flex items-center space-x-2">
+                    <Shield className="w-5 h-5 text-purple-600" />
+                    <span>KYC & Compliance Management</span>
+                  </CardTitle>
+                  <CardDescription>Configure Know Your Customer rules and compliance requirements by region</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  {/* KYC Requirements by Region */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                        <FileText className="w-5 h-5 text-blue-600" />
+                        <span>Document Requirements</span>
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-blue-800">United States & Canada</span>
+                            <Badge className="bg-blue-100 text-blue-800">Tier 1</Badge>
+                          </div>
+                          <div className="text-sm text-blue-600 space-y-1">
+                            <div>• Government-issued photo ID</div>
+                            <div>• Proof of address (utility bill)</div>
+                            <div>• SSN/SIN verification</div>
+                            <div>• Investment experience questionnaire</div>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-green-800">European Union</span>
+                            <Badge className="bg-green-100 text-green-800">Tier 1</Badge>
+                          </div>
+                          <div className="text-sm text-green-600 space-y-1">
+                            <div>• EU/EEA national ID or passport</div>
+                            <div>• Proof of residence</div>
+                            <div>• MiFID II compliance check</div>
+                            <div>• GDPR consent documentation</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                        <Calculator className="w-5 h-5 text-purple-600" />
+                        <span>Investment Thresholds</span>
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-purple-800">Basic KYC</div>
+                              <div className="text-sm text-purple-600">Up to $1,000 investment</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-orange-800">Enhanced KYC</div>
+                              <div className="text-sm text-orange-600">$1,000 - $10,000 investment</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-red-800">Full AML Check</div>
+                              <div className="text-sm text-red-600">Above $10,000 investment</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Regional Compliance Settings */}
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Regional Compliance Configuration</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-medium">United States</span>
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700">SEC Compliant</Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Accredited Investor Check</span>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Rule 506(c) Compliance</span>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-medium">United Kingdom</span>
+                          <Badge variant="outline" className="bg-green-50 text-green-700">FCA Compliant</Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">High Net Worth Check</span>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">FCA Appropriateness Test</span>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-medium">Australia</span>
+                          <Badge variant="outline" className="bg-purple-50 text-purple-700">ASIC Compliant</Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Sophisticated Investor</span>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Corporations Act Compliance</span>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Regional Settings */}
+            <TabsContent value="regions" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-orange-200/50">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-green-50 border-b border-blue-200/50">
+                  <CardTitle className="flex items-center space-x-2">
+                    <Globe className="w-5 h-5 text-blue-600" />
+                    <span>Multi-Country Operations</span>
+                  </CardTitle>
+                  <CardDescription>Configure regional settings, currencies, and localization options</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  {/* Supported Countries Overview */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                        <MapPin className="w-5 h-5 text-green-600" />
+                        <span>Active Markets</span>
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-green-800">North America</div>
+                              <div className="text-sm text-green-600">USA, Canada, Mexico</div>
+                            </div>
+                            <Badge className="bg-green-100 text-green-800">3 Countries</Badge>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-blue-800">Europe</div>
+                              <div className="text-sm text-blue-600">UK, Germany, France, Spain, Italy</div>
+                            </div>
+                            <Badge className="bg-blue-100 text-blue-800">27+ Countries</Badge>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg border border-purple-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-purple-800">Asia-Pacific</div>
+                              <div className="text-sm text-purple-600">Australia, Japan, Singapore, India</div>
+                            </div>
+                            <Badge className="bg-purple-100 text-purple-800">15+ Countries</Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                        <DollarSign className="w-5 h-5 text-orange-600" />
+                        <span>Currency Support</span>
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <DollarSign className="w-4 h-4 text-green-600" />
+                              </div>
+                              <div>
+                                <div className="font-medium">USD (Primary)</div>
+                                <div className="text-sm text-gray-600">United States Dollar</div>
+                              </div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                <span className="text-sm font-bold text-orange-600">₦</span>
+                              </div>
+                              <div>
+                                <div className="font-medium">NGN</div>
+                                <div className="text-sm text-gray-600">Nigerian Naira</div>
+                              </div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span className="text-sm font-bold text-blue-600">€</span>
+                              </div>
+                              <div>
+                                <div className="font-medium">EUR</div>
+                                <div className="text-sm text-gray-600">Euro</div>
+                              </div>
+                            </div>
+                            <Switch />
+                          </div>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span className="text-sm font-bold text-purple-600">£</span>
+                              </div>
+                              <div>
+                                <div className="font-medium">GBP</div>
+                                <div className="text-sm text-gray-600">British Pound</div>
+                              </div>
+                            </div>
+                            <Switch />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Add New Region */}
+                  <div className="border-t pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Expand to New Markets</h3>
+                      <Button className="bg-fundry-orange hover:bg-orange-600">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add New Market
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="new-country">Country/Region</Label>
+                        <Select>
+                          <SelectTrigger className="border-orange-200 focus:border-orange-400">
+                            <SelectValue placeholder="Select country" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="brazil">Brazil</SelectItem>
+                            <SelectItem value="south-africa">South Africa</SelectItem>
+                            <SelectItem value="china">China</SelectItem>
+                            <SelectItem value="russia">Russia</SelectItem>
+                            <SelectItem value="south-korea">South Korea</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="new-currency">Local Currency</Label>
+                        <Select>
+                          <SelectTrigger className="border-orange-200 focus:border-orange-400">
+                            <SelectValue placeholder="Select currency" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="brl">BRL - Brazilian Real</SelectItem>
+                            <SelectItem value="zar">ZAR - South African Rand</SelectItem>
+                            <SelectItem value="cny">CNY - Chinese Yuan</SelectItem>
+                            <SelectItem value="rub">RUB - Russian Ruble</SelectItem>
+                            <SelectItem value="krw">KRW - South Korean Won</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="regulatory-tier">Regulatory Tier</Label>
+                        <Select>
+                          <SelectTrigger className="border-orange-200 focus:border-orange-400">
+                            <SelectValue placeholder="Select tier" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="tier1">Tier 1 - High Regulation</SelectItem>
+                            <SelectItem value="tier2">Tier 2 - Medium Regulation</SelectItem>
+                            <SelectItem value="tier3">Tier 3 - Low Regulation</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="launch-date">Target Launch</Label>
+                        <Input
+                          id="launch-date"
+                          type="date"
+                          className="border-orange-200 focus:border-orange-400"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Payment Gateway Settings */}
+            <TabsContent value="payments" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-orange-200/50">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50 border-b border-green-200/50">
+                  <CardTitle className="flex items-center space-x-2">
+                    <CreditCard className="w-5 h-5 text-green-600" />
+                    <span>Payment Gateway Management</span>
+                  </CardTitle>
+                  <CardDescription>Configure and manage payment processing for different regions and currencies</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  {/* Active Payment Gateways */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <span>Active Payment Processors</span>
+                    </h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                              <CreditCard className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="font-semibold text-blue-800">Stripe</div>
+                              <div className="text-sm text-blue-600">Global USD Processing</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800">Active</Badge>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">Supported Countries:</span>
+                            <span className="font-medium">40+ Countries</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">Processing Fee:</span>
+                            <span className="font-medium">2.9% + $0.30</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">Settlement Time:</span>
+                            <span className="font-medium">2-7 Business Days</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border border-orange-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                              <span className="text-lg font-bold text-orange-600">₦</span>
+                            </div>
+                            <div>
+                              <div className="font-semibold text-orange-800">Budpay</div>
+                              <div className="text-sm text-orange-600">Nigeria Local Processing</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800">Active</Badge>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-orange-700">Supported Countries:</span>
+                            <span className="font-medium">Nigeria</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-orange-700">Processing Fee:</span>
+                            <span className="font-medium">1.5% + ₦50</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-orange-700">Settlement Time:</span>
+                            <span className="font-medium">1-3 Business Days</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Processing Settings */}
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Global Payment Settings</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <div className="font-medium">Auto Currency Conversion</div>
+                            <div className="text-sm text-gray-600">Convert payments to founder's preferred currency</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <div className="font-medium">Multi-Gateway Fallback</div>
+                            <div className="text-sm text-gray-600">Automatically retry failed payments with backup gateway</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <div className="font-medium">Real-time Exchange Rates</div>
+                            <div className="text-sm text-gray-600">Update currency rates every 15 minutes</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Legal Documents Management */}
+            <TabsContent value="legal" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-orange-200/50">
+                <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200/50">
+                  <CardTitle className="flex items-center space-x-2">
+                    <FileText className="w-5 h-5 text-purple-600" />
+                    <span>Legal Framework & Documentation</span>
+                  </CardTitle>
+                  <CardDescription>Manage legal templates, compliance documents, and regional regulations</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  {/* SAFE Agreement Templates */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                      <FileText className="w-5 h-5 text-blue-600" />
+                      <span>SAFE Agreement Templates</span>
+                    </h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <div className="font-semibold text-blue-800">Y Combinator Standard</div>
+                            <div className="text-sm text-blue-600">Most widely used SAFE template</div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800">Active</Badge>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">Version:</span>
+                            <span className="font-medium">2023-12</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">Jurisdictions:</span>
+                            <span className="font-medium">US, CA, UK, AU</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">Last Updated:</span>
+                            <span className="font-medium">Dec 2023</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <div className="font-semibold text-purple-800">EU Compliant SAFE</div>
+                            <div className="text-sm text-purple-600">GDPR and MiFID II compliant</div>
+                          </div>
+                          <Badge className="bg-blue-100 text-blue-800">Available</Badge>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-purple-700">Version:</span>
+                            <span className="font-medium">2024-01</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-purple-700">Jurisdictions:</span>
+                            <span className="font-medium">EU/EEA</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-purple-700">Last Updated:</span>
+                            <span className="font-medium">Jan 2024</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Regulatory Compliance */}
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Regulatory Compliance Documents</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <Shield className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">SEC Filings</div>
+                            <div className="text-sm text-gray-600">United States</div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Form D - Reg D Offering</span>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Rule 506(c) Notice</span>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <FileText className="w-4 h-4 text-green-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">FCA Requirements</div>
+                            <div className="text-sm text-gray-600">United Kingdom</div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Promotion Order Notice</span>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Risk Warning Template</span>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <Globe className="w-4 h-4 text-purple-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">GDPR Compliance</div>
+                            <div className="text-sm text-gray-600">European Union</div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Privacy Policy Template</span>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Consent Management</span>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Withdrawal Policies */}
+            <TabsContent value="withdrawals" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-orange-200/50">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200/50">
+                  <CardTitle className="flex items-center space-x-2">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                    <span>Withdrawal Policies & Management</span>
+                  </CardTitle>
+                  <CardDescription>Configure founder withdrawal policies, limits, and regional requirements</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  {/* Withdrawal Policies by Region */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                      <Clock className="w-5 h-5 text-blue-600" />
+                      <span>Global Withdrawal Settings</span>
+                    </h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <div className="font-semibold text-blue-800">Standard Processing</div>
+                              <div className="text-sm text-blue-600">Most regions worldwide</div>
+                            </div>
+                            <Badge className="bg-blue-100 text-blue-800">Active</Badge>
+                          </div>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-blue-700">Processing Time:</span>
+                              <span className="font-medium">3-5 Business Days</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-blue-700">Minimum Amount:</span>
+                              <span className="font-medium">$100</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-blue-700">Processing Fee:</span>
+                              <span className="font-medium">$2.50</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <div className="font-semibold text-green-800">Express Processing</div>
+                              <div className="text-sm text-green-600">Premium service</div>
+                            </div>
+                            <Badge className="bg-green-100 text-green-800">Available</Badge>
+                          </div>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-green-700">Processing Time:</span>
+                              <span className="font-medium">Same Day</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-green-700">Minimum Amount:</span>
+                              <span className="font-medium">$500</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-green-700">Processing Fee:</span>
+                              <span className="font-medium">$15.00</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <h4 className="font-medium text-gray-900">Regional Variations</h4>
+                        <div className="space-y-3">
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium">United States</div>
+                                <div className="text-sm text-gray-600">ACH & Wire transfers</div>
+                              </div>
+                              <span className="text-sm text-blue-600">1-3 days</span>
+                            </div>
+                          </div>
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium">European Union</div>
+                                <div className="text-sm text-gray-600">SEPA transfers</div>
+                              </div>
+                              <span className="text-sm text-blue-600">1-2 days</span>
+                            </div>
+                          </div>
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium">Nigeria</div>
+                                <div className="text-sm text-gray-600">Local bank transfers</div>
+                              </div>
+                              <span className="text-sm text-blue-600">2-4 hours</span>
+                            </div>
+                          </div>
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium">Other Regions</div>
+                                <div className="text-sm text-gray-600">International wires</div>
+                              </div>
+                              <span className="text-sm text-blue-600">5-7 days</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Withdrawal Limits and Restrictions */}
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Withdrawal Limits & Security</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h4 className="font-medium text-gray-900 flex items-center space-x-2">
+                          <Shield className="w-4 h-4 text-purple-600" />
+                          <span>Security Requirements</span>
+                        </h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <div className="font-medium">KYC Verification Required</div>
+                              <div className="text-sm text-gray-600">All withdrawal requests</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <div className="font-medium">Two-Factor Authentication</div>
+                              <div className="text-sm text-gray-600">For withdrawals above $1,000</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <div className="font-medium">Email Confirmation</div>
+                              <div className="text-sm text-gray-600">All withdrawal requests</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <div className="font-medium">Manual Review</div>
+                              <div className="text-sm text-gray-600">Withdrawals above $10,000</div>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <h4 className="font-medium text-gray-900 flex items-center space-x-2">
+                          <Calculator className="w-4 h-4 text-green-600" />
+                          <span>Amount Limits</span>
+                        </h4>
+                        <div className="space-y-3">
+                          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium text-green-800">Daily Limit</span>
+                              <span className="text-green-600 font-semibold">$25,000</span>
+                            </div>
+                          </div>
+                          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium text-blue-800">Weekly Limit</span>
+                              <span className="text-blue-600 font-semibold">$100,000</span>
+                            </div>
+                          </div>
+                          <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium text-purple-800">Monthly Limit</span>
+                              <span className="text-purple-600 font-semibold">$500,000</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+          <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-orange-200/50">
+            <Button variant="outline" onClick={() => setShowGlobalSettings(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-fundry-orange hover:bg-orange-600">
+              <Save className="w-4 h-4 mr-2" />
+              Save Global Settings
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

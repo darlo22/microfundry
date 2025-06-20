@@ -595,11 +595,15 @@ export default function AdminDashboard() {
   // Platform settings query
   const { data: platformSettingsData, isLoading: platformSettingsLoading } = useQuery<any>({
     queryKey: ['/api/admin/platform-settings'],
-    enabled: !!adminUser && activeTab === "settings",
-    onSuccess: (data) => {
-      setPlatformSettings(data);
-    }
+    enabled: !!adminUser && activeTab === "settings"
   });
+
+  // Update platform settings state when data changes
+  useEffect(() => {
+    if (platformSettingsData) {
+      setPlatformSettings(platformSettingsData);
+    }
+  }, [platformSettingsData]);
 
   // Message statistics query
   const { data: messageStats, isLoading: messageStatsLoading } = useQuery<{
@@ -2464,56 +2468,7 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {activeTab === "settings" && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900">Platform Settings</h2>
-                <p className="text-gray-600">Configure platform-wide settings and policies</p>
-              </div>
 
-              <div className="grid gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Investment Limits</CardTitle>
-                    <CardDescription>Set minimum and maximum investment amounts</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium">Minimum Investment</label>
-                        <p className="text-2xl font-bold text-green-600">$25</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Maximum Campaign Goal</label>
-                        <p className="text-2xl font-bold text-blue-600">$100,000</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Platform Fees</CardTitle>
-                    <CardDescription>Current fee structure for the platform</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium">Standard Fee</label>
-                        <p className="text-2xl font-bold text-fundry-orange">0%</p>
-                        <p className="text-sm text-gray-600">For all investors</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Processing Fee</label>
-                        <p className="text-2xl font-bold text-gray-600">Stripe/Budpay</p>
-                        <p className="text-sm text-gray-600">Payment processing only</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          )}
         </main>
       </div>
 

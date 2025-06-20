@@ -177,6 +177,36 @@ export default function AdminDashboard() {
   // Global Admin Settings state
   const [showGlobalSettings, setShowGlobalSettings] = useState(false);
   const [globalSettingsTab, setGlobalSettingsTab] = useState("fees");
+  const [showAddMarketModal, setShowAddMarketModal] = useState(false);
+  const [showAddTierModal, setShowAddTierModal] = useState(false);
+  const [savingGlobalSettings, setSavingGlobalSettings] = useState(false);
+  
+  // New Market form state
+  const [newMarketForm, setNewMarketForm] = useState({
+    country: "",
+    region: "",
+    currency: "",
+    language: "",
+    kycRequirements: "",
+    minInvestment: "",
+    maxInvestment: "",
+    platformFee: "",
+    paymentMethods: [] as string[],
+    legalFramework: "",
+    status: "active"
+  });
+
+  // New Tier form state
+  const [newTierForm, setNewTierForm] = useState({
+    name: "",
+    minAmount: "",
+    maxAmount: "",
+    feePercentage: "",
+    region: "",
+    description: "",
+    features: [] as string[],
+    status: "active"
+  });
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -512,6 +542,129 @@ export default function AdminDashboard() {
 
   const handleRemoveSpecificUser = (userId: string) => {
     setSelectedSpecificUsers(selectedSpecificUsers.filter(user => user.id !== userId));
+  };
+
+  // Global Settings mutations
+  const addNewMarketMutation = useMutation({
+    mutationFn: async (marketData: typeof newMarketForm) => {
+      return apiRequest("POST", "/api/admin/global-settings/markets", marketData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/global-settings'] });
+      setShowAddMarketModal(false);
+      setNewMarketForm({
+        country: "",
+        region: "",
+        currency: "",
+        language: "",
+        kycRequirements: "",
+        minInvestment: "",
+        maxInvestment: "",
+        platformFee: "",
+        paymentMethods: [],
+        legalFramework: "",
+        status: "active"
+      });
+      toast({
+        title: "Market Added",
+        description: "New market has been added successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Add Market Failed",
+        description: "Failed to add new market. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const addCustomTierMutation = useMutation({
+    mutationFn: async (tierData: typeof newTierForm) => {
+      return apiRequest("POST", "/api/admin/global-settings/tiers", tierData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/global-settings'] });
+      setShowAddTierModal(false);
+      setNewTierForm({
+        name: "",
+        minAmount: "",
+        maxAmount: "",
+        feePercentage: "",
+        region: "",
+        description: "",
+        features: [],
+        status: "active"
+      });
+      toast({
+        title: "Tier Added",
+        description: "Custom tier has been added successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Add Tier Failed",
+        description: "Failed to add custom tier. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const saveGlobalSettingsMutation = useMutation({
+    mutationFn: async (settingsData: any) => {
+      return apiRequest("PUT", "/api/admin/global-settings", settingsData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/global-settings'] });
+      setSavingGlobalSettings(false);
+      toast({
+        title: "Settings Saved",
+        description: "Global platform settings have been saved successfully.",
+      });
+    },
+    onError: () => {
+      setSavingGlobalSettings(false);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save global settings. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Global Settings handlers
+  const handleAddNewMarket = () => {
+    if (!newMarketForm.country || !newMarketForm.currency || !newMarketForm.platformFee) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields (Country, Currency, Platform Fee).",
+        variant: "destructive",
+      });
+      return;
+    }
+    addNewMarketMutation.mutate(newMarketForm);
+  };
+
+  const handleAddCustomTier = () => {
+    if (!newTierForm.name || !newTierForm.minAmount || !newTierForm.maxAmount || !newTierForm.feePercentage) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields (Name, Amount Range, Fee Percentage).",
+        variant: "destructive",
+      });
+      return;
+    }
+    addCustomTierMutation.mutate(newTierForm);
+  };
+
+  const handleSaveGlobalSettings = () => {
+    setSavingGlobalSettings(true);
+    const settingsData = {
+      lastUpdated: new Date().toISOString(),
+      updatedBy: adminUser?.email || "admin",
+      timestamp: Date.now()
+    };
+    saveGlobalSettingsMutation.mutate(settingsData);
   };
 
 

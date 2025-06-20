@@ -3565,8 +3565,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         targetType: typeof details === 'object' ? details.targetType || null : null,
         targetId: typeof details === 'object' ? details.targetId || null : null,
         details: typeof details === 'string' ? details : JSON.stringify(details),
-        ipAddress: null,
-        createdAt: new Date()
+        ipAddress: null
       });
     } catch (error) {
       console.error('Failed to log admin activity:', error);
@@ -3637,7 +3636,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   app.get('/api/admin/users', requireAdmin, async (req: any, res) => {
     try {
       // Log admin activity
-      await logAdminActivity(req.user.id, 'User Management', 'Accessed user management section');
+      await logAdminActivity(req.user.id, 'user_management', {
+        targetType: 'users',
+        description: 'Accessed user management section'
+      });
       
       const allUsers = await db.select({
         id: users.id,

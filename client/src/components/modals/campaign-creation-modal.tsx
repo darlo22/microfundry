@@ -559,6 +559,17 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
           description: "Legal fees and regulatory compliance"
         }
       ],
+      
+      // Social Media Links
+      websiteUrl: "",
+      twitterUrl: "",
+      facebookUrl: "",
+      instagramUrl: "",
+      linkedinUrl: "",
+      youtubeUrl: "",
+      mediumUrl: "",
+      tiktokUrl: "",
+      snapchatUrl: "",
     },
   });
 
@@ -1753,6 +1764,152 @@ export default function CampaignCreationModal({ isOpen, onClose }: CampaignCreat
                   </Card>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Social Media Section */}
+            <div className="border-b pb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Social Media & Online Presence</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Add your startup's social media links to help investors connect with your brand (optional)
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="websiteUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Website URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://yourcompany.com" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="twitterUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Twitter/X URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://twitter.com/yourcompany" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="facebookUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Facebook URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://facebook.com/yourcompany" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="instagramUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Instagram URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://instagram.com/yourcompany" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="linkedinUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>LinkedIn URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://linkedin.com/company/yourcompany" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="youtubeUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>YouTube URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://youtube.com/@yourcompany" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="mediumUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Medium URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://medium.com/@yourcompany" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="tiktokUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>TikTok URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://tiktok.com/@yourcompany" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             {/* Use of Funds */}

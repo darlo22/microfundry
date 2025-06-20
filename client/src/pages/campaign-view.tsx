@@ -304,12 +304,12 @@ export default function CampaignView() {
                   </div>
 
                   {/* Social Media Links */}
-                  {(campaign.websiteUrl || campaign.twitterUrl || campaign.facebookUrl || campaign.instagramUrl || 
-                    campaign.linkedinUrl || campaign.youtubeUrl || campaign.mediumUrl || campaign.tiktokUrl || campaign.snapchatUrl) && (
+                  {((campaign as any).websiteUrl || (campaign as any).twitterUrl || (campaign as any).facebookUrl || (campaign as any).instagramUrl || 
+                    (campaign as any).linkedinUrl || (campaign as any).youtubeUrl || (campaign as any).mediumUrl || (campaign as any).tiktokUrl || (campaign as any).snapchatUrl) && (
                     <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 border-t pt-4 mt-4">
-                      {campaign.websiteUrl && (
+                      {(campaign as any).websiteUrl && (
                         <a 
-                          href={campaign.websiteUrl} 
+                          href={(campaign as any).websiteUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="flex items-center text-gray-500 hover:text-fundry-orange transition-colors"
@@ -317,9 +317,9 @@ export default function CampaignView() {
                           <Globe size={18} />
                         </a>
                       )}
-                      {campaign.twitterUrl && (
+                      {(campaign as any).twitterUrl && (
                         <a 
-                          href={campaign.twitterUrl} 
+                          href={(campaign as any).twitterUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="flex items-center text-gray-500 hover:text-blue-500 transition-colors"
@@ -327,9 +327,9 @@ export default function CampaignView() {
                           <FaTwitter size={18} />
                         </a>
                       )}
-                      {campaign.facebookUrl && (
+                      {(campaign as any).facebookUrl && (
                         <a 
-                          href={campaign.facebookUrl} 
+                          href={(campaign as any).facebookUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="flex items-center text-gray-500 hover:text-blue-600 transition-colors"
@@ -337,9 +337,9 @@ export default function CampaignView() {
                           <FaFacebook size={18} />
                         </a>
                       )}
-                      {campaign.instagramUrl && (
+                      {(campaign as any).instagramUrl && (
                         <a 
-                          href={campaign.instagramUrl} 
+                          href={(campaign as any).instagramUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="flex items-center text-gray-500 hover:text-pink-500 transition-colors"
@@ -347,9 +347,9 @@ export default function CampaignView() {
                           <FaInstagram size={18} />
                         </a>
                       )}
-                      {campaign.linkedinUrl && (
+                      {(campaign as any).linkedinUrl && (
                         <a 
-                          href={campaign.linkedinUrl} 
+                          href={(campaign as any).linkedinUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="flex items-center text-gray-500 hover:text-blue-700 transition-colors"
@@ -357,9 +357,9 @@ export default function CampaignView() {
                           <FaLinkedin size={18} />
                         </a>
                       )}
-                      {campaign.youtubeUrl && (
+                      {(campaign as any).youtubeUrl && (
                         <a 
-                          href={campaign.youtubeUrl} 
+                          href={(campaign as any).youtubeUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="flex items-center text-gray-500 hover:text-red-600 transition-colors"
@@ -367,9 +367,9 @@ export default function CampaignView() {
                           <FaYoutube size={18} />
                         </a>
                       )}
-                      {campaign.mediumUrl && (
+                      {(campaign as any).mediumUrl && (
                         <a 
-                          href={campaign.mediumUrl} 
+                          href={(campaign as any).mediumUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="flex items-center text-gray-500 hover:text-green-600 transition-colors"
@@ -377,9 +377,9 @@ export default function CampaignView() {
                           <FaMedium size={18} />
                         </a>
                       )}
-                      {campaign.tiktokUrl && (
+                      {(campaign as any).tiktokUrl && (
                         <a 
-                          href={campaign.tiktokUrl} 
+                          href={(campaign as any).tiktokUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="flex items-center text-gray-500 hover:text-black transition-colors"
@@ -387,9 +387,9 @@ export default function CampaignView() {
                           <FaTiktok size={18} />
                         </a>
                       )}
-                      {campaign.snapchatUrl && (
+                      {(campaign as any).snapchatUrl && (
                         <a 
-                          href={campaign.snapchatUrl} 
+                          href={(campaign as any).snapchatUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="flex items-center text-gray-500 hover:text-yellow-400 transition-colors"

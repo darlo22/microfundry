@@ -52,6 +52,16 @@ export interface CampaignWithStats {
   competitiveLandscape?: string;
   // Use of Funds
   useOfFunds?: string | any[];
+  // Social Media fields
+  websiteUrl?: string | null;
+  twitterUrl?: string | null;
+  facebookUrl?: string | null;
+  instagramUrl?: string | null;
+  linkedinUrl?: string | null;
+  youtubeUrl?: string | null;
+  mediumUrl?: string | null;
+  tiktokUrl?: string | null;
+  snapchatUrl?: string | null;
   // Legacy fields for compatibility
   marketSize?: string;
   riskFactors?: string;

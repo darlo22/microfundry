@@ -268,26 +268,15 @@ export default function CampaignView() {
 
                 {/* Campaign Info Below Video */}
                 <div className="p-3 sm:p-4 lg:p-6">
-                  {/* Company Logo and Title */}
-                  <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
-                    {campaign.logoUrl && (
-                      <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-lg shadow-md overflow-hidden border mx-auto sm:mx-0">
-                        <img 
-                          src={campaign.logoUrl.startsWith('/') ? campaign.logoUrl : `/${campaign.logoUrl}`}
-                          alt={`${campaign.companyName} logo`}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1 text-center sm:text-left">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">{campaign.title}</h1>
-                        <Badge className="bg-fundry-orange text-white border-fundry-orange self-center sm:self-start">
-                          {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
-                        </Badge>
-                      </div>
-                      <p className="text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed">{campaign.shortPitch}</p>
+                  {/* Company Title */}
+                  <div className="mb-4 sm:mb-6 text-center sm:text-left">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">{campaign.title}</h1>
+                      <Badge className="bg-fundry-orange text-white border-fundry-orange self-center sm:self-start">
+                        {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
+                      </Badge>
                     </div>
+                    <p className="text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed">{campaign.shortPitch}</p>
                   </div>
 
                   {/* Meta Information */}

@@ -178,8 +178,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
   
-  // Auth middleware
+  // Auth middleware - Use email/password authentication only
   setupAuth(app);
+  
+  // Disable Replit OAuth to prevent session conflicts
+  // setupReplitAuth(app);
 
   // 2FA Setup Routes
   

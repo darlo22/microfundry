@@ -46,10 +46,12 @@ export function setupAuth(app: Express) {
       createTableIfMissing: false,
     }),
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // Set to false for development to fix session issues
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: 'lax', // Allow cross-site requests for proper session handling
     },
+    name: 'connect.sid',
   };
 
   app.set("trust proxy", 1);

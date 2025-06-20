@@ -39,14 +39,8 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
 
-  // Always render the loading state first if still loading
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange"></div>
-      </div>
-    );
-  }
+  // Render content immediately, don't wait for auth check
+  // This prevents infinite loading on public pages
 
   return (
     <Switch>
@@ -94,7 +88,7 @@ function Router() {
       
       {/* Root path handling */}
       <Route path="/">
-        {!isAuthenticated ? <Landing /> : <Home />}
+        <Landing />
       </Route>
       
       {/* Catch all routes */}

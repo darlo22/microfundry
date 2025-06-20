@@ -1651,6 +1651,57 @@ export default function AdminDashboard() {
                 </Card>
               </div>
 
+              {/* Withdrawal Settings */}
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Settings className="w-5 h-5 mr-2 text-blue-600" />
+                    Withdrawal Settings
+                  </CardTitle>
+                  <CardDescription>Configure minimum withdrawal amounts and campaign requirements</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="min-withdrawal-amount">Minimum Withdrawal Amount ($)</Label>
+                        <Input
+                          id="min-withdrawal-amount"
+                          type="number"
+                          step="1"
+                          min="1"
+                          max="1000"
+                          defaultValue={25}
+                          className="mt-1"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Minimum amount founders can withdraw</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="min-goal-percentage">Minimum Goal Achievement (%)</Label>
+                        <Input
+                          id="min-goal-percentage"
+                          type="number"
+                          step="1"
+                          min="0"
+                          max="100"
+                          defaultValue={20}
+                          className="mt-1"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Required % of funding goal to enable withdrawals</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Withdrawal Settings
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Recent Transactions and Withdrawal Requests */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <Card>
@@ -1863,56 +1914,7 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Withdrawal Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Settings className="w-5 h-5 mr-2 text-blue-600" />
-                    Withdrawal Settings
-                  </CardTitle>
-                  <CardDescription>Configure minimum withdrawal amounts and campaign requirements</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="min-withdrawal-amount">Minimum Withdrawal Amount ($)</Label>
-                        <Input
-                          id="min-withdrawal-amount"
-                          type="number"
-                          step="1"
-                          min="1"
-                          max="1000"
-                          defaultValue={25}
-                          className="mt-1"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Minimum amount founders can withdraw</p>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="min-goal-percentage">Minimum Goal Achievement (%)</Label>
-                        <Input
-                          id="min-goal-percentage"
-                          type="number"
-                          step="1"
-                          min="0"
-                          max="100"
-                          defaultValue={20}
-                          className="mt-1"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Required % of funding goal to enable withdrawals</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-6">
-                    <Button className="bg-blue-600 hover:bg-blue-700">
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Withdrawal Settings
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+
 
 
 

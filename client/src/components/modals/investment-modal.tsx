@@ -1949,7 +1949,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                     <p className="mb-2 font-semibold">{campaign.title}</p>
                     <p className="text-sm text-gray-600 mb-3">
                       {campaign.businessAddress || 'Business Address'}<br/>
-                      {campaign.city}, {campaign.state} {campaign.country}
+                      {campaign.country}
                     </p>
                     <div className="border-b border-gray-400 w-64 mb-2"></div>
                     <p className="text-xs text-gray-600">Authorized Representative</p>

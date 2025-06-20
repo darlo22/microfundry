@@ -244,6 +244,7 @@ The deployment uses:
 - June 20, 2025. Streamlined investment sidebar interface: removed "WATCH FOR UPDATES" button to create cleaner, more focused investment experience with just essential investment functionality
 - June 20, 2025. Adjusted campaign view page layout proportions: increased video/cover section from 60% to 70% width (7/10 columns) and reduced investment sidebar from 40% to 30% width (3/10 columns) for better visual balance and enhanced media prominence
 - June 20, 2025. Updated About This Campaign section background: changed from orange gradient to Fundry Navy blue gradient (from-fundry-navy via-blue-800 to-blue-900) for enhanced brand consistency and professional appearance
+- June 20, 2025. Implemented comprehensive scrollable SAFE agreement viewer within investment modal: created full legal document display with 6 articles covering definitions, investment terms, company/investor representations, miscellaneous provisions, and risk disclosures; added both "View SAFE Agreement" and "Download" buttons in SAFE review step; fixed investment amount calculation to show actual investment values instead of $0; enhanced signature block with complete company and investor details including email, business address, and agreement summary; implemented mobile-responsive modal with 90% viewport sizing for optimal document viewing experience
 
 ## User Preferences
 

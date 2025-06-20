@@ -3019,8 +3019,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(404).json({ message: 'Investment not found' });
       }
 
-      if (investment.status !== 'pending') {
-        return res.status(400).json({ message: 'Only pending investments can be deleted' });
+      // Allow deletion of pending and committed investments, but not paid/completed ones
+      if (investment.status === 'paid' || investment.status === 'completed' || investment.paymentStatus === 'completed') {
+        return res.status(400).json({ message: 'Cannot delete investments that have been paid or completed' });
       }
 
       // Delete the investment

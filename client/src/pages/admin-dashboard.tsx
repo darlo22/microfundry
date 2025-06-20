@@ -774,7 +774,7 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {users?.filter(user => user.userType === 'founder').length > 0 ? 
+                      {users && users.filter(user => user.userType === 'founder').length > 0 ? 
                         users.filter(user => user.userType === 'founder').map((user) => (
                         <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
@@ -796,7 +796,7 @@ export default function AdminDashboard() {
                                 </span>
                               )}
                               <span className="text-sm font-medium text-blue-600">
-                                Campaigns: {campaigns?.filter(c => c.founderId === user.id).length || 0}
+                                Campaigns: {campaigns?.filter(c => c.id && user.id).length || 0}
                               </span>
                             </div>
                           </div>
@@ -1371,7 +1371,7 @@ export default function AdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-orange-600">
-                      {investments?.filter((inv: Investment) => inv.paymentStatus === 'pending').length || 0}
+                      {investments?.filter((inv: Investment) => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').length || 0}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Awaiting payment
@@ -1393,6 +1393,48 @@ export default function AdminDashboard() {
                 </Card>
               </div>
 
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="text-orange-700">Pending Transactions</CardTitle>
+                  <CardDescription>Investment commitments awaiting payment processing</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {investments && investments.filter(inv => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').length > 0 ? 
+                      investments.filter(inv => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').map((investment: Investment) => (
+                      <div key={investment.id} className="flex items-center justify-between p-4 border-2 border-orange-200 rounded-lg bg-orange-50">
+                        <div>
+                          <p className="font-medium text-orange-900">
+                            {investment.investor?.firstName} {investment.investor?.lastName} 
+                            {!investment.investor && investment.investorName && investment.investorName}
+                            {!investment.investor && !investment.investorName && `Investor #${investment.investorId}`}
+                          </p>
+                          <p className="text-sm text-orange-700">
+                            {investment.campaign?.companyName || investment.campaign?.title || `Campaign #${investment.campaignId}`}
+                          </p>
+                          <p className="text-xs text-orange-600">
+                            Committed: {new Date(investment.createdAt).toLocaleDateString()} at {new Date(investment.createdAt).toLocaleTimeString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-orange-800 text-lg">{formatCurrency(parseFloat(investment.amount))}</p>
+                          <Badge variant="secondary" className="bg-orange-200 text-orange-800 border-orange-300">
+                            {investment.paymentStatus.toUpperCase()}
+                          </Badge>
+                          <p className="text-xs text-orange-600 mt-1">Awaiting Payment</p>
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                        <p className="text-lg font-medium">No pending transactions</p>
+                        <p className="text-sm">All investments have been processed</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
@@ -1401,30 +1443,33 @@ export default function AdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {investments?.slice(0, 10).map((investment: Investment) => (
+                      {investments && investments.length > 0 ? 
+                        investments.slice(0, 10).map((investment: Investment) => (
                         <div key={investment.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
                             <p className="font-medium">
-                              {investment.investor?.firstName} {investment.investor?.lastName}
+                              {investment.investor?.firstName} {investment.investor?.lastName} 
+                              {!investment.investor && investment.investorName && investment.investorName}
+                              {!investment.investor && !investment.investorName && `Investor #${investment.investorId}`}
                             </p>
                             <p className="text-sm text-gray-600">
-                              {investment.campaign?.companyName || `Campaign #${investment.campaignId}`}
+                              {investment.campaign?.companyName || investment.campaign?.title || `Campaign #${investment.campaignId}`}
                             </p>
                             <p className="text-xs text-gray-500">
-                              {new Date(investment.createdAt).toLocaleDateString()}
+                              {new Date(investment.createdAt).toLocaleDateString()} at {new Date(investment.createdAt).toLocaleTimeString()}
                             </p>
                           </div>
                           <div className="text-right">
                             <p className="font-bold">{formatCurrency(parseFloat(investment.amount))}</p>
                             <Badge variant={
                               investment.paymentStatus === 'completed' ? 'default' : 
-                              investment.paymentStatus === 'pending' ? 'secondary' : 'destructive'
+                              investment.paymentStatus === 'pending' || investment.paymentStatus === 'processing' ? 'secondary' : 'destructive'
                             }>
                               {investment.paymentStatus}
                             </Badge>
                           </div>
                         </div>
-                      )) || <p className="text-gray-500 text-center py-4">No transactions found</p>}
+                      )) : <p className="text-gray-500 text-center py-4">No transactions found</p>}
                     </div>
                   </CardContent>
                 </Card>

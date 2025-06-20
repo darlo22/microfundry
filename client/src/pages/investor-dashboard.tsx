@@ -29,8 +29,6 @@ import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 import TwoFactorSetupModal from "@/components/modals/two-factor-setup-modal";
 import PaymentModal from "@/components/modals/payment-modal";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
 
 // Edit Profile Form Schema
 const editProfileSchema = z.object({
@@ -50,8 +48,6 @@ const editProfileSchema = z.object({
 type EditProfileFormData = z.infer<typeof editProfileSchema>;
 
 // Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
-
 export default function InvestorDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
@@ -2041,16 +2037,14 @@ This SAFE Agreement has been digitally signed and executed.
 
       {/* Payment Modal */}
       {isPaymentModalOpen && selectedInvestmentForPayment && (
-        <Elements stripe={stripePromise}>
-          <PaymentModal
-            isOpen={isPaymentModalOpen}
-            onClose={() => {
-              setIsPaymentModalOpen(false);
-              setSelectedInvestmentForPayment(null);
-            }}
-            investment={selectedInvestmentForPayment}
-          />
-        </Elements>
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => {
+            setIsPaymentModalOpen(false);
+            setSelectedInvestmentForPayment(null);
+          }}
+          investment={selectedInvestmentForPayment}
+        />
       )}
 
       {/* Edit Investment Modal */}

@@ -86,7 +86,7 @@ export function setupAuth(app: Express) {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser(async (id: string, done) => {
     try {
-      const user = await storage.getUser(id);
+      const user = await storage.getUser(String(id));
       if (!user) {
         // User not found, clear the session
         return done(null, false);

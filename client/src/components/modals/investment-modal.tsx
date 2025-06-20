@@ -1640,9 +1640,15 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Elements stripe={stripePromise} options={{ clientSecret }}>
-                    <StripePaymentForm />
-                  </Elements>
+                  {stripePromise ? (
+                    <Elements stripe={stripePromise} options={{ clientSecret }}>
+                      <StripePaymentForm />
+                    </Elements>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-red-600">Stripe payment system unavailable</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}

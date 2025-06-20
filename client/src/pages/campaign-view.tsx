@@ -1137,7 +1137,7 @@ export default function CampaignView() {
               </div>
               
               {campaign.teamMembers && Array.isArray(campaign.teamMembers) && campaign.teamMembers.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-8">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {campaign.teamMembers.map((member: any, index: number) => {
                     const colors = [
                       { bg: "from-blue-500 to-indigo-600", ring: "ring-blue-200", text: "text-blue-600" },
@@ -1153,39 +1153,41 @@ export default function CampaignView() {
                       <div key={index} className="group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 hover:scale-105">
                         <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${color.bg}`}></div>
                         
-                        <div className="flex items-start gap-6">
-                          <div className="flex-shrink-0">
+                        <div className="flex flex-col items-center text-center">
+                          {/* Photo at the top */}
+                          <div className="mb-6">
                             {member.photoUrl ? (
                               <img
                                 src={member.photoUrl.startsWith('/') ? member.photoUrl : `/${member.photoUrl}`}
                                 alt={member.name}
-                                className={`w-28 h-28 rounded-2xl object-cover ring-4 ${color.ring} shadow-lg`}
+                                className={`w-32 h-32 rounded-2xl object-cover ring-4 ${color.ring} shadow-lg mx-auto`}
                               />
                             ) : (
-                              <div className={`w-28 h-28 bg-gradient-to-br ${color.bg} rounded-2xl flex items-center justify-center ring-4 ${color.ring} shadow-lg`}>
-                                <span className="text-white text-2xl font-bold">
+                              <div className={`w-32 h-32 bg-gradient-to-br ${color.bg} rounded-2xl flex items-center justify-center ring-4 ${color.ring} shadow-lg mx-auto`}>
+                                <span className="text-white text-3xl font-bold">
                                   {member.name ? member.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2) : 'TM'}
                                 </span>
                               </div>
                             )}
                           </div>
                           
-                          <div className="flex-1">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
+                          {/* Text content below photo */}
+                          <div className="w-full">
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">{member.name}</h3>
                             <p className={`font-semibold uppercase tracking-wide text-sm mb-4 ${color.text}`}>
                               {member.role}
                             </p>
                             
                             {member.experience && (
                               <div className="mb-6">
-                                <div className="bg-gradient-to-r from-gray-50 to-slate-50/50 rounded-xl p-4 border-l-4 border-gray-300">
+                                <div className="bg-gradient-to-r from-gray-50 to-slate-50/50 rounded-xl p-4 border-l-4 border-gray-300 text-left">
                                   <p className="text-gray-700 leading-relaxed text-sm">{member.experience}</p>
                                 </div>
                               </div>
                             )}
                             
                             {member.linkedinUrl && (
-                              <div className="mt-6">
+                              <div className="flex justify-center">
                                 <a
                                   href={member.linkedinUrl}
                                   target="_blank"

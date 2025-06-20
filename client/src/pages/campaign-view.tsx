@@ -206,11 +206,11 @@ export default function CampaignView() {
 
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-2 sm:py-4 lg:py-8">
         
-        {/* Hero Section - Two Column Layout like Wefunder */}
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8 lg:mb-12">
+        {/* Hero Section - Mobile-First Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-3 sm:gap-4 lg:gap-8 mb-4 sm:mb-6 lg:mb-12">
           
           {/* Left Column - Video/Cover Image (7/10 width - 70%) */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 order-1">
             <Card className="border-0 shadow-xl bg-white overflow-hidden">
               <CardContent className="p-0">
                 {/* Media Section */}
@@ -267,11 +267,11 @@ export default function CampaignView() {
                 </div>
 
                 {/* Campaign Info Below Video */}
-                <div className="p-6">
+                <div className="p-3 sm:p-4 lg:p-6">
                   {/* Company Logo and Title */}
-                  <div className="flex items-start gap-4 mb-6">
+                  <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
                     {campaign.logoUrl && (
-                      <div className="flex-shrink-0 w-16 h-16 bg-white rounded-lg shadow-md overflow-hidden border">
+                      <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-lg shadow-md overflow-hidden border mx-auto sm:mx-0">
                         <img 
                           src={campaign.logoUrl.startsWith('/') ? campaign.logoUrl : `/${campaign.logoUrl}`}
                           alt={`${campaign.companyName} logo`}
@@ -279,30 +279,30 @@ export default function CampaignView() {
                         />
                       </div>
                     )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{campaign.title}</h1>
-                        <Badge className="bg-fundry-orange text-white border-fundry-orange">
+                    <div className="flex-1 text-center sm:text-left">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">{campaign.title}</h1>
+                        <Badge className="bg-fundry-orange text-white border-fundry-orange self-center sm:self-start">
                           {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                         </Badge>
                       </div>
-                      <p className="text-lg text-gray-600 leading-relaxed">{campaign.shortPitch}</p>
+                      <p className="text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed">{campaign.shortPitch}</p>
                     </div>
                   </div>
 
                   {/* Meta Information */}
-                  <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 border-t pt-4">
-                    <div className="flex items-center">
-                      <Building className="mr-2 text-fundry-orange" size={16} />
-                      <span>{campaign.businessSector || 'Technology'}</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 border-t pt-3 sm:pt-4">
+                    <div className="flex items-center justify-center sm:justify-start">
+                      <Building className="mr-2 text-fundry-orange" size={14} />
+                      <span className="truncate">{campaign.businessSector || 'Technology'}</span>
                     </div>
-                    <div className="flex items-center">
-                      <MapPin className="mr-2 text-fundry-orange" size={16} />
-                      <span>{campaign.country && campaign.state ? `${campaign.state}, ${campaign.country}` : 'Location TBD'}</span>
+                    <div className="flex items-center justify-center sm:justify-start">
+                      <MapPin className="mr-2 text-fundry-orange" size={14} />
+                      <span className="truncate">{campaign.country && campaign.state ? `${campaign.state}, ${campaign.country}` : 'Location TBD'}</span>
                     </div>
-                    <div className="flex items-center">
-                      <Calendar className="mr-2 text-fundry-orange" size={16} />
-                      <span>Started {formatDate(campaign.createdAt)}</span>
+                    <div className="flex items-center justify-center sm:justify-start sm:col-span-2 lg:col-span-1">
+                      <Calendar className="mr-2 text-fundry-orange" size={14} />
+                      <span className="truncate">Started {formatDate(campaign.createdAt)}</span>
                     </div>
                   </div>
 
@@ -408,69 +408,69 @@ export default function CampaignView() {
           </div>
 
           {/* Right Column - Investment Information (3/10 width - 30%) */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 order-2 lg:order-2">
             <Card className="border-0 shadow-xl bg-white lg:sticky lg:top-8">
-              <CardContent className="p-4 sm:p-6">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
                 {/* Status Badge */}
-                <div className="mb-4">
+                <div className="mb-3 sm:mb-4 text-center lg:text-left">
                   <Badge className="bg-fundry-orange text-white border-fundry-orange px-3 py-1 text-xs font-semibold">
                     {campaign.progressPercent >= 75 ? "ALMOST SOLD OUT" : "ACCEPTING INVESTMENTS"}
                   </Badge>
                 </div>
 
                 {/* Funding Amount - Large Display */}
-                <div className="mb-4 sm:mb-6">
-                  <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{formatCurrency(campaign.totalRaised)}</div>
+                <div className="mb-3 sm:mb-4 lg:mb-6 text-center lg:text-left">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1">{formatCurrency(campaign.totalRaised)}</div>
                   <div className="text-xs sm:text-sm text-gray-600">raised from {campaign.investorCount} investors</div>
                 </div>
 
                 {/* Investment Form */}
-                <div className="mb-4 sm:mb-6">
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">INVEST</label>
+                <div className="mb-3 sm:mb-4 lg:mb-6">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 text-center lg:text-left">INVEST</label>
                   <div className="flex items-center border rounded-lg overflow-hidden bg-gray-50">
-                    <span className="px-2 sm:px-3 py-2 sm:py-3 text-gray-500 text-sm">$</span>
+                    <span className="px-3 py-3 text-gray-500 text-sm">$</span>
                     <input
                       type="number"
                       placeholder="0"
                       min={campaign.minimumInvestment}
                       value={investmentAmount}
                       onChange={(e) => setInvestmentAmount(e.target.value)}
-                      className="flex-1 px-2 sm:px-3 py-2 sm:py-3 border-0 focus:ring-0 focus:outline-none text-base sm:text-lg bg-transparent"
+                      className="flex-1 px-3 py-3 border-0 focus:ring-0 focus:outline-none text-base bg-transparent text-center lg:text-left"
                     />
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">min ${campaign.minimumInvestment}</div>
+                  <div className="text-xs text-gray-500 mt-1 text-center lg:text-left">min ${campaign.minimumInvestment}</div>
                 </div>
 
                 {/* Invest Button */}
                 <Button 
                   onClick={handleInvest}
                   disabled={isProcessing}
-                  className="w-full bg-fundry-orange hover:bg-orange-600 text-white font-bold py-2 sm:py-3 text-sm sm:text-base mb-3 sm:mb-4 rounded-lg"
+                  className="w-full bg-fundry-orange hover:bg-orange-600 text-white font-bold py-3 text-base mb-3 sm:mb-4 rounded-lg"
                 >
                   {isProcessing ? "Processing..." : "INVEST"}
                 </Button>
 
                 {/* Investment Terms */}
                 <div className="border-t pt-3 sm:pt-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-xs sm:text-sm">INVESTMENT TERMS</h3>
-                  <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
-                    <div className="flex justify-between items-start">
-                      <span className="text-gray-600">Future Equity</span>
-                      <span className="font-medium text-right ml-2">{formatCurrency(campaign.valuationCap)} Valuation Cap</span>
+                  <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-xs sm:text-sm text-center lg:text-left">INVESTMENT TERMS</h3>
+                  <div className="space-y-2 text-xs sm:text-sm">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2">
+                      <span className="text-gray-600 text-center sm:text-left">Future Equity</span>
+                      <span className="font-medium text-center sm:text-right">{formatCurrency(campaign.valuationCap)} Valuation Cap</span>
                     </div>
                     {campaign.discountRate && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Discount Rate</span>
-                        <span className="font-medium">{campaign.discountRate}%</span>
+                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                        <span className="text-gray-600 text-center sm:text-left">Discount Rate</span>
+                        <span className="font-medium text-center sm:text-right">{campaign.discountRate}%</span>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="mt-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-gray-600">{campaign.progressPercent}% of {formatCurrency(campaign.fundingGoal)} goal</span>
+                <div className="mt-4 sm:mt-6">
+                  <div className="flex justify-center lg:justify-between items-center mb-2">
+                    <span className="text-xs sm:text-sm text-gray-600 text-center lg:text-left">{campaign.progressPercent}% of {formatCurrency(campaign.fundingGoal)} goal</span>
                   </div>
                   <Progress 
                     value={campaign.progressPercent} 
@@ -487,9 +487,9 @@ export default function CampaignView() {
           
           {/* View Pitch Deck Section */}
           <Card className="border-0 shadow-xl bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20 overflow-hidden">
-            <CardContent className="py-16 px-8 text-center">
+            <CardContent className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 text-center">
               <div className="max-w-4xl mx-auto">
-                <h2 className="text-4xl font-bold text-fundry-navy mb-4 tracking-tight">Pitch Deck</h2>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-fundry-navy mb-3 sm:mb-4 tracking-tight">Pitch Deck</h2>
                 
                 {campaign.pitchDeckUrl ? (
                   <div className="space-y-8">

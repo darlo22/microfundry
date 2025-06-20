@@ -500,15 +500,18 @@ export const adminLogsRelations = relations(adminLogs, ({ one }) => ({
 export type AdminLog = typeof adminLogs.$inferSelect;
 export type InsertAdminLog = typeof adminLogs.$inferInsert;
 
-// Platform settings table
+// Platform settings table for managing fees and KYC requirements
 export const platformSettings = pgTable("platform_settings", {
   id: serial("id").primaryKey(),
-  key: varchar("key").notNull().unique(),
-  value: text("value").notNull(),
+  settingKey: varchar("setting_key").notNull().unique(),
+  settingValue: text("setting_value").notNull(),
+  settingType: varchar("setting_type", { enum: ["string", "number", "boolean", "json"] }).notNull(),
   description: text("description"),
+  category: varchar("category").notNull(), // 'fees', 'kyc', 'general', etc.
+  isEditable: boolean("is_editable").default(true),
   updatedBy: varchar("updated_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const platformSettingsRelations = relations(platformSettings, ({ one }) => ({
@@ -520,6 +523,7 @@ export const platformSettingsRelations = relations(platformSettings, ({ one }) =
 
 export type PlatformSetting = typeof platformSettings.$inferSelect;
 export type InsertPlatformSetting = typeof platformSettings.$inferInsert;
+export type InsertAdminLog = typeof adminLogs.$inferInsert;
 
 // Admin messages exports
 export type AdminMessage = typeof adminMessages.$inferSelect;

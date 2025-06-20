@@ -3971,8 +3971,21 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           eq(adminMessages.status, 'scheduled')
         ));
 
+      // Calculate yesterday's messages for comparison
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      const [yesterdayMessages] = await db.select({ count: sql<number>`count(*)` })
+        .from(adminMessages)
+        .where(and(
+          eq(adminMessages.adminId, req.user.id),
+          gte(adminMessages.createdAt, yesterday),
+          lt(adminMessages.createdAt, today)
+        ));
+
       res.json({
         messagesToday: todayMessages?.count || 0,
+        messagesYesterday: yesterdayMessages?.count || 0,
         totalRecipients: totalRecipients?.count || 0,
         scheduledMessages: scheduledMessages?.count || 0
       });

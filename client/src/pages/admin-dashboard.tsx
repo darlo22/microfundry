@@ -565,6 +565,17 @@ export default function AdminDashboard() {
     enabled: !!adminUser && activeTab === "message-center"
   });
 
+  // Message statistics query
+  const { data: messageStats, isLoading: messageStatsLoading } = useQuery<{
+    messagesToday: number;
+    messagesYesterday: number;
+    totalRecipients: number;
+    scheduledMessages: number;
+  }>({
+    queryKey: ['/api/admin/message-stats'],
+    enabled: !!adminUser && activeTab === "message-center"
+  });
+
   const filteredUsers = useMemo(() => {
     if (!users || !userSearchQuery) return [];
     return users.filter((user: User) => 

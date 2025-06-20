@@ -3553,9 +3553,26 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Helper function to log admin activities
+  const logAdminActivity = async (adminId: string, action: string, details: string) => {
+    try {
+      await db.insert(adminLogs).values({
+        adminId,
+        action,
+        details,
+        createdAt: new Date()
+      });
+    } catch (error) {
+      console.error('Failed to log admin activity:', error);
+    }
+  };
+
   // Admin API endpoints
   app.get('/api/admin/stats', requireAdmin, async (req: any, res) => {
     try {
+      // Log admin activity
+      await logAdminActivity(req.user.id, 'Dashboard Access', 'Viewed admin dashboard overview');
+      
       const [
         totalCampaigns,
         activeCampaigns,
@@ -3610,6 +3627,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   app.get('/api/admin/users', requireAdmin, async (req: any, res) => {
     try {
+      // Log admin activity
+      await logAdminActivity(req.user.id, 'User Management', 'Accessed user management section');
+      
       const allUsers = await db.select({
         id: users.id,
         email: users.email,

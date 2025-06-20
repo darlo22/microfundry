@@ -521,18 +521,49 @@ export default function AdminDashboard() {
                         ))}
                       </div>
                     ) : stats?.recentActivity?.length ? (
-                      stats.recentActivity.map((activity) => (
-                        <div key={activity.id} className="flex items-center justify-between py-2 border-b">
-                          <div>
-                            <p className="font-medium">{activity.action}</p>
-                            <p className="text-sm text-gray-600">{activity.details}</p>
-                            <p className="text-xs text-gray-500">by {activity.adminName}</p>
+                      stats.recentActivity.map((activity) => {
+                        const getActivityIcon = (action: string) => {
+                          switch (action) {
+                            case 'Dashboard Access':
+                              return <Activity className="w-4 h-4 text-blue-500" />;
+                            case 'User Management':
+                              return <Users className="w-4 h-4 text-green-500" />;
+                            case 'System Monitoring':
+                              return <TrendingUp className="w-4 h-4 text-purple-500" />;
+                            case 'Data Fix':
+                              return <Settings className="w-4 h-4 text-orange-500" />;
+                            case 'Email Configuration':
+                              return <Mail className="w-4 h-4 text-indigo-500" />;
+                            case 'Security Review':
+                              return <Shield className="w-4 h-4 text-red-500" />;
+                            default:
+                              return <Activity className="w-4 h-4 text-gray-500" />;
+                          }
+                        };
+
+                        return (
+                          <div key={activity.id} className="flex items-start space-x-3 py-3 border-b border-gray-100 last:border-b-0">
+                            <div className="flex-shrink-0 mt-1">
+                              {getActivityIcon(activity.action)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <p className="font-medium text-gray-900">{activity.action}</p>
+                                <p className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                                  {new Date(activity.timestamp).toLocaleString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </p>
+                              </div>
+                              <p className="text-sm text-gray-600 mt-1">{activity.details}</p>
+                              <p className="text-xs text-gray-500 mt-1">by {activity.adminName}</p>
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {new Date(activity.timestamp).toLocaleString()}
-                          </div>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       <p className="text-gray-500 text-center py-4">No recent activity</p>
                     )}

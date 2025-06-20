@@ -180,6 +180,17 @@ export default function AdminDashboard() {
   const [showAddMarketModal, setShowAddMarketModal] = useState(false);
   const [showAddTierModal, setShowAddTierModal] = useState(false);
   const [savingGlobalSettings, setSavingGlobalSettings] = useState(false);
+
+  // Fetch global settings data
+  const { data: globalSettingsData, isLoading: globalSettingsLoading } = useQuery({
+    queryKey: ['/api/admin/global-settings'],
+    enabled: showGlobalSettings,
+  });
+  
+  // Transaction and Withdrawal Management state
+  const [showCompletedTransactionsModal, setShowCompletedTransactionsModal] = useState(false);
+  const [showWithdrawalManagementModal, setShowWithdrawalManagementModal] = useState(false);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);
   
   // New Market form state
   const [newMarketForm, setNewMarketForm] = useState({
@@ -627,6 +638,49 @@ export default function AdminDashboard() {
       toast({
         title: "Save Failed",
         description: "Failed to save global settings. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Withdrawal Management mutations
+  const approveWithdrawalMutation = useMutation({
+    mutationFn: async (withdrawalId: string) => {
+      return apiRequest("PUT", `/api/admin/withdrawals/${withdrawalId}/approve`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/withdrawals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      toast({
+        title: "Withdrawal Approved",
+        description: "Withdrawal request has been approved successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Approval Failed",
+        description: "Failed to approve withdrawal request. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const markWithdrawalCompleteMutation = useMutation({
+    mutationFn: async (withdrawalId: string) => {
+      return apiRequest("PUT", `/api/admin/withdrawals/${withdrawalId}/complete`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/withdrawals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      toast({
+        title: "Withdrawal Completed",
+        description: "Withdrawal has been marked as completed.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to mark withdrawal as complete. Please try again.",
         variant: "destructive",
       });
     }
@@ -1718,6 +1772,15 @@ export default function AdminDashboard() {
                     <p className="text-xs text-muted-foreground">
                       Successfully processed
                     </p>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="w-full mt-3 text-green-700 border-green-200 hover:bg-green-50"
+                      onClick={() => setShowCompletedTransactionsModal(true)}
+                    >
+                      <Eye className="w-4 h-4 mr-1" />
+                      View All
+                    </Button>
                   </CardContent>
                 </Card>
 
@@ -1746,6 +1809,15 @@ export default function AdminDashboard() {
                     <p className="text-xs text-muted-foreground">
                       Pending approval
                     </p>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="w-full mt-3 text-red-700 border-red-200 hover:bg-red-50"
+                      onClick={() => setShowWithdrawalManagementModal(true)}
+                    >
+                      <Settings className="w-4 h-4 mr-1" />
+                      Manage
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
@@ -4534,6 +4606,183 @@ export default function AdminDashboard() {
                   Add Tier
                 </>
               )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Completed Transactions Modal */}
+      <Dialog open={showCompletedTransactionsModal} onOpenChange={setShowCompletedTransactionsModal}>
+        <DialogContent className="max-w-6xl max-h-[85vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50">
+          <DialogHeader className="pb-6 border-b border-orange-200/50">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full">
+                <CheckCircle className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-bold text-gray-900">Completed Transactions</DialogTitle>
+                <DialogDescription className="text-gray-600">
+                  View all successfully processed investment transactions
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          
+          <div className="py-6">
+            {investments?.filter((inv: Investment) => inv.paymentStatus === 'completed').length > 0 ? (
+              <div className="space-y-4">
+                {investments?.filter((inv: Investment) => inv.paymentStatus === 'completed').map((investment: Investment) => (
+                  <div key={investment.id} className="flex items-center justify-between p-4 border border-green-200 rounded-lg bg-green-50/50">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-green-100 rounded-full">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {investment.investorName || `${investment.investor?.firstName} ${investment.investor?.lastName}`}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Campaign: {investment.campaign?.companyName || investment.campaign?.title}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="ml-11 mt-2 flex items-center space-x-6">
+                        <span className="text-lg font-bold text-green-700">
+                          {formatCurrency(parseFloat(investment.amount))}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {new Date(investment.createdAt).toLocaleDateString()}
+                        </span>
+                        <Badge variant="default" className="bg-green-100 text-green-800">
+                          Completed
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <CheckCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Completed Transactions</h3>
+                <p className="text-gray-500">No completed transactions to display yet.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end pt-6 border-t border-orange-200/50">
+            <Button variant="outline" onClick={() => setShowCompletedTransactionsModal(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Withdrawal Management Modal */}
+      <Dialog open={showWithdrawalManagementModal} onOpenChange={setShowWithdrawalManagementModal}>
+        <DialogContent className="max-w-6xl max-h-[85vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50">
+          <DialogHeader className="pb-6 border-b border-orange-200/50">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-r from-red-500 to-pink-600 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-bold text-gray-900">Withdrawal Management</DialogTitle>
+                <DialogDescription className="text-gray-600">
+                  Approve and manage founder withdrawal requests
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          
+          <div className="py-6">
+            {withdrawals && withdrawals.length > 0 ? (
+              <div className="space-y-4">
+                {withdrawals.map((withdrawal) => (
+                  <div key={withdrawal.id} className="p-4 border rounded-lg bg-white shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div className={`p-2 rounded-full ${
+                            withdrawal.status === 'pending' ? 'bg-yellow-100' : 
+                            withdrawal.status === 'approved' ? 'bg-blue-100' :
+                            withdrawal.status === 'completed' ? 'bg-green-100' : 'bg-red-100'
+                          }`}>
+                            {withdrawal.status === 'pending' ? (
+                              <Clock className="w-4 h-4 text-yellow-600" />
+                            ) : withdrawal.status === 'approved' ? (
+                              <CheckCircle className="w-4 h-4 text-blue-600" />
+                            ) : withdrawal.status === 'completed' ? (
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <X className="w-4 h-4 text-red-600" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">{withdrawal.founderName}</p>
+                            <p className="text-sm text-gray-600">
+                              Requested: {formatCurrency(withdrawal.amount)}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(withdrawal.requestedAt).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant={
+                          withdrawal.status === 'pending' ? 'secondary' : 
+                          withdrawal.status === 'approved' ? 'default' :
+                          withdrawal.status === 'completed' ? 'default' : 'destructive'
+                        } className={
+                          withdrawal.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          withdrawal.status === 'approved' ? 'bg-blue-100 text-blue-800' :
+                          withdrawal.status === 'completed' ? 'bg-green-100 text-green-800' : ''
+                        }>
+                          {withdrawal.status}
+                        </Badge>
+                        
+                        {withdrawal.status === 'pending' && (
+                          <Button 
+                            size="sm" 
+                            onClick={() => approveWithdrawalMutation.mutate(withdrawal.id)}
+                            disabled={approveWithdrawalMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Approve
+                          </Button>
+                        )}
+                        
+                        {withdrawal.status === 'approved' && (
+                          <Button 
+                            size="sm" 
+                            onClick={() => markWithdrawalCompleteMutation.mutate(withdrawal.id)}
+                            disabled={markWithdrawalCompleteMutation.isPending}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Mark Complete
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <AlertTriangle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Withdrawal Requests</h3>
+                <p className="text-gray-500">No withdrawal requests to display yet.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end pt-6 border-t border-orange-200/50">
+            <Button variant="outline" onClick={() => setShowWithdrawalManagementModal(false)}>
+              Close
             </Button>
           </div>
         </DialogContent>

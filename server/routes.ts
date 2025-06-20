@@ -4985,6 +4985,71 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Withdrawal Management API endpoints
+  app.put('/api/admin/withdrawals/:id/approve', requireAdmin, async (req: any, res) => {
+    try {
+      const withdrawalId = req.params.id;
+      
+      // Update withdrawal status in memory for fallback system
+      if (!global.adminWithdrawals) {
+        global.adminWithdrawals = [];
+      }
+      
+      const withdrawalIndex = global.adminWithdrawals.findIndex(w => w.id === withdrawalId);
+      if (withdrawalIndex >= 0) {
+        global.adminWithdrawals[withdrawalIndex].status = 'approved';
+        global.adminWithdrawals[withdrawalIndex].approvedAt = new Date().toISOString();
+        global.adminWithdrawals[withdrawalIndex].approvedBy = req.user.id;
+      }
+
+      await logAdminAction(
+        req.user.id,
+        'withdrawal_approved',
+        'withdrawal',
+        withdrawalId,
+        { status: 'approved' },
+        req
+      );
+
+      res.json({ message: "Withdrawal approved successfully" });
+    } catch (error) {
+      console.error("Error approving withdrawal:", error);
+      res.status(500).json({ message: "Failed to approve withdrawal" });
+    }
+  });
+
+  app.put('/api/admin/withdrawals/:id/complete', requireAdmin, async (req: any, res) => {
+    try {
+      const withdrawalId = req.params.id;
+      
+      // Update withdrawal status in memory for fallback system
+      if (!global.adminWithdrawals) {
+        global.adminWithdrawals = [];
+      }
+      
+      const withdrawalIndex = global.adminWithdrawals.findIndex(w => w.id === withdrawalId);
+      if (withdrawalIndex >= 0) {
+        global.adminWithdrawals[withdrawalIndex].status = 'completed';
+        global.adminWithdrawals[withdrawalIndex].completedAt = new Date().toISOString();
+        global.adminWithdrawals[withdrawalIndex].completedBy = req.user.id;
+      }
+
+      await logAdminAction(
+        req.user.id,
+        'withdrawal_completed',
+        'withdrawal',
+        withdrawalId,
+        { status: 'completed' },
+        req
+      );
+
+      res.json({ message: "Withdrawal marked as completed" });
+    } catch (error) {
+      console.error("Error marking withdrawal complete:", error);
+      res.status(500).json({ message: "Failed to mark withdrawal complete" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -3711,9 +3711,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       await logAdminActivity(
         req.user.id, 
         'Campaign Management', 
-        `Changed campaign status to ${status}`,
-        'campaign',
-        campaignId.toString()
+        `Changed campaign status to ${status} for campaign ID ${campaignId}`
       );
 
       res.json({ message: "Campaign status updated successfully", campaign: updatedCampaign });
@@ -3748,9 +3746,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       await logAdminActivity(
         req.user.id, 
         'Campaign Management', 
-        `Updated campaign details`,
-        'campaign',
-        campaignId.toString()
+        `Updated campaign details for campaign ID ${campaignId}`
       );
 
       res.json({ message: "Campaign updated successfully", campaign: updatedCampaign });

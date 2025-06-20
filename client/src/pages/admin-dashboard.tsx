@@ -2778,6 +2778,32 @@ export default function AdminDashboard() {
                               />
                             </div>
                           </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <label className="font-medium text-gray-800">Document Types Required</label>
+                              <p className="text-sm text-gray-600">Documents needed for verification</p>
+                            </div>
+                            <Select
+                              value={platformSettings?.kyc_tier_1_document_types?.value || 'basic'}
+                              onValueChange={(value) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.kyc_tier_1_document_types) newSettings.kyc_tier_1_document_types = {};
+                                newSettings.kyc_tier_1_document_types.value = value;
+                                setPlatformSettings(newSettings);
+                              }}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">None Required</SelectItem>
+                                <SelectItem value="basic">Basic (ID Only)</SelectItem>
+                                <SelectItem value="standard">Standard (ID + Utility)</SelectItem>
+                                <SelectItem value="enhanced">Enhanced (Full Suite)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
 
@@ -2831,6 +2857,32 @@ export default function AdminDashboard() {
                               />
                             </div>
                           </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <label className="font-medium text-gray-800">Document Types Required</label>
+                              <p className="text-sm text-gray-600">Documents needed for verification</p>
+                            </div>
+                            <Select
+                              value={platformSettings?.kyc_tier_2_document_types?.value || 'standard'}
+                              onValueChange={(value) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.kyc_tier_2_document_types) newSettings.kyc_tier_2_document_types = {};
+                                newSettings.kyc_tier_2_document_types.value = value;
+                                setPlatformSettings(newSettings);
+                              }}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">None Required</SelectItem>
+                                <SelectItem value="basic">Basic (ID Only)</SelectItem>
+                                <SelectItem value="standard">Standard (ID + Utility)</SelectItem>
+                                <SelectItem value="enhanced">Enhanced (Full Suite)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
 
@@ -2883,6 +2935,32 @@ export default function AdminDashboard() {
                                 max="50000"
                               />
                             </div>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <label className="font-medium text-gray-800">Document Types Required</label>
+                              <p className="text-sm text-gray-600">Documents needed for verification</p>
+                            </div>
+                            <Select
+                              value={platformSettings?.kyc_tier_3_document_types?.value || 'enhanced'}
+                              onValueChange={(value) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.kyc_tier_3_document_types) newSettings.kyc_tier_3_document_types = {};
+                                newSettings.kyc_tier_3_document_types.value = value;
+                                setPlatformSettings(newSettings);
+                              }}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">None Required</SelectItem>
+                                <SelectItem value="basic">Basic (ID Only)</SelectItem>
+                                <SelectItem value="standard">Standard (ID + Utility)</SelectItem>
+                                <SelectItem value="enhanced">Enhanced (Full Suite)</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
                       </div>
@@ -2982,6 +3060,10 @@ export default function AdminDashboard() {
                             settingValue: platformSettings?.kyc_tier_1_threshold?.value || '500'
                           }),
                           updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'kyc_tier_1_document_types',
+                            settingValue: platformSettings?.kyc_tier_1_document_types?.value || 'basic'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
                             settingKey: 'kyc_tier_2_required',
                             settingValue: platformSettings?.kyc_tier_2_required?.value || 'true'
                           }),
@@ -2990,12 +3072,20 @@ export default function AdminDashboard() {
                             settingValue: platformSettings?.kyc_tier_2_threshold?.value || '250'
                           }),
                           updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'kyc_tier_2_document_types',
+                            settingValue: platformSettings?.kyc_tier_2_document_types?.value || 'standard'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
                             settingKey: 'kyc_tier_3_required',
                             settingValue: platformSettings?.kyc_tier_3_required?.value || 'true'
                           }),
                           updatePlatformSettingMutation.mutateAsync({
                             settingKey: 'kyc_tier_3_threshold',
                             settingValue: platformSettings?.kyc_tier_3_threshold?.value || '100'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'kyc_tier_3_document_types',
+                            settingValue: platformSettings?.kyc_tier_3_document_types?.value || 'enhanced'
                           }),
                           updatePlatformSettingMutation.mutateAsync({
                             settingKey: 'auto_kyc_approval',
@@ -3197,31 +3287,44 @@ export default function AdminDashboard() {
                       <div className="border-t border-purple-200 pt-2 mt-2">
                         <h5 className="text-sm font-semibold text-gray-700 mb-2">KYC Requirements by Tier</h5>
                         <div className="space-y-1">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="text-gray-600">Tier 1 (&lt; $1,000):</span>
-                            <div className="flex items-center space-x-2">
-                              <Badge variant={platformSettings?.kyc_tier_1_required?.value === 'true' ? "default" : "secondary"} className="text-xs">
-                                {platformSettings?.kyc_tier_1_required?.value === 'true' ? 'Required' : 'Optional'}
-                              </Badge>
-                              <span className="text-gray-500">Threshold: ${platformSettings?.kyc_tier_1_threshold?.value || '500'}</span>
+                          <div className="grid grid-cols-1 gap-2 text-xs">
+                            <div className="p-2 bg-green-50 rounded border border-green-200">
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium text-green-800">Tier 1 (&lt; $1,000):</span>
+                                <Badge variant={platformSettings?.kyc_tier_1_required?.value === 'true' ? "default" : "secondary"} className="text-xs">
+                                  {platformSettings?.kyc_tier_1_required?.value === 'true' ? 'Required' : 'Optional'}
+                                </Badge>
+                              </div>
+                              <div className="flex justify-between items-center mt-1">
+                                <span className="text-gray-600">Threshold: ${platformSettings?.kyc_tier_1_threshold?.value || '500'}</span>
+                                <span className="text-gray-600 capitalize">Docs: {platformSettings?.kyc_tier_1_document_types?.value || 'Basic'}</span>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="text-gray-600">Tier 2 ($1,000 - $50,000):</span>
-                            <div className="flex items-center space-x-2">
-                              <Badge variant={platformSettings?.kyc_tier_2_required?.value === 'true' ? "default" : "secondary"} className="text-xs">
-                                {platformSettings?.kyc_tier_2_required?.value === 'true' ? 'Required' : 'Optional'}
-                              </Badge>
-                              <span className="text-gray-500">Threshold: ${platformSettings?.kyc_tier_2_threshold?.value || '250'}</span>
+                            
+                            <div className="p-2 bg-blue-50 rounded border border-blue-200">
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium text-blue-800">Tier 2 ($1,000 - $50,000):</span>
+                                <Badge variant={platformSettings?.kyc_tier_2_required?.value === 'true' ? "default" : "secondary"} className="text-xs">
+                                  {platformSettings?.kyc_tier_2_required?.value === 'true' ? 'Required' : 'Optional'}
+                                </Badge>
+                              </div>
+                              <div className="flex justify-between items-center mt-1">
+                                <span className="text-gray-600">Threshold: ${platformSettings?.kyc_tier_2_threshold?.value || '250'}</span>
+                                <span className="text-gray-600 capitalize">Docs: {platformSettings?.kyc_tier_2_document_types?.value || 'Standard'}</span>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="text-gray-600">Tier 3 (&gt; $50,000):</span>
-                            <div className="flex items-center space-x-2">
-                              <Badge variant={platformSettings?.kyc_tier_3_required?.value === 'true' ? "default" : "secondary"} className="text-xs">
-                                {platformSettings?.kyc_tier_3_required?.value === 'true' ? 'Required' : 'Optional'}
-                              </Badge>
-                              <span className="text-gray-500">Threshold: ${platformSettings?.kyc_tier_3_threshold?.value || '100'}</span>
+                            
+                            <div className="p-2 bg-purple-50 rounded border border-purple-200">
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium text-purple-800">Tier 3 (&gt; $50,000):</span>
+                                <Badge variant={platformSettings?.kyc_tier_3_required?.value === 'true' ? "default" : "secondary"} className="text-xs">
+                                  {platformSettings?.kyc_tier_3_required?.value === 'true' ? 'Required' : 'Optional'}
+                                </Badge>
+                              </div>
+                              <div className="flex justify-between items-center mt-1">
+                                <span className="text-gray-600">Threshold: ${platformSettings?.kyc_tier_3_threshold?.value || '100'}</span>
+                                <span className="text-gray-600 capitalize">Docs: {platformSettings?.kyc_tier_3_document_types?.value || 'Enhanced'}</span>
+                              </div>
                             </div>
                           </div>
                           <div className="flex justify-between items-center text-xs">

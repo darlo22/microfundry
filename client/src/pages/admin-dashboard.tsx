@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { 
   Users, 
@@ -28,15 +30,27 @@ import {
   Calendar,
   Mail,
   User,
+  Globe,
+  Percent,
+  Calculator,
+  Trash2,
+  Plus,
+  MoreHorizontal,
+  Filter,
+  BarChart3,
+  CreditCard,
+  Building2,
+  Pause,
+  ChevronRight,
   MapPin,
   Phone,
   Key,
-  Send,
   Bell,
   Search,
   X,
-  Clock,
   Star,
+  Send,
+  Clock,
   Save
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";

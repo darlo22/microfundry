@@ -162,8 +162,15 @@ export default function AdminDashboard() {
   const [userSearchQuery, setUserSearchQuery] = useState('');
   
   // Team Management State
-  const [newTeamMember, setNewTeamMember] = useState<any>({});
-  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [inviteTeamModalOpen, setInviteTeamModalOpen] = useState(false);
+  const [inviteForm, setInviteForm] = useState({
+    email: "",
+    fullName: "",
+    role: "admin",
+    department: "operations",
+    responsibilities: "",
+    tempPassword: ""
+  });
   const [isInvitingMember, setIsInvitingMember] = useState(false);
   const [editingMember, setEditingMember] = useState<any>(null);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -381,6 +388,75 @@ export default function AdminDashboard() {
     setSelectedCampaign(campaign);
     setPauseCampaignModalOpen(true);
   };
+
+  // Team management mutations
+  const inviteTeamMemberMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest("POST", "/api/admin/invite-team-member", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/team-members'] });
+      setInviteTeamModalOpen(false);
+      setInviteForm({
+        email: "",
+        fullName: "",
+        role: "admin",
+        department: "operations",
+        responsibilities: "",
+        tempPassword: ""
+      });
+      toast({
+        title: "Team Member Invited",
+        description: "Team member invitation sent successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Invitation Failed",
+        description: "Failed to send team member invitation.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const resetTeamPasswordMutation = useMutation({
+    mutationFn: async (data: { memberId: number; email: string }) => {
+      return apiRequest("POST", "/api/admin/reset-team-password", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password Reset",
+        description: "Password reset email sent successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Reset Failed",
+        description: "Failed to reset team member password.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const removeTeamMemberMutation = useMutation({
+    mutationFn: async (memberId: number) => {
+      return apiRequest("DELETE", `/api/admin/team-members/${memberId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/team-members'] });
+      toast({
+        title: "Team Member Removed",
+        description: "Team member has been removed successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Removal Failed",
+        description: "Failed to remove team member.",
+        variant: "destructive",
+      });
+    }
+  });
 
   // Message sending mutation
   const sendMessageMutation = useMutation({
@@ -623,19 +699,6 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/message-stats'],
     enabled: !!adminUser && activeTab === "message-center"
   });
-
-  // Team members query
-  const { data: teamMembersData, isLoading: teamMembersLoading } = useQuery<any[]>({
-    queryKey: ['/api/admin/team-members'],
-    enabled: !!adminUser && activeTab === "settings"
-  });
-
-  // Update team members state when data changes
-  useEffect(() => {
-    if (teamMembersData) {
-      setTeamMembers(teamMembersData);
-    }
-  }, [teamMembersData]);
 
   const filteredUsers = useMemo(() => {
     if (!users || !userSearchQuery) return [];

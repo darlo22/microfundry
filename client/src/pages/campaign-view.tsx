@@ -445,20 +445,18 @@ export default function CampaignView() {
                 <Button 
                   onClick={handleInvest}
                   disabled={isProcessing}
-                  className="w-full bg-fundry-orange hover:bg-orange-600 text-white font-bold py-3 text-base mb-4 rounded-lg"
+                  className="w-full bg-fundry-orange hover:bg-orange-600 text-white font-bold py-2 sm:py-3 text-sm sm:text-base mb-3 sm:mb-4 rounded-lg"
                 >
                   {isProcessing ? "Processing..." : "INVEST"}
                 </Button>
 
-
-
                 {/* Investment Terms */}
-                <div className="border-t pt-4">
-                  <h3 className="font-semibold text-gray-900 mb-3 text-sm">INVESTMENT TERMS</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
+                <div className="border-t pt-3 sm:pt-4">
+                  <h3 className="font-semibold text-gray-900 mb-2 sm:mb-3 text-xs sm:text-sm">INVESTMENT TERMS</h3>
+                  <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
+                    <div className="flex justify-between items-start">
                       <span className="text-gray-600">Future Equity</span>
-                      <span className="font-medium">{formatCurrency(campaign.valuationCap)} Valuation Cap</span>
+                      <span className="font-medium text-right ml-2">{formatCurrency(campaign.valuationCap)} Valuation Cap</span>
                     </div>
                     {campaign.discountRate && (
                       <div className="flex justify-between">
@@ -466,7 +464,6 @@ export default function CampaignView() {
                         <span className="font-medium">{campaign.discountRate}%</span>
                       </div>
                     )}
-
                   </div>
                 </div>
 
@@ -678,12 +675,12 @@ export default function CampaignView() {
           {/* Investment Details */}
           <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30">
             <CardContent className="p-10">
-              <div className="flex items-center space-x-4 mb-8">
-                <div className="w-3 h-10 bg-gradient-to-b from-fundry-orange via-orange-500 to-orange-600 rounded-full shadow-md"></div>
-                <h2 className="text-3xl font-bold text-fundry-navy tracking-tight">Investment Details</h2>
+              <div className="flex items-center space-x-4 mb-6 sm:mb-8">
+                <div className="w-3 h-8 sm:h-10 bg-gradient-to-b from-fundry-orange via-orange-500 to-orange-600 rounded-full shadow-md"></div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-fundry-navy tracking-tight">Investment Details</h2>
               </div>
               
-              <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Funding Goal */}
                 <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-violet-600"></div>

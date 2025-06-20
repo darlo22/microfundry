@@ -1380,7 +1380,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               </div>
             </div>
 
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6">
               <div className="text-center mb-4">
                 <Shield className="mx-auto h-8 w-8 text-blue-500 mb-2" />
                 <p className="text-sm text-gray-600">
@@ -1388,11 +1388,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 </p>
               </div>
               
-              <div className="flex flex-col sm:flex-row justify-center gap-3">
+              <div className="flex flex-col gap-3 max-w-sm mx-auto">
                 <Button
                   variant="outline"
                   onClick={() => setShowSafeViewer(true)}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white"
+                  className="w-full flex items-center justify-center gap-2 border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white"
                 >
                   <FileText className="w-4 h-4" />
                   View SAFE Agreement
@@ -1403,7 +1403,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                     const safeContent = generateSafeAgreement(campaign, selectedAmount);
                     downloadSafeAgreement(safeContent, campaign.title, selectedAmount);
                   }}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white"
+                  className="w-full flex items-center justify-center gap-2 border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white"
                 >
                   <Download className="w-4 h-4" />
                   Download SAFE Agreement

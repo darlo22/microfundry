@@ -309,7 +309,7 @@ export default function CampaignView() {
                   {/* Social Media Links */}
                   {((campaign as any).websiteUrl || (campaign as any).twitterUrl || (campaign as any).facebookUrl || (campaign as any).instagramUrl || 
                     (campaign as any).linkedinUrl || (campaign as any).youtubeUrl || (campaign as any).mediumUrl || (campaign as any).tiktokUrl || (campaign as any).snapchatUrl) && (
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 border-t pt-4 mt-4">
+                    <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-600 border-t pt-4 mt-4">
                       {(campaign as any).websiteUrl && (
                         <a 
                           href={(campaign as any).websiteUrl} 

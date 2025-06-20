@@ -179,7 +179,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center space-x-4">
             <Badge variant="secondary" className="bg-green-100 text-green-800">
-              Admin: {user.firstName} {user.lastName}
+              Admin: {adminUser.firstName} {adminUser.lastName}
             </Badge>
             <Button onClick={handleLogout} variant="outline" size="sm">
               <LogOut className="w-4 h-4 mr-2" />

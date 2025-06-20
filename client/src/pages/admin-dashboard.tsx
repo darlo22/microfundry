@@ -37,13 +37,7 @@ import {
   X,
   Clock,
   Star,
-  Save,
-  Globe,
-  Percent,
-  CreditCard as PaymentIcon,
-  Calculator,
-  Trash2,
-  Plus
+  Save
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
@@ -2437,62 +2431,51 @@ export default function AdminDashboard() {
           {activeTab === "settings" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Global Admin Settings</h2>
-                <p className="text-gray-600">Configure platform-wide rules for multi-country fundraising</p>
+                <h2 className="text-3xl font-bold text-gray-900">Platform Settings</h2>
+                <p className="text-gray-600">Configure platform-wide settings and policies</p>
               </div>
 
-              <Tabs defaultValue="fee-tiers" className="w-full">
-                <TabsList className="grid w-full grid-cols-6">
-                  <TabsTrigger value="fee-tiers" className="flex items-center gap-2">
-                    <Percent className="w-4 h-4" />
-                    Fee Tiers
-                  </TabsTrigger>
-                  <TabsTrigger value="kyc-rules" className="flex items-center gap-2">
-                    <Shield className="w-4 h-4" />
-                    KYC Rules
-                  </TabsTrigger>
-                  <TabsTrigger value="regions" className="flex items-center gap-2">
-                    <Globe className="w-4 h-4" />
-                    Regions
-                  </TabsTrigger>
-                  <TabsTrigger value="payments" className="flex items-center gap-2">
-                    <PaymentIcon className="w-4 h-4" />
-                    Payments
-                  </TabsTrigger>
-                  <TabsTrigger value="legal" className="flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    Legal
-                  </TabsTrigger>
-                  <TabsTrigger value="simulator" className="flex items-center gap-2">
-                    <Calculator className="w-4 h-4" />
-                    Simulator
-                  </TabsTrigger>
-                </TabsList>
+              <div className="grid gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Investment Limits</CardTitle>
+                    <CardDescription>Set minimum and maximum investment amounts</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium">Minimum Investment</label>
+                        <p className="text-2xl font-bold text-green-600">$25</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Maximum Campaign Goal</label>
+                        <p className="text-2xl font-bold text-blue-600">$100,000</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                <TabsContent value="fee-tiers" className="space-y-6">
-                  <FeeTimersManager />
-                </TabsContent>
-
-                <TabsContent value="kyc-rules" className="space-y-6">
-                  <KYCRulesManager />
-                </TabsContent>
-
-                <TabsContent value="regions" className="space-y-6">
-                  <RegionSettingsManager />
-                </TabsContent>
-
-                <TabsContent value="payments" className="space-y-6">
-                  <PaymentGatewaysManager />
-                </TabsContent>
-
-                <TabsContent value="legal" className="space-y-6">
-                  <LegalDocumentsManager />
-                </TabsContent>
-
-                <TabsContent value="simulator" className="space-y-6">
-                  <FeeSimulator />
-                </TabsContent>
-              </Tabs>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Platform Fees</CardTitle>
+                    <CardDescription>Current fee structure for the platform</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium">Standard Fee</label>
+                        <p className="text-2xl font-bold text-fundry-orange">0%</p>
+                        <p className="text-sm text-gray-600">For all investors</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Processing Fee</label>
+                        <p className="text-2xl font-bold text-gray-600">Stripe/Budpay</p>
+                        <p className="text-sm text-gray-600">Payment processing only</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           )}
         </main>

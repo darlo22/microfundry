@@ -122,8 +122,10 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     return 0;
   };
 
-  // Initialize Stripe
-  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
+  // Initialize Stripe outside component to avoid recreating on every render
+  const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
+    ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
+    : null;
 
   // Budpay configuration
   const BUDPAY_PUBLIC_KEY = import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key';

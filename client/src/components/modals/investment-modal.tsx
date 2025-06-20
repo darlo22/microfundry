@@ -439,10 +439,13 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         description: "Opening Budpay checkout with payment options...",
       });
 
+      // Get the actual investment amount
+      const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
+      
       // Create payment request with backend
       const paymentData = {
         campaignId: campaign.id,
-        amount: selectedAmount,
+        amount: actualAmount,
         currency: 'NGN',
         ngnAmount: ngnAmount,
         email: user?.email || investorDetails.firstName + '@example.com',
@@ -591,10 +594,13 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     });
 
     try {
+      // Get the actual investment amount
+      const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
+      
       // Create Budpay payment request
       const paymentData = {
         campaignId: campaign.id,
-        amount: selectedAmount,
+        amount: actualAmount,
         currency: 'NGN',
         ngnAmount: ngnAmount,
         paymentMethod: 'budpay',
@@ -903,10 +909,14 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
 
   const handlePayment = async () => {
     setIsProcessingPayment(true);
+    
+    // Get the actual investment amount
+    const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
+    
     try {
       const investmentData = {
         campaignId: campaign.id,
-        amount: selectedAmount.toString(),
+        amount: actualAmount.toString(),
         status: 'committed',
         investorDetails: {
           ...investorDetails,
@@ -921,7 +931,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       
       toast({
         title: "Investment Successful!",
-        description: `You have successfully committed $${selectedAmount} to ${campaign.title}`,
+        description: `You have successfully committed $${actualAmount} to ${campaign.title}`,
       });
     } catch (error: any) {
       toast({
@@ -1499,7 +1509,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               <CardContent className="space-y-3">
                 <div className="flex justify-between items-center py-3 border-b border-gray-100">
                   <span className="text-gray-600 font-medium">USD Amount:</span>
-                  <span className="font-bold text-xl text-gray-900">${selectedAmount}</span>
+                  <span className="font-bold text-xl text-gray-900">${selectedAmount || parseFloat(customAmount) || 0}</span>
                 </div>
                 
                 {ngnAmount && exchangeRate ? (
@@ -1629,7 +1639,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
               <h4 className="font-semibold text-green-900 mb-4">Congratulations!</h4>
               <p className="text-green-800 mb-4">
-                You have successfully invested ${selectedAmount} in {campaign.title}. Your payment has been processed and you will receive updates on the company's progress.
+                You have successfully invested ${selectedAmount || parseFloat(customAmount) || 0} in {campaign.title}. Your payment has been processed and you will receive updates on the company's progress.
               </p>
               
               <div className="space-y-2 text-sm">

@@ -7,6 +7,7 @@ import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser, emailVerificationTokens } from "@shared/schema";
 import connectPg from "connect-pg-simple";
+import MemoryStore from "memorystore";
 import { emailService } from "./services/email";
 import { db } from "./db";
 import { nanoid } from "nanoid";
@@ -34,30 +35,13 @@ export async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const PostgresSessionStore = connectPg(session);
-  
-  // Enhanced session store with error handling
-  const sessionStore = new PostgresSessionStore({
-    conString: process.env.DATABASE_URL,
-    tableName: "sessions",
-    createTableIfMissing: false,
-    errorLog: (error: Error) => {
-      if (error.message?.includes('Control plane') || (error as any).code === 'XX000') {
-        console.log('Session store control plane error (non-critical):', error.message);
-      } else {
-        console.error('Session store error:', error);
-      }
-    }
+  // Use MemoryStore to avoid PostgreSQL control plane issues
+  const MemStore = MemoryStore(session);
+  const sessionStore = new MemStore({
+    checkPeriod: 86400000, // Prune expired entries every 24h
   });
 
-  // Handle session store errors gracefully
-  sessionStore.on('error', (error: Error) => {
-    if (error.message?.includes('Control plane') || (error as any).code === 'XX000') {
-      console.log('Session store connection issue (retrying):', error.message);
-    } else {
-      console.error('Session store critical error:', error);
-    }
-  });
+  console.log('Using memory-based session store for stability');
   
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "dev-secret-key-change-in-production",

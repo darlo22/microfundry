@@ -23,7 +23,8 @@ const formatCurrency = (amount: number) => {
 // Get status badge for campaign
 const getStatusBadge = (campaign: CampaignWithStats) => {
   const totalRaised = typeof campaign.totalRaised === 'string' ? parseFloat(campaign.totalRaised) : campaign.totalRaised || 0;
-  const progressPercent = (totalRaised / campaign.fundingGoal) * 100;
+  const fundingGoal = typeof campaign.fundingGoal === 'string' ? parseFloat(campaign.fundingGoal) : campaign.fundingGoal || 1;
+  const progressPercent = (totalRaised / fundingGoal) * 100;
   
   if (progressPercent >= 90) {
     return { text: "Almost Funded", color: "bg-red-500" };
@@ -41,7 +42,8 @@ function WefunderCampaignCard({ campaign }: { campaign: CampaignWithStats }) {
   const [, setLocation] = useLocation();
   const status = getStatusBadge(campaign);
   const totalRaised = typeof campaign.totalRaised === 'string' ? parseFloat(campaign.totalRaised) : campaign.totalRaised || 0;
-  const progressPercent = (totalRaised / campaign.fundingGoal) * 100;
+  const fundingGoal = typeof campaign.fundingGoal === 'string' ? parseFloat(campaign.fundingGoal) : campaign.fundingGoal || 1;
+  const progressPercent = (totalRaised / fundingGoal) * 100;
 
   return (
     <Card 
@@ -147,7 +149,7 @@ function WefunderCampaignCard({ campaign }: { campaign: CampaignWithStats }) {
         {/* Bottom Stats */}
         <div className="flex justify-between items-center text-sm text-gray-600">
           <span className="font-medium">
-            {formatCurrency(campaign.fundingGoal)} goal
+            {formatCurrency(Number(fundingGoal))} goal
           </span>
           <span className="flex items-center gap-1">
             <Eye className="w-4 h-4" />

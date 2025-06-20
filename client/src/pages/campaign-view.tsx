@@ -9,6 +9,9 @@ import InvestmentModal from "@/components/modals/investment-modal";
 import { ShareCampaignModal } from "@/components/modals/share-campaign-modal";
 import { EditCampaignModal } from "@/components/modals/edit-campaign-modal";
 import { PitchDeckModal } from "@/components/modals/pitch-deck-modal";
+import { CampaignUpdatesModal } from "@/components/modals/campaign-updates-modal";
+import { CampaignCommentsModal } from "@/components/modals/campaign-comments-modal";
+import { CampaignQuestionsModal } from "@/components/modals/campaign-questions-modal";
 import { RobustVideoPlayer } from "@/components/RobustVideoPlayer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -70,6 +73,27 @@ export default function CampaignView() {
     queryKey: [`/api/investments/campaign/${campaign?.id}`],
     enabled: !!campaign?.id,
   });
+
+  // Fetch campaign updates count
+  const { data: updatesData } = useQuery<any[]>({
+    queryKey: [`/api/campaign-updates/${campaign?.id}`],
+    enabled: !!campaign?.id,
+  });
+  const updatesCount = updatesData?.length || 0;
+
+  // Fetch campaign comments count
+  const { data: commentsData } = useQuery<any[]>({
+    queryKey: [`/api/campaigns/${campaign?.id}/comments`],
+    enabled: !!campaign?.id,
+  });
+  const commentsCount = commentsData?.length || 0;
+
+  // Fetch campaign questions count
+  const { data: questionsData } = useQuery<any[]>({
+    queryKey: [`/api/campaigns/${campaign?.id}/questions`],
+    enabled: !!campaign?.id,
+  });
+  const questionsCount = questionsData?.length || 0;
 
   // Helper functions for processing investment data
   const formatCurrency = (amount: string | number) => {
@@ -1133,6 +1157,33 @@ export default function CampaignView() {
         <PitchDeckModal 
           isOpen={showPitchDeckModal}
           onClose={() => setShowPitchDeckModal(false)}
+          campaignId={campaign.id}
+          campaignTitle={campaign.title}
+        />
+      )}
+
+      {campaign && (
+        <CampaignUpdatesModal
+          isOpen={showUpdatesModal}
+          onClose={() => setShowUpdatesModal(false)}
+          campaignId={campaign.id}
+          campaignTitle={campaign.title}
+        />
+      )}
+
+      {campaign && (
+        <CampaignCommentsModal
+          isOpen={showCommentsModal}
+          onClose={() => setShowCommentsModal(false)}
+          campaignId={campaign.id}
+          campaignTitle={campaign.title}
+        />
+      )}
+
+      {campaign && (
+        <CampaignQuestionsModal
+          isOpen={showQuestionsModal}
+          onClose={() => setShowQuestionsModal(false)}
           campaignId={campaign.id}
           campaignTitle={campaign.title}
         />

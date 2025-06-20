@@ -939,6 +939,34 @@ export default function CampaignView() {
             </Card>
           )}
 
+          {/* Directors Information */}
+          {campaign.directors && Array.isArray(campaign.directors) && campaign.directors.length > 0 && (
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardContent className="p-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold text-fundry-navy">Company Directors</h2>
+                </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {campaign.directors.map((director: any, index: number) => (
+                    <div key={index} className="bg-gray-50 rounded-xl p-6">
+                      <h3 className="font-semibold text-fundry-navy mb-2">{director.name || `Director ${index + 1}`}</h3>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <span className="font-medium">Position:</span> {director.position || 'Director'}
+                      </p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <span className="font-medium">Ownership:</span> {director.ownership || 'N/A'}%
+                      </p>
+                      {director.experience && (
+                        <p className="text-sm text-gray-700 mt-2">{director.experience}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Meet the Team */}
           {campaign.teamMembers && Array.isArray(campaign.teamMembers) && campaign.teamMembers.length > 0 && (
             <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30">
@@ -1013,34 +1041,6 @@ export default function CampaignView() {
                       </div>
                     );
                   })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Directors Information */}
-          {campaign.directors && Array.isArray(campaign.directors) && campaign.directors.length > 0 && (
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardContent className="p-8">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-2 h-8 bg-gradient-to-b from-fundry-orange to-orange-600 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-fundry-navy">Company Directors</h2>
-                </div>
-                <div className="grid md:grid-cols-2 gap-6">
-                  {campaign.directors.map((director: any, index: number) => (
-                    <div key={index} className="bg-gray-50 rounded-xl p-6">
-                      <h3 className="font-semibold text-fundry-navy mb-2">{director.name || `Director ${index + 1}`}</h3>
-                      <p className="text-sm text-gray-600 mb-1">
-                        <span className="font-medium">Position:</span> {director.position || 'Director'}
-                      </p>
-                      <p className="text-sm text-gray-600 mb-1">
-                        <span className="font-medium">Ownership:</span> {director.ownership || 'N/A'}%
-                      </p>
-                      {director.experience && (
-                        <p className="text-sm text-gray-700 mt-2">{director.experience}</p>
-                      )}
-                    </div>
-                  ))}
                 </div>
               </CardContent>
             </Card>

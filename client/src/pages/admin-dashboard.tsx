@@ -29,7 +29,10 @@ import {
   Mail,
   User,
   MapPin,
-  Phone
+  Phone,
+  Key,
+  Send,
+  Bell
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
@@ -191,6 +194,80 @@ export default function AdminDashboard() {
       userId: selectedUser.id,
       suspend,
       reason
+    });
+  };
+
+  // Additional user management mutations
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return apiRequest("POST", `/api/admin/users/${userId}/reset-password`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password Reset Sent",
+        description: "Password reset email has been sent to the user.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Reset Failed",
+        description: "Failed to send password reset email.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const sendVerificationMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return apiRequest("POST", `/api/admin/users/${userId}/send-verification`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Verification Email Sent",
+        description: "Email verification link has been sent to the user.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Verification Failed",
+        description: "Failed to send verification email.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const sendNotificationMutation = useMutation({
+    mutationFn: async (data: { userId: string; message: string; type: string }) => {
+      return apiRequest("POST", `/api/admin/users/${data.userId}/send-notification`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Notification Sent",
+        description: "Push notification has been sent to the user.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Notification Failed",
+        description: "Failed to send push notification.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleResetPassword = (user: User) => {
+    resetPasswordMutation.mutate(user.id);
+  };
+
+  const handleSendVerification = (user: User) => {
+    sendVerificationMutation.mutate(user.id);
+  };
+
+  const handleSendNotification = (user: User) => {
+    sendNotificationMutation.mutate({
+      userId: user.id,
+      message: `Hello ${user.firstName}, this is an important notification from the Fundry admin team.`,
+      type: "admin"
     });
   };
 
@@ -502,7 +579,7 @@ export default function AdminDashboard() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-2 flex-wrap gap-2">
                             <Button size="sm" variant="outline" onClick={() => handleViewUser(user)}>
                               <Eye className="w-4 h-4 mr-1" />
                               View
@@ -510,6 +587,36 @@ export default function AdminDashboard() {
                             <Button size="sm" variant="outline" onClick={() => handleEditUser(user)}>
                               <Edit className="w-4 h-4 mr-1" />
                               Edit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleResetPassword(user)}
+                              disabled={resetPasswordMutation.isPending}
+                              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                            >
+                              <Key className="w-4 h-4 mr-1" />
+                              {resetPasswordMutation.isPending ? "Sending..." : "Reset Password"}
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleSendVerification(user)}
+                              disabled={sendVerificationMutation.isPending || user.isEmailVerified}
+                              className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                            >
+                              <Mail className="w-4 h-4 mr-1" />
+                              {sendVerificationMutation.isPending ? "Sending..." : user.isEmailVerified ? "Verified" : "Send Verification"}
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleSendNotification(user)}
+                              disabled={sendNotificationMutation.isPending}
+                              className="bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200"
+                            >
+                              <Bell className="w-4 h-4 mr-1" />
+                              {sendNotificationMutation.isPending ? "Sending..." : "Send Notification"}
                             </Button>
                             <Button 
                               size="sm" 

@@ -261,6 +261,221 @@ export class EmailService {
     });
   }
 
+  async sendPasswordResetEmail(email: string, firstName: string, resetUrl: string): Promise<boolean> {
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Password Reset - Fundry</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+              margin: 0;
+              padding: 0;
+              background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+              color: #334155;
+            }
+            .container {
+              max-width: 600px;
+              margin: 40px auto;
+              background: white;
+              border-radius: 16px;
+              box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+              overflow: hidden;
+            }
+            .header {
+              background: linear-gradient(135deg, #f97316 0%, #1e40af 100%);
+              color: white;
+              padding: 40px 32px;
+              text-align: center;
+            }
+            .logo-container {
+              width: 60px;
+              height: 60px;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 50%;
+              margin: 0 auto 20px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              backdrop-filter: blur(10px);
+            }
+            .logo-text {
+              font-size: 28px;
+              font-weight: bold;
+              color: white;
+            }
+            .header-title {
+              margin: 0 0 8px 0;
+              font-size: 28px;
+              font-weight: 700;
+            }
+            .header-subtitle {
+              margin: 0;
+              font-size: 16px;
+              opacity: 0.9;
+            }
+            .content {
+              padding: 40px 32px;
+              line-height: 1.6;
+            }
+            .welcome-text {
+              color: #1e40af;
+              font-size: 24px;
+              margin: 0 0 24px 0;
+              font-weight: 600;
+            }
+            .description {
+              color: #4b5563;
+              font-size: 16px;
+              margin-bottom: 32px;
+            }
+            .button-container {
+              text-align: center;
+              margin: 32px 0;
+            }
+            .button {
+              background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+              color: white;
+              padding: 16px 32px;
+              text-decoration: none;
+              border-radius: 8px;
+              font-weight: 600;
+              font-size: 16px;
+              display: inline-block;
+              box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+              transition: all 0.2s ease;
+            }
+            .button:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+            }
+            .link-fallback {
+              background: #f8fafc;
+              border-radius: 8px;
+              padding: 16px;
+              margin: 24px 0;
+              text-align: center;
+            }
+            .link-text {
+              font-size: 14px;
+              color: #64748b;
+              margin-bottom: 8px;
+            }
+            .reset-link {
+              font-size: 14px;
+              color: #f97316;
+              word-break: break-all;
+              font-family: monospace;
+            }
+            .expiry-notice {
+              background: #fef3e2;
+              border-left: 4px solid #f97316;
+              padding: 16px;
+              border-radius: 0 8px 8px 0;
+              margin: 24px 0;
+            }
+            .expiry-text {
+              color: #92400e;
+              font-weight: 600;
+              margin: 0;
+            }
+            .footer { 
+              margin-top: 40px; 
+              text-align: center; 
+              color: #9ca3af; 
+              font-size: 14px;
+              border-top: 1px solid #e5e7eb;
+              padding-top: 24px;
+            }
+            .footer p {
+              margin: 4px 0;
+            }
+            .company-name {
+              font-weight: 600;
+              color: #6b7280;
+            }
+            .security-notice {
+              background: #fef2f2;
+              border-left: 4px solid #ef4444;
+              padding: 16px;
+              border-radius: 0 8px 8px 0;
+              margin: 24px 0;
+            }
+            .security-text {
+              color: #dc2626;
+              font-weight: 600;
+              margin: 0;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo-container">
+                <div class="logo-text">F</div>
+              </div>
+              <h1 class="header-title">Password Reset Request</h1>
+              <p class="header-subtitle">Reset your Fundry account password securely</p>
+            </div>
+            
+            <div class="content">
+              <h2 class="welcome-text">Hello ${firstName}!</h2>
+              
+              <p class="description">
+                We received a request to reset your password for your Fundry account. If you made this request, click the button below to create a new password:
+              </p>
+              
+              <div class="button-container">
+                <a href="${resetUrl}" class="button">Reset My Password</a>
+              </div>
+              
+              <div class="expiry-notice">
+                <p class="expiry-text">This password reset link will expire in 24 hours for security purposes.</p>
+              </div>
+              
+              <div class="link-fallback">
+                <p class="link-text">If the button doesn't work, you can also copy and paste this link into your browser:</p>
+                <p class="reset-link">${resetUrl}</p>
+              </div>
+              
+              <div class="security-notice">
+                <p class="security-text">If you didn't request this password reset, please ignore this email or contact our support team immediately.</p>
+              </div>
+              
+              <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+              
+              <p><strong>Security Tips:</strong></p>
+              <ul style="color: #4b5563; line-height: 1.7;">
+                <li>Never share your password with anyone</li>
+                <li>Use a strong, unique password for your Fundry account</li>
+                <li>Enable two-factor authentication for extra security</li>
+                <li>Log out of shared or public computers</li>
+              </ul>
+              
+              <p style="color: #6b7280; font-size: 14px; margin-top: 24px;">
+                For security reasons, this email was sent from an automated system. Please do not reply to this email.
+              </p>
+            </div>
+            
+            <div class="footer">
+              <p class="company-name">© 2025 Micro Fundry. All rights reserved.</p>
+              <p>This is an automated security message from the Fundry platform.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    return this.sendEmail({
+      to: email,
+      subject: "Password Reset Request - Fundry Account",
+      html
+    });
+  }
+
   async sendWelcomeEmail(email: string, firstName: string, userType: 'founder' | 'investor'): Promise<boolean> {
     const dashboardUrl = process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS}/landing` : 'http://localhost:5000/landing';
 

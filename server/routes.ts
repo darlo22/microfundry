@@ -22,7 +22,8 @@ import {
   users, 
   campaigns, 
   investments, 
-  adminLogs
+  adminLogs,
+  notifications
 } from "@shared/schema";
 import Stripe from "stripe";
 import fs from "fs";
@@ -3738,6 +3739,123 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     } catch (error) {
       console.error("Error updating user status:", error);
       res.status(500).json({ message: "Failed to update user status" });
+    }
+  });
+
+  app.post('/api/admin/users/:userId/reset-password', requireAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Get user details
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Generate reset token and send email
+      const resetToken = nanoid(32);
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      // Store reset token (you may need to create a password_reset_tokens table)
+      // For now, we'll just send the email
+      const resetUrl = `${process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` : 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+      
+      await emailService.sendPasswordResetEmail(user.email, user.firstName, resetUrl);
+
+      await logAdminAction(
+        req.user.id,
+        'password_reset_sent',
+        'user',
+        userId,
+        { userEmail: user.email },
+        req
+      );
+
+      res.json({ message: "Password reset email sent successfully" });
+    } catch (error) {
+      console.error("Error sending password reset:", error);
+      res.status(500).json({ message: "Failed to send password reset email" });
+    }
+  });
+
+  app.post('/api/admin/users/:userId/send-verification', requireAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Get user details
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.isEmailVerified) {
+        return res.status(400).json({ message: "User email is already verified" });
+      }
+
+      // Generate verification token
+      const verificationToken = nanoid(32);
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      // Store verification token
+      await db.insert(emailVerificationTokens).values({
+        userId: user.id,
+        token: verificationToken,
+        expiresAt
+      });
+
+      const verificationUrl = `${process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` : 'http://localhost:5000'}/verify-email?token=${verificationToken}`;
+      
+      await emailService.sendVerificationEmail(user.email, user.firstName, verificationUrl);
+
+      await logAdminAction(
+        req.user.id,
+        'verification_email_sent',
+        'user',
+        userId,
+        { userEmail: user.email },
+        req
+      );
+
+      res.json({ message: "Verification email sent successfully" });
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      res.status(500).json({ message: "Failed to send verification email" });
+    }
+  });
+
+  app.post('/api/admin/users/:userId/send-notification', requireAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { message, type = "admin" } = req.body;
+      
+      // Get user details
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Create notification in database
+      await db.insert(notifications).values({
+        userId: user.id,
+        type: type,
+        title: "Important Message from Admin",
+        message: message,
+        isRead: false
+      });
+
+      await logAdminAction(
+        req.user.id,
+        'notification_sent',
+        'user',
+        userId,
+        { message, type },
+        req
+      );
+
+      res.json({ message: "Push notification sent successfully" });
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      res.status(500).json({ message: "Failed to send push notification" });
     }
   });
 

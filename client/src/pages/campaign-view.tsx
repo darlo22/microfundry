@@ -183,31 +183,31 @@ export default function CampaignView() {
         showBackButton={true}
         onBackClick={handleBackToDashboard}
         rightContent={
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {user && campaign.founderId === user.id && (
               <Button 
                 onClick={handleEdit}
-                className="flex items-center border-2 border-fundry-orange text-white bg-fundry-orange hover:bg-orange-600 hover:text-white transition-all duration-200 shadow-sm"
+                className="flex items-center border-2 border-fundry-orange text-white bg-fundry-orange hover:bg-orange-600 hover:text-white transition-all duration-200 shadow-sm px-2 sm:px-4 py-2"
               >
-                <Edit className="mr-2" size={16} />
-                Edit
+                <Edit className="sm:mr-2" size={16} />
+                <span className="hidden sm:inline">Edit</span>
               </Button>
             )}
             <Button 
               onClick={handleShare} 
-              className="bg-fundry-orange hover:bg-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-fundry-orange hover:bg-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-2 sm:px-4 py-2"
             >
-              <Share className="mr-2" size={16} />
-              Share
+              <Share className="sm:mr-2" size={16} />
+              <span className="hidden sm:inline">Share</span>
             </Button>
           </div>
         }
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-2 sm:py-4 lg:py-8">
         
         {/* Hero Section - Two Column Layout like Wefunder */}
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8 lg:mb-12">
           
           {/* Left Column - Video/Cover Image (7/10 width - 70%) */}
           <div className="lg:col-span-7">
@@ -225,38 +225,41 @@ export default function CampaignView() {
                 </div>
 
                 {/* Social Engagement Buttons */}
-                <div className="border-t border-gray-200 bg-gray-50 px-6 py-4">
-                  <div className="flex items-center justify-center gap-4">
+                <div className="border-t border-gray-200 bg-gray-50 px-2 sm:px-4 lg:px-6 py-3 sm:py-4">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 lg:gap-4">
                     <Button
                       onClick={() => setShowUpdatesModal(true)}
                       variant="outline"
-                      className="flex items-center gap-2 bg-white hover:bg-blue-50 border-blue-200 text-blue-700 font-medium px-4 py-2 rounded-lg transition-all"
+                      className="w-full sm:w-auto flex items-center justify-center gap-1 sm:gap-2 bg-white hover:bg-blue-50 border-blue-200 text-blue-700 font-medium px-3 sm:px-4 py-2 rounded-lg transition-all text-sm"
                     >
-                      <FileText size={16} />
-                      UPDATES
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                      <FileText size={14} className="sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline sm:inline">UPDATES</span>
+                      <span className="xs:hidden sm:hidden">UPD</span>
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs ml-1">
                         {updatesCount || 0}
                       </Badge>
                     </Button>
                     <Button
                       onClick={() => setShowCommentsModal(true)}
                       variant="outline"
-                      className="flex items-center gap-2 bg-white hover:bg-green-50 border-green-200 text-green-700 font-medium px-4 py-2 rounded-lg transition-all"
+                      className="w-full sm:w-auto flex items-center justify-center gap-1 sm:gap-2 bg-white hover:bg-green-50 border-green-200 text-green-700 font-medium px-3 sm:px-4 py-2 rounded-lg transition-all text-sm"
                     >
-                      <Users size={16} />
-                      WHAT PEOPLE SAY
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                      <Users size={14} className="sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline sm:inline">WHAT PEOPLE SAY</span>
+                      <span className="xs:hidden sm:hidden">COMMENTS</span>
+                      <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs ml-1">
                         {commentsCount || 0}
                       </Badge>
                     </Button>
                     <Button
                       onClick={() => setShowQuestionsModal(true)}
                       variant="outline"
-                      className="flex items-center gap-2 bg-white hover:bg-purple-50 border-purple-200 text-purple-700 font-medium px-4 py-2 rounded-lg transition-all"
+                      className="w-full sm:w-auto flex items-center justify-center gap-1 sm:gap-2 bg-white hover:bg-purple-50 border-purple-200 text-purple-700 font-medium px-3 sm:px-4 py-2 rounded-lg transition-all text-sm"
                     >
-                      <MessageSquare size={16} />
-                      ASK A QUESTION
-                      <Badge variant="secondary" className="bg-purple-100 text-purple-800 text-xs">
+                      <MessageSquare size={14} className="sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline sm:inline">ASK A QUESTION</span>
+                      <span className="xs:hidden sm:hidden">Q&A</span>
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800 text-xs ml-1">
                         {questionsCount || 0}
                       </Badge>
                     </Button>
@@ -406,8 +409,8 @@ export default function CampaignView() {
 
           {/* Right Column - Investment Information (3/10 width - 30%) */}
           <div className="lg:col-span-3">
-            <Card className="border-0 shadow-xl bg-white sticky top-8">
-              <CardContent className="p-6">
+            <Card className="border-0 shadow-xl bg-white lg:sticky lg:top-8">
+              <CardContent className="p-4 sm:p-6">
                 {/* Status Badge */}
                 <div className="mb-4">
                   <Badge className="bg-fundry-orange text-white border-fundry-orange px-3 py-1 text-xs font-semibold">
@@ -416,23 +419,23 @@ export default function CampaignView() {
                 </div>
 
                 {/* Funding Amount - Large Display */}
-                <div className="mb-6">
-                  <div className="text-3xl font-bold text-gray-900 mb-1">{formatCurrency(campaign.totalRaised)}</div>
-                  <div className="text-sm text-gray-600">raised from {campaign.investorCount} investors</div>
+                <div className="mb-4 sm:mb-6">
+                  <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{formatCurrency(campaign.totalRaised)}</div>
+                  <div className="text-xs sm:text-sm text-gray-600">raised from {campaign.investorCount} investors</div>
                 </div>
 
                 {/* Investment Form */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">INVEST</label>
+                <div className="mb-4 sm:mb-6">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">INVEST</label>
                   <div className="flex items-center border rounded-lg overflow-hidden bg-gray-50">
-                    <span className="px-3 py-3 text-gray-500 text-sm">$</span>
+                    <span className="px-2 sm:px-3 py-2 sm:py-3 text-gray-500 text-sm">$</span>
                     <input
                       type="number"
                       placeholder="0"
                       min={campaign.minimumInvestment}
                       value={investmentAmount}
                       onChange={(e) => setInvestmentAmount(e.target.value)}
-                      className="flex-1 px-3 py-3 border-0 focus:ring-0 focus:outline-none text-lg bg-transparent"
+                      className="flex-1 px-2 sm:px-3 py-2 sm:py-3 border-0 focus:ring-0 focus:outline-none text-base sm:text-lg bg-transparent"
                     />
                   </div>
                   <div className="text-xs text-gray-500 mt-1">min ${campaign.minimumInvestment}</div>

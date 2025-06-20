@@ -4586,5 +4586,210 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   const httpServer = createServer(app);
+  // KYC Management API Endpoints
+  app.get("/api/admin/kyc-requests", requireAdmin, async (req: any, res) => {
+    try {
+      // Get all KYC submissions with user and campaign information
+      const kycRequests = await db
+        .select({
+          id: kycSubmissions.id,
+          userId: kycSubmissions.userId,
+          status: kycSubmissions.status,
+          submittedAt: kycSubmissions.submittedAt,
+          reviewedAt: kycSubmissions.reviewedAt,
+          reviewMessage: kycSubmissions.reviewMessage,
+          personalInfo: kycSubmissions.personalInfo,
+          professionalInfo: kycSubmissions.professionalInfo,
+          documents: kycSubmissions.documents,
+          user: {
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email
+          }
+        })
+        .from(kycSubmissions)
+        .leftJoin(users, eq(kycSubmissions.userId, users.id))
+        .orderBy(desc(kycSubmissions.submittedAt));
+
+      // For each KYC request, find the founder's active campaign with highest goal
+      const enrichedRequests = await Promise.all(
+        kycRequests.map(async (submission) => {
+          try {
+            // Get the founder's active campaigns
+            const activeCampaigns = await db
+              .select({
+                id: campaigns.id,
+                title: campaigns.title,
+                fundingGoal: campaigns.fundingGoal
+              })
+              .from(campaigns)
+              .where(
+                and(
+                  eq(campaigns.founderId, submission.userId),
+                  eq(campaigns.status, 'active')
+                )
+              )
+              .orderBy(desc(campaigns.fundingGoal));
+
+            let activeCampaign = null;
+            if (activeCampaigns.length > 0) {
+              const campaign = activeCampaigns[0];
+              const goalAmount = parseFloat(campaign.fundingGoal);
+              
+              // Determine KYC tier based on funding goal
+              let tier = 'tier1';
+              let recommendedDocs = 'Basic: Government ID only';
+              
+              if (goalAmount >= 50000) {
+                tier = 'tier3';
+                recommendedDocs = 'Enhanced: Government ID + Utility Bill + Bank Statement + Professional References';
+              } else if (goalAmount >= 1000) {
+                tier = 'tier2';
+                recommendedDocs = 'Standard: Government ID + Utility Bill';
+              }
+
+              activeCampaign = {
+                id: campaign.id,
+                title: campaign.title,
+                fundingGoal: `$${goalAmount.toLocaleString()}`,
+                tier,
+                recommendedDocs
+              };
+            }
+
+            return {
+              id: submission.id,
+              userId: submission.userId,
+              status: submission.status,
+              submittedAt: submission.submittedAt,
+              reviewedAt: submission.reviewedAt,
+              reviewMessage: submission.reviewMessage,
+              personalInfo: {
+                ...submission.personalInfo,
+                ...submission.user
+              },
+              professionalInfo: submission.professionalInfo,
+              documents: submission.documents,
+              activeCampaign
+            };
+          } catch (error) {
+            console.error('Error enriching KYC request:', error);
+            return {
+              id: submission.id,
+              userId: submission.userId,
+              status: submission.status,
+              submittedAt: submission.submittedAt,
+              reviewedAt: submission.reviewedAt,
+              reviewMessage: submission.reviewMessage,
+              personalInfo: {
+                ...submission.personalInfo,
+                ...submission.user
+              },
+              professionalInfo: submission.professionalInfo,
+              documents: submission.documents,
+              activeCampaign: null
+            };
+          }
+        })
+      );
+
+      return res.json(enrichedRequests);
+    } catch (error) {
+      console.error("KYC requests fetch error:", error);
+      return res.status(500).json({ message: "Failed to fetch KYC requests" });
+    }
+  });
+
+  app.post("/api/admin/kyc-requests/:requestId/review", requireAdmin, async (req: any, res) => {
+    try {
+      const { requestId } = req.params;
+      const { action, message } = req.body;
+
+      if (!action || !message || !['approve', 'reject'].includes(action)) {
+        return res.status(400).json({ message: "Invalid review action or message" });
+      }
+
+      // Get the KYC submission
+      const submission = await db
+        .select({
+          id: kycSubmissions.id,
+          userId: kycSubmissions.userId,
+          status: kycSubmissions.status
+        })
+        .from(kycSubmissions)
+        .where(eq(kycSubmissions.id, requestId))
+        .limit(1);
+
+      if (!submission.length) {
+        return res.status(404).json({ message: "KYC request not found" });
+      }
+
+      const newStatus = action === 'approve' ? 'approved' : 'rejected';
+      
+      // Update KYC submission status
+      await db
+        .update(kycSubmissions)
+        .set({
+          status: newStatus,
+          reviewedAt: new Date(),
+          reviewMessage: message
+        })
+        .where(eq(kycSubmissions.id, requestId));
+
+      // If approved, update user's KYC status and remove withdrawal restrictions
+      if (action === 'approve') {
+        await db
+          .update(users)
+          .set({
+            kycStatus: 'verified'
+          })
+          .where(eq(users.id, submission[0].userId));
+      } else {
+        // If rejected, set KYC status to rejected
+        await db
+          .update(users)
+          .set({
+            kycStatus: 'rejected'
+          })
+          .where(eq(users.id, submission[0].userId));
+      }
+
+      // Send notification to the user about KYC decision
+      try {
+        await db.insert(notifications).values({
+          userId: submission[0].userId,
+          type: 'security',
+          title: action === 'approve' ? 'KYC Verification Approved' : 'KYC Verification Rejected',
+          message: action === 'approve' 
+            ? `Your identity verification has been approved. ${message}` 
+            : `Your identity verification was rejected. ${message}`,
+          isRead: false,
+          createdAt: new Date()
+        });
+      } catch (notificationError) {
+        console.error('Failed to send KYC notification:', notificationError);
+      }
+
+      // Log admin activity
+      try {
+        await logAdminActivity(
+          req.user.id, 
+          'KYC Management', 
+          `KYC request ${requestId} ${action}d: ${message}`
+        );
+      } catch (logError) {
+        console.error('Failed to log admin activity:', logError);
+      }
+
+      return res.json({ 
+        message: `KYC request ${action}d successfully`,
+        status: newStatus
+      });
+    } catch (error) {
+      console.error("KYC review error:", error);
+      return res.status(500).json({ message: "Failed to process KYC review" });
+    }
+  });
+
   return httpServer;
 }

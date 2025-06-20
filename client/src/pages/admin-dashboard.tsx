@@ -730,6 +730,15 @@ export default function AdminDashboard() {
               <TrendingUp className="w-4 h-4 mr-2" />
               Campaign Oversight
             </Button>
+            <Link href="/admin-kyc-management">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                KYC Management
+              </Button>
+            </Link>
             <Button 
               variant={activeTab === "transactions" ? "default" : "ghost"} 
               className="w-full justify-start"

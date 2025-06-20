@@ -158,6 +158,12 @@ export default function AdminDashboard() {
   });
   const [selectedSpecificUsers, setSelectedSpecificUsers] = useState<User[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState('');
+  
+  // Team Management State
+  const [newTeamMember, setNewTeamMember] = useState<any>({});
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [isInvitingMember, setIsInvitingMember] = useState(false);
+  const [editingMember, setEditingMember] = useState<any>(null);
   const [sendingMessage, setSendingMessage] = useState(false);
 
   // Platform settings state
@@ -3116,6 +3122,213 @@ export default function AdminDashboard() {
                         </>
                       )}
                     </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Team Management */}
+                <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200">
+                  <CardHeader className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Team Management
+                    </CardTitle>
+                    <CardDescription className="text-indigo-100">
+                      Invite team members and manage access controls
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 p-6">
+                    <div className="space-y-4">
+                      {/* Invite New Team Member */}
+                      <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+                        <h4 className="text-lg font-semibold text-indigo-800 mb-3">Invite New Team Member</h4>
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                              <Input
+                                type="email"
+                                placeholder="teammember@fundry.com"
+                                className="border-indigo-300"
+                                value={newTeamMember?.email || ''}
+                                onChange={(e) => setNewTeamMember({...newTeamMember, email: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                              <Input
+                                type="text"
+                                placeholder="John Smith"
+                                className="border-indigo-300"
+                                value={newTeamMember?.fullName || ''}
+                                onChange={(e) => setNewTeamMember({...newTeamMember, fullName: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                              <Select
+                                value={newTeamMember?.role || 'admin'}
+                                onValueChange={(value) => setNewTeamMember({...newTeamMember, role: value})}
+                              >
+                                <SelectTrigger className="border-indigo-300">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="super_admin">Super Admin</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                  <SelectItem value="moderator">Moderator</SelectItem>
+                                  <SelectItem value="support">Support</SelectItem>
+                                  <SelectItem value="analyst">Analyst</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                              <Select
+                                value={newTeamMember?.department || 'operations'}
+                                onValueChange={(value) => setNewTeamMember({...newTeamMember, department: value})}
+                              >
+                                <SelectTrigger className="border-indigo-300">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="operations">Operations</SelectItem>
+                                  <SelectItem value="compliance">Compliance</SelectItem>
+                                  <SelectItem value="customer_support">Customer Support</SelectItem>
+                                  <SelectItem value="finance">Finance</SelectItem>
+                                  <SelectItem value="engineering">Engineering</SelectItem>
+                                  <SelectItem value="marketing">Marketing</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Responsibilities</label>
+                            <textarea
+                              className="w-full p-2 border border-indigo-300 rounded-md resize-none"
+                              rows={3}
+                              placeholder="Describe key responsibilities and access permissions..."
+                              value={newTeamMember?.responsibilities || ''}
+                              onChange={(e) => setNewTeamMember({...newTeamMember, responsibilities: e.target.value})}
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Temporary Password</label>
+                              <Input
+                                type="text"
+                                placeholder="Auto-generated or custom"
+                                className="border-indigo-300"
+                                value={newTeamMember?.tempPassword || ''}
+                                onChange={(e) => setNewTeamMember({...newTeamMember, tempPassword: e.target.value})}
+                              />
+                            </div>
+                            <div className="flex items-end">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                  const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+                                  setNewTeamMember({...newTeamMember, tempPassword: randomPassword});
+                                }}
+                                className="w-full border-indigo-300 text-indigo-700 hover:bg-indigo-50"
+                              >
+                                Generate Password
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <Button
+                            onClick={handleInviteTeamMember}
+                            disabled={isInvitingMember}
+                            className="w-full bg-indigo-600 hover:bg-indigo-700"
+                          >
+                            {isInvitingMember ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                Sending Invitation...
+                              </>
+                            ) : (
+                              <>
+                                <Mail className="w-4 h-4 mr-2" />
+                                Send Invitation
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Current Team Members */}
+                      <div className="p-4 bg-white rounded-lg border border-indigo-200">
+                        <h4 className="text-lg font-semibold text-gray-800 mb-3">Current Team Members</h4>
+                        <div className="space-y-3">
+                          {teamMembers?.map((member: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                                    <span className="text-indigo-700 font-medium text-sm">
+                                      {member.fullName?.charAt(0) || member.email?.charAt(0)}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <h5 className="font-medium text-gray-900">{member.fullName || 'Team Member'}</h5>
+                                    <p className="text-sm text-gray-600">{member.email}</p>
+                                  </div>
+                                </div>
+                                <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
+                                  <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">
+                                    {member.role || 'Admin'}
+                                  </span>
+                                  <span>{member.department || 'Operations'}</span>
+                                  <span>Last Login: {member.lastLogin || 'Never'}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleResetPassword(member)}
+                                  className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                                >
+                                  <Key className="w-4 h-4 mr-1" />
+                                  Reset Password
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setEditingMember(member)}
+                                  className="text-indigo-600 border-indigo-300 hover:bg-indigo-50"
+                                >
+                                  <Edit className="w-4 h-4 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRemoveTeamMember(member)}
+                                  className="text-red-600 border-red-300 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-1" />
+                                  Remove
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                          
+                          {(!teamMembers || teamMembers.length === 0) && (
+                            <div className="text-center py-8 text-gray-500">
+                              <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                              <p>No team members yet. Invite your first team member above.</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
 

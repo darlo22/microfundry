@@ -324,6 +324,46 @@ export default function CampaignView() {
         {/* Additional Content Sections */}
         <div className="space-y-8">
           
+          {/* View Pitch Deck Section */}
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20 overflow-hidden">
+            <CardContent className="py-16 px-8 text-center">
+              <div className="max-w-4xl mx-auto">
+                <h2 className="text-4xl font-bold text-fundry-navy mb-4 tracking-tight">Pitch Deck</h2>
+                
+                {campaign.pitchDeckUrl ? (
+                  <div className="space-y-8">
+                    <div className="max-w-2xl mx-auto">
+                      <p className="text-lg text-gray-700 font-medium leading-relaxed mb-2">
+                        Discover the complete vision and strategy behind this investment opportunity
+                      </p>
+                      <p className="text-gray-600">
+                        Comprehensive business plan, market analysis, and growth projections
+                      </p>
+                    </div>
+                    
+                    <div className="flex justify-center">
+                      <Button 
+                        onClick={handleViewPitchDeck}
+                        className="group relative bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-10 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center">
+                            <FileText className="w-4 h-4" />
+                          </div>
+                          <span className="text-lg">View Pitch Deck</span>
+                        </div>
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <p className="text-gray-600 text-lg">Pitch deck will be available soon</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* About This Campaign Section */}
           <Card className="border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
             <div className="relative px-10 py-8 bg-gradient-to-br from-fundry-orange via-orange-500 to-orange-600 overflow-hidden">
@@ -744,7 +784,7 @@ export default function CampaignView() {
           </Card>
 
           {/* Traction & Growth */}
-          {(campaign.startupStage || campaign.currentRevenue || campaign.customerBase || 
+          {(campaign.startupStage || campaign.currentRevenue || campaign.customers || 
             campaign.previousFunding || campaign.keyMilestones) && (
             <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30">
               <CardContent className="p-10">
@@ -784,7 +824,7 @@ export default function CampaignView() {
                     </div>
                   )}
 
-                  {campaign.customerBase && (
+                  {campaign.customers && (
                     <div className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100">
                       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-violet-600"></div>
                       <div className="flex items-center gap-4 mb-4">
@@ -795,7 +835,7 @@ export default function CampaignView() {
                         </div>
                         <h3 className="text-lg font-bold text-gray-900">Customer Base</h3>
                       </div>
-                      <p className="text-lg text-purple-600 font-medium">{campaign.customerBase}</p>
+                      <p className="text-lg text-purple-600 font-medium">{campaign.customers}</p>
                     </div>
                   )}
 
@@ -1006,45 +1046,6 @@ export default function CampaignView() {
             </Card>
           )}
 
-          {/* View Pitch Deck Section */}
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20 overflow-hidden">
-            <CardContent className="py-16 px-8 text-center">
-              <div className="max-w-4xl mx-auto">
-                <h2 className="text-4xl font-bold text-fundry-navy mb-4 tracking-tight">Pitch Deck</h2>
-                
-                {campaign.pitchDeckUrl ? (
-                  <div className="space-y-8">
-                    <div className="max-w-2xl mx-auto">
-                      <p className="text-lg text-gray-700 font-medium leading-relaxed mb-2">
-                        Discover the complete vision and strategy behind this investment opportunity
-                      </p>
-                      <p className="text-gray-600">
-                        Comprehensive business plan, market analysis, and growth projections
-                      </p>
-                    </div>
-                    
-                    <div className="flex justify-center">
-                      <Button 
-                        onClick={handleViewPitchDeck}
-                        className="group relative bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-10 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center">
-                            <FileText className="w-4 h-4" />
-                          </div>
-                          <span className="text-lg">View Pitch Deck</span>
-                        </div>
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <p className="text-gray-600 text-lg">Pitch deck will be available soon</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 

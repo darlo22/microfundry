@@ -129,6 +129,11 @@ export default function AdminDashboard() {
   const [viewCampaignModalOpen, setViewCampaignModalOpen] = useState(false);
   const [editCampaignModalOpen, setEditCampaignModalOpen] = useState(false);
   const [pauseCampaignModalOpen, setPauseCampaignModalOpen] = useState(false);
+  
+  // Investment management state
+  const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
+  const [investmentDetailsModalOpen, setInvestmentDetailsModalOpen] = useState(false);
+  const [sendReminderModalOpen, setSendReminderModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     firstName: "",
     lastName: "",
@@ -185,6 +190,26 @@ export default function AdminDashboard() {
     }
   });
 
+  const sendReminderMutation = useMutation({
+    mutationFn: async (data: { investmentId: number; message: string }) => {
+      return apiRequest("POST", `/api/admin/send-reminder`, data);
+    },
+    onSuccess: () => {
+      setSendReminderModalOpen(false);
+      toast({
+        title: "Reminder Sent",
+        description: "Payment reminder has been sent to the investor.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to Send",
+        description: "Could not send reminder email.",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Handle modal actions
   const handleViewUser = (user: User) => {
     setSelectedUser(user);
@@ -224,6 +249,25 @@ export default function AdminDashboard() {
       userId: selectedUser.id,
       suspend,
       reason
+    });
+  };
+
+  // Investment management handlers
+  const handleViewInvestmentDetails = (investment: Investment) => {
+    setSelectedInvestment(investment);
+    setInvestmentDetailsModalOpen(true);
+  };
+
+  const handleSendReminder = (investment: Investment) => {
+    setSelectedInvestment(investment);
+    setSendReminderModalOpen(true);
+  };
+
+  const handleSendReminderConfirm = (message: string) => {
+    if (!selectedInvestment) return;
+    sendReminderMutation.mutate({
+      investmentId: selectedInvestment.id,
+      message
     });
   };
 
@@ -1466,11 +1510,21 @@ export default function AdminDashboard() {
                             <span>Pending for {Math.ceil((Date.now() - new Date(investment.createdAt).getTime()) / (1000 * 60 * 60 * 24))} days</span>
                           </div>
                           <div className="flex space-x-2">
-                            <Button size="sm" variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-100">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                              onClick={() => handleViewInvestmentDetails(investment)}
+                            >
                               <Eye className="w-4 h-4 mr-1" />
                               View Details
                             </Button>
-                            <Button size="sm" variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-100">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                              onClick={() => handleSendReminder(investment)}
+                            >
                               <Mail className="w-4 h-4 mr-1" />
                               Send Reminder
                             </Button>

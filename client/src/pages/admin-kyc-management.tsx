@@ -61,7 +61,7 @@ export default function AdminKYCManagement() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  const { data: kycRequests = [], isLoading, refetch } = useQuery({
+  const { data: kycRequests = [], isLoading, refetch } = useQuery<KYCRequest[]>({
     queryKey: ['/api/admin/kyc-requests'],
     enabled: !!adminUser
   });
@@ -184,7 +184,7 @@ export default function AdminKYCManagement() {
                 <div>
                   <p className="text-sm font-medium text-yellow-700">Pending Review</p>
                   <p className="text-2xl font-bold text-yellow-900">
-                    {kycRequests?.filter((req: KYCRequest) => req.status === 'pending' || req.status === 'under_review').length || 0}
+                    {kycRequests.filter((req: KYCRequest) => req.status === 'pending' || req.status === 'under_review').length}
                   </p>
                 </div>
                 <Clock className="w-8 h-8 text-yellow-600" />

@@ -28,7 +28,8 @@ import {
   notifications,
   campaignComments,
   campaignQuestions,
-  adminMessages
+  adminMessages,
+  kycVerifications
 } from "@shared/schema";
 import Stripe from "stripe";
 import fs from "fs";
@@ -4724,55 +4725,38 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(400).json({ message: "Invalid review action or message" });
       }
 
-      // Get the KYC submission
-      const submission = await db
+      // Get the KYC verification
+      const verification = await db
         .select({
-          id: kycSubmissions.id,
-          userId: kycSubmissions.userId,
-          status: kycSubmissions.status
+          id: kycVerifications.id,
+          userId: kycVerifications.userId,
+          status: kycVerifications.status
         })
-        .from(kycSubmissions)
-        .where(eq(kycSubmissions.id, requestId))
+        .from(kycVerifications)
+        .where(eq(kycVerifications.id, requestId))
         .limit(1);
 
-      if (!submission.length) {
+      if (!verification.length) {
         return res.status(404).json({ message: "KYC request not found" });
       }
 
-      const newStatus = action === 'approve' ? 'approved' : 'rejected';
+      const newStatus = action === 'approve' ? 'verified' : 'rejected';
       
-      // Update KYC submission status
+      // Update KYC verification status
       await db
-        .update(kycSubmissions)
+        .update(kycVerifications)
         .set({
           status: newStatus,
           reviewedAt: new Date(),
-          reviewMessage: message
+          reviewNotes: message,
+          rejectionReason: action === 'reject' ? message : null
         })
-        .where(eq(kycSubmissions.id, requestId));
-
-      // If approved, update user's KYC status and remove withdrawal restrictions
-      if (action === 'approve') {
-        await db
-          .update(users)
-          .set({
-            kycStatus: 'verified'
-          })
-          .where(eq(users.id, submission[0].userId));
-      } else {
-        // If rejected, set KYC status to rejected
-        await db
-          .update(users)
-          .set({
-            kycStatus: 'rejected'
-          })
-          .where(eq(users.id, submission[0].userId));
-      }
+        .where(eq(kycVerifications.id, requestId));
 
       // Send notification to the user about KYC decision
       try {
         await db.insert(notifications).values({
-          userId: submission[0].userId,
+          userId: verification[0].userId,
           type: 'security',
           title: action === 'approve' ? 'KYC Verification Approved' : 'KYC Verification Rejected',
           message: action === 'approve' 

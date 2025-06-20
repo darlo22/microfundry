@@ -198,7 +198,7 @@ export default function AdminKYCManagement() {
                 <div>
                   <p className="text-sm font-medium text-green-700">Approved</p>
                   <p className="text-2xl font-bold text-green-900">
-                    {kycRequests?.filter((req: KYCRequest) => req.status === 'approved').length || 0}
+                    {kycRequests.filter((req: KYCRequest) => req.status === 'approved').length}
                   </p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-green-600" />
@@ -212,7 +212,7 @@ export default function AdminKYCManagement() {
                 <div>
                   <p className="text-sm font-medium text-red-700">Rejected</p>
                   <p className="text-2xl font-bold text-red-900">
-                    {kycRequests?.filter((req: KYCRequest) => req.status === 'rejected').length || 0}
+                    {kycRequests.filter((req: KYCRequest) => req.status === 'rejected').length}
                   </p>
                 </div>
                 <XCircle className="w-8 h-8 text-red-600" />
@@ -226,7 +226,7 @@ export default function AdminKYCManagement() {
                 <div>
                   <p className="text-sm font-medium text-blue-700">Total Requests</p>
                   <p className="text-2xl font-bold text-blue-900">
-                    {kycRequests?.length || 0}
+                    {kycRequests.length}
                   </p>
                 </div>
                 <FileText className="w-8 h-8 text-blue-600" />
@@ -541,7 +541,7 @@ export default function AdminKYCManagement() {
       </Dialog>
 
       {/* Confirmation Dialog */}
-      <AlertDialog open={reviewAction === 'confirm'} onOpenChange={() => setReviewAction(null)}>
+      <AlertDialog open={false} onOpenChange={() => setReviewAction(null)}>
         <AlertDialogContent className="bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 backdrop-blur-sm border-0 shadow-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center space-x-2">

@@ -500,6 +500,8 @@ export const adminLogsRelations = relations(adminLogs, ({ one }) => ({
 export type AdminLog = typeof adminLogs.$inferSelect;
 export type InsertAdminLog = typeof adminLogs.$inferInsert;
 
+
+
 // Platform settings table for managing fees and KYC requirements
 export const platformSettings = pgTable("platform_settings", {
   id: serial("id").primaryKey(),

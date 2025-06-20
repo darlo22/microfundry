@@ -2723,57 +2723,222 @@ export default function AdminDashboard() {
                       KYC Management
                     </CardTitle>
                     <CardDescription className="text-blue-100">
-                      Know Your Customer verification requirements
+                      Know Your Customer verification requirements by campaign threshold
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4 p-6">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-blue-200">
-                        <div>
-                          <label className="font-medium text-gray-800">KYC Required for Investment</label>
-                          <p className="text-sm text-gray-600">Require identity verification</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Select
-                            value={platformSettings?.kyc_required_for_investment?.value || 'true'}
-                            onValueChange={(value) => {
-                              const newSettings = { ...platformSettings };
-                              if (!newSettings.kyc_required_for_investment) newSettings.kyc_required_for_investment = {};
-                              newSettings.kyc_required_for_investment.value = value;
-                              setPlatformSettings(newSettings);
-                            }}
-                          >
-                            <SelectTrigger className="w-24">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="true">Yes</SelectItem>
-                              <SelectItem value="false">No</SelectItem>
-                            </SelectContent>
-                          </Select>
+                  <CardContent className="space-y-6 p-6">
+                    <div className="space-y-6">
+                      {/* KYC Tier 1 */}
+                      <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+                        <h4 className="text-lg font-semibold text-green-800 mb-3">Tier 1 KYC (Campaigns &lt; $1,000)</h4>
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <label className="font-medium text-gray-800">KYC Required</label>
+                              <p className="text-sm text-gray-600">Require identity verification</p>
+                            </div>
+                            <Select
+                              value={platformSettings?.kyc_tier_1_required?.value || 'false'}
+                              onValueChange={(value) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.kyc_tier_1_required) newSettings.kyc_tier_1_required = {};
+                                newSettings.kyc_tier_1_required.value = value;
+                                setPlatformSettings(newSettings);
+                              }}
+                            >
+                              <SelectTrigger className="w-24">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="true">Yes</SelectItem>
+                                <SelectItem value="false">No</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <label className="font-medium text-gray-800">Investment Threshold</label>
+                              <p className="text-sm text-gray-600">Minimum investment requiring KYC</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-gray-600">$</span>
+                              <Input
+                                type="number"
+                                className="w-24 text-center border-green-300"
+                                value={platformSettings?.kyc_tier_1_threshold?.value || '500'}
+                                onChange={(e) => {
+                                  const newSettings = { ...platformSettings };
+                                  if (!newSettings.kyc_tier_1_threshold) newSettings.kyc_tier_1_threshold = {};
+                                  newSettings.kyc_tier_1_threshold.value = e.target.value;
+                                  setPlatformSettings(newSettings);
+                                }}
+                                min="0"
+                                max="1000"
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-blue-200">
-                        <div>
-                          <label className="font-medium text-gray-800">KYC Threshold Amount</label>
-                          <p className="text-sm text-gray-600">Minimum investment requiring KYC</p>
+
+                      {/* KYC Tier 2 */}
+                      <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                        <h4 className="text-lg font-semibold text-blue-800 mb-3">Tier 2 KYC (Campaigns $1,000 - $50,000)</h4>
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <label className="font-medium text-gray-800">KYC Required</label>
+                              <p className="text-sm text-gray-600">Require identity verification</p>
+                            </div>
+                            <Select
+                              value={platformSettings?.kyc_tier_2_required?.value || 'true'}
+                              onValueChange={(value) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.kyc_tier_2_required) newSettings.kyc_tier_2_required = {};
+                                newSettings.kyc_tier_2_required.value = value;
+                                setPlatformSettings(newSettings);
+                              }}
+                            >
+                              <SelectTrigger className="w-24">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="true">Yes</SelectItem>
+                                <SelectItem value="false">No</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <label className="font-medium text-gray-800">Investment Threshold</label>
+                              <p className="text-sm text-gray-600">Minimum investment requiring KYC</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-gray-600">$</span>
+                              <Input
+                                type="number"
+                                className="w-24 text-center border-blue-300"
+                                value={platformSettings?.kyc_tier_2_threshold?.value || '250'}
+                                onChange={(e) => {
+                                  const newSettings = { ...platformSettings };
+                                  if (!newSettings.kyc_tier_2_threshold) newSettings.kyc_tier_2_threshold = {};
+                                  newSettings.kyc_tier_2_threshold.value = e.target.value;
+                                  setPlatformSettings(newSettings);
+                                }}
+                                min="0"
+                                max="10000"
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-gray-600">$</span>
-                          <Input
-                            type="number"
-                            className="w-24 text-center"
-                            value={platformSettings?.kyc_required_amount_threshold?.value || '1000'}
-                            onChange={(e) => {
-                              const newSettings = { ...platformSettings };
-                              if (!newSettings.kyc_required_amount_threshold) newSettings.kyc_required_amount_threshold = {};
-                              newSettings.kyc_required_amount_threshold.value = e.target.value;
-                              setPlatformSettings(newSettings);
-                            }}
-                            min="0"
-                            max="10000"
-                          />
+                      </div>
+
+                      {/* KYC Tier 3 */}
+                      <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                        <h4 className="text-lg font-semibold text-purple-800 mb-3">Tier 3 KYC (Campaigns &gt; $50,000)</h4>
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <label className="font-medium text-gray-800">KYC Required</label>
+                              <p className="text-sm text-gray-600">Require identity verification</p>
+                            </div>
+                            <Select
+                              value={platformSettings?.kyc_tier_3_required?.value || 'true'}
+                              onValueChange={(value) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.kyc_tier_3_required) newSettings.kyc_tier_3_required = {};
+                                newSettings.kyc_tier_3_required.value = value;
+                                setPlatformSettings(newSettings);
+                              }}
+                            >
+                              <SelectTrigger className="w-24">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="true">Yes</SelectItem>
+                                <SelectItem value="false">No</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <label className="font-medium text-gray-800">Investment Threshold</label>
+                              <p className="text-sm text-gray-600">Minimum investment requiring KYC</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-gray-600">$</span>
+                              <Input
+                                type="number"
+                                className="w-24 text-center border-purple-300"
+                                value={platformSettings?.kyc_tier_3_threshold?.value || '100'}
+                                onChange={(e) => {
+                                  const newSettings = { ...platformSettings };
+                                  if (!newSettings.kyc_tier_3_threshold) newSettings.kyc_tier_3_threshold = {};
+                                  newSettings.kyc_tier_3_threshold.value = e.target.value;
+                                  setPlatformSettings(newSettings);
+                                }}
+                                min="0"
+                                max="50000"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Global KYC Settings */}
+                      <div className="p-3 bg-white rounded-lg border border-blue-200">
+                        <h4 className="text-md font-semibold text-gray-800 mb-3">Global KYC Settings</h4>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <label className="font-medium text-gray-800">Auto KYC Approval</label>
+                              <p className="text-sm text-gray-600">Automatically approve KYC submissions</p>
+                            </div>
+                            <Select
+                              value={platformSettings?.auto_kyc_approval?.value || 'false'}
+                              onValueChange={(value) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.auto_kyc_approval) newSettings.auto_kyc_approval = {};
+                                newSettings.auto_kyc_approval.value = value;
+                                setPlatformSettings(newSettings);
+                              }}
+                            >
+                              <SelectTrigger className="w-24">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="true">Yes</SelectItem>
+                                <SelectItem value="false">No</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <label className="font-medium text-gray-800">Document Types Required</label>
+                              <p className="text-sm text-gray-600">Required document types for verification</p>
+                            </div>
+                            <Select
+                              value={platformSettings?.kyc_document_types?.value || 'standard'}
+                              onValueChange={(value) => {
+                                const newSettings = { ...platformSettings };
+                                if (!newSettings.kyc_document_types) newSettings.kyc_document_types = {};
+                                newSettings.kyc_document_types.value = value;
+                                setPlatformSettings(newSettings);
+                              }}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="basic">Basic</SelectItem>
+                                <SelectItem value="standard">Standard</SelectItem>
+                                <SelectItem value="enhanced">Enhanced</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
                       
@@ -2809,16 +2974,36 @@ export default function AdminDashboard() {
                         setIsUpdatingSettings(true);
                         Promise.all([
                           updatePlatformSettingMutation.mutateAsync({
-                            settingKey: 'kyc_required_for_investment',
-                            settingValue: platformSettings?.kyc_required_for_investment?.value || 'true'
+                            settingKey: 'kyc_tier_1_required',
+                            settingValue: platformSettings?.kyc_tier_1_required?.value || 'false'
                           }),
                           updatePlatformSettingMutation.mutateAsync({
-                            settingKey: 'kyc_required_amount_threshold',
-                            settingValue: platformSettings?.kyc_required_amount_threshold?.value || '1000'
+                            settingKey: 'kyc_tier_1_threshold',
+                            settingValue: platformSettings?.kyc_tier_1_threshold?.value || '500'
                           }),
                           updatePlatformSettingMutation.mutateAsync({
-                            settingKey: 'kyc_auto_approval_enabled',
-                            settingValue: platformSettings?.kyc_auto_approval_enabled?.value || 'false'
+                            settingKey: 'kyc_tier_2_required',
+                            settingValue: platformSettings?.kyc_tier_2_required?.value || 'true'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'kyc_tier_2_threshold',
+                            settingValue: platformSettings?.kyc_tier_2_threshold?.value || '250'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'kyc_tier_3_required',
+                            settingValue: platformSettings?.kyc_tier_3_required?.value || 'true'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'kyc_tier_3_threshold',
+                            settingValue: platformSettings?.kyc_tier_3_threshold?.value || '100'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'auto_kyc_approval',
+                            settingValue: platformSettings?.auto_kyc_approval?.value || 'false'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'kyc_document_types',
+                            settingValue: platformSettings?.kyc_document_types?.value || 'standard'
                           })
                         ]).then(() => {
                           setIsUpdatingSettings(false);
@@ -2837,7 +3022,7 @@ export default function AdminDashboard() {
                       ) : (
                         <>
                           <Save className="w-4 h-4 mr-2" />
-                          Save KYC Settings
+                          Save Tiered KYC Settings
                         </>
                       )}
                     </Button>
@@ -3007,15 +3192,49 @@ export default function AdminDashboard() {
                           ${platformSettings?.minimum_investment?.value || '25'} - ${platformSettings?.maximum_investment?.value || '100,000'}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">KYC Required:</span>
-                        <Badge variant={platformSettings?.kyc_required_for_investment?.value === 'true' ? "default" : "secondary"}>
-                          {platformSettings?.kyc_required_for_investment?.value === 'true' ? 'Yes' : 'No'}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">KYC Threshold:</span>
-                        <span className="font-medium">${platformSettings?.kyc_required_amount_threshold?.value || '1,000'}</span>
+                      
+                      {/* Tiered KYC Summary */}
+                      <div className="border-t border-purple-200 pt-2 mt-2">
+                        <h5 className="text-sm font-semibold text-gray-700 mb-2">KYC Requirements by Tier</h5>
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-600">Tier 1 (&lt; $1,000):</span>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant={platformSettings?.kyc_tier_1_required?.value === 'true' ? "default" : "secondary"} className="text-xs">
+                                {platformSettings?.kyc_tier_1_required?.value === 'true' ? 'Required' : 'Optional'}
+                              </Badge>
+                              <span className="text-gray-500">Threshold: ${platformSettings?.kyc_tier_1_threshold?.value || '500'}</span>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-600">Tier 2 ($1,000 - $50,000):</span>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant={platformSettings?.kyc_tier_2_required?.value === 'true' ? "default" : "secondary"} className="text-xs">
+                                {platformSettings?.kyc_tier_2_required?.value === 'true' ? 'Required' : 'Optional'}
+                              </Badge>
+                              <span className="text-gray-500">Threshold: ${platformSettings?.kyc_tier_2_threshold?.value || '250'}</span>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-600">Tier 3 (&gt; $50,000):</span>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant={platformSettings?.kyc_tier_3_required?.value === 'true' ? "default" : "secondary"} className="text-xs">
+                                {platformSettings?.kyc_tier_3_required?.value === 'true' ? 'Required' : 'Optional'}
+                              </Badge>
+                              <span className="text-gray-500">Threshold: ${platformSettings?.kyc_tier_3_threshold?.value || '100'}</span>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-600">Auto Approval:</span>
+                            <Badge variant={platformSettings?.auto_kyc_approval?.value === 'true' ? "default" : "secondary"} className="text-xs">
+                              {platformSettings?.auto_kyc_approval?.value === 'true' ? 'Enabled' : 'Disabled'}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-600">Document Types:</span>
+                            <span className="font-medium text-gray-700 capitalize">{platformSettings?.kyc_document_types?.value || 'Standard'}</span>
+                          </div>
+                        </div>
                       </div>
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-gray-600">New Registrations:</span>

@@ -3498,33 +3498,31 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     next();
   };
 
-  // Admin verification endpoint
-  app.get("/api/admin/verify", async (req, res) => {
+  // Admin verification endpoint - immediate response without database
+  app.get("/api/admin/verify", (req, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user) {
-        return res.status(401).json({ message: "Not authenticated" });
+      // Check hardcoded admin credential instead of session complexity
+      const sessionUser = (req.session as any)?.passport?.user || (req.session as any)?.user;
+      
+      if (sessionUser?.userType === "admin" && sessionUser?.email === "ugolington2@yahoo.co.uk") {
+        return res.json({
+          id: "admin-fallback",
+          email: "ugolington2@yahoo.co.uk",
+          firstName: "Admin",
+          lastName: "User",
+          userType: "admin"
+        });
       }
 
-      const user = req.user;
-      if (user.userType !== "admin") {
-        return res.status(403).json({ message: "Access denied. Admin privileges required." });
-      }
-
-      res.json({
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        userType: user.userType
-      });
+      res.status(401).json({ message: "Not authenticated" });
     } catch (error) {
       console.error('Admin verification error:', error);
       res.status(500).json({ message: "Verification system error" });
     }
   });
 
-  // Admin login endpoint with fallback authentication
-  app.post("/api/admin/login", async (req, res) => {
+  // Admin login endpoint with direct session management
+  app.post("/api/admin/login", (req, res) => {
     try {
       const { email, password } = req.body;
 
@@ -3536,67 +3534,29 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const ADMIN_EMAIL = "ugolington2@yahoo.co.uk";
       const ADMIN_PASSWORD = "Darlo@1234";
 
-      // Validate credentials
       if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
         return res.status(401).json({ message: "Invalid admin credentials" });
       }
 
-      // Create admin user object for session
+      // Create minimal admin user for session
       const adminUser = {
         id: "admin-fallback",
         email: ADMIN_EMAIL,
         firstName: "Admin",
         lastName: "User",
-        userType: "admin" as const,
-        isEmailVerified: true,
-        password: null,
-        phone: null,
-        country: null,
-        state: null,
-        bio: null,
-        profilePicture: null,
-        profileImageUrl: null,
-        dateOfBirth: null,
-        address: null,
-        city: null,
-        zipCode: null,
-        occupation: null,
-        investmentExperience: null,
-        accreditedInvestor: null,
-        riskTolerance: null,
-        investmentGoals: null,
-        annualIncome: null,
-        netWorth: null,
-        employmentStatus: null,
-        onboardingCompleted: true,
-        twoFactorEnabled: false,
-        twoFactorSecret: null,
-        twoFactorBackupCodes: null,
-        twoFactorMethod: null,
-        passwordLastChanged: new Date(),
-        status: "active" as const,
-        stripeCustomerId: null,
-        stripeSubscriptionId: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        userType: "admin" as const
       };
 
-      console.log(`Admin login successful: ${adminUser.email} at ${new Date().toISOString()}`);
+      console.log(`Admin login successful: ${email} at ${new Date().toISOString()}`);
 
-      // Set session directly without passport overhead
+      // Set session manually
       if (req.session) {
-        req.session.passport = { user: adminUser };
-        req.session.user = adminUser;
+        (req.session as any).passport = { user: adminUser };
+        (req.session as any).user = adminUser;
         
-        res.json({ 
+        res.json({
           message: "Admin authentication successful",
-          user: {
-            id: adminUser.id,
-            email: adminUser.email,
-            firstName: adminUser.firstName,
-            lastName: adminUser.lastName,
-            userType: adminUser.userType
-          }
+          user: adminUser
         });
       } else {
         res.status(500).json({ message: "Session not available" });

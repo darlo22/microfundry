@@ -38,6 +38,9 @@ app.use('/uploads', express.static('uploads', {
   }
 }));
 
+// Serve assets (logos, etc.)
+app.use('/assets', express.static('client/src/assets'));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

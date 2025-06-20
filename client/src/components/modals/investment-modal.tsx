@@ -25,9 +25,6 @@ import {
 import type { CampaignWithStats } from "@/lib/types";
 import FundryLogo from "@/components/ui/fundry-logo";
 import { SafeDocumentViewer } from "./safe-document-viewer";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { convertUsdToNgn, formatCurrency, type ExchangeRate } from "@/lib/currency";
 
 // Global type declaration for Budpay
 declare global {
@@ -825,7 +822,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     }
 
     if (currentStep === 'payment') {
-      handlePayment();
+      handleCommitInvestment();
       return;
     }
 
@@ -921,7 +918,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     }
   };
 
-  const handlePayment = async () => {
+  const handleCommitInvestment = async () => {
     setIsProcessingPayment(true);
     
     // Get the actual investment amount
@@ -932,6 +929,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         campaignId: campaign.id,
         amount: actualAmount.toString(),
         status: 'committed',
+        paymentStatus: 'pending',
         investorDetails: {
           ...investorDetails,
           signature: signatureData,
@@ -943,14 +941,25 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
       setCreatedInvestment(investmentResponse.investment);
       
+      // Clear localStorage investment context
+      localStorage.removeItem('investmentContext');
+      
       toast({
-        title: "Investment Successful!",
-        description: `You have successfully committed $${actualAmount} to ${campaign.title}`,
+        title: "Investment Committed!",
+        description: `Your investment of $${actualAmount} has been committed. Complete payment in your dashboard.`,
       });
+      
+      // Redirect to investor dashboard after short delay
+      setTimeout(() => {
+        handleClose();
+        setLocation('/investor-dashboard');
+      }, 2000);
+      
+      setCurrentStep('confirmation');
     } catch (error: any) {
       toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process payment",
+        title: "Commitment Failed",
+        description: error.message || "Failed to commit investment",
         variant: "destructive",
       });
     } finally {
@@ -1514,8 +1523,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           <div className="space-y-6">
             <div className="text-center">
               <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure Payment</h3>
-              <p className="text-gray-600">Step {stepNumber} of 7: Complete your investment payment</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Complete Investment</h3>
+              <p className="text-gray-600">Step {stepNumber} of 7: Finalize your investment commitment</p>
             </div>
             
             {renderProgressIndicator()}
@@ -1530,120 +1539,48 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                  <span className="text-gray-600 font-medium">USD Amount:</span>
+                  <span className="text-gray-600 font-medium">Investment Amount:</span>
                   <span className="font-bold text-xl text-gray-900">${selectedAmount || parseFloat(customAmount) || 0}</span>
                 </div>
-                
-                {ngnAmount && exchangeRate ? (
-                  <>
-                    <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                      <span className="text-gray-600 font-medium">NGN Equivalent:</span>
-                      <span className="font-bold text-xl text-green-700">₦{ngnAmount.toLocaleString('en-NG')}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-500">Exchange Rate:</span>
-                      <span className="text-sm text-gray-600">$1 = ₦{exchangeRate.usdToNgn.toLocaleString('en-NG')}</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex justify-between items-center py-3">
-                    <span className="text-gray-600 font-medium">NGN Equivalent:</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-gray-500">Loading...</span>
-                    </div>
-                  </div>
-                )}
+                <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                  <span className="text-gray-600 font-medium">Campaign:</span>
+                  <span className="font-semibold text-gray-900">{campaign.title}</span>
+                </div>
+                <div className="flex justify-between items-center py-3">
+                  <span className="text-gray-600 font-medium">Next Step:</span>
+                  <span className="font-semibold text-blue-600">Payment via Dashboard</span>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Payment Method Selection */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
-                Choose Payment Method
-              </h3>
-              
-              {/* USD Payment Button */}
-              <Button
-                onClick={handleUSDPayment}
-                disabled={isProcessingPayment || isProcessingNaira}
-                className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold">$</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-base">Pay with USD</div>
-                    <div className="text-sm opacity-90">Powered by Stripe</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {isProcessingPayment ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span className="font-bold text-lg">${selectedAmount}</span>
-                  )}
-                </div>
-              </Button>
-
-              {/* NGN Payment Button */}
-              <Button
-                onClick={handleNairaPayment}
-                disabled={isProcessingPayment || isProcessingNaira || !ngnAmount}
-                className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold">₦</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-base">Pay with Naira</div>
-                    <div className="text-sm opacity-90">Powered by Budpay</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {isProcessingNaira ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span className="font-bold text-lg">
-                      {ngnAmount ? `₦${ngnAmount.toLocaleString('en-NG')}` : '...'}
-                    </span>
-                  )}
-                </div>
-              </Button>
-            </div>
-
-            {/* Security Notice */}
+            {/* Commitment Information */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
                 <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
                 <div>
-                  <h4 className="font-semibold text-blue-900 mb-1">Secure Payment</h4>
-                  <p className="text-sm text-blue-700">
-                    Your payment information is encrypted and secure. Card details will be handled directly by the selected payment processor.
-                  </p>
+                  <h4 className="font-semibold text-blue-900 mb-2">Investment Process</h4>
+                  <div className="text-sm text-blue-700 space-y-2">
+                    <p>• Your investment will be committed and saved</p>
+                    <p>• You'll be redirected to your investor dashboard</p>
+                    <p>• Complete payment using USD (Stripe) or NGN (Budpay)</p>
+                    <p>• Track your investment progress after payment</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Stripe Elements form - shows when USD payment is selected */}
-            {showStripeForm && clientSecret && (
-              <Card className="border-2 border-blue-100 bg-white/90">
-                <CardHeader>
-                  <CardTitle className="text-lg text-blue-800 flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
-                    Complete USD Payment
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Elements stripe={stripePromise} options={{ clientSecret }}>
-                    <StripePaymentForm />
-                  </Elements>
-                </CardContent>
-              </Card>
-            )}
+            {/* Terms Reminder */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <FileText className="w-5 h-5 text-amber-600 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-amber-900 mb-1">SAFE Agreement</h4>
+                  <p className="text-sm text-amber-800">
+                    Your digital signature and agreement to terms will be finalized upon payment completion.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         );
 
@@ -1652,22 +1589,22 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           <div className="space-y-6">
             <div className="text-center">
               <Icon className="mx-auto h-12 w-12 text-green-500 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Investment Successful!</h3>
-              <p className="text-gray-600">Step {stepNumber} of 7: Your investment has been processed</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Investment Committed!</h3>
+              <p className="text-gray-600">Step {stepNumber} of 7: Your investment has been committed successfully</p>
             </div>
             
             {renderProgressIndicator()}
             
             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <h4 className="font-semibold text-green-900 mb-4">Congratulations!</h4>
+              <h4 className="font-semibold text-green-900 mb-4">Commitment Complete!</h4>
               <p className="text-green-800 mb-4">
-                You have successfully invested ${selectedAmount || parseFloat(customAmount) || 0} in {campaign.title}. Your payment has been processed and you will receive updates on the company's progress.
+                You have successfully committed ${selectedAmount || parseFloat(customAmount) || 0} to {campaign.title}. Complete your payment in the investor dashboard to finalize your investment.
               </p>
               
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span>Investment ID:</span>
-                  <span className="font-medium">#{Date.now().toString().slice(-6)}</span>
+                  <span>Investment Amount:</span>
+                  <span className="font-medium">${selectedAmount || parseFloat(customAmount) || 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Date:</span>
@@ -1675,23 +1612,38 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 </div>
                 <div className="flex justify-between">
                   <span>Status:</span>
-                  <span className="font-medium text-green-600">Paid</span>
+                  <span className="font-medium text-blue-600">Committed - Payment Pending</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <CreditCard className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-blue-900 mb-1">Next Steps</h4>
+                  <div className="text-sm text-blue-700 space-y-1">
+                    <p>• Go to your investor dashboard</p>
+                    <p>• Find your pending investment</p>
+                    <p>• Complete payment using USD or NGN</p>
+                    <p>• Track your investment progress</p>
+                  </div>
                 </div>
               </div>
             </div>
             
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-4">
-                You can track your investment progress in your investor dashboard.
+                Redirecting to your dashboard automatically...
               </p>
               <Button
                 onClick={() => {
-                  onClose();
+                  handleClose();
                   setLocation('/investor-dashboard');
                 }}
                 className="bg-fundry-orange hover:bg-orange-600"
               >
-                Go to Dashboard
+                Go to Dashboard Now
               </Button>
             </div>
           </div>
@@ -1798,7 +1750,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                   className="bg-fundry-orange hover:bg-orange-600 w-full sm:w-auto"
                 >
                   {currentStep === 'payment' ? 
-                    (isProcessingPayment ? 'Processing...' : 'Commit Investment') : 
+                    (isProcessingPayment ? 'Committing...' : 'Commit Investment') : 
                     'Next'
                   }
                 </Button>

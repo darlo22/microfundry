@@ -756,7 +756,10 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     const stepOrder: InvestmentStep[] = ['amount', 'auth', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'];
     const currentIndex = stepOrder.indexOf(currentStep);
     
-    if (currentStep === 'amount' && selectedAmount < minimumInvestment) {
+    // Get the actual investment amount (either from preset selection or custom input)
+    const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
+    
+    if (currentStep === 'amount' && actualAmount < minimumInvestment) {
       toast({
         title: "Invalid Amount",
         description: `Minimum investment is $${minimumInvestment}`,
@@ -765,7 +768,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       return;
     }
 
-    if (currentStep === 'amount' && selectedAmount > maximumInvestment) {
+    if (currentStep === 'amount' && actualAmount > maximumInvestment) {
       toast({
         title: "Invalid Amount",
         description: `Maximum investment is $${maximumInvestment}`,
@@ -1670,7 +1673,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   const canProceed = () => {
     switch (currentStep) {
       case 'amount':
-        return selectedAmount >= minimumInvestment && selectedAmount <= maximumInvestment;
+        // Get the actual investment amount (either from preset selection or custom input)
+        const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
+        return actualAmount >= minimumInvestment && actualAmount <= maximumInvestment;
       case 'auth':
         return isAuthenticated;
       case 'safe-review':

@@ -37,7 +37,13 @@ import {
   X,
   Clock,
   Star,
-  Save
+  Save,
+  Globe,
+  Percent,
+  CreditCard as PaymentIcon,
+  Calculator,
+  Trash2,
+  Plus
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
@@ -2429,7 +2435,65 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === "settings" && (
-            <GlobalAdminSettings />
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Global Admin Settings</h2>
+                <p className="text-gray-600">Configure platform-wide rules for multi-country fundraising</p>
+              </div>
+
+              <Tabs defaultValue="fee-tiers" className="w-full">
+                <TabsList className="grid w-full grid-cols-6">
+                  <TabsTrigger value="fee-tiers" className="flex items-center gap-2">
+                    <Percent className="w-4 h-4" />
+                    Fee Tiers
+                  </TabsTrigger>
+                  <TabsTrigger value="kyc-rules" className="flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    KYC Rules
+                  </TabsTrigger>
+                  <TabsTrigger value="regions" className="flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    Regions
+                  </TabsTrigger>
+                  <TabsTrigger value="payments" className="flex items-center gap-2">
+                    <PaymentIcon className="w-4 h-4" />
+                    Payments
+                  </TabsTrigger>
+                  <TabsTrigger value="legal" className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Legal
+                  </TabsTrigger>
+                  <TabsTrigger value="simulator" className="flex items-center gap-2">
+                    <Calculator className="w-4 h-4" />
+                    Simulator
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="fee-tiers" className="space-y-6">
+                  <FeeTimersManager />
+                </TabsContent>
+
+                <TabsContent value="kyc-rules" className="space-y-6">
+                  <KYCRulesManager />
+                </TabsContent>
+
+                <TabsContent value="regions" className="space-y-6">
+                  <RegionSettingsManager />
+                </TabsContent>
+
+                <TabsContent value="payments" className="space-y-6">
+                  <PaymentGatewaysManager />
+                </TabsContent>
+
+                <TabsContent value="legal" className="space-y-6">
+                  <LegalDocumentsManager />
+                </TabsContent>
+
+                <TabsContent value="simulator" className="space-y-6">
+                  <FeeSimulator />
+                </TabsContent>
+              </Tabs>
+            </div>
           )}
         </main>
       </div>

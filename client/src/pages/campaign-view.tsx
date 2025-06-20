@@ -243,8 +243,8 @@ export default function CampaignView() {
               <CardContent className="p-6">
                 {/* Status Badge */}
                 <div className="mb-4">
-                  <Badge className="bg-red-500 text-white border-red-500 px-3 py-1 text-xs font-semibold">
-                    ALMOST SOLD OUT
+                  <Badge className="bg-fundry-orange text-white border-fundry-orange px-3 py-1 text-xs font-semibold">
+                    {campaign.progressPercent >= 75 ? "ALMOST SOLD OUT" : "ACCEPTING INVESTMENT"}
                   </Badge>
                 </div>
 

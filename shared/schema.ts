@@ -593,6 +593,101 @@ export const campaignQuestionsRelations = relations(campaignQuestions, ({ one })
 export type CampaignQuestion = typeof campaignQuestions.$inferSelect;
 export type InsertCampaignQuestion = typeof campaignQuestions.$inferInsert;
 
+// Global fee tiers table
+export const globalFeeTiers = pgTable("global_fee_tiers", {
+  id: serial("id").primaryKey(),
+  country: varchar("country").notNull(),
+  currency: varchar("currency", { length: 3 }).notNull(),
+  minGoal: decimal("min_goal", { precision: 15, scale: 2 }).notNull(),
+  maxGoal: decimal("max_goal", { precision: 15, scale: 2 }).notNull(),
+  feePercent: decimal("fee_percent", { precision: 5, scale: 2 }).notNull(),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type GlobalFeeTier = typeof globalFeeTiers.$inferSelect;
+export type InsertGlobalFeeTier = typeof globalFeeTiers.$inferInsert;
+
+// KYC policy settings table
+export const kycPolicySettings = pgTable("kyc_policy_settings", {
+  id: serial("id").primaryKey(),
+  country: varchar("country").notNull(),
+  tier: varchar("tier").notNull(),
+  minAmount: decimal("min_amount", { precision: 15, scale: 2 }).notNull(),
+  maxAmount: decimal("max_amount", { precision: 15, scale: 2 }).notNull(),
+  requirements: jsonb("requirements").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type KycPolicySetting = typeof kycPolicySettings.$inferSelect;
+export type InsertKycPolicySetting = typeof kycPolicySettings.$inferInsert;
+
+// Region settings table
+export const regionSettings = pgTable("region_settings", {
+  id: serial("id").primaryKey(),
+  country: varchar("country").notNull().unique(),
+  currency: varchar("currency", { length: 3 }).notNull(),
+  language: varchar("language", { length: 10 }).notNull(),
+  maxGoal: decimal("max_goal", { precision: 15, scale: 2 }).notNull(),
+  isEnabled: boolean("is_enabled").default(true),
+  timezone: varchar("timezone").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type RegionSetting = typeof regionSettings.$inferSelect;
+export type InsertRegionSetting = typeof regionSettings.$inferInsert;
+
+// Legal documents table
+export const legalDocuments = pgTable("legal_documents", {
+  id: serial("id").primaryKey(),
+  country: varchar("country").notNull(),
+  documentType: varchar("document_type").notNull(),
+  title: varchar("title").notNull(),
+  content: text("content"),
+  url: varchar("url"),
+  version: varchar("version").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type LegalDocument = typeof legalDocuments.$inferSelect;
+export type InsertLegalDocument = typeof legalDocuments.$inferInsert;
+
+// Payment gateways table
+export const paymentGateways = pgTable("payment_gateways", {
+  id: serial("id").primaryKey(),
+  country: varchar("country").notNull(),
+  currency: varchar("currency", { length: 3 }).notNull(),
+  gateway: varchar("gateway").notNull(),
+  isDefault: boolean("is_default").default(false),
+  isEnabled: boolean("is_enabled").default(true),
+  settings: jsonb("settings"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type PaymentGateway = typeof paymentGateways.$inferSelect;
+export type InsertPaymentGateway = typeof paymentGateways.$inferInsert;
+
+// Withdrawal policies table
+export const withdrawalPolicies = pgTable("withdrawal_policies", {
+  id: serial("id").primaryKey(),
+  country: varchar("country").notNull(),
+  disbursementTimeline: integer("disbursement_timeline").notNull(), // days
+  minimumWithdrawal: decimal("minimum_withdrawal", { precision: 15, scale: 2 }).notNull(),
+  requiresKyc: boolean("requires_kyc").default(true),
+  bankIntegrations: jsonb("bank_integrations"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type WithdrawalPolicy = typeof withdrawalPolicies.$inferSelect;
+export type InsertWithdrawalPolicy = typeof withdrawalPolicies.$inferInsert;
+
 export const insertBusinessProfileSchema = createInsertSchema(businessProfiles).omit({
   id: true,
   createdAt: true,

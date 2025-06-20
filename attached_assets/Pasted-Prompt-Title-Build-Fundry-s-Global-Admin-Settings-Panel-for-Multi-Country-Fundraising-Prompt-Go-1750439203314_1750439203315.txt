@@ -1,0 +1,131 @@
+Prompt Title:
+🌐 Build Fundry’s Global Admin Settings Panel for Multi-Country Fundraising
+
+Prompt Goal:
+Enable Fundry Admins to configure global platform-wide rules for investment limits, tier-based fees, country-specific KYC compliance, and regionally tailored payment processing — all dynamically controlled from a central admin dashboard, with persistent sync to Supabase.
+
+🔧 Core Functional Requirements
+1. 💸 Global Tiered Platform Fee Settings
+Allow admins to define and manage platform fees based on:
+
+Funding Goal Tiers (globally and per country):
+
+e.g.
+
+Tier 1 ($0 – $5,000): 0%
+
+Tier 2 ($5,001 – $25,000): 2%
+
+Tier 3 ($25,001 – $100,000): 4%
+
+Country-specific overrides (e.g. Nigeria gets a 1% discount)
+
+Multi-currency support for each tier
+
+Auto-apply correct fee structure based on campaign goal and founder’s country
+
+2. 🌐 Country-Based KYC & Verification Rules
+Admins should:
+
+Define different KYC levels by fundraising range per country or region
+
+Example for Nigeria:
+
+$0 – $5,000: Email, Phone
+
+$5,001 – $25,000: BVN, ID upload
+
+$25,001+: Company docs, proof of address
+
+Example for USA:
+
+SSN verification, IRS EIN, Gov ID
+
+Store these in kyc_policy_settings table, enforce during campaign creation
+
+Dynamic alerts to founders when their goal exceeds their completed KYC tier
+
+3. 💱 Currency & Payment Processor Settings
+Create a settings module that allows admins to:
+
+Set default currency per country
+
+Assign payment processors based on currency:
+
+Stripe → USD, GBP, EUR
+
+Budpay/Paystack → NGN
+
+Flutterwave → Multi-currency fallback
+
+Map currency conversion for UI display and backend logic
+
+4. 📈 Fee Simulation & Preview Tool
+Let Admins simulate:
+
+Gross campaign value
+
+Platform + processing fee deductions
+
+Net payout in founder’s currency
+
+This calculator should also appear in the Founder Campaign creation UI
+
+5. 📜 Global Terms & Legal Disclaimers
+Admins can:
+
+Upload or edit Terms of Service by country
+
+Add auto-generated markdown explanations of fees, KYC, and withdrawal timelines
+
+Automatically require founders to acknowledge the relevant version during onboarding or campaign launch
+
+6. 📡 Regional Settings Panel
+A dynamic interface where Admins can:
+
+Enable/disable fundraising in certain countries
+
+Set localized thresholds (e.g., Brazil max = R$150,000, India max = ₹10L)
+
+Choose default language per country
+
+Save all settings in region_settings table and fetch from Supabase
+
+7. 🧾 Tiered Withdrawal Policies (Optional)
+Add optional controls for:
+
+Disbursement timelines (e.g. “7 days after campaign close”)
+
+Minimum withdrawal amount
+
+Country-based bank integrations
+
+Link to KYC compliance before release of funds
+
+🧩 Suggested Supabase Tables:
+global_fee_tiers: min_goal, max_goal, country, fee_percent, currency
+
+kyc_policy_settings: country, tier, requirements
+
+region_settings: country, currency, language, max_goal, is_enabled
+
+legal_documents: country, tos_url, privacy_policy_url, disclaimer_text
+
+payment_gateways: country, currency, gateway
+
+🖥️ UI Section Mock-Up
+Fee Rules by Country → Editable table w/ default & override logic
+
+KYC Rules → Drag-drop doc fields by country and tier
+
+Currency & Payment Processor → Selectable per country
+
+Withdrawal Policy → Timing, limits, and compliance preconditions
+
+Legal → Upload markdown or links to ToS / Privacy policies per region
+
+Simulation Tool → Interactive preview based on tier and country
+
+✅ Outcome
+An enterprise-grade Admin Settings Panel that empowers Fundry to operate legally and efficiently across multiple jurisdictions, adapting instantly to local regulations, payment infrastructure, and investor protection requirements — without hardcoding platform logic.
+

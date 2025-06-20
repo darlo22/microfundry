@@ -108,6 +108,20 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
+  // Helper function to get the current investment amount
+  const getCurrentInvestmentAmount = (): number => {
+    if (customAmount && parseFloat(customAmount) > 0) {
+      return parseFloat(customAmount);
+    }
+    if (selectedAmount > 0) {
+      return selectedAmount;
+    }
+    if (initialAmount && parseFloat(initialAmount) > 0) {
+      return parseFloat(initialAmount);
+    }
+    return 0;
+  };
+
   // Initialize Stripe
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
 
@@ -1811,8 +1825,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    const safeContent = generateSafeAgreement(campaign, selectedAmount);
-                    downloadSafeAgreement(safeContent, campaign.title, selectedAmount);
+                    const safeContent = generateSafeAgreement(campaign, getCurrentInvestmentAmount());
+                    downloadSafeAgreement(safeContent, campaign.title, getCurrentInvestmentAmount());
                   }}
                   className="border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white"
                 >
@@ -1835,7 +1849,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                   {campaign.title}
                 </p>
                 <p className="text-sm text-gray-600 mt-2">
-                  Investment Amount: <span className="font-bold">${selectedAmount.toLocaleString()}</span>
+                  Investment Amount: <span className="font-bold">${getCurrentInvestmentAmount().toLocaleString()}</span>
                 </p>
               </div>
 
@@ -1846,8 +1860,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 </h2>
                 <div className="space-y-3 text-sm leading-relaxed">
                   <p><strong>"Company"</strong> means {campaign.title}, a company incorporated under the laws of {campaign.country || 'Delaware'}.</p>
-                  <p><strong>"Investor"</strong> means {user?.firstName} {user?.lastName}, the purchaser of this SAFE.</p>
-                  <p><strong>"Purchase Amount"</strong> means ${selectedAmount.toLocaleString()}.</p>
+                  <p><strong>"Investor"</strong> means {user?.firstName} {user?.lastName} ({user?.email}), the purchaser of this SAFE.</p>
+                  <p><strong>"Purchase Amount"</strong> means ${getCurrentInvestmentAmount().toLocaleString()}.</p>
                   <p><strong>"Valuation Cap"</strong> means ${(parseFloat(campaign.valuationCap || "1000000")).toLocaleString()}.</p>
                   <p><strong>"Discount Rate"</strong> means {campaign.discountRate}%.</p>
                   <p><strong>"Equity Financing"</strong> means a bona fide transaction or series of transactions with the principal purpose of raising capital.</p>
@@ -1860,7 +1874,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                   Article 2: Investment and Conversion
                 </h2>
                 <div className="space-y-3 text-sm leading-relaxed">
-                  <p>2.1 <strong>Investment:</strong> The Investor agrees to invest ${selectedAmount.toLocaleString()} in the Company in exchange for the right to receive shares of the Company's capital stock upon the occurrence of an Equity Financing or Liquidity Event.</p>
+                  <p>2.1 <strong>Investment:</strong> The Investor agrees to invest ${getCurrentInvestmentAmount().toLocaleString()} in the Company in exchange for the right to receive shares of the Company's capital stock upon the occurrence of an Equity Financing or Liquidity Event.</p>
                   <p>2.2 <strong>Conversion Trigger:</strong> This SAFE will automatically convert into shares of the Company's preferred stock issued in the next Equity Financing at either:</p>
                   <ul className="ml-6 list-disc space-y-1">
                     <li>The price per share equal to the Valuation Cap divided by the Company's fully-diluted capitalization; or</li>
@@ -1932,17 +1946,40 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
                     <h3 className="font-bold text-fundry-navy mb-4">COMPANY</h3>
-                    <p className="mb-2">{campaign.title}</p>
-                    <div className="border-b border-gray-400 w-48 mb-2"></div>
-                    <p className="text-xs text-gray-600">Authorized Signatory</p>
+                    <p className="mb-2 font-semibold">{campaign.title}</p>
+                    <p className="text-sm text-gray-600 mb-3">
+                      {campaign.businessAddress || 'Business Address'}<br/>
+                      {campaign.city}, {campaign.state} {campaign.country}
+                    </p>
+                    <div className="border-b border-gray-400 w-64 mb-2"></div>
+                    <p className="text-xs text-gray-600">Authorized Representative</p>
                     <p className="text-xs text-gray-600 mt-4">Date: ________________</p>
                   </div>
                   <div>
                     <h3 className="font-bold text-fundry-navy mb-4">INVESTOR</h3>
-                    <p className="mb-2">{user?.firstName} {user?.lastName}</p>
-                    <div className="border-b border-gray-400 w-48 mb-2"></div>
+                    <p className="mb-2 font-semibold">{user?.firstName} {user?.lastName}</p>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Email: {user?.email}<br/>
+                      Investment Amount: ${getCurrentInvestmentAmount().toLocaleString()}
+                    </p>
+                    <div className="border-b border-gray-400 w-64 mb-2"></div>
                     <p className="text-xs text-gray-600">Investor Signature</p>
                     <p className="text-xs text-gray-600 mt-4">Date: {new Date().toLocaleDateString()}</p>
+                  </div>
+                </div>
+                
+                {/* Agreement Summary */}
+                <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-bold text-fundry-navy mb-2">Agreement Summary</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p><strong>Investment Amount:</strong> ${getCurrentInvestmentAmount().toLocaleString()}</p>
+                      <p><strong>Valuation Cap:</strong> ${(parseFloat(campaign.valuationCap || "1000000")).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p><strong>Discount Rate:</strong> {campaign.discountRate}%</p>
+                      <p><strong>Company:</strong> {campaign.title}</p>
+                    </div>
                   </div>
                 </div>
               </div>

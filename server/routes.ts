@@ -4861,6 +4861,130 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Global Settings API endpoints
+  app.post('/api/admin/global-settings/markets', requireAdmin, async (req: any, res) => {
+    try {
+      const marketData = req.body;
+      
+      // Store market data in global memory for fallback system
+      if (!global.adminMarkets) {
+        global.adminMarkets = [];
+      }
+      
+      const newMarket = {
+        id: Date.now().toString(),
+        ...marketData,
+        createdAt: new Date().toISOString(),
+        status: 'active'
+      };
+      
+      global.adminMarkets.push(newMarket);
+
+      await logAdminAction(
+        req.user.id,
+        'market_added',
+        'market',
+        newMarket.id,
+        { marketData },
+        req
+      );
+
+      res.json({ message: "Market added successfully", market: newMarket });
+    } catch (error) {
+      console.error("Error adding market:", error);
+      res.status(500).json({ message: "Failed to add market" });
+    }
+  });
+
+  app.post('/api/admin/global-settings/tiers', requireAdmin, async (req: any, res) => {
+    try {
+      const tierData = req.body;
+      
+      // Store tier data in global memory for fallback system
+      if (!global.adminTiers) {
+        global.adminTiers = [];
+      }
+      
+      const newTier = {
+        id: Date.now().toString(),
+        ...tierData,
+        createdAt: new Date().toISOString(),
+        status: 'active'
+      };
+      
+      global.adminTiers.push(newTier);
+
+      await logAdminAction(
+        req.user.id,
+        'tier_added',
+        'tier',
+        newTier.id,
+        { tierData },
+        req
+      );
+
+      res.json({ message: "Custom tier added successfully", tier: newTier });
+    } catch (error) {
+      console.error("Error adding tier:", error);
+      res.status(500).json({ message: "Failed to add tier" });
+    }
+  });
+
+  app.put('/api/admin/global-settings', requireAdmin, async (req: any, res) => {
+    try {
+      const settingsData = req.body;
+      
+      // Store global settings in memory for fallback system
+      if (!global.adminGlobalSettings) {
+        global.adminGlobalSettings = {};
+      }
+      
+      global.adminGlobalSettings = {
+        ...global.adminGlobalSettings,
+        ...settingsData,
+        lastUpdated: new Date().toISOString(),
+        updatedBy: req.user.id
+      };
+
+      await logAdminAction(
+        req.user.id,
+        'global_settings_updated',
+        'settings',
+        'global',
+        { settingsData },
+        req
+      );
+
+      res.json({ message: "Global settings saved successfully" });
+    } catch (error) {
+      console.error("Error saving global settings:", error);
+      res.status(500).json({ message: "Failed to save global settings" });
+    }
+  });
+
+  app.get('/api/admin/global-settings', requireAdmin, async (req: any, res) => {
+    try {
+      // Return fallback global settings data
+      const settings = {
+        markets: global.adminMarkets || [],
+        tiers: global.adminTiers || [],
+        globalSettings: global.adminGlobalSettings || {
+          defaultPlatformFee: 5.0,
+          maxCampaignAmount: 100000,
+          minInvestmentAmount: 25,
+          kycEnabled: true,
+          multiCurrencyEnabled: true,
+          emailNotificationsEnabled: true
+        }
+      };
+
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching global settings:", error);
+      res.status(500).json({ message: "Failed to fetch global settings" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -3424,7 +3424,10 @@ export default function AdminDashboard() {
                   <div className="border-t pt-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-gray-900">Custom Fee Tiers</h3>
-                      <Button className="bg-fundry-orange hover:bg-orange-600">
+                      <Button 
+                        onClick={() => setShowAddTierModal(true)}
+                        className="bg-fundry-orange hover:bg-orange-600"
+                      >
                         <Plus className="w-4 h-4 mr-2" />
                         Add Custom Tier
                       </Button>
@@ -3731,7 +3734,10 @@ export default function AdminDashboard() {
                   <div className="border-t pt-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-gray-900">Expand to New Markets</h3>
-                      <Button className="bg-fundry-orange hover:bg-orange-600">
+                      <Button 
+                        onClick={() => setShowAddMarketModal(true)}
+                        className="bg-fundry-orange hover:bg-orange-600"
+                      >
                         <Plus className="w-4 h-4 mr-2" />
                         Add New Market
                       </Button>
@@ -4238,9 +4244,296 @@ export default function AdminDashboard() {
             <Button variant="outline" onClick={() => setShowGlobalSettings(false)}>
               Cancel
             </Button>
-            <Button className="bg-fundry-orange hover:bg-orange-600">
+            <Button 
+              onClick={handleSaveGlobalSettings}
+              disabled={savingGlobalSettings}
+              className="bg-fundry-orange hover:bg-orange-600"
+            >
               <Save className="w-4 h-4 mr-2" />
-              Save Global Settings
+              {savingGlobalSettings ? "Saving..." : "Save Global Settings"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add New Market Modal */}
+      <Dialog open={showAddMarketModal} onOpenChange={setShowAddMarketModal}>
+        <DialogContent className="max-w-3xl bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 backdrop-blur-sm shadow-2xl rounded-2xl border border-orange-200/50">
+          <DialogHeader className="text-center pb-6 border-b border-orange-200/50">
+            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
+              Add New Market
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2">
+              Expand Fundry to a new country or region with custom settings
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="market-country">Country/Region *</Label>
+                <Select value={newMarketForm.country} onValueChange={(value) => setNewMarketForm({...newMarketForm, country: value})}>
+                  <SelectTrigger className="border-orange-200 focus:border-orange-400">
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="brazil">Brazil</SelectItem>
+                    <SelectItem value="south-africa">South Africa</SelectItem>
+                    <SelectItem value="china">China</SelectItem>
+                    <SelectItem value="russia">Russia</SelectItem>
+                    <SelectItem value="south-korea">South Korea</SelectItem>
+                    <SelectItem value="mexico">Mexico</SelectItem>
+                    <SelectItem value="germany">Germany</SelectItem>
+                    <SelectItem value="france">France</SelectItem>
+                    <SelectItem value="japan">Japan</SelectItem>
+                    <SelectItem value="australia">Australia</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="market-currency">Currency *</Label>
+                <Select value={newMarketForm.currency} onValueChange={(value) => setNewMarketForm({...newMarketForm, currency: value})}>
+                  <SelectTrigger className="border-orange-200 focus:border-orange-400">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">USD - US Dollar</SelectItem>
+                    <SelectItem value="EUR">EUR - Euro</SelectItem>
+                    <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                    <SelectItem value="BRL">BRL - Brazilian Real</SelectItem>
+                    <SelectItem value="ZAR">ZAR - South African Rand</SelectItem>
+                    <SelectItem value="CNY">CNY - Chinese Yuan</SelectItem>
+                    <SelectItem value="RUB">RUB - Russian Ruble</SelectItem>
+                    <SelectItem value="KRW">KRW - South Korean Won</SelectItem>
+                    <SelectItem value="MXN">MXN - Mexican Peso</SelectItem>
+                    <SelectItem value="JPY">JPY - Japanese Yen</SelectItem>
+                    <SelectItem value="AUD">AUD - Australian Dollar</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="market-platform-fee">Platform Fee (%) *</Label>
+                <Input
+                  id="market-platform-fee"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="10"
+                  placeholder="5.0"
+                  value={newMarketForm.platformFee}
+                  onChange={(e) => setNewMarketForm({...newMarketForm, platformFee: e.target.value})}
+                  className="border-orange-200 focus:border-orange-400"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="market-language">Language</Label>
+                <Select value={newMarketForm.language} onValueChange={(value) => setNewMarketForm({...newMarketForm, language: value})}>
+                  <SelectTrigger className="border-orange-200 focus:border-orange-400">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="english">English</SelectItem>
+                    <SelectItem value="spanish">Spanish</SelectItem>
+                    <SelectItem value="portuguese">Portuguese</SelectItem>
+                    <SelectItem value="french">French</SelectItem>
+                    <SelectItem value="german">German</SelectItem>
+                    <SelectItem value="chinese">Chinese</SelectItem>
+                    <SelectItem value="japanese">Japanese</SelectItem>
+                    <SelectItem value="korean">Korean</SelectItem>
+                    <SelectItem value="russian">Russian</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="market-min-investment">Minimum Investment</Label>
+                <Input
+                  id="market-min-investment"
+                  placeholder="$25"
+                  value={newMarketForm.minInvestment}
+                  onChange={(e) => setNewMarketForm({...newMarketForm, minInvestment: e.target.value})}
+                  className="border-orange-200 focus:border-orange-400"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="market-max-investment">Maximum Investment</Label>
+                <Input
+                  id="market-max-investment"
+                  placeholder="$100,000"
+                  value={newMarketForm.maxInvestment}
+                  onChange={(e) => setNewMarketForm({...newMarketForm, maxInvestment: e.target.value})}
+                  className="border-orange-200 focus:border-orange-400"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="market-kyc">KYC Requirements</Label>
+              <textarea
+                id="market-kyc"
+                rows={3}
+                placeholder="Describe KYC and compliance requirements for this market..."
+                value={newMarketForm.kycRequirements}
+                onChange={(e) => setNewMarketForm({...newMarketForm, kycRequirements: e.target.value})}
+                className="w-full p-3 border border-orange-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="market-legal">Legal Framework</Label>
+              <textarea
+                id="market-legal"
+                rows={3}
+                placeholder="Describe legal framework and regulatory requirements..."
+                value={newMarketForm.legalFramework}
+                onChange={(e) => setNewMarketForm({...newMarketForm, legalFramework: e.target.value})}
+                className="w-full p-3 border border-orange-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-6 border-t border-orange-200/50">
+            <Button variant="outline" onClick={() => setShowAddMarketModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAddNewMarket}
+              disabled={addNewMarketMutation.isPending}
+              className="bg-fundry-orange hover:bg-orange-600"
+            >
+              {addNewMarketMutation.isPending ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Market
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Custom Tier Modal */}
+      <Dialog open={showAddTierModal} onOpenChange={setShowAddTierModal}>
+        <DialogContent className="max-w-2xl bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 backdrop-blur-sm shadow-2xl rounded-2xl border border-orange-200/50">
+          <DialogHeader className="text-center pb-6 border-b border-orange-200/50">
+            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
+              Add Custom Tier
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2">
+              Create a custom fee tier for specific investment ranges or regions
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="tier-name">Tier Name *</Label>
+                <Input
+                  id="tier-name"
+                  placeholder="Premium Tier"
+                  value={newTierForm.name}
+                  onChange={(e) => setNewTierForm({...newTierForm, name: e.target.value})}
+                  className="border-orange-200 focus:border-orange-400"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tier-region">Target Region</Label>
+                <Select value={newTierForm.region} onValueChange={(value) => setNewTierForm({...newTierForm, region: value})}>
+                  <SelectTrigger className="border-orange-200 focus:border-orange-400">
+                    <SelectValue placeholder="Select region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="global">Global</SelectItem>
+                    <SelectItem value="north-america">North America</SelectItem>
+                    <SelectItem value="europe">Europe</SelectItem>
+                    <SelectItem value="asia-pacific">Asia Pacific</SelectItem>
+                    <SelectItem value="latin-america">Latin America</SelectItem>
+                    <SelectItem value="africa">Africa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tier-min-amount">Minimum Amount *</Label>
+                <Input
+                  id="tier-min-amount"
+                  placeholder="$5,000"
+                  value={newTierForm.minAmount}
+                  onChange={(e) => setNewTierForm({...newTierForm, minAmount: e.target.value})}
+                  className="border-orange-200 focus:border-orange-400"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tier-max-amount">Maximum Amount *</Label>
+                <Input
+                  id="tier-max-amount"
+                  placeholder="$50,000"
+                  value={newTierForm.maxAmount}
+                  onChange={(e) => setNewTierForm({...newTierForm, maxAmount: e.target.value})}
+                  className="border-orange-200 focus:border-orange-400"
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="tier-fee">Fee Percentage *</Label>
+                <Input
+                  id="tier-fee"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="10"
+                  placeholder="3.5"
+                  value={newTierForm.feePercentage}
+                  onChange={(e) => setNewTierForm({...newTierForm, feePercentage: e.target.value})}
+                  className="border-orange-200 focus:border-orange-400"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tier-description">Description</Label>
+              <textarea
+                id="tier-description"
+                rows={3}
+                placeholder="Describe this tier and its benefits..."
+                value={newTierForm.description}
+                onChange={(e) => setNewTierForm({...newTierForm, description: e.target.value})}
+                className="w-full p-3 border border-orange-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-6 border-t border-orange-200/50">
+            <Button variant="outline" onClick={() => setShowAddTierModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAddCustomTier}
+              disabled={addCustomTierMutation.isPending}
+              className="bg-fundry-orange hover:bg-orange-600"
+            >
+              {addCustomTierMutation.isPending ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Tier
+                </>
+              )}
             </Button>
           </div>
         </DialogContent>

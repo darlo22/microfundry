@@ -3548,7 +3548,29 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         firstName: "Admin",
         lastName: "User",
         userType: "admin" as const,
-        isEmailVerified: true
+        isEmailVerified: true,
+        password: null,
+        phone: null,
+        country: null,
+        state: null,
+        bio: null,
+        profilePicture: null,
+        dateOfBirth: null,
+        address: null,
+        city: null,
+        zipCode: null,
+        investmentExperience: null,
+        accreditedInvestor: null,
+        riskTolerance: null,
+        investmentGoals: null,
+        annualIncome: null,
+        netWorth: null,
+        employmentStatus: null,
+        status: "active" as const,
+        stripeCustomerId: null,
+        stripeSubscriptionId: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
 
       console.log(`Admin login successful: ${adminUser.email} at ${new Date().toISOString()}`);

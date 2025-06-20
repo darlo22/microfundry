@@ -108,6 +108,7 @@ interface Investment {
   investor?: {
     firstName: string;
     lastName: string;
+    email: string;
   };
   campaign?: {
     id: number;

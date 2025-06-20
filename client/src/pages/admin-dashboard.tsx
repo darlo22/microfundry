@@ -37,7 +37,8 @@ import {
   X,
   Clock,
   Star,
-  Save
+  Save,
+  Trash2
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
@@ -472,7 +473,7 @@ export default function AdminDashboard() {
     }
   });
 
-  const handleResetPassword = (user: User) => {
+  const handleResetUserPassword = (user: User) => {
     resetPasswordMutation.mutate(user.id);
   };
 
@@ -622,6 +623,19 @@ export default function AdminDashboard() {
     enabled: !!adminUser && activeTab === "message-center"
   });
 
+  // Team members query
+  const { data: teamMembersData, isLoading: teamMembersLoading } = useQuery<any[]>({
+    queryKey: ['/api/admin/team-members'],
+    enabled: !!adminUser && activeTab === "settings"
+  });
+
+  // Update team members state when data changes
+  useEffect(() => {
+    if (teamMembersData) {
+      setTeamMembers(teamMembersData);
+    }
+  }, [teamMembersData]);
+
   const filteredUsers = useMemo(() => {
     if (!users || !userSearchQuery) return [];
     return users.filter((user: User) => 
@@ -666,6 +680,89 @@ export default function AdminDashboard() {
       style: 'currency',
       currency: 'USD'
     }).format(typeof amount === 'string' ? parseFloat(amount) : amount);
+  };
+
+  // Team Management Handlers
+  const handleInviteTeamMember = async () => {
+    if (!newTeamMember.email || !newTeamMember.fullName || !newTeamMember.tempPassword) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsInvitingMember(true);
+    try {
+      await apiRequest("POST", "/api/admin/invite-team-member", {
+        email: newTeamMember.email,
+        fullName: newTeamMember.fullName,
+        role: newTeamMember.role || 'admin',
+        department: newTeamMember.department || 'operations',
+        responsibilities: newTeamMember.responsibilities || '',
+        tempPassword: newTeamMember.tempPassword
+      });
+
+      toast({
+        title: "Invitation Sent",
+        description: `Invitation sent to ${newTeamMember.email} successfully.`,
+      });
+
+      // Reset form
+      setNewTeamMember({});
+      
+      // Refresh team members list
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/team-members'] });
+    } catch (error) {
+      toast({
+        title: "Failed to Send Invitation",
+        description: "Could not send team member invitation. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsInvitingMember(false);
+    }
+  };
+
+  const handleResetTeamMemberPassword = async (member: any) => {
+    try {
+      await apiRequest("POST", "/api/admin/reset-team-password", {
+        memberId: member.id,
+        email: member.email
+      });
+
+      toast({
+        title: "Password Reset",
+        description: `Password reset email sent to ${member.email}.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to Reset",
+        description: "Could not reset password. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRemoveTeamMember = async (member: any) => {
+    try {
+      await apiRequest("DELETE", `/api/admin/team-members/${member.id}`);
+
+      toast({
+        title: "Team Member Removed",
+        description: `${member.fullName || member.email} has been removed from the team.`,
+      });
+
+      // Refresh team members list
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/team-members'] });
+    } catch (error) {
+      toast({
+        title: "Failed to Remove",
+        description: "Could not remove team member. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

@@ -27,6 +27,10 @@ export default function AdminLogin() {
     setError("");
 
     try {
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('/api/admin/login', {
         method: 'POST',
         headers: {
@@ -34,24 +38,37 @@ export default function AdminLogin() {
         },
         credentials: 'include',
         body: JSON.stringify(formData),
+        signal: controller.signal,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        toast({
-          title: "Admin Access Granted",
-          description: "Welcome to the Admin Command Centre",
-        });
-        // Invalidate auth cache to refresh authentication state
-        await queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-        await queryClient.invalidateQueries({ queryKey: ['/api/admin/verify'] });
-        setLocation("/admin-dashboard");
-      } else {
-        setError(data.message || "Invalid admin credentials");
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Authentication failed" }));
+        setError(errorData.message || "Invalid admin credentials");
+        return;
       }
-    } catch (error) {
-      setError("Connection error. Please try again.");
+
+      const data = await response.json();
+      
+      toast({
+        title: "Admin Access Granted",
+        description: "Welcome to the Admin Command Centre",
+      });
+      
+      // Invalidate auth cache to refresh authentication state
+      await queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/admin/verify'] });
+      
+      setLocation("/admin-dashboard");
+      
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        setError("Request timeout. Please try again.");
+      } else {
+        setError("Connection error. Please try again.");
+      }
+      console.error('Admin login error:', error);
     } finally {
       setIsLoading(false);
     }

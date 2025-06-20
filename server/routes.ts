@@ -3555,10 +3555,12 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         state: null,
         bio: null,
         profilePicture: null,
+        profileImageUrl: null,
         dateOfBirth: null,
         address: null,
         city: null,
         zipCode: null,
+        occupation: null,
         investmentExperience: null,
         accreditedInvestor: null,
         riskTolerance: null,
@@ -3566,6 +3568,12 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         annualIncome: null,
         netWorth: null,
         employmentStatus: null,
+        onboardingCompleted: true,
+        twoFactorEnabled: false,
+        twoFactorSecret: null,
+        twoFactorBackupCodes: null,
+        twoFactorMethod: null,
+        passwordLastChanged: new Date(),
         status: "active" as const,
         stripeCustomerId: null,
         stripeSubscriptionId: null,
@@ -3575,12 +3583,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       console.log(`Admin login successful: ${adminUser.email} at ${new Date().toISOString()}`);
 
-      // Create session
-      req.logIn(adminUser, (err) => {
-        if (err) {
-          console.error('Session creation error:', err);
-          return res.status(500).json({ message: "Session creation failed" });
-        }
+      // Set session directly without passport overhead
+      if (req.session) {
+        req.session.passport = { user: adminUser };
+        req.session.user = adminUser;
         
         res.json({ 
           message: "Admin authentication successful",
@@ -3592,7 +3598,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             userType: adminUser.userType
           }
         });
-      });
+      } else {
+        res.status(500).json({ message: "Session not available" });
+      }
 
     } catch (error) {
       console.error('Admin login error:', error);

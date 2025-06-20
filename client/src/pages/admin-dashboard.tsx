@@ -1651,6 +1651,112 @@ export default function AdminDashboard() {
                 </Card>
               </div>
 
+              {/* Recent Transactions and Withdrawal Requests */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+                      Recent Transactions
+                    </CardTitle>
+                    <CardDescription>Latest completed investment transactions</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {investments && investments.filter((inv: Investment) => inv.paymentStatus === 'completed').length > 0 ? 
+                        investments.filter((inv: Investment) => inv.paymentStatus === 'completed').slice(0, 5).map((investment: Investment) => (
+                        <div key={investment.id} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">
+                                {investment.investor?.firstName} {investment.investor?.lastName} 
+                                {!investment.investor && investment.investorName && investment.investorName}
+                                {!investment.investor && !investment.investorName && `Investor #${investment.investorId}`}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {investment.campaign?.companyName || investment.campaign?.title || `Campaign #${investment.campaignId}`}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(investment.createdAt).toLocaleDateString()} at {new Date(investment.createdAt).toLocaleTimeString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-green-600">{formatCurrency(parseFloat(investment.amount))}</p>
+                            <Badge className="bg-green-100 text-green-800">completed</Badge>
+                          </div>
+                        </div>
+                      )) : (
+                        <div className="text-center py-8">
+                          <CheckCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                          <p className="text-gray-500">No completed transactions yet</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <ArrowUpCircle className="w-5 h-5 mr-2 text-orange-600" />
+                      Withdrawal Requests
+                    </CardTitle>
+                    <CardDescription>Pending founder withdrawal requests</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {withdrawals && withdrawals.length > 0 ? 
+                        withdrawals.slice(0, 3).map((withdrawal: any) => (
+                        <div key={withdrawal.id} className="p-4 border rounded-lg">
+                          <div className="flex justify-between items-start">
+                            <div className="space-y-1">
+                              <div className="flex items-center space-x-2">
+                                <h3 className="font-medium">{withdrawal.founderName}</h3>
+                                <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                                  {withdrawal.status}
+                                </span>
+                              </div>
+                              <p className="text-lg font-bold text-green-600">{formatCurrency(withdrawal.amount)}</p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(withdrawal.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-green-500 text-green-600 hover:bg-green-50"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-500 text-red-600 hover:bg-red-50"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )) : (
+                        <div className="text-center py-8">
+                          <ArrowUpCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                          <p className="text-gray-500">No withdrawal requests found</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
               <Card className="mb-6">
                 <CardHeader>
                   <CardTitle className="text-orange-700">Pending Transactions</CardTitle>
@@ -1808,111 +1914,7 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Recent Transactions and Withdrawal Requests */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-                      Recent Transactions
-                    </CardTitle>
-                    <CardDescription>Latest completed investment transactions</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {investments && investments.filter((inv: Investment) => inv.paymentStatus === 'completed').length > 0 ? 
-                        investments.filter((inv: Investment) => inv.paymentStatus === 'completed').slice(0, 5).map((investment: Investment) => (
-                        <div key={investment.id} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                            </div>
-                            <div>
-                              <p className="font-medium">
-                                {investment.investor?.firstName} {investment.investor?.lastName} 
-                                {!investment.investor && investment.investorName && investment.investorName}
-                                {!investment.investor && !investment.investorName && `Investor #${investment.investorId}`}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {investment.campaign?.companyName || investment.campaign?.title || `Campaign #${investment.campaignId}`}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(investment.createdAt).toLocaleDateString()} at {new Date(investment.createdAt).toLocaleTimeString('en-US', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold text-green-600">{formatCurrency(parseFloat(investment.amount))}</p>
-                            <Badge className="bg-green-100 text-green-800">completed</Badge>
-                          </div>
-                        </div>
-                      )) : (
-                        <div className="text-center py-8">
-                          <CheckCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                          <p className="text-gray-500">No completed transactions yet</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <ArrowUpCircle className="w-5 h-5 mr-2 text-orange-600" />
-                      Withdrawal Requests
-                    </CardTitle>
-                    <CardDescription>Pending founder withdrawal requests</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {withdrawals && withdrawals.length > 0 ? 
-                        withdrawals.slice(0, 3).map((withdrawal: any) => (
-                        <div key={withdrawal.id} className="p-4 border rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div className="space-y-1">
-                              <div className="flex items-center space-x-2">
-                                <h3 className="font-medium">{withdrawal.founderName}</h3>
-                                <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
-                                  {withdrawal.status}
-                                </span>
-                              </div>
-                              <p className="text-lg font-bold text-green-600">{formatCurrency(withdrawal.amount)}</p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(withdrawal.createdAt).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <div className="flex space-x-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="border-green-500 text-green-600 hover:bg-green-50"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="border-red-500 text-red-600 hover:bg-red-50"
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )) : (
-                        <div className="text-center py-8">
-                          <ArrowUpCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                          <p className="text-gray-500">No withdrawal requests found</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
 
               {/* Pending Transactions */}
               <Card>

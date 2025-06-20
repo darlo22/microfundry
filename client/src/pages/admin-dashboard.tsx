@@ -2019,10 +2019,22 @@ export default function AdminDashboard() {
                     <Send className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">12</div>
-                    <p className="text-xs text-muted-foreground">
-                      +2 from yesterday
-                    </p>
+                    {messageStatsLoading ? (
+                      <div className="animate-pulse">
+                        <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-2xl font-bold">{messageStats?.messagesToday || 0}</div>
+                        <p className="text-xs text-muted-foreground">
+                          {messageStats?.messagesToday && messageStats?.messagesYesterday ? 
+                            `${messageStats.messagesToday > messageStats.messagesYesterday ? '+' : ''}${messageStats.messagesToday - messageStats.messagesYesterday} from yesterday` :
+                            'No change from yesterday'
+                          }
+                        </p>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -2032,10 +2044,19 @@ export default function AdminDashboard() {
                     <User className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">1,247</div>
-                    <p className="text-xs text-muted-foreground">
-                      Across all user types
-                    </p>
+                    {messageStatsLoading ? (
+                      <div className="animate-pulse">
+                        <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-2xl font-bold">{messageStats?.totalRecipients || 0}</div>
+                        <p className="text-xs text-muted-foreground">
+                          Across all user types
+                        </p>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -2045,10 +2066,22 @@ export default function AdminDashboard() {
                     <Clock className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">3</div>
-                    <p className="text-xs text-muted-foreground">
-                      Pending delivery
-                    </p>
+                    {messageStatsLoading ? (
+                      <div className="animate-pulse">
+                        <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-2xl font-bold">{messageStats?.scheduledMessages || 0}</div>
+                        <p className="text-xs text-muted-foreground">
+                          Pending delivery
+                        </p>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
                   </CardContent>
                 </Card>
               </div>

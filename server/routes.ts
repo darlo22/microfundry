@@ -17,7 +17,7 @@ import multer from "multer";
 import path from "path";
 import { TwoFactorService } from "./twoFactorService";
 import { emailService } from "./services/email";
-import { eq, and, gt, sql, desc, or, ne, inArray, gte } from "drizzle-orm";
+import { eq, and, gt, sql, desc, or, ne, inArray, gte, lt } from "drizzle-orm";
 import { 
   emailVerificationTokens, 
   passwordResetTokens,
@@ -3975,12 +3975,16 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
       
+      const yesterdayEnd = new Date(today);
+      yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
+      yesterdayEnd.setHours(23, 59, 59, 999);
+      
       const [yesterdayMessages] = await db.select({ count: sql<number>`count(*)` })
         .from(adminMessages)
         .where(and(
           eq(adminMessages.adminId, req.user.id),
           gte(adminMessages.createdAt, yesterday),
-          lt(adminMessages.createdAt, today)
+          sql`${adminMessages.createdAt} <= ${yesterdayEnd}`
         ));
 
       res.json({

@@ -578,6 +578,14 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
             </Button>
 
             <div className="text-center text-sm text-gray-600">
+              <button
+                type="button"
+                onClick={() => handleModeChange("forgotPassword")}
+                className="text-fundry-orange hover:underline font-medium mb-3 block"
+              >
+                Forgot your password?
+              </button>
+              
               Don't have an account?{" "}
               <button
                 type="button"

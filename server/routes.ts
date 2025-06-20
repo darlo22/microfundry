@@ -467,6 +467,215 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Password Reset Routes
+  
+  // Send password reset email
+  app.post('/api/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Return success even if user doesn't exist for security
+        return res.json({ message: "If an account exists with this email, a password reset link has been sent." });
+      }
+
+      // Generate reset token
+      const token = nanoid(32);
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+      // Delete any existing reset tokens for this user
+      await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, user.id));
+
+      // Store reset token
+      await storage.createPasswordResetToken({
+        id: nanoid(),
+        userId: user.id,
+        token,
+        expiresAt,
+        createdAt: new Date()
+      });
+
+      // Send password reset email
+      const resetUrl = `${process.env.REPLIT_DOMAINS?.split(',')[0] || 'https://localhost:5000'}/reset-password?token=${token}`;
+      
+      const emailHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #f97316, #1e40af); }
+            .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; margin-top: 40px; margin-bottom: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+            .header { background: linear-gradient(135deg, #f97316, #1e40af); padding: 40px 30px; text-align: center; }
+            .logo { width: 60px; height: 60px; background: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #f97316; margin-bottom: 20px; }
+            .header h1 { color: white; margin: 0; font-size: 28px; font-weight: 600; }
+            .content { padding: 40px 30px; }
+            .content h2 { color: #1e40af; margin: 0 0 20px; font-size: 24px; }
+            .content p { color: #374151; line-height: 1.6; margin: 0 0 20px; }
+            .button { display: inline-block; background: linear-gradient(135deg, #f97316, #ea580c); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0; transition: all 0.3s ease; }
+            .button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(249, 115, 22, 0.3); }
+            .security-note { background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b; }
+            .security-note p { color: #92400e; margin: 0; font-size: 14px; }
+            .footer { background: #f9fafb; padding: 20px 30px; text-align: center; color: #6b7280; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo">F</div>
+              <h1>Password Reset Request</h1>
+            </div>
+            <div class="content">
+              <h2>Reset Your Password</h2>
+              <p>Hello ${user.firstName},</p>
+              <p>We received a request to reset your password for your Fundry account. Click the button below to create a new password:</p>
+              <a href="${resetUrl}" class="button">Reset Password</a>
+              <div class="security-note">
+                <p><strong>Security Notice:</strong> This link will expire in 1 hour for your security. If you didn't request this password reset, please ignore this email and your password will remain unchanged.</p>
+              </div>
+              <p>If the button doesn't work, copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; color: #6b7280; font-size: 14px;">${resetUrl}</p>
+            </div>
+            <div class="footer">
+              <p>This email was sent by Micro Fundry Support. If you have questions, contact us at support@microfundry.com</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      await emailService.sendEmail({
+        to: user.email,
+        subject: "Reset Your Fundry Password",
+        html: emailHtml
+      });
+
+      res.json({ message: "If an account exists with this email, a password reset link has been sent." });
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+      res.status(500).json({ message: "Failed to send password reset email" });
+    }
+  });
+
+  // Reset password with token
+  app.post('/api/reset-password', async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+
+      if (!token || !newPassword) {
+        return res.status(400).json({ message: "Token and new password are required" });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+
+      // Find valid reset token
+      const resetToken = await storage.getPasswordResetToken(token);
+      if (!resetToken) {
+        return res.status(400).json({ message: "Invalid or expired reset token" });
+      }
+
+      // Check if token is expired
+      if (new Date() > resetToken.expiresAt) {
+        await storage.deletePasswordResetToken(token);
+        return res.status(400).json({ message: "Reset token has expired" });
+      }
+
+      // Hash new password
+      const hashedPassword = await hashPassword(newPassword);
+
+      // Update user password
+      await storage.updateUserPassword(resetToken.userId, hashedPassword);
+
+      // Delete the used reset token
+      await storage.deletePasswordResetToken(token);
+
+      // Send confirmation email
+      const user = await storage.getUser(resetToken.userId);
+      if (user) {
+        const confirmationHtml = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #f97316, #1e40af); }
+              .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; margin-top: 40px; margin-bottom: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+              .header { background: linear-gradient(135deg, #f97316, #1e40af); padding: 40px 30px; text-align: center; }
+              .logo { width: 60px; height: 60px; background: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #f97316; margin-bottom: 20px; }
+              .header h1 { color: white; margin: 0; font-size: 28px; font-weight: 600; }
+              .content { padding: 40px 30px; }
+              .content h2 { color: #1e40af; margin: 0 0 20px; font-size: 24px; }
+              .content p { color: #374151; line-height: 1.6; margin: 0 0 20px; }
+              .success-box { background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a; }
+              .success-box p { color: #166534; margin: 0; }
+              .footer { background: #f9fafb; padding: 20px 30px; text-align: center; color: #6b7280; font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <div class="logo">F</div>
+                <h1>Password Updated</h1>
+              </div>
+              <div class="content">
+                <h2>Password Successfully Changed</h2>
+                <p>Hello ${user.firstName},</p>
+                <p>Your Fundry account password has been successfully updated. You can now sign in with your new password.</p>
+                <div class="success-box">
+                  <p><strong>Security Confirmation:</strong> Your password was changed on ${new Date().toLocaleString()}. If you didn't make this change, please contact support immediately.</p>
+                </div>
+              </div>
+              <div class="footer">
+                <p>This email was sent by Micro Fundry Support. If you have questions, contact us at support@microfundry.com</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `;
+
+        await emailService.sendEmail({
+          to: user.email,
+          subject: "Password Successfully Updated - Fundry",
+          html: confirmationHtml
+        });
+      }
+
+      res.json({ message: "Password has been successfully reset" });
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
+  // Validate reset token
+  app.get('/api/validate-reset-token/:token', async (req, res) => {
+    try {
+      const { token } = req.params;
+
+      const resetToken = await storage.getPasswordResetToken(token);
+      if (!resetToken) {
+        return res.status(400).json({ valid: false, message: "Invalid reset token" });
+      }
+
+      if (new Date() > resetToken.expiresAt) {
+        await storage.deletePasswordResetToken(token);
+        return res.status(400).json({ valid: false, message: "Reset token has expired" });
+      }
+
+      res.json({ valid: true, message: "Token is valid" });
+    } catch (error) {
+      console.error("Error validating reset token:", error);
+      res.status(500).json({ valid: false, message: "Failed to validate token" });
+    }
+  });
+
   // Email Verification Routes
   
   // Send verification email

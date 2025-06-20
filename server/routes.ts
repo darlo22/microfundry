@@ -3975,16 +3975,15 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
       
-      const yesterdayEnd = new Date(today);
-      yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
+      const yesterdayEnd = new Date(yesterday);
       yesterdayEnd.setHours(23, 59, 59, 999);
-      
+
       const [yesterdayMessages] = await db.select({ count: sql<number>`count(*)` })
         .from(adminMessages)
         .where(and(
           eq(adminMessages.adminId, req.user.id),
           gte(adminMessages.createdAt, yesterday),
-          sql`${adminMessages.createdAt} <= ${yesterdayEnd}`
+          sql`${adminMessages.createdAt} < ${today}`
         ));
 
       res.json({

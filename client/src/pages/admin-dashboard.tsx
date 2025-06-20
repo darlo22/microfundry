@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { 
   Users, 
   TrendingUp, 
@@ -19,10 +24,17 @@ import {
   Ban,
   CheckCircle,
   XCircle,
-  Download
+  Download,
+  Calendar,
+  Mail,
+  User,
+  MapPin,
+  Phone
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface AdminStats {
   totalCampaigns: number;
@@ -50,6 +62,10 @@ interface User {
   isEmailVerified: boolean;
   createdAt: string;
   status?: string;
+  phone?: string;
+  country?: string;
+  state?: string;
+  bio?: string;
 }
 
 interface Campaign {
@@ -76,6 +92,107 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [adminUser, setAdminUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [suspendModalOpen, setSuspendModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    userType: "",
+    phone: "",
+    country: "",
+    state: ""
+  });
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // User management mutations
+  const updateUserMutation = useMutation({
+    mutationFn: async (data: { userId: string; updates: any }) => {
+      return apiRequest("PUT", `/api/admin/users/${data.userId}`, data.updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      setEditModalOpen(false);
+      toast({
+        title: "User Updated",
+        description: "User information has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed", 
+        description: "Failed to update user information.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const suspendUserMutation = useMutation({
+    mutationFn: async (data: { userId: string; suspend: boolean; reason?: string }) => {
+      return apiRequest("PUT", `/api/admin/users/${data.userId}/suspend`, data);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      setSuspendModalOpen(false);
+      toast({
+        title: variables.suspend ? "User Suspended" : "User Reactivated",
+        description: variables.suspend ? "User has been suspended successfully." : "User has been reactivated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Action Failed",
+        description: "Failed to update user status.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Handle modal actions
+  const handleViewUser = (user: User) => {
+    setSelectedUser(user);
+    setViewModalOpen(true);
+  };
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setEditForm({
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      userType: user.userType || "",
+      phone: user.phone || "",
+      country: user.country || "",
+      state: user.state || ""
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleSuspendUser = (user: User) => {
+    setSelectedUser(user);
+    setSuspendModalOpen(true);
+  };
+
+  const handleUpdateUser = () => {
+    if (!selectedUser) return;
+    updateUserMutation.mutate({
+      userId: selectedUser.id,
+      updates: editForm
+    });
+  };
+
+  const handleSuspendConfirm = (suspend: boolean, reason?: string) => {
+    if (!selectedUser) return;
+    suspendUserMutation.mutate({
+      userId: selectedUser.id,
+      suspend,
+      reason
+    });
+  };
 
   // Check admin authentication on mount
   useEffect(() => {
@@ -386,17 +503,22 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => handleViewUser(user)}>
                               <Eye className="w-4 h-4 mr-1" />
                               View
                             </Button>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => handleEditUser(user)}>
                               <Edit className="w-4 h-4 mr-1" />
                               Edit
                             </Button>
-                            <Button size="sm" variant="destructive">
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              onClick={() => handleSuspendUser(user)}
+                              disabled={user.status === "suspended"}
+                            >
                               <Ban className="w-4 h-4 mr-1" />
-                              Suspend
+                              {user.status === "suspended" ? "Suspended" : "Suspend"}
                             </Button>
                           </div>
                         </div>
@@ -579,6 +701,227 @@ export default function AdminDashboard() {
           )}
         </main>
       </div>
+
+      {/* View User Modal */}
+      <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <User className="w-5 h-5 text-fundry-orange" />
+              <span>User Details</span>
+            </DialogTitle>
+            <DialogDescription>
+              Complete information for {selectedUser?.firstName} {selectedUser?.lastName}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Full Name</Label>
+                    <p className="text-lg font-semibold">{selectedUser.firstName} {selectedUser.lastName}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Email Address</Label>
+                    <p className="text-sm text-gray-600">{selectedUser.email}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">User Type</Label>
+                    <Badge variant={selectedUser.userType === "founder" ? "default" : "secondary"} className="mt-1">
+                      {selectedUser.userType}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Email Status</Label>
+                    <Badge variant={selectedUser.isEmailVerified ? "default" : "destructive"} className="mt-1">
+                      {selectedUser.isEmailVerified ? "Verified" : "Unverified"}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Account Status</Label>
+                    <Badge variant={selectedUser.status === "suspended" ? "destructive" : "default"} className="mt-1">
+                      {selectedUser.status === "suspended" ? "Suspended" : "Active"}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Member Since</Label>
+                    <p className="text-sm text-gray-600">
+                      {new Date(selectedUser.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {selectedUser.phone && (
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Phone Number</Label>
+                  <p className="text-sm text-gray-600">{selectedUser.phone}</p>
+                </div>
+              )}
+              
+              {selectedUser.country && (
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Location</Label>
+                  <p className="text-sm text-gray-600">
+                    {selectedUser.state ? `${selectedUser.state}, ` : ""}{selectedUser.country}
+                  </p>
+                </div>
+              )}
+              
+              {selectedUser.bio && (
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Bio</Label>
+                  <p className="text-sm text-gray-600">{selectedUser.bio}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Modal */}
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Edit className="w-5 h-5 text-fundry-orange" />
+              <span>Edit User Information</span>
+            </DialogTitle>
+            <DialogDescription>
+              Update user details and account settings
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  value={editForm.firstName}
+                  onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={editForm.lastName}
+                  onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="userType">User Type</Label>
+              <Select value={editForm.userType} onValueChange={(value) => setEditForm({...editForm, userType: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select user type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="founder">Founder</SelectItem>
+                  <SelectItem value="investor">Investor</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                value={editForm.phone}
+                onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                placeholder="Optional"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="country">Country</Label>
+                <Input
+                  id="country"
+                  value={editForm.country}
+                  onChange={(e) => setEditForm({...editForm, country: e.target.value})}
+                  placeholder="Optional"
+                />
+              </div>
+              <div>
+                <Label htmlFor="state">State/Province</Label>
+                <Input
+                  id="state"
+                  value={editForm.state}
+                  onChange={(e) => setEditForm({...editForm, state: e.target.value})}
+                  placeholder="Optional"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button variant="outline" onClick={() => setEditModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleUpdateUser}
+                disabled={updateUserMutation.isPending}
+                className="bg-fundry-orange hover:bg-orange-600"
+              >
+                {updateUserMutation.isPending ? "Updating..." : "Update User"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Suspend User Modal */}
+      <AlertDialog open={suspendModalOpen} onOpenChange={setSuspendModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center space-x-2">
+              <Ban className="w-5 h-5 text-red-500" />
+              <span>
+                {selectedUser?.status === "suspended" ? "Reactivate User" : "Suspend User"}
+              </span>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedUser?.status === "suspended" 
+                ? `Are you sure you want to reactivate ${selectedUser.firstName} ${selectedUser.lastName}? They will regain full access to their account.`
+                : `Are you sure you want to suspend ${selectedUser?.firstName} ${selectedUser?.lastName}? This will prevent them from accessing their account and participating in any platform activities.`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleSuspendConfirm(selectedUser?.status !== "suspended")}
+              className={selectedUser?.status === "suspended" 
+                ? "bg-green-600 hover:bg-green-700" 
+                : "bg-red-600 hover:bg-red-700"
+              }
+              disabled={suspendUserMutation.isPending}
+            >
+              {suspendUserMutation.isPending 
+                ? "Processing..." 
+                : selectedUser?.status === "suspended" 
+                  ? "Reactivate User" 
+                  : "Suspend User"
+              }
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

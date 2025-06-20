@@ -3790,17 +3790,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       res.status(500).json({ message: "Failed to fetch investments" });
     }
   });
-        }
-      }));
 
-      res.json(formattedInvestments);
-    } catch (error) {
-      console.error("Error fetching admin investments:", error);
-      res.status(500).json({ message: "Failed to fetch investments" });
-    }
-  });
-
-  app.get('/api/admin/withdrawals', requireAdmin, async (req: any, res) => {
+  app.get('/api/admin/withdrawals', (req: any, res) => {
     try {
       res.json([]);
     } catch (error) {

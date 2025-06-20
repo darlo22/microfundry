@@ -4740,7 +4740,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(404).json({ message: "KYC request not found" });
       }
 
-      const newStatus = action === 'approve' ? 'verified' : 'rejected';
+      const newStatus = action === 'approve' ? 'approved' : 'rejected';
       
       // Update KYC verification status
       await db
@@ -4753,15 +4753,26 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         })
         .where(eq(kycVerifications.id, requestId));
 
+      // If approved, lift withdrawal restrictions by updating user status
+      if (action === 'approve') {
+        await db
+          .update(users)
+          .set({
+            status: 'verified',
+            updatedAt: new Date()
+          })
+          .where(eq(users.id, verification[0].userId));
+      }
+
       // Send notification to the user about KYC decision
       try {
         await db.insert(notifications).values({
           userId: verification[0].userId,
           type: 'security',
-          title: action === 'approve' ? 'KYC Verification Approved' : 'KYC Verification Rejected',
+          title: action === 'approve' ? 'KYC Verification Approved ✅' : 'KYC Verification Rejected ❌',
           message: action === 'approve' 
-            ? `Your identity verification has been approved. ${message}` 
-            : `Your identity verification was rejected. ${message}`,
+            ? `Your identity verification has been approved! You can now withdraw funds from your campaigns. Admin notes: ${message}` 
+            : `Your identity verification was rejected. Please review the requirements and resubmit. Rejection reason: ${message}`,
           isRead: false,
           createdAt: new Date()
         });

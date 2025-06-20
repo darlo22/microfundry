@@ -968,14 +968,14 @@ export default function CampaignView() {
           )}
 
           {/* Meet the Team */}
-          {campaign.teamMembers && Array.isArray(campaign.teamMembers) && campaign.teamMembers.length > 0 && (
-            <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30">
-              <CardContent className="p-10">
-                <div className="flex items-center space-x-4 mb-8">
-                  <div className="w-3 h-10 bg-gradient-to-b from-fundry-orange via-orange-500 to-orange-600 rounded-full shadow-md"></div>
-                  <h2 className="text-3xl font-bold text-fundry-navy tracking-tight">Meet the Team</h2>
-                </div>
-                
+          <Card className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30">
+            <CardContent className="p-10">
+              <div className="flex items-center space-x-4 mb-8">
+                <div className="w-3 h-10 bg-gradient-to-b from-fundry-orange via-orange-500 to-orange-600 rounded-full shadow-md"></div>
+                <h2 className="text-3xl font-bold text-fundry-navy tracking-tight">Meet the Team</h2>
+              </div>
+              
+              {campaign.teamMembers && Array.isArray(campaign.teamMembers) && campaign.teamMembers.length > 0 ? (
                 <div className="grid md:grid-cols-2 gap-8">
                   {campaign.teamMembers.map((member: any, index: number) => {
                     const colors = [
@@ -1042,9 +1042,24 @@ export default function CampaignView() {
                     );
                   })}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Users className="w-12 h-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-700 mb-3">Team Information Coming Soon</h3>
+                  <p className="text-gray-600 leading-relaxed max-w-md mx-auto">
+                    The founder is preparing detailed team information to showcase the talented individuals behind this startup.
+                  </p>
+                  <div className="text-sm text-gray-500 mt-4">
+                    <span className="bg-gray-100 px-3 py-1 rounded-full">
+                      {campaign.teamStructure || 'Solo Founder'}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
         </div>
       </div>

@@ -341,21 +341,25 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkAdminAuth = async () => {
       try {
-        const response = await fetch('/api/admin/verify', {
+        // First check regular user auth
+        const userResponse = await fetch('/api/user', {
           credentials: 'include'
         });
         
-        if (response.ok) {
-          const userData = await response.json();
-          setAdminUser(userData);
-        } else {
-          setLocation("/admin-login");
-          return;
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          if (userData && userData.userType === 'admin') {
+            setAdminUser(userData);
+            setIsLoading(false);
+            return;
+          }
         }
+        
+        // If not authenticated or not admin, redirect to login
+        setLocation("/admin-login");
       } catch (error) {
         console.error('Admin auth check failed:', error);
         setLocation("/admin-login");
-        return;
       } finally {
         setIsLoading(false);
       }

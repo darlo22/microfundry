@@ -72,21 +72,25 @@ export default function AdminKYCManagement() {
         action,
         message
       });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to submit review');
+      }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/kyc-requests'] });
       setSelectedRequest(null);
       setReviewAction(null);
       setReviewMessage('');
       toast({
-        title: "Review Completed",
-        description: `KYC request has been ${reviewAction}d successfully.`
+        title: "Review Completed Successfully",
+        description: `KYC request has been ${data.status}. The founder has been notified and withdrawal restrictions ${data.status === 'approved' ? 'have been lifted' : 'remain in place'}.`
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Review Failed",
+        title: "Review Failed", 
         description: error.message || "Failed to process KYC review",
         variant: "destructive"
       });

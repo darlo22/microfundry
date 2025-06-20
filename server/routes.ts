@@ -4758,7 +4758,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         await db
           .update(users)
           .set({
-            status: 'verified',
+            status: 'active',
             updatedAt: new Date()
           })
           .where(eq(users.id, verification[0].userId));

@@ -1740,61 +1740,62 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[450px] w-[90vw] max-h-[90vh] overflow-y-auto overflow-x-hidden">
-        <DialogHeader>
-          <DialogTitle className="text-center text-base sm:text-lg">
-            {getStepTitle(currentStep)}
-          </DialogTitle>
-          <DialogDescription className="text-center text-sm text-gray-600">
-            Complete your investment in {campaign.title}
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="py-2 px-1 overflow-x-hidden">
-          <div className="max-w-full">
-            {renderStepContent()}
-          </div>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
-          <Button
-            variant="outline"
-            onClick={handlePrevStep}
-            disabled={currentStep === 'amount' || currentStep === 'confirmation'}
-            className="w-full sm:w-auto"
-          >
-            Previous
-          </Button>
+    <>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-[450px] w-[90vw] max-h-[90vh] overflow-y-auto overflow-x-hidden">
+          <DialogHeader>
+            <DialogTitle className="text-center text-base sm:text-lg">
+              {getStepTitle(currentStep)}
+            </DialogTitle>
+            <DialogDescription className="text-center text-sm text-gray-600">
+              Complete your investment in {campaign.title}
+            </DialogDescription>
+          </DialogHeader>
           
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="py-2 px-1 overflow-x-hidden">
+            <div className="max-w-full">
+              {renderStepContent()}
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
             <Button
               variant="outline"
-              onClick={handleClose}
+              onClick={handlePrevStep}
+              disabled={currentStep === 'amount' || currentStep === 'confirmation'}
               className="w-full sm:w-auto"
             >
-              Cancel
+              Previous
             </Button>
             
-            {currentStep !== 'confirmation' && (
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
-                onClick={handleNextStep}
-                disabled={!canProceed() || isProcessingPayment || createInvestmentMutation.isPending}
-                className="bg-fundry-orange hover:bg-orange-600 w-full sm:w-auto"
+                variant="outline"
+                onClick={handleClose}
+                className="w-full sm:w-auto"
               >
-                {currentStep === 'payment' ? 
-                  (isProcessingPayment ? 'Processing...' : 'Commit Investment') : 
-                  'Next'
-                }
+                Cancel
               </Button>
-            )}
+              
+              {currentStep !== 'confirmation' && (
+                <Button
+                  onClick={handleNextStep}
+                  disabled={!canProceed() || isProcessingPayment || createInvestmentMutation.isPending}
+                  className="bg-fundry-orange hover:bg-orange-600 w-full sm:w-auto"
+                >
+                  {currentStep === 'payment' ? 
+                    (isProcessingPayment ? 'Processing...' : 'Commit Investment') : 
+                    'Next'
+                  }
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
 
-    {/* SAFE Agreement Viewer Modal */}
-    {showSafeViewer && (
+      {/* SAFE Agreement Viewer Modal */}
+      {showSafeViewer && (
       <Dialog open={showSafeViewer} onOpenChange={setShowSafeViewer}>
         <DialogContent className="max-w-4xl max-h-[90vh] bg-gradient-to-br from-white via-orange-50/20 to-blue-50/30">
           <DialogHeader className="border-b pb-4">
@@ -1950,6 +1951,6 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         </DialogContent>
       </Dialog>
     )}
-  </>
+    </>
   );
 }

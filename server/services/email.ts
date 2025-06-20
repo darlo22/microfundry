@@ -293,6 +293,7 @@ export class EmailService {
   }
 
   async sendPasswordResetEmail(email: string, firstName: string, resetUrl: string): Promise<boolean> {
+    const logoUrl = process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}/assets/fundry-logo.png` : 'http://localhost:5000/assets/fundry-logo.png';
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -447,7 +448,7 @@ export class EmailService {
           <div class="container">
             <div class="header">
               <div class="logo-container">
-                <img src="https://raw.githubusercontent.com/replit/replit/main/assets/ChatGPT%20Image%20Jun%2011%2C%202025%2C%2005_42_54%20AM%20(1)_1750087389811.png" alt="Fundry" class="logo-img" />
+                <img src="${logoUrl}" alt="Fundry" class="logo-img" />
               </div>
               <h1 class="header-title">Password Reset Request</h1>
               <p class="header-subtitle">Reset your Fundry account password securely</p>

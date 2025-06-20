@@ -3587,12 +3587,12 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       ]);
 
       res.json({
-        totalCampaigns: totalCampaigns[0]?.count || 0,
-        activeCampaigns: activeCampaigns[0]?.count || 0,
-        totalFounders: totalFounders[0]?.count || 0,
-        totalInvestors: totalInvestors[0]?.count || 0,
-        totalSafes: totalSafes[0]?.count || 0,
-        totalFundsRaised: totalFundsRaised[0]?.total || 0,
+        totalCampaigns: parseInt(totalCampaigns[0]?.count || '0'),
+        activeCampaigns: parseInt(activeCampaigns[0]?.count || '0'),
+        totalFounders: parseInt(totalFounders[0]?.count || '0'),
+        totalInvestors: parseInt(totalInvestors[0]?.count || '0'),
+        totalSafes: parseInt(totalSafes[0]?.count || '0'),
+        totalFundsRaised: parseFloat(totalFundsRaised[0]?.total || '0'),
         pendingWithdrawals: 0,
         recentActivity: recentActivity.map(activity => ({
           id: activity.id.toString(),

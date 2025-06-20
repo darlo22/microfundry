@@ -17,7 +17,7 @@ import multer from "multer";
 import path from "path";
 import { TwoFactorService } from "./twoFactorService";
 import { emailService } from "./services/email";
-import { eq, and, gt, sql, desc } from "drizzle-orm";
+import { eq, and, gt, sql, desc, or } from "drizzle-orm";
 import { 
   emailVerificationTokens, 
   passwordResetTokens,
@@ -25,7 +25,9 @@ import {
   campaigns, 
   investments, 
   adminLogs,
-  notifications
+  notifications,
+  campaignComments,
+  campaignQuestions
 } from "@shared/schema";
 import Stripe from "stripe";
 import fs from "fs";
@@ -4057,6 +4059,166 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     } catch (error) {
       console.error("Error resetting password:", error);
       res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
+  // Campaign Comments API endpoints
+  app.get('/api/campaigns/:id/comments', async (req, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      
+      const comments = await db
+        .select({
+          id: campaignComments.id,
+          campaignId: campaignComments.campaignId,
+          userId: campaignComments.userId,
+          content: campaignComments.content,
+          isLeadInvestor: campaignComments.isLeadInvestor,
+          createdAt: campaignComments.createdAt,
+          user: {
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+          },
+        })
+        .from(campaignComments)
+        .leftJoin(users, eq(campaignComments.userId, users.id))
+        .where(eq(campaignComments.campaignId, campaignId))
+        .orderBy(desc(campaignComments.createdAt));
+
+      res.json(comments);
+    } catch (error) {
+      console.error('Error fetching campaign comments:', error);
+      res.status(500).json({ message: 'Failed to fetch comments' });
+    }
+  });
+
+  app.post('/api/campaigns/:id/comments', requireAuth, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const { content } = req.body;
+      const userId = req.user.id;
+
+      if (!content || content.trim().length === 0) {
+        return res.status(400).json({ message: 'Comment content is required' });
+      }
+
+      // Check if user is a lead investor (has largest investment in this campaign)
+      const userInvestments = await db
+        .select()
+        .from(investments)
+        .where(and(
+          eq(investments.campaignId, campaignId),
+          eq(investments.investorId, userId),
+          or(
+            eq(investments.status, 'committed'),
+            eq(investments.status, 'paid'),
+            eq(investments.status, 'completed')
+          )
+        ));
+
+      const userTotalInvestment = userInvestments.reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+      
+      // Get all investments for this campaign to determine if user is lead investor
+      const allInvestments = await db
+        .select()
+        .from(investments)
+        .where(and(
+          eq(investments.campaignId, campaignId),
+          or(
+            eq(investments.status, 'committed'),
+            eq(investments.status, 'paid'),
+            eq(investments.status, 'completed')
+          )
+        ));
+
+      const investorTotals = new Map();
+      allInvestments.forEach(inv => {
+        const current = investorTotals.get(inv.investorId) || 0;
+        investorTotals.set(inv.investorId, current + parseFloat(inv.amount));
+      });
+
+      const maxInvestment = Math.max(...Array.from(investorTotals.values()));
+      const isLeadInvestor = userTotalInvestment > 0 && userTotalInvestment === maxInvestment;
+
+      const [newComment] = await db
+        .insert(campaignComments)
+        .values({
+          campaignId,
+          userId,
+          content: content.trim(),
+          isLeadInvestor,
+        })
+        .returning();
+
+      res.status(201).json(newComment);
+    } catch (error) {
+      console.error('Error creating comment:', error);
+      res.status(500).json({ message: 'Failed to create comment' });
+    }
+  });
+
+  // Campaign Questions API endpoints
+  app.get('/api/campaigns/:id/questions', async (req, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      
+      const questions = await db
+        .select({
+          id: campaignQuestions.id,
+          campaignId: campaignQuestions.campaignId,
+          userId: campaignQuestions.userId,
+          question: campaignQuestions.question,
+          answer: campaignQuestions.answer,
+          answeredBy: campaignQuestions.answeredBy,
+          answeredAt: campaignQuestions.answeredAt,
+          isPublic: campaignQuestions.isPublic,
+          createdAt: campaignQuestions.createdAt,
+          user: {
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+          },
+        })
+        .from(campaignQuestions)
+        .leftJoin(users, eq(campaignQuestions.userId, users.id))
+        .where(and(
+          eq(campaignQuestions.campaignId, campaignId),
+          eq(campaignQuestions.isPublic, true)
+        ))
+        .orderBy(desc(campaignQuestions.createdAt));
+
+      res.json(questions);
+    } catch (error) {
+      console.error('Error fetching campaign questions:', error);
+      res.status(500).json({ message: 'Failed to fetch questions' });
+    }
+  });
+
+  app.post('/api/campaigns/:id/questions', requireAuth, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const { question } = req.body;
+      const userId = req.user.id;
+
+      if (!question || question.trim().length === 0) {
+        return res.status(400).json({ message: 'Question is required' });
+      }
+
+      const [newQuestion] = await db
+        .insert(campaignQuestions)
+        .values({
+          campaignId,
+          userId,
+          question: question.trim(),
+          isPublic: true,
+        })
+        .returning();
+
+      res.status(201).json(newQuestion);
+    } catch (error) {
+      console.error('Error creating question:', error);
+      res.status(500).json({ message: 'Failed to create question' });
     }
   });
 

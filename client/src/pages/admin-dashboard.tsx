@@ -163,6 +163,12 @@ export default function AdminDashboard() {
   // Platform settings state
   const [platformSettings, setPlatformSettings] = useState<any>({});
   const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+
+  // Withdrawal management state
+  const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
+  const [transactionStats, setTransactionStats] = useState<any>({});
+  const [completedTransactions, setCompletedTransactions] = useState<any[]>([]);
+  const [pendingPayments, setPendingPayments] = useState<any[]>([]);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();

@@ -90,6 +90,26 @@ interface WithdrawalRequest {
   requestedAt: string;
 }
 
+interface Investment {
+  id: number;
+  amount: string;
+  status: string;
+  paymentStatus: string;
+  createdAt: string;
+  investorId: number;
+  campaignId: number;
+  investorName?: string;
+  investor?: {
+    firstName: string;
+    lastName: string;
+  };
+  campaign?: {
+    id: number;
+    title?: string;
+    companyName?: string;
+  };
+}
+
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
@@ -390,6 +410,12 @@ export default function AdminDashboard() {
   const { data: withdrawals, isLoading: withdrawalsLoading } = useQuery<WithdrawalRequest[]>({
     queryKey: ['/api/admin/withdrawals'],
     enabled: !!adminUser && activeTab === "withdrawals"
+  });
+
+  // Investments query for SAFE agreements
+  const { data: investments, isLoading: investmentsLoading } = useQuery<Investment[]>({
+    queryKey: ['/api/admin/investments'],
+    enabled: !!adminUser && activeTab === "safes"
   });
 
   if (isLoading) {
@@ -857,6 +883,180 @@ export default function AdminDashboard() {
                       )) || <p className="text-gray-500 text-center py-4">No withdrawal requests</p>}
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "safes" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">SAFE Agreement Management</h2>
+                <p className="text-gray-600">Monitor and manage all SAFE agreements on the platform</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total SAFE Agreements</CardTitle>
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats?.totalSafes || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Generated agreements
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Investments</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-green-600">
+                      {investments?.filter((inv: Investment) => inv.paymentStatus === 'completed').length || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Paid investments
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Investment Value</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {formatCurrency(
+                        investments?.filter(inv => inv.paymentStatus === 'completed')
+                          .reduce((sum, inv) => sum + parseFloat(inv.amount), 0) || 0
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      In SAFE agreements
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>SAFE Agreement Records</CardTitle>
+                  <CardDescription>All investment agreements and their status</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {investmentsLoading ? (
+                    <div className="animate-pulse space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="h-16 bg-gray-200 rounded"></div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {investments?.filter(inv => inv.paymentStatus === 'completed').map((investment) => (
+                        <div key={investment.id} className="flex items-center justify-between p-4 border rounded-lg bg-white">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-4">
+                              <div>
+                                <p className="font-medium text-gray-900">
+                                  {investment.investorName || `${investment.investor?.firstName} ${investment.investor?.lastName}`}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  invested in {investment.campaign?.title || investment.campaign?.companyName}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-6 mt-2">
+                              <span className="text-sm font-medium text-green-600">
+                                Amount: {formatCurrency(investment.amount)}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                Date: {new Date(investment.createdAt).toLocaleDateString()}
+                              </span>
+                              <Badge variant="default" className="bg-green-100 text-green-800">
+                                {investment.paymentStatus === 'completed' ? 'Active SAFE' : investment.status}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                // Download SAFE agreement
+                                const link = document.createElement('a');
+                                link.href = `/api/investments/${investment.id}/safe-agreement`;
+                                link.download = `SAFE_Agreement_${investment.campaign?.title?.replace(/\s+/g, '_')}_${investment.id}.txt`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              }}
+                            >
+                              <Download className="w-4 h-4 mr-1" />
+                              Download
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => window.open(`/campaign/${investment.campaignId}`, '_blank')}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              View Campaign
+                            </Button>
+                          </div>
+                        </div>
+                      )) || <p className="text-gray-500 text-center py-8">No SAFE agreements found</p>}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>SAFE Agreement Template</CardTitle>
+                  <CardDescription>Standard template used for all investments</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start space-x-3">
+                        <FileText className="text-blue-600 mt-1" size={20} />
+                        <div>
+                          <h4 className="font-medium text-blue-900">Standard SAFE Template</h4>
+                          <p className="text-blue-800 text-sm mt-1">
+                            All investments use the Y Combinator SAFE template with valuation cap and discount rate.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex space-x-3">
+                      <Button 
+                        variant="outline"
+                        onClick={() => window.open('/safe-agreement-template', '_blank')}
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View Template
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          // Download template
+                          const link = document.createElement('a');
+                          link.href = '/safe-agreement-template';
+                          link.target = '_blank';
+                          link.click();
+                        }}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download Template
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>

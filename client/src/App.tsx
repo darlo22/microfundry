@@ -72,21 +72,17 @@ function Router() {
       <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/admin-kyc-management" component={AdminKYCManagement} />
       
-      {/* Authenticated routes */}
-      {isAuthenticated && (
-        <>
-          <Route path="/founder-dashboard" component={FounderDashboard} />
-          <Route path="/founder/dashboard" component={FounderDashboard} />
-          <Route path="/founder/campaigns" component={FounderDashboard} />
-          <Route path="/founder/investors" component={FounderInvestors} />
-          <Route path="/founder/analytics" component={FounderAnalytics} />
-          <Route path="/founder/settings" component={FounderSettings} />
-          <Route path="/founder/updates" component={FounderUpdates} />
-          <Route path="/payment-withdrawal" component={PaymentWithdrawal} />
-          <Route path="/investor-dashboard" component={InvestorDashboard} />
-          <Route path="/investor/dashboard" component={InvestorDashboard} />
-        </>
-      )}
+      {/* Authenticated routes - always available, auth check happens inside components */}
+      <Route path="/founder-dashboard" component={FounderDashboard} />
+      <Route path="/founder/dashboard" component={FounderDashboard} />
+      <Route path="/founder/campaigns" component={FounderDashboard} />
+      <Route path="/founder/investors" component={FounderInvestors} />
+      <Route path="/founder/analytics" component={FounderAnalytics} />
+      <Route path="/founder/settings" component={FounderSettings} />
+      <Route path="/founder/updates" component={FounderUpdates} />
+      <Route path="/payment-withdrawal" component={PaymentWithdrawal} />
+      <Route path="/investor-dashboard" component={InvestorDashboard} />
+      <Route path="/investor/dashboard" component={InvestorDashboard} />
       
       {/* Root path handling */}
       <Route path="/">

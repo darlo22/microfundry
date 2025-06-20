@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocation } from "wouter";
 
 const registrationSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -47,6 +48,7 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   // Reset modal state when defaultUserType changes
@@ -143,8 +145,10 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
       const response = await apiRequest("POST", "/api/login", data);
       return response.json();
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    onSuccess: async (data) => {
+      // Invalidate user query and wait for it to complete
+      await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
       toast({
         title: "Welcome back!",
         description: "You've been logged in successfully.",
@@ -166,9 +170,11 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
         }
       }
       
-      // Route based on selected role during sign-in
-      const dashboardRoute = selectedUserType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
-      window.location.href = dashboardRoute;
+      // Use proper router navigation with a small delay to ensure auth state is updated
+      setTimeout(() => {
+        const dashboardRoute = selectedUserType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
+        setLocation(dashboardRoute);
+      }, 100);
     },
     onError: (error: any) => {
       toast({

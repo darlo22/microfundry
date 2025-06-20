@@ -35,28 +35,22 @@ export default function AdminLogin() {
         credentials: 'include',
         body: JSON.stringify(formData),
       });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Authentication failed" }));
-        setError(errorData.message || "Invalid admin credentials");
-        return;
-      }
 
       const data = await response.json();
-      
-      toast({
-        title: "Admin Access Granted",
-        description: "Welcome to the Admin Command Centre",
-      });
-      
-      // Invalidate auth cache to refresh authentication state
-      await queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin/verify'] });
-      
-      setLocation("/admin-dashboard");
-      
-    } catch (error: any) {
-      console.error('Admin login error:', error);
+
+      if (response.ok) {
+        toast({
+          title: "Admin Access Granted",
+          description: "Welcome to the Admin Command Centre",
+        });
+        // Invalidate auth cache to refresh authentication state
+        await queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+        await queryClient.invalidateQueries({ queryKey: ['/api/admin/verify'] });
+        setLocation("/admin-dashboard");
+      } else {
+        setError(data.message || "Invalid admin credentials");
+      }
+    } catch (error) {
       setError("Connection error. Please try again.");
     } finally {
       setIsLoading(false);
@@ -78,7 +72,11 @@ export default function AdminLogin() {
       
       {/* Header */}
       <div className="absolute top-6 left-6">
-        <FundryLogo className="h-12 w-auto cursor-pointer" linkToHome={true} />
+        <Link href="/landing">
+          <div>
+            <FundryLogo className="h-12 w-auto cursor-pointer" />
+          </div>
+        </Link>
       </div>
 
       {/* Login Card */}

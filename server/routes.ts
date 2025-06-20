@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { setupAuth, requireAuth, hashPassword, comparePasswords } from "./auth";
 
 import { isAuthenticated } from "./replitAuth";
-import { db, checkDatabaseHealth } from "./db";
+import { db } from "./db";
 import { 
   insertBusinessProfileSchema,
   insertCampaignSchema,
@@ -49,41 +49,6 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Safe database operation wrapper to handle control plane errors
-async function safeDbOperation<T>(operation: () => Promise<T>, fallback?: T): Promise<T | undefined> {
-  try {
-    return await operation();
-  } catch (error: any) {
-    console.error('Database operation failed:', error.message);
-    if (error.code === 'XX000' || error.message?.includes('Control plane')) {
-      console.log('Control plane error detected, returning fallback value');
-      return fallback;
-    }
-    throw error;
-  }
-}
-
-// Safe route handler wrapper
-function safeHandler(handler: (req: any, res: any, next?: any) => Promise<void>) {
-  return async (req: any, res: any, next?: any) => {
-    try {
-      await handler(req, res, next);
-    } catch (error: any) {
-      console.error('Route handler error:', error.message);
-      if (error.code === 'XX000' || error.message?.includes('Control plane')) {
-        return res.status(503).json({ 
-          message: "Database temporarily unavailable. Please try again in a moment." 
-        });
-      }
-      if (!res.headersSent) {
-        res.status(500).json({ 
-          message: "Internal server error" 
-        });
-      }
-    }
-  };
-}
-
 // KYC submissions are now handled via database storage
 
 // Configure multer for file uploads
@@ -110,7 +75,21 @@ const upload = multer({
   },
 });
 
-
+// Helper function to wrap route handlers with error handling
+const safeHandler = (handler: Function) => {
+  return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    try {
+      await handler(req, res, next);
+    } catch (error) {
+      console.error('Route handler error:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ 
+          message: error instanceof Error ? error.message : 'Internal server error' 
+        });
+      }
+    }
+  };
+};
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
@@ -194,19 +173,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Serve slide files from nested directories
-  app.get('/uploads/slides/:campaignId/:filename', async (req: express.Request, res: express.Response) => {
-    try {
-      const { campaignId, filename } = req.params;
-      const filePath = path.join(process.cwd(), 'uploads', 'slides', campaignId, filename);
-      res.sendFile(filePath, (err: any) => {
-        if (err && !res.headersSent) {
-          res.status(404).json({ message: 'Slide not found' });
-        }
-      });
-    } catch (error) {
-      res.status(500).json({ message: 'Server error' });
-    }
-  });
+  app.get('/uploads/slides/:campaignId/:filename', safeHandler((req: express.Request, res: express.Response) => {
+    const { campaignId, filename } = req.params;
+    const filePath = path.join(process.cwd(), 'uploads', 'slides', campaignId, filename);
+    res.sendFile(filePath, (err: any) => {
+      if (err && !res.headersSent) {
+        res.status(404).json({ message: 'Slide not found' });
+      }
+    });
+  }));
   
   // Auth middleware
   setupAuth(app);
@@ -3492,71 +3467,39 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   // Admin middleware - check admin access
   const requireAdmin = (req: any, res: any, next: any) => {
-    const session = req.session as any;
-    
-    // Check all possible admin authentication markers
-    const hasAdminAccess = (req.isAuthenticated() && req.user.userType === 'admin') ||
-                          session?.adminAuth === true || 
-                          session?.adminEmail === "ugolington2@yahoo.co.uk" ||
-                          session?.user?.userType === "admin" ||
-                          session?.passport?.user?.userType === "admin";
-    
-    if (!hasAdminAccess) {
+    if (!req.isAuthenticated() || req.user.userType !== 'admin') {
       return res.status(403).json({ message: "Admin access required" });
     }
-    
-    // Ensure req.user exists for admin operations
-    if (!req.user) {
-      req.user = {
-        id: "admin-fallback",
-        email: "ugolington2@yahoo.co.uk",
-        firstName: "Admin",
-        lastName: "User",
-        userType: "admin"
-      };
-    }
-    
     next();
   };
 
-  // Admin verification endpoint - completely stateless for reliability
-  app.get("/api/admin/verify", (req, res) => {
-    // Set immediate timeout for hanging prevention
-    res.setTimeout(2000, () => {
-      if (!res.headersSent) {
-        res.status(408).json({ message: "Timeout" });
-      }
-    });
-
+  // Admin verification endpoint
+  app.get("/api/admin/verify", async (req, res) => {
     try {
-      const session = req.session as any;
-      
-      // Check all possible session markers
-      const hasAdminSession = session?.adminAuth === true || 
-                            session?.adminEmail === "ugolington2@yahoo.co.uk" ||
-                            session?.user?.userType === "admin" ||
-                            session?.passport?.user?.userType === "admin";
-      
-      if (hasAdminSession) {
-        return res.json({
-          id: "admin-fallback",
-          email: "ugolington2@yahoo.co.uk",
-          firstName: "Admin",
-          lastName: "User", 
-          userType: "admin"
-        });
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "Not authenticated" });
       }
 
-      res.status(401).json({ message: "Not authenticated" });
-    } catch (error) {
-      if (!res.headersSent) {
-        res.status(500).json({ message: "Verification error" });
+      const user = req.user;
+      if (user.userType !== "admin") {
+        return res.status(403).json({ message: "Access denied. Admin privileges required." });
       }
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        userType: user.userType
+      });
+    } catch (error) {
+      console.error('Admin verification error:', error);
+      res.status(500).json({ message: "Verification system error" });
     }
   });
 
-  // Admin login endpoint with direct session management
-  app.post("/api/admin/login", (req, res) => {
+  // Admin login endpoint
+  app.post("/api/admin/login", async (req, res) => {
     try {
       const { email, password } = req.body;
 
@@ -3564,39 +3507,54 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(400).json({ message: "Email and password are required" });
       }
 
-      // Hardcoded admin credentials for stable authentication
-      const ADMIN_EMAIL = "ugolington2@yahoo.co.uk";
-      const ADMIN_PASSWORD = "Darlo@1234";
+      // Find user by email
+      const [user] = await db.select().from(users).where(eq(users.email, email));
 
-      if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+      if (!user) {
         return res.status(401).json({ message: "Invalid admin credentials" });
       }
 
-      // Create minimal admin user for session
-      const adminUser = {
-        id: "admin-fallback",
-        email: ADMIN_EMAIL,
-        firstName: "Admin",
-        lastName: "User",
-        userType: "admin" as const
-      };
-
-      console.log(`Admin login successful: ${email} at ${new Date().toISOString()}`);
-
-      // Set session manually with multiple markers
-      if (req.session) {
-        (req.session as any).passport = { user: adminUser };
-        (req.session as any).user = adminUser;
-        (req.session as any).adminAuth = true;
-        (req.session as any).adminEmail = ADMIN_EMAIL;
-        
-        res.json({
-          message: "Admin authentication successful",
-          user: adminUser
-        });
-      } else {
-        res.status(500).json({ message: "Session not available" });
+      // Check if user is admin
+      if (user.userType !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Admin privileges required." });
       }
+
+      // Verify password
+      if (!user.password) {
+        return res.status(401).json({ message: "Invalid admin credentials" });
+      }
+      
+      const isValid = await comparePasswords(password, user.password);
+      if (!isValid) {
+        return res.status(401).json({ message: "Invalid admin credentials" });
+      }
+
+      // Check if email is verified
+      if (!user.isEmailVerified) {
+        return res.status(401).json({ message: "Please verify your email before accessing admin panel" });
+      }
+
+      // Log successful admin login (simplified for now)
+      console.log(`Admin login successful: ${user.email} at ${new Date().toISOString()}`);
+
+      // Create session
+      req.logIn(user, (err) => {
+        if (err) {
+          console.error('Session creation error:', err);
+          return res.status(500).json({ message: "Session creation failed" });
+        }
+        
+        res.json({ 
+          message: "Admin authentication successful",
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            userType: user.userType
+          }
+        });
+      });
 
     } catch (error) {
       console.error('Admin login error:', error);
@@ -3620,178 +3578,172 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   };
 
-  // Admin API endpoints with simplified authentication
-  app.get('/api/admin/stats', (req: any, res) => {
+  // Admin API endpoints
+  app.get('/api/admin/stats', requireAdmin, async (req: any, res) => {
     try {
-      // Return immediate admin stats for dashboard access
-      const adminStats = {
-        totalCampaigns: 15,
-        activeCampaigns: 8,
-        totalFundsRaised: 47850,
-        totalFounders: 6,
-        totalInvestors: 23,
-        totalSafes: 34,
-        pendingWithdrawals: 2,
-        recentActivity: [
-          {
-            id: "1",
-            action: "Campaign Created",
-            details: "New campaign 'TechFlow Solutions' submitted for review",
-            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            adminName: "Admin User"
-          },
-          {
-            id: "2", 
-            action: "Investment Completed",
-            details: "Investor John Smith completed $2,500 investment",
-            timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-            adminName: "Admin User"
-          },
-          {
-            id: "3",
-            action: "User Verification",
-            details: "KYC verification approved for Sarah Johnson",
-            timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-            adminName: "Admin User"
-          }
-        ]
-      };
+      // Log admin activity
+      await logAdminActivity(req.user.id, 'dashboard_access', {
+        targetType: 'dashboard',
+        description: 'Accessed admin dashboard overview'
+      });
+      
+      const [
+        totalCampaigns,
+        activeCampaigns,
+        totalFounders,
+        totalInvestors,
+        totalSafes,
+        totalFundsRaised,
+        recentActivity
+      ] = await Promise.all([
+        db.select({ count: sql`COUNT(*)` }).from(campaigns),
+        db.select({ count: sql`COUNT(*)` }).from(campaigns).where(eq(campaigns.status, 'active')),
+        db.select({ count: sql`COUNT(*)` }).from(users).where(eq(users.userType, 'founder')),
+        db.select({ count: sql`COUNT(*)` }).from(users).where(eq(users.userType, 'investor')),
+        db.select({ count: sql`COUNT(*)` }).from(investments).where(sql`payment_status = 'completed'`),
+        db.select({ 
+          total: sql<number>`COALESCE(SUM(CAST(amount AS NUMERIC)), 0)` 
+        }).from(investments).where(sql`payment_status = 'completed'`),
+        db.select({
+          id: adminLogs.id,
+          action: adminLogs.action,
+          details: adminLogs.details,
+          timestamp: adminLogs.createdAt,
+          adminName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`
+        })
+        .from(adminLogs)
+        .innerJoin(users, eq(adminLogs.adminId, users.id))
+        .orderBy(desc(adminLogs.createdAt))
+        .limit(10)
+      ]);
 
-      res.json(adminStats);
+      res.json({
+        totalCampaigns: parseInt(totalCampaigns[0]?.count || '0'),
+        activeCampaigns: parseInt(activeCampaigns[0]?.count || '0'),
+        totalFounders: parseInt(totalFounders[0]?.count || '0'),
+        totalInvestors: parseInt(totalInvestors[0]?.count || '0'),
+        totalSafes: parseInt(totalSafes[0]?.count || '0'),
+        totalFundsRaised: parseFloat(totalFundsRaised[0]?.total || '0'),
+        pendingWithdrawals: 0,
+        recentActivity: recentActivity.map(activity => ({
+          id: activity.id.toString(),
+          action: activity.action,
+          details: activity.details,
+          timestamp: activity.timestamp,
+          adminName: activity.adminName
+        }))
+      });
     } catch (error) {
       console.error("Error fetching admin stats:", error);
-      res.status(500).json({ message: "Failed to fetch admin stats" });
+      res.status(500).json({ message: "Failed to fetch admin statistics" });
     }
   });
 
-  app.get('/api/admin/users', (req: any, res) => {
+  app.get('/api/admin/users', requireAdmin, async (req: any, res) => {
     try {
-      // Return fallback user data for immediate admin access
-      const fallbackUsers = [
-        {
-          id: "1",
-          email: "sarah.founder@example.com",
-          firstName: "Sarah",
-          lastName: "Johnson",
-          userType: "founder",
-          isEmailVerified: true,
-          createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: "2", 
-          email: "john.investor@example.com",
-          firstName: "John",
-          lastName: "Smith",
-          userType: "investor",
-          isEmailVerified: true,
-          createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: "3",
-          email: "mike.founder@example.com", 
-          firstName: "Mike",
-          lastName: "Chen",
-          userType: "founder",
-          isEmailVerified: false,
-          createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-        }
-      ];
+      // Log admin activity
+      await logAdminActivity(req.user.id, 'user_management', {
+        targetType: 'users',
+        description: 'Accessed user management section'
+      });
+      
+      const allUsers = await db.select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        userType: users.userType,
+        isEmailVerified: users.isEmailVerified,
+        createdAt: users.createdAt
+      })
+      .from(users)
+      .where(sql`user_type != 'admin'`)
+      .orderBy(desc(users.createdAt));
 
-      res.json(fallbackUsers);
+      res.json(allUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
     }
   });
 
-  app.get('/api/admin/campaigns', (req: any, res) => {
+  app.get('/api/admin/campaigns', requireAdmin, async (req: any, res) => {
     try {
-      // Return fallback campaign data for immediate admin access
-      const fallbackCampaigns = [
-        {
-          id: "1",
-          companyName: "TechFlow Solutions",
-          fundingGoal: "50000",
-          status: "active",
-          createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          founderName: "Sarah Johnson",
-          amountRaised: "15000"
-        },
-        {
-          id: "2",
-          companyName: "GreenEnergy Startup",
-          fundingGoal: "75000",
-          status: "active", 
-          createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-          founderName: "Mike Chen",
-          amountRaised: "22500"
-        },
-        {
-          id: "3",
-          companyName: "HealthBridge",
-          fundingGoal: "30000",
-          status: "completed",
-          createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-          founderName: "Emily Davis",
-          amountRaised: "30000"
-        }
-      ];
+      const allCampaigns = await db.select({
+        id: campaigns.id,
+        companyName: campaigns.companyName,
+        fundingGoal: campaigns.fundingGoal,
+        status: campaigns.status,
+        createdAt: campaigns.createdAt,
+        founderName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        amountRaised: sql<string>`COALESCE(
+          (SELECT SUM(CAST(amount AS NUMERIC)) 
+           FROM investments 
+           WHERE campaign_id = campaigns.id 
+           AND payment_status = 'completed'), 0
+        )`
+      })
+      .from(campaigns)
+      .innerJoin(users, eq(campaigns.founderId, users.id))
+      .orderBy(desc(campaigns.createdAt));
 
-      res.json(fallbackCampaigns);
+      res.json(allCampaigns);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
       res.status(500).json({ message: "Failed to fetch campaigns" });
     }
   });
 
-  app.get('/api/admin/investments', (req: any, res) => {
+  app.get('/api/admin/investments', requireAdmin, async (req: any, res) => {
     try {
-      // Return fallback investment data for immediate admin access
-      const fallbackInvestments = [
-        {
-          id: "1",
-          campaignId: "1",
-          investorId: "2",
-          amount: "5000",
-          status: "committed",
-          paymentStatus: "completed",
-          createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          investor: {
-            firstName: "John",
-            lastName: "Smith",
-            email: "john.investor@example.com"
-          },
-          campaign: {
-            companyName: "TechFlow Solutions"
-          }
-        },
-        {
-          id: "2",
-          campaignId: "2",
-          investorId: "3",
-          amount: "3000",
-          status: "committed",
-          paymentStatus: "pending",
-          createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-          investor: {
-            firstName: "Jane",
-            lastName: "Wilson",
-            email: "jane.investor@example.com"
-          },
-          campaign: {
-            companyName: "GreenEnergy Startup"
-          }
-        }
-      ];
+      // Log admin activity
+      await logAdminActivity(req.user.id, 'Transactions Management', 'Accessed investment transactions');
+      
+      const allInvestments = await db.select({
+        id: investments.id,
+        campaignId: investments.campaignId,
+        investorId: investments.investorId,
+        amount: investments.amount,
+        status: investments.status,
+        paymentStatus: investments.paymentStatus,
+        createdAt: investments.createdAt,
+        investorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        investorEmail: users.email,
+        campaignName: campaigns.companyName
+      })
+      .from(investments)
+      .leftJoin(users, eq(investments.investorId, users.id))
+      .leftJoin(campaigns, eq(investments.campaignId, campaigns.id))
+      .orderBy(desc(investments.createdAt));
 
-      res.json(fallbackInvestments);
+      // Format the response to include nested objects for compatibility
+      const formattedInvestments = allInvestments.map(inv => ({
+        id: inv.id,
+        campaignId: inv.campaignId,
+        investorId: inv.investorId,
+        amount: inv.amount,
+        status: inv.status,
+        paymentStatus: inv.paymentStatus,
+        createdAt: inv.createdAt,
+        investor: {
+          firstName: inv.investorName?.split(' ')[0] || '',
+          lastName: inv.investorName?.split(' ')[1] || '',
+          email: inv.investorEmail
+        },
+        campaign: {
+          companyName: inv.campaignName,
+          title: inv.campaignName
+        }
+      }));
+
+      res.json(formattedInvestments);
     } catch (error) {
-      console.error("Error fetching investments:", error);
+      console.error("Error fetching admin investments:", error);
       res.status(500).json({ message: "Failed to fetch investments" });
     }
   });
 
-  app.get('/api/admin/withdrawals', (req: any, res) => {
+  app.get('/api/admin/withdrawals', requireAdmin, async (req: any, res) => {
     try {
       res.json([]);
     } catch (error) {
@@ -4858,195 +4810,6 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     } catch (error) {
       console.error('Error creating question:', error);
       res.status(500).json({ message: 'Failed to create question' });
-    }
-  });
-
-  // Global Settings API endpoints
-  app.post('/api/admin/global-settings/markets', requireAdmin, async (req: any, res) => {
-    try {
-      const marketData = req.body;
-      
-      // Store market data in global memory for fallback system
-      if (!global.adminMarkets) {
-        global.adminMarkets = [];
-      }
-      
-      const newMarket = {
-        id: Date.now().toString(),
-        ...marketData,
-        createdAt: new Date().toISOString(),
-        status: 'active'
-      };
-      
-      global.adminMarkets.push(newMarket);
-
-      await logAdminAction(
-        req.user.id,
-        'market_added',
-        'market',
-        newMarket.id,
-        { marketData },
-        req
-      );
-
-      res.json({ message: "Market added successfully", market: newMarket });
-    } catch (error) {
-      console.error("Error adding market:", error);
-      res.status(500).json({ message: "Failed to add market" });
-    }
-  });
-
-  app.post('/api/admin/global-settings/tiers', requireAdmin, async (req: any, res) => {
-    try {
-      const tierData = req.body;
-      
-      // Store tier data in global memory for fallback system
-      if (!global.adminTiers) {
-        global.adminTiers = [];
-      }
-      
-      const newTier = {
-        id: Date.now().toString(),
-        ...tierData,
-        createdAt: new Date().toISOString(),
-        status: 'active'
-      };
-      
-      global.adminTiers.push(newTier);
-
-      await logAdminAction(
-        req.user.id,
-        'tier_added',
-        'tier',
-        newTier.id,
-        { tierData },
-        req
-      );
-
-      res.json({ message: "Custom tier added successfully", tier: newTier });
-    } catch (error) {
-      console.error("Error adding tier:", error);
-      res.status(500).json({ message: "Failed to add tier" });
-    }
-  });
-
-  app.put('/api/admin/global-settings', requireAdmin, async (req: any, res) => {
-    try {
-      const settingsData = req.body;
-      
-      // Store global settings in memory for fallback system
-      if (!global.adminGlobalSettings) {
-        global.adminGlobalSettings = {};
-      }
-      
-      global.adminGlobalSettings = {
-        ...global.adminGlobalSettings,
-        ...settingsData,
-        lastUpdated: new Date().toISOString(),
-        updatedBy: req.user.id
-      };
-
-      await logAdminAction(
-        req.user.id,
-        'global_settings_updated',
-        'settings',
-        'global',
-        { settingsData },
-        req
-      );
-
-      res.json({ message: "Global settings saved successfully" });
-    } catch (error) {
-      console.error("Error saving global settings:", error);
-      res.status(500).json({ message: "Failed to save global settings" });
-    }
-  });
-
-  app.get('/api/admin/global-settings', requireAdmin, async (req: any, res) => {
-    try {
-      // Return fallback global settings data
-      const settings = {
-        markets: global.adminMarkets || [],
-        tiers: global.adminTiers || [],
-        globalSettings: global.adminGlobalSettings || {
-          defaultPlatformFee: 5.0,
-          maxCampaignAmount: 100000,
-          minInvestmentAmount: 25,
-          kycEnabled: true,
-          multiCurrencyEnabled: true,
-          emailNotificationsEnabled: true
-        }
-      };
-
-      res.json(settings);
-    } catch (error) {
-      console.error("Error fetching global settings:", error);
-      res.status(500).json({ message: "Failed to fetch global settings" });
-    }
-  });
-
-  // Withdrawal Management API endpoints
-  app.put('/api/admin/withdrawals/:id/approve', requireAdmin, async (req: any, res) => {
-    try {
-      const withdrawalId = req.params.id;
-      
-      // Update withdrawal status in memory for fallback system
-      if (!global.adminWithdrawals) {
-        global.adminWithdrawals = [];
-      }
-      
-      const withdrawalIndex = global.adminWithdrawals.findIndex(w => w.id === withdrawalId);
-      if (withdrawalIndex >= 0) {
-        global.adminWithdrawals[withdrawalIndex].status = 'approved';
-        global.adminWithdrawals[withdrawalIndex].approvedAt = new Date().toISOString();
-        global.adminWithdrawals[withdrawalIndex].approvedBy = req.user.id;
-      }
-
-      await logAdminAction(
-        req.user.id,
-        'withdrawal_approved',
-        'withdrawal',
-        withdrawalId,
-        { status: 'approved' },
-        req
-      );
-
-      res.json({ message: "Withdrawal approved successfully" });
-    } catch (error) {
-      console.error("Error approving withdrawal:", error);
-      res.status(500).json({ message: "Failed to approve withdrawal" });
-    }
-  });
-
-  app.put('/api/admin/withdrawals/:id/complete', requireAdmin, async (req: any, res) => {
-    try {
-      const withdrawalId = req.params.id;
-      
-      // Update withdrawal status in memory for fallback system
-      if (!global.adminWithdrawals) {
-        global.adminWithdrawals = [];
-      }
-      
-      const withdrawalIndex = global.adminWithdrawals.findIndex(w => w.id === withdrawalId);
-      if (withdrawalIndex >= 0) {
-        global.adminWithdrawals[withdrawalIndex].status = 'completed';
-        global.adminWithdrawals[withdrawalIndex].completedAt = new Date().toISOString();
-        global.adminWithdrawals[withdrawalIndex].completedBy = req.user.id;
-      }
-
-      await logAdminAction(
-        req.user.id,
-        'withdrawal_completed',
-        'withdrawal',
-        withdrawalId,
-        { status: 'completed' },
-        req
-      );
-
-      res.json({ message: "Withdrawal marked as completed" });
-    } catch (error) {
-      console.error("Error marking withdrawal complete:", error);
-      res.status(500).json({ message: "Failed to mark withdrawal complete" });
     }
   });
 

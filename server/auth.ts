@@ -7,7 +7,6 @@ import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser, emailVerificationTokens } from "@shared/schema";
 import connectPg from "connect-pg-simple";
-import MemoryStore from "memorystore";
 import { emailService } from "./services/email";
 import { db } from "./db";
 import { nanoid } from "nanoid";
@@ -35,19 +34,17 @@ export async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  // Use MemoryStore to avoid PostgreSQL control plane issues
-  const MemStore = MemoryStore(session);
-  const sessionStore = new MemStore({
-    checkPeriod: 86400000, // Prune expired entries every 24h
-  });
-
-  console.log('Using memory-based session store for stability');
+  const PostgresSessionStore = connectPg(session);
   
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "dev-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
-    store: sessionStore,
+    store: new PostgresSessionStore({
+      conString: process.env.DATABASE_URL,
+      tableName: "sessions",
+      createTableIfMissing: false,
+    }),
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,

@@ -89,15 +89,8 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [signatureData, setSignatureData] = useState<string>('');
-  const [cardholderName, setCardholderName] = useState<string>('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [isProcessingNaira, setIsProcessingNaira] = useState(false);
   const [showSafeViewer, setShowSafeViewer] = useState(false);
-  const [ngnAmount, setNgnAmount] = useState<number | null>(null);
-  const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
-  const [isLoadingRate, setIsLoadingRate] = useState(false);
-  const [clientSecret, setClientSecret] = useState('');
-  const [showStripeForm, setShowStripeForm] = useState(false);
   const [createdInvestment, setCreatedInvestment] = useState<any>(null);
 
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -118,9 +111,6 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     }
     return 0;
   };
-
-  // Initialize Stripe
-  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
 
   // Budpay configuration
   const BUDPAY_PUBLIC_KEY = import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key';
@@ -408,31 +398,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     }
   }, [isOpen]);
 
-  // Fetch exchange rate when investment amount changes
-  useEffect(() => {
-    const amount = selectedAmount || parseFloat(customAmount) || 0;
-    if (amount > 0 && isOpen) {
-      setIsLoadingRate(true);
-      convertUsdToNgn(amount)
-        .then(({ ngn, rate }) => {
-          setNgnAmount(ngn);
-          setExchangeRate(rate);
-        })
-        .catch((error) => {
-          console.warn('Failed to fetch exchange rate:', error);
-          // Use fallback rate
-          setNgnAmount(amount * 1650);
-          setExchangeRate({
-            usdToNgn: 1650,
-            source: 'Fallback',
-            lastUpdated: new Date()
-          });
-        })
-        .finally(() => {
-          setIsLoadingRate(false);
-        });
-    }
-  }, [selectedAmount, customAmount, isOpen]);
+
 
   const minimumInvestment = 25;
   const maximumInvestment = 5000;

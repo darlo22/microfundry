@@ -493,6 +493,63 @@ export const platformSettingsRelations = relations(platformSettings, ({ one }) =
 export type PlatformSetting = typeof platformSettings.$inferSelect;
 export type InsertPlatformSetting = typeof platformSettings.$inferInsert;
 
+// Campaign comments table
+export const campaignComments = pgTable("campaign_comments", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").notNull().references(() => campaigns.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  isLeadInvestor: boolean("is_lead_investor").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const campaignCommentsRelations = relations(campaignComments, ({ one }) => ({
+  campaign: one(campaigns, {
+    fields: [campaignComments.campaignId],
+    references: [campaigns.id],
+  }),
+  user: one(users, {
+    fields: [campaignComments.userId],
+    references: [users.id],
+  }),
+}));
+
+export type CampaignComment = typeof campaignComments.$inferSelect;
+export type InsertCampaignComment = typeof campaignComments.$inferInsert;
+
+// Campaign questions table
+export const campaignQuestions = pgTable("campaign_questions", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").notNull().references(() => campaigns.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  question: text("question").notNull(),
+  answer: text("answer"),
+  answeredBy: varchar("answered_by").references(() => users.id),
+  answeredAt: timestamp("answered_at"),
+  isPublic: boolean("is_public").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const campaignQuestionsRelations = relations(campaignQuestions, ({ one }) => ({
+  campaign: one(campaigns, {
+    fields: [campaignQuestions.campaignId],
+    references: [campaigns.id],
+  }),
+  user: one(users, {
+    fields: [campaignQuestions.userId],
+    references: [users.id],
+  }),
+  answeredByUser: one(users, {
+    fields: [campaignQuestions.answeredBy],
+    references: [users.id],
+  }),
+}));
+
+export type CampaignQuestion = typeof campaignQuestions.$inferSelect;
+export type InsertCampaignQuestion = typeof campaignQuestions.$inferInsert;
+
 export const insertBusinessProfileSchema = createInsertSchema(businessProfiles).omit({
   id: true,
   createdAt: true,

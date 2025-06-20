@@ -24,7 +24,8 @@ import {
   Users,
   DollarSign,
   Edit,
-  ExternalLink
+  ExternalLink,
+  MessageSquare
 } from "lucide-react";
 import type { CampaignWithStats } from "@/lib/types";
 
@@ -43,6 +44,9 @@ export default function CampaignView() {
   const [showPitchDeckModal, setShowPitchDeckModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showUpdatesModal, setShowUpdatesModal] = useState(false);
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
+  const [showQuestionsModal, setShowQuestionsModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [investmentAmount, setInvestmentAmount] = useState<string>("");
 
@@ -191,6 +195,45 @@ export default function CampaignView() {
                       title={campaign.title}
                       logoUrl={campaign.logoUrl}
                     />
+                  </div>
+                </div>
+
+                {/* Social Engagement Buttons */}
+                <div className="border-t border-gray-200 bg-gray-50 px-6 py-4">
+                  <div className="flex items-center justify-center gap-4">
+                    <Button
+                      onClick={() => setShowUpdatesModal(true)}
+                      variant="outline"
+                      className="flex items-center gap-2 bg-white hover:bg-blue-50 border-blue-200 text-blue-700 font-medium px-4 py-2 rounded-lg transition-all"
+                    >
+                      <FileText size={16} />
+                      UPDATES
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                        {updatesCount || 0}
+                      </Badge>
+                    </Button>
+                    <Button
+                      onClick={() => setShowCommentsModal(true)}
+                      variant="outline"
+                      className="flex items-center gap-2 bg-white hover:bg-green-50 border-green-200 text-green-700 font-medium px-4 py-2 rounded-lg transition-all"
+                    >
+                      <Users size={16} />
+                      WHAT PEOPLE SAY
+                      <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                        {commentsCount || 0}
+                      </Badge>
+                    </Button>
+                    <Button
+                      onClick={() => setShowQuestionsModal(true)}
+                      variant="outline"
+                      className="flex items-center gap-2 bg-white hover:bg-purple-50 border-purple-200 text-purple-700 font-medium px-4 py-2 rounded-lg transition-all"
+                    >
+                      <MessageSquare size={16} />
+                      ASK A QUESTION
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800 text-xs">
+                        {questionsCount || 0}
+                      </Badge>
+                    </Button>
                   </div>
                 </div>
 

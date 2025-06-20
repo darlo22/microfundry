@@ -151,6 +151,17 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
     currentRevenue: campaign.currentRevenue || '',
     customers: campaign.customers || '',
     teamStructure: campaign.teamStructure || '',
+    
+    // Social Media Links
+    websiteUrl: (campaign as any).websiteUrl || '',
+    twitterUrl: (campaign as any).twitterUrl || '',
+    facebookUrl: (campaign as any).facebookUrl || '',
+    instagramUrl: (campaign as any).instagramUrl || '',
+    linkedinUrl: (campaign as any).linkedinUrl || '',
+    youtubeUrl: (campaign as any).youtubeUrl || '',
+    mediumUrl: (campaign as any).mediumUrl || '',
+    tiktokUrl: (campaign as any).tiktokUrl || '',
+    snapchatUrl: (campaign as any).snapchatUrl || '',
   });
   
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(parseTeamMembers());
@@ -735,6 +746,94 @@ export function EditCampaignModal({ isOpen, onClose, campaign }: EditCampaignMod
                     )}
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Social Media & Online Presence */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900">Social Media & Online Presence</h3>
+            <p className="text-sm text-gray-600">Add your startup's social media links to help investors connect with your brand (optional)</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="websiteUrl">Website URL</Label>
+                <Input
+                  id="websiteUrl"
+                  placeholder="https://yourcompany.com"
+                  value={formData.websiteUrl}
+                  onChange={(e) => handleInputChange('websiteUrl', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="twitterUrl">Twitter/X URL</Label>
+                <Input
+                  id="twitterUrl"
+                  placeholder="https://twitter.com/yourcompany"
+                  value={formData.twitterUrl}
+                  onChange={(e) => handleInputChange('twitterUrl', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="facebookUrl">Facebook URL</Label>
+                <Input
+                  id="facebookUrl"
+                  placeholder="https://facebook.com/yourcompany"
+                  value={formData.facebookUrl}
+                  onChange={(e) => handleInputChange('facebookUrl', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="instagramUrl">Instagram URL</Label>
+                <Input
+                  id="instagramUrl"
+                  placeholder="https://instagram.com/yourcompany"
+                  value={formData.instagramUrl}
+                  onChange={(e) => handleInputChange('instagramUrl', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+                <Input
+                  id="linkedinUrl"
+                  placeholder="https://linkedin.com/company/yourcompany"
+                  value={formData.linkedinUrl}
+                  onChange={(e) => handleInputChange('linkedinUrl', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="youtubeUrl">YouTube URL</Label>
+                <Input
+                  id="youtubeUrl"
+                  placeholder="https://youtube.com/@yourcompany"
+                  value={formData.youtubeUrl}
+                  onChange={(e) => handleInputChange('youtubeUrl', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="mediumUrl">Medium URL</Label>
+                <Input
+                  id="mediumUrl"
+                  placeholder="https://medium.com/@yourcompany"
+                  value={formData.mediumUrl}
+                  onChange={(e) => handleInputChange('mediumUrl', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="tiktokUrl">TikTok URL</Label>
+                <Input
+                  id="tiktokUrl"
+                  placeholder="https://tiktok.com/@yourcompany"
+                  value={formData.tiktokUrl}
+                  onChange={(e) => handleInputChange('tiktokUrl', e.target.value)}
+                />
               </div>
             </div>
           </div>

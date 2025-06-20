@@ -61,6 +61,7 @@ export const users = pgTable("users", {
   twoFactorBackupCodes: jsonb("two_factor_backup_codes"), // Array of backup codes
   passwordLastChanged: timestamp("password_last_changed").defaultNow(),
   stripeCustomerId: varchar("stripe_customer_id"),
+  status: varchar("status", { enum: ["active", "suspended", "pending"] }).default("active"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

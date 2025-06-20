@@ -3681,24 +3681,63 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   };
 
   // Admin user management endpoints
-  app.put('/api/admin/users/:userId/suspend', requireAdmin, async (req: any, res) => {
+  app.put('/api/admin/users/:userId', requireAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const { reason } = req.body;
+      const { firstName, lastName, email, userType, phone, country, state } = req.body;
+
+      // Update user information
+      await db.update(users)
+        .set({
+          firstName,
+          lastName,
+          email,
+          userType,
+          phone,
+          country,
+          state
+        })
+        .where(eq(users.id, userId));
 
       await logAdminAction(
         req.user.id,
-        'user_suspended',
+        'user_updated',
+        'user',
+        userId,
+        { updates: req.body },
+        req
+      );
+
+      res.json({ message: "User updated successfully" });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  app.put('/api/admin/users/:userId/suspend', requireAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { suspend, reason } = req.body;
+
+      // Update user status
+      await db.update(users)
+        .set({ status: suspend ? 'suspended' : 'active' })
+        .where(eq(users.id, userId));
+
+      await logAdminAction(
+        req.user.id,
+        suspend ? 'user_suspended' : 'user_reactivated',
         'user',
         userId,
         { reason },
         req
       );
 
-      res.json({ message: "User suspended successfully" });
+      res.json({ message: suspend ? "User suspended successfully" : "User reactivated successfully" });
     } catch (error) {
-      console.error("Error suspending user:", error);
-      res.status(500).json({ message: "Failed to suspend user" });
+      console.error("Error updating user status:", error);
+      res.status(500).json({ message: "Failed to update user status" });
     }
   });
 

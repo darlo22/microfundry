@@ -3,13 +3,161 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-import CampaignCard from "@/components/campaign/campaign-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, TrendingUp, Clock, Users, ArrowLeft } from "lucide-react";
+import { Search, Filter, TrendingUp, Clock, Users, ArrowLeft, Eye, Star } from "lucide-react";
 import type { CampaignWithStats } from "@/lib/types";
+
+// Format currency for display
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+// Get status badge for campaign
+const getStatusBadge = (campaign: CampaignWithStats) => {
+  const totalRaised = typeof campaign.totalRaised === 'string' ? parseFloat(campaign.totalRaised) : campaign.totalRaised || 0;
+  const progressPercent = (totalRaised / campaign.fundingGoal) * 100;
+  
+  if (progressPercent >= 90) {
+    return { text: "Almost Funded", color: "bg-red-500" };
+  } else if (progressPercent >= 75) {
+    return { text: "Hot Deal", color: "bg-orange-500" };
+  } else if (progressPercent >= 50) {
+    return { text: "Trending", color: "bg-blue-500" };
+  } else {
+    return { text: "New", color: "bg-green-500" };
+  }
+};
+
+// Wefunder-style Campaign Card Component
+function WefunderCampaignCard({ campaign }: { campaign: CampaignWithStats }) {
+  const [, setLocation] = useLocation();
+  const status = getStatusBadge(campaign);
+  const totalRaised = typeof campaign.totalRaised === 'string' ? parseFloat(campaign.totalRaised) : campaign.totalRaised || 0;
+  const progressPercent = (totalRaised / campaign.fundingGoal) * 100;
+
+  return (
+    <Card 
+      className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 border-0 bg-white"
+      onClick={() => setLocation(`/campaign/${campaign.id}`)}
+    >
+      {/* Hero Image Section */}
+      <div className="relative h-64 bg-gradient-to-br from-slate-100 to-slate-200">
+        {campaign.pitchMediaUrl ? (
+          campaign.pitchMediaUrl.endsWith('.mp4') || campaign.pitchMediaUrl.endsWith('.mov') ? (
+            <video 
+              className="w-full h-full object-cover"
+              src={campaign.pitchMediaUrl}
+              muted
+              playsInline
+            />
+          ) : (
+            <img 
+              src={campaign.pitchMediaUrl} 
+              alt={campaign.title}
+              className="w-full h-full object-cover"
+            />
+          )
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-fundry-orange/20 to-fundry-navy/20 flex items-center justify-center">
+            <TrendingUp className="w-16 h-16 text-fundry-navy/30" />
+          </div>
+        )}
+        
+        {/* Status Badge */}
+        <div className="absolute top-4 left-4">
+          <Badge className={`${status.color} text-white border-0 px-3 py-1 text-sm font-medium`}>
+            {status.text}
+          </Badge>
+        </div>
+
+        {/* Founder Profile Circle */}
+        <div className="absolute bottom-4 right-4">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center border-2 border-white shadow-lg">
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+              <Users className="w-5 h-5 text-purple-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <CardContent className="p-6">
+        {/* Company Name */}
+        <div className="mb-2">
+          <h3 className="text-lg font-semibold text-gray-600">{campaign.companyName || campaign.title}</h3>
+        </div>
+
+        {/* Main Headline */}
+        <h2 className="text-xl font-bold text-gray-900 mb-3 leading-tight">
+          {campaign.shortPitch}
+        </h2>
+
+        {/* Key Metrics */}
+        <div className="text-gray-600 text-sm mb-4">
+          <div className="flex flex-wrap gap-1">
+            <span className="font-medium">
+              {progressPercent.toFixed(0)}% funded:
+            </span>
+            <span>
+              {formatCurrency(totalRaised)} raised,
+            </span>
+            <span>
+              {campaign.investorCount} investors,
+            </span>
+            <span>
+              {campaign.businessSector}
+            </span>
+          </div>
+        </div>
+
+        {/* Notable Badges */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {progressPercent >= 50 && (
+            <Badge variant="outline" className="text-xs px-2 py-1 bg-gray-50">
+              TRENDING
+            </Badge>
+          )}
+          {campaign.investorCount >= 10 && (
+            <Badge variant="outline" className="text-xs px-2 py-1 bg-gray-50">
+              POPULAR
+            </Badge>
+          )}
+          {totalRaised >= 1000 && (
+            <Badge variant="outline" className="text-xs px-2 py-1 bg-gray-50">
+              ${Math.floor(totalRaised / 1000)}K+ RAISED
+            </Badge>
+          )}
+        </div>
+
+        {/* Progress Bar */}
+        <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+          <div 
+            className="bg-gradient-to-r from-fundry-orange to-orange-600 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${Math.min(progressPercent, 100)}%` }}
+          ></div>
+        </div>
+
+        {/* Bottom Stats */}
+        <div className="flex justify-between items-center text-sm text-gray-600">
+          <span className="font-medium">
+            {formatCurrency(campaign.fundingGoal)} goal
+          </span>
+          <span className="flex items-center gap-1">
+            <Eye className="w-4 h-4" />
+            {Math.floor(Math.random() * 500 + 100)} views
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function BrowseCampaigns() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -174,16 +322,32 @@ export default function BrowseCampaigns() {
           </div>
         </div>
 
-        {/* Campaign Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        {/* Campaign Grid - Wefunder Style */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {filteredCampaigns.length > 0 ? (
             filteredCampaigns.map((campaign) => (
-              <CampaignCard key={campaign.id} campaign={campaign} />
+              <WefunderCampaignCard key={campaign.id} campaign={campaign} />
             ))
           ) : (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500 text-lg">No campaigns found matching your criteria.</p>
-              <p className="text-gray-400 mt-2">Try adjusting your search or filters.</p>
+            <div className="col-span-full text-center py-16">
+              <div className="max-w-md mx-auto">
+                <TrendingUp className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No campaigns found
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  Try adjusting your search terms or browse different categories to discover exciting investment opportunities.
+                </p>
+                <Button 
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedCategory("all");
+                  }}
+                  className="bg-fundry-orange hover:bg-orange-600"
+                >
+                  Clear Filters
+                </Button>
+              </div>
             </div>
           )}
         </div>

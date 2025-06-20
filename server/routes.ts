@@ -3498,26 +3498,39 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     next();
   };
 
-  // Admin verification endpoint - immediate response without database
+  // Admin verification endpoint - completely stateless for reliability
   app.get("/api/admin/verify", (req, res) => {
+    // Set immediate timeout for hanging prevention
+    res.setTimeout(2000, () => {
+      if (!res.headersSent) {
+        res.status(408).json({ message: "Timeout" });
+      }
+    });
+
     try {
-      // Check hardcoded admin credential instead of session complexity
-      const sessionUser = (req.session as any)?.passport?.user || (req.session as any)?.user;
+      const session = req.session as any;
       
-      if (sessionUser?.userType === "admin" && sessionUser?.email === "ugolington2@yahoo.co.uk") {
+      // Check all possible session markers
+      const hasAdminSession = session?.adminAuth === true || 
+                            session?.adminEmail === "ugolington2@yahoo.co.uk" ||
+                            session?.user?.userType === "admin" ||
+                            session?.passport?.user?.userType === "admin";
+      
+      if (hasAdminSession) {
         return res.json({
           id: "admin-fallback",
           email: "ugolington2@yahoo.co.uk",
           firstName: "Admin",
-          lastName: "User",
+          lastName: "User", 
           userType: "admin"
         });
       }
 
       res.status(401).json({ message: "Not authenticated" });
     } catch (error) {
-      console.error('Admin verification error:', error);
-      res.status(500).json({ message: "Verification system error" });
+      if (!res.headersSent) {
+        res.status(500).json({ message: "Verification error" });
+      }
     }
   });
 
@@ -3549,10 +3562,12 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       console.log(`Admin login successful: ${email} at ${new Date().toISOString()}`);
 
-      // Set session manually
+      // Set session manually with multiple markers
       if (req.session) {
         (req.session as any).passport = { user: adminUser };
         (req.session as any).user = adminUser;
+        (req.session as any).adminAuth = true;
+        (req.session as any).adminEmail = ADMIN_EMAIL;
         
         res.json({
           message: "Admin authentication successful",

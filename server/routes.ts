@@ -4592,24 +4592,39 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       // Get all KYC submissions with user and campaign information
       const kycRequests = await db
         .select({
-          id: kycSubmissions.id,
-          userId: kycSubmissions.userId,
-          status: kycSubmissions.status,
-          submittedAt: kycSubmissions.submittedAt,
-          reviewedAt: kycSubmissions.reviewedAt,
-          reviewMessage: kycSubmissions.reviewMessage,
-          personalInfo: kycSubmissions.personalInfo,
-          professionalInfo: kycSubmissions.professionalInfo,
-          documents: kycSubmissions.documents,
+          id: kycVerifications.id,
+          userId: kycVerifications.userId,
+          status: kycVerifications.status,
+          submittedAt: kycVerifications.submittedAt,
+          reviewedAt: kycVerifications.reviewedAt,
+          reviewMessage: kycVerifications.reviewNotes,
+          personalInfo: {
+            dateOfBirth: kycVerifications.dateOfBirth,
+            address: kycVerifications.address,
+            city: kycVerifications.city,
+            state: kycVerifications.state,
+            zipCode: kycVerifications.zipCode
+          },
+          professionalInfo: {
+            employmentStatus: kycVerifications.employmentStatus,
+            incomeLevel: kycVerifications.annualIncome,
+            investmentExperience: kycVerifications.investmentExperience,
+            riskTolerance: kycVerifications.riskTolerance
+          },
+          documents: {
+            governmentId: kycVerifications.governmentIdFiles,
+            utilityBill: kycVerifications.utilityBillFiles,
+            otherDocuments: kycVerifications.otherDocumentFiles
+          },
           user: {
             firstName: users.firstName,
             lastName: users.lastName,
             email: users.email
           }
         })
-        .from(kycSubmissions)
-        .leftJoin(users, eq(kycSubmissions.userId, users.id))
-        .orderBy(desc(kycSubmissions.submittedAt));
+        .from(kycVerifications)
+        .leftJoin(users, eq(kycVerifications.userId, users.id))
+        .orderBy(desc(kycVerifications.submittedAt));
 
       // For each KYC request, find the founder's active campaign with highest goal
       const enrichedRequests = await Promise.all(

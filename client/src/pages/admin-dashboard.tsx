@@ -492,12 +492,20 @@ export default function AdminDashboard() {
               Overview
             </Button>
             <Button 
-              variant={activeTab === "users" ? "default" : "ghost"} 
+              variant={activeTab === "founders" ? "default" : "ghost"} 
               className="w-full justify-start"
-              onClick={() => setActiveTab("users")}
+              onClick={() => setActiveTab("founders")}
+            >
+              <User className="w-4 h-4 mr-2" />
+              Founder Management
+            </Button>
+            <Button 
+              variant={activeTab === "investors" ? "default" : "ghost"} 
+              className="w-full justify-start"
+              onClick={() => setActiveTab("investors")}
             >
               <Users className="w-4 h-4 mr-2" />
-              User Management
+              Investor Management
             </Button>
             <Button 
               variant={activeTab === "campaigns" ? "default" : "ghost"} 
@@ -508,12 +516,12 @@ export default function AdminDashboard() {
               Campaign Oversight
             </Button>
             <Button 
-              variant={activeTab === "withdrawals" ? "default" : "ghost"} 
+              variant={activeTab === "transactions" ? "default" : "ghost"} 
               className="w-full justify-start"
-              onClick={() => setActiveTab("withdrawals")}
+              onClick={() => setActiveTab("transactions")}
             >
               <DollarSign className="w-4 h-4 mr-2" />
-              Withdrawals
+              Transactions & Withdrawals
             </Button>
             <Button 
               variant={activeTab === "safes" ? "default" : "ghost"} 
@@ -522,6 +530,14 @@ export default function AdminDashboard() {
             >
               <FileText className="w-4 h-4 mr-2" />
               SAFE Agreements
+            </Button>
+            <Button 
+              variant={activeTab === "content" ? "default" : "ghost"} 
+              className="w-full justify-start"
+              onClick={() => setActiveTab("content")}
+            >
+              <Bell className="w-4 h-4 mr-2" />
+              Content & Announcements
             </Button>
             <Button 
               variant={activeTab === "settings" ? "default" : "ghost"} 
@@ -664,6 +680,279 @@ export default function AdminDashboard() {
                       <p className="text-gray-500 text-center py-4">No recent activity</p>
                     )}
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "founders" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Founder Management</h2>
+                <p className="text-gray-600">Manage all founder accounts, KYC status, and campaigns</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Founders</CardTitle>
+                    <User className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats?.totalFounders || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Registered founder accounts
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-green-600">{stats?.activeCampaigns || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Currently fundraising
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">KYC Verified</CardTitle>
+                    <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {users?.filter(user => user.userType === 'founder').length || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Verified founders
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
+                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-orange-600">0</div>
+                    <p className="text-xs text-muted-foreground">
+                      Awaiting review
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Founders</CardTitle>
+                  <CardDescription>Manage founder accounts and their startups</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {usersLoading ? (
+                    <div className="animate-pulse space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="h-16 bg-gray-200 rounded"></div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {users?.filter(user => user.userType === 'founder').map((user) => (
+                        <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{user.firstName} {user.lastName}</p>
+                            <p className="text-sm text-gray-600">{user.email}</p>
+                            <div className="flex items-center space-x-4 mt-2">
+                              <Badge variant={user.isEmailVerified ? "default" : "destructive"}>
+                                {user.isEmailVerified ? "Verified" : "Unverified"}
+                              </Badge>
+                              <span className="text-sm text-gray-500">
+                                Joined: {new Date(user.createdAt).toLocaleDateString()}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {user.country && `Location: ${user.country}`}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline" onClick={() => handleViewUser(user)}>
+                              <Eye className="w-4 h-4 mr-1" />
+                              View KYC
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => handleEditUser(user)}>
+                              <Edit className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleResetPassword(user)}
+                              disabled={resetPasswordMutation.isPending}
+                              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                            >
+                              <Key className="w-4 h-4 mr-1" />
+                              Reset Password
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              onClick={() => handleSuspendUser(user)}
+                              disabled={user.status === "suspended"}
+                            >
+                              <Ban className="w-4 h-4 mr-1" />
+                              {user.status === "suspended" ? "Suspended" : "Suspend"}
+                            </Button>
+                          </div>
+                        </div>
+                      )) || <p className="text-gray-500 text-center py-4">No founders found</p>}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "investors" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Investor Management</h2>
+                <p className="text-gray-600">Manage all investor accounts and investment history</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Investors</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats?.totalInvestors || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Registered investor accounts
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Investors</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-green-600">
+                      {investments?.filter((inv: Investment) => inv.paymentStatus === 'completed')
+                        .map((inv: Investment) => inv.investorId)
+                        .filter((id, index, array) => array.indexOf(id) === index).length || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Have made investments
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Invested</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {formatCurrency(
+                        investments?.filter((inv: Investment) => inv.paymentStatus === 'completed')
+                          .reduce((sum: number, inv: Investment) => sum + parseFloat(inv.amount), 0) || 0
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Total investment volume
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Flagged Accounts</CardTitle>
+                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-red-600">0</div>
+                    <p className="text-xs text-muted-foreground">
+                      Require attention
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Investors</CardTitle>
+                  <CardDescription>Manage investor accounts and investment history</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {usersLoading ? (
+                    <div className="animate-pulse space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="h-16 bg-gray-200 rounded"></div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {users?.filter(user => user.userType === 'investor').map((user) => (
+                        <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{user.firstName} {user.lastName}</p>
+                            <p className="text-sm text-gray-600">{user.email}</p>
+                            <div className="flex items-center space-x-4 mt-2">
+                              <Badge variant={user.isEmailVerified ? "default" : "destructive"}>
+                                {user.isEmailVerified ? "Verified" : "Unverified"}
+                              </Badge>
+                              <span className="text-sm text-gray-500">
+                                Joined: {new Date(user.createdAt).toLocaleDateString()}
+                              </span>
+                              <span className="text-sm font-medium text-green-600">
+                                Investments: {investments?.filter((inv: Investment) => 
+                                  inv.investorId === parseInt(user.id) && inv.paymentStatus === 'completed'
+                                ).length || 0}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline" onClick={() => handleViewUser(user)}>
+                              <Eye className="w-4 h-4 mr-1" />
+                              View History
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => handleEditUser(user)}>
+                              <Edit className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleSendNotification(user)}
+                              disabled={sendNotificationMutation.isPending}
+                              className="bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200"
+                            >
+                              <Bell className="w-4 h-4 mr-1" />
+                              Contact
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              onClick={() => handleSuspendUser(user)}
+                              disabled={user.status === "suspended"}
+                            >
+                              <Ban className="w-4 h-4 mr-1" />
+                              {user.status === "suspended" ? "Suspended" : "Suspend"}
+                            </Button>
+                          </div>
+                        </div>
+                      )) || <p className="text-gray-500 text-center py-4">No investors found</p>}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -825,6 +1114,290 @@ export default function AdminDashboard() {
                       )) || <p className="text-gray-500 text-center py-4">No campaigns found</p>}
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "transactions" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Transactions & Withdrawals</h2>
+                <p className="text-gray-600">Manage all transactions, payments, and withdrawal requests</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Volume</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {formatCurrency(
+                        investments?.filter((inv: Investment) => inv.paymentStatus === 'completed')
+                          .reduce((sum: number, inv: Investment) => sum + parseFloat(inv.amount), 0) || 0
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Total transaction volume
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Completed Transactions</CardTitle>
+                    <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-green-600">
+                      {investments?.filter((inv: Investment) => inv.paymentStatus === 'completed').length || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Successfully processed
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-orange-600">
+                      {investments?.filter((inv: Investment) => inv.paymentStatus === 'pending').length || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Awaiting payment
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Withdrawal Requests</CardTitle>
+                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-red-600">{stats?.pendingWithdrawals || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Pending approval
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Transactions</CardTitle>
+                    <CardDescription>Latest investment transactions</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {investments?.slice(0, 10).map((investment: Investment) => (
+                        <div key={investment.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <p className="font-medium">
+                              {investment.investor?.firstName} {investment.investor?.lastName}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {investment.campaign?.companyName || `Campaign #${investment.campaignId}`}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(investment.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold">{formatCurrency(parseFloat(investment.amount))}</p>
+                            <Badge variant={
+                              investment.paymentStatus === 'completed' ? 'default' : 
+                              investment.paymentStatus === 'pending' ? 'secondary' : 'destructive'
+                            }>
+                              {investment.paymentStatus}
+                            </Badge>
+                          </div>
+                        </div>
+                      )) || <p className="text-gray-500 text-center py-4">No transactions found</p>}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Withdrawal Requests</CardTitle>
+                    <CardDescription>Pending founder withdrawal requests</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {withdrawalRequests?.map((request: WithdrawalRequest) => (
+                        <div key={request.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{request.founderName}</p>
+                            <p className="text-sm text-gray-600">
+                              Requested: {new Date(request.requestedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold">{request.amount}</p>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button size="sm" variant="destructive">
+                                <X className="w-4 h-4 mr-1" />
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )) || <p className="text-gray-500 text-center py-4">No withdrawal requests</p>}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Transaction Analytics</CardTitle>
+                  <CardDescription>Payment method breakdown and platform fees</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center p-4 border rounded-lg">
+                      <h3 className="font-medium text-lg">USD Payments</h3>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {investments?.filter((inv: Investment) => inv.paymentStatus === 'completed').length || 0}
+                      </p>
+                      <p className="text-sm text-gray-500">Via Stripe</p>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <h3 className="font-medium text-lg">NGN Payments</h3>
+                      <p className="text-2xl font-bold text-green-600">0</p>
+                      <p className="text-sm text-gray-500">Via Budpay</p>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <h3 className="font-medium text-lg">Platform Fees</h3>
+                      <p className="text-2xl font-bold text-orange-600">
+                        {formatCurrency(0)}
+                      </p>
+                      <p className="text-sm text-gray-500">Total collected</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "content" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Content Management & Announcements</h2>
+                <p className="text-gray-600">Manage platform content, announcements, and featured campaigns</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Global Announcements</CardTitle>
+                    <CardDescription>Post updates visible to all users</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Announcement Title</label>
+                        <input 
+                          type="text" 
+                          placeholder="Enter announcement title..."
+                          className="w-full p-2 border rounded-lg"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Message</label>
+                        <textarea 
+                          placeholder="Enter announcement message..."
+                          rows={4}
+                          className="w-full p-2 border rounded-lg"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <select className="p-2 border rounded-lg">
+                          <option>Info</option>
+                          <option>Warning</option>
+                          <option>Success</option>
+                          <option>Error</option>
+                        </select>
+                        <Button className="bg-orange-600 hover:bg-orange-700">
+                          <Bell className="w-4 h-4 mr-2" />
+                          Post Announcement
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Featured Campaigns</CardTitle>
+                    <CardDescription>Promote campaigns on homepage</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {campaigns?.slice(0, 3).map((campaign: Campaign) => (
+                        <div key={campaign.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <p className="font-medium">{campaign.companyName}</p>
+                            <p className="text-sm text-gray-600">{campaign.founderName}</p>
+                            <p className="text-xs text-gray-500">
+                              Goal: {campaign.fundingGoal}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline">
+                              <Star className="w-4 h-4 mr-1" />
+                              Feature
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <Eye className="w-4 h-4 mr-1" />
+                              Preview
+                            </Button>
+                          </div>
+                        </div>
+                      )) || <p className="text-gray-500 text-center py-4">No campaigns available</p>}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Content Moderation</CardTitle>
+                  <CardDescription>Review and moderate user-generated content</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center p-4 border rounded-lg">
+                      <h3 className="font-medium">Campaign Updates</h3>
+                      <p className="text-2xl font-bold text-blue-600">0</p>
+                      <p className="text-sm text-gray-500">Pending review</p>
+                      <Button size="sm" className="mt-2" variant="outline">Review</Button>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <h3 className="font-medium">User Comments</h3>
+                      <p className="text-2xl font-bold text-orange-600">0</p>
+                      <p className="text-sm text-gray-500">Flagged content</p>
+                      <Button size="sm" className="mt-2" variant="outline">Review</Button>
+                    </div>
+                    <div className="text-center p-4 border rounded-lg">
+                      <h3 className="font-medium">Success Stories</h3>
+                      <p className="text-2xl font-bold text-green-600">4</p>
+                      <p className="text-sm text-gray-500">Published</p>
+                      <Button size="sm" className="mt-2" variant="outline">Manage</Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>

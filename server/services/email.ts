@@ -323,20 +323,21 @@ export class EmailService {
               text-align: center;
             }
             .logo-container {
-              width: 60px;
-              height: 60px;
-              background: rgba(255, 255, 255, 0.2);
-              border-radius: 50%;
+              width: 80px;
+              height: 80px;
+              background: rgba(255, 255, 255, 0.95);
+              border-radius: 12px;
               margin: 0 auto 20px;
               display: flex;
               align-items: center;
               justify-content: center;
               backdrop-filter: blur(10px);
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             }
-            .logo-text {
-              font-size: 28px;
-              font-weight: bold;
-              color: white;
+            .logo-img {
+              width: 60px;
+              height: 60px;
+              object-fit: contain;
             }
             .header-title {
               margin: 0 0 8px 0;
@@ -446,7 +447,7 @@ export class EmailService {
           <div class="container">
             <div class="header">
               <div class="logo-container">
-                <div class="logo-text">F</div>
+                <img src="https://raw.githubusercontent.com/replit/replit/main/assets/ChatGPT%20Image%20Jun%2011%2C%202025%2C%2005_42_54%20AM%20(1)_1750087389811.png" alt="Fundry" class="logo-img" />
               </div>
               <h1 class="header-title">Password Reset Request</h1>
               <p class="header-subtitle">Reset your Fundry account password securely</p>

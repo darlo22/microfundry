@@ -3950,7 +3950,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       }
 
       // Hash the new password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await hashPassword(password);
 
       // Update user password
       await db

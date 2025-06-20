@@ -1388,11 +1388,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 </p>
               </div>
               
-              <div className="flex justify-center gap-3">
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <Button
                   variant="outline"
                   onClick={() => setShowSafeViewer(true)}
-                  className="flex items-center gap-2 border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white"
                 >
                   <FileText className="w-4 h-4" />
                   View SAFE Agreement
@@ -1403,7 +1403,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                     const safeContent = generateSafeAgreement(campaign, selectedAmount);
                     downloadSafeAgreement(safeContent, campaign.title, selectedAmount);
                   }}
-                  className="flex items-center gap-2 border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white"
                 >
                   <Download className="w-4 h-4" />
                   Download SAFE Agreement
@@ -1811,41 +1811,50 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       {/* SAFE Agreement Viewer Modal */}
       {showSafeViewer && (
       <Dialog open={showSafeViewer} onOpenChange={setShowSafeViewer}>
-        <DialogContent className="max-w-4xl max-h-[90vh] bg-gradient-to-br from-white via-orange-50/20 to-blue-50/30">
+        <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] bg-gradient-to-br from-white via-orange-50/20 to-blue-50/30">
           <DialogHeader className="border-b pb-4">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-bold text-fundry-navy flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between">
+              <DialogTitle className="text-lg sm:text-xl font-bold text-fundry-navy flex items-center gap-3">
                 <div className="bg-fundry-orange p-2 rounded-lg">
-                  <FileText className="h-5 w-5 text-white" />
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
-                SAFE Agreement Preview
+                <span className="text-sm sm:text-base">SAFE Agreement Preview</span>
               </DialogTitle>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
                 <Button
                   variant="outline"
+                  size="sm"
+                  onClick={() => setShowSafeViewer(false)}
+                  className="w-full sm:w-auto border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white order-2 sm:order-1"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Close Viewer
+                </Button>
+                <Button
+                  variant="outline" 
                   size="sm"
                   onClick={() => {
                     const safeContent = generateSafeAgreement(campaign, getCurrentInvestmentAmount());
                     downloadSafeAgreement(safeContent, campaign.title, getCurrentInvestmentAmount());
                   }}
-                  className="border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white"
+                  className="w-full sm:w-auto border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white order-1 sm:order-2"
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Download
+                  Download PDF
                 </Button>
               </div>
             </div>
           </DialogHeader>
           
           {/* Scrollable SAFE Agreement Content */}
-          <div className="flex-1 overflow-y-auto max-h-[calc(90vh-140px)] p-6 bg-white rounded-lg border">
+          <div className="flex-1 overflow-y-auto max-h-[calc(90vh-180px)] p-3 sm:p-6 bg-white rounded-lg border">
             <div className="prose prose-sm max-w-none">
               {/* SAFE Agreement Header */}
-              <div className="text-center mb-8 pb-6 border-b-2 border-gray-200">
-                <h1 className="text-2xl font-bold text-fundry-navy mb-2">
+              <div className="text-center mb-6 sm:mb-8 pb-4 sm:pb-6 border-b-2 border-gray-200">
+                <h1 className="text-xl sm:text-2xl font-bold text-fundry-navy mb-2">
                   SIMPLE AGREEMENT FOR FUTURE EQUITY
                 </h1>
-                <p className="text-lg font-semibold text-gray-700">
+                <p className="text-base sm:text-lg font-semibold text-gray-700">
                   {campaign.title}
                 </p>
                 <p className="text-sm text-gray-600 mt-2">
@@ -1854,11 +1863,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               </div>
 
               {/* Article 1 - Definitions */}
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-fundry-navy mb-3 pb-2 border-b border-gray-300">
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
                   Article 1: Definitions
                 </h2>
-                <div className="space-y-3 text-sm leading-relaxed">
+                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
                   <p><strong>"Company"</strong> means {campaign.title}, a company incorporated under the laws of {campaign.country || 'Delaware'}.</p>
                   <p><strong>"Investor"</strong> means {user?.firstName} {user?.lastName} ({user?.email}), the purchaser of this SAFE.</p>
                   <p><strong>"Purchase Amount"</strong> means ${getCurrentInvestmentAmount().toLocaleString()}.</p>
@@ -1869,14 +1878,14 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               </div>
 
               {/* Article 2 - Investment and Conversion */}
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-fundry-navy mb-3 pb-2 border-b border-gray-300">
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
                   Article 2: Investment and Conversion
                 </h2>
-                <div className="space-y-3 text-sm leading-relaxed">
+                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
                   <p>2.1 <strong>Investment:</strong> The Investor agrees to invest ${getCurrentInvestmentAmount().toLocaleString()} in the Company in exchange for the right to receive shares of the Company's capital stock upon the occurrence of an Equity Financing or Liquidity Event.</p>
                   <p>2.2 <strong>Conversion Trigger:</strong> This SAFE will automatically convert into shares of the Company's preferred stock issued in the next Equity Financing at either:</p>
-                  <ul className="ml-6 list-disc space-y-1">
+                  <ul className="ml-4 sm:ml-6 list-disc space-y-1">
                     <li>The price per share equal to the Valuation Cap divided by the Company's fully-diluted capitalization; or</li>
                     <li>A discount of {campaign.discountRate}% to the price per share of the securities sold in the Equity Financing;</li>
                     <li>Whichever calculation results in a greater number of shares for the Investor.</li>
@@ -1885,11 +1894,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               </div>
 
               {/* Article 3 - Company Representations */}
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-fundry-navy mb-3 pb-2 border-b border-gray-300">
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
                   Article 3: Company Representations
                 </h2>
-                <div className="space-y-3 text-sm leading-relaxed">
+                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
                   <p>3.1 The Company is a corporation duly organized, validly existing, and in good standing under the laws of its jurisdiction of incorporation.</p>
                   <p>3.2 The execution and delivery of this SAFE has been duly authorized by the Company.</p>
                   <p>3.3 This SAFE constitutes a valid and binding obligation of the Company.</p>
@@ -1898,11 +1907,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               </div>
 
               {/* Article 4 - Investor Representations */}
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-fundry-navy mb-3 pb-2 border-b border-gray-300">
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
                   Article 4: Investor Representations
                 </h2>
-                <div className="space-y-3 text-sm leading-relaxed">
+                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
                   <p>4.1 The Investor has full legal capacity to execute and deliver this SAFE.</p>
                   <p>4.2 This SAFE constitutes a valid and binding obligation of the Investor.</p>
                   <p>4.3 The Investor understands that this investment involves substantial risk and may result in total loss.</p>
@@ -1911,11 +1920,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               </div>
 
               {/* Article 5 - Miscellaneous */}
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-fundry-navy mb-3 pb-2 border-b border-gray-300">
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
                   Article 5: Miscellaneous
                 </h2>
-                <div className="space-y-3 text-sm leading-relaxed">
+                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
                   <p>5.1 <strong>Governing Law:</strong> This SAFE shall be governed by and construed in accordance with the laws of Delaware.</p>
                   <p>5.2 <strong>Amendment:</strong> This SAFE may only be amended with the written consent of both parties.</p>
                   <p>5.3 <strong>Assignment:</strong> This SAFE may not be transferred or assigned without the Company's written consent.</p>
@@ -1924,13 +1933,13 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               </div>
 
               {/* Article 6 - Risk Disclosures */}
-              <div className="mb-8">
-                <h2 className="text-lg font-bold text-fundry-navy mb-3 pb-2 border-b border-gray-300">
+              <div className="mb-6 sm:mb-8">
+                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
                   Article 6: Risk Disclosures
                 </h2>
-                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200 space-y-3 text-sm leading-relaxed">
+                <div className="bg-yellow-50 p-3 sm:p-4 rounded-lg border border-yellow-200 space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
                   <p><strong>IMPORTANT RISK DISCLOSURES:</strong></p>
-                  <ul className="ml-6 list-disc space-y-2">
+                  <ul className="ml-4 sm:ml-6 list-disc space-y-1 sm:space-y-2">
                     <li><strong>Total Loss Risk:</strong> You may lose your entire investment.</li>
                     <li><strong>Illiquidity:</strong> Your investment cannot be easily sold or transferred.</li>
                     <li><strong>Dilution:</strong> Your percentage ownership may be reduced in future financing rounds.</li>
@@ -1942,41 +1951,41 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               </div>
 
               {/* Signature Block */}
-              <div className="border-t-2 border-gray-200 pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="border-t-2 border-gray-200 pt-4 sm:pt-6">
+                <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2">
                   <div>
-                    <h3 className="font-bold text-fundry-navy mb-4">COMPANY</h3>
-                    <p className="mb-2 font-semibold">{campaign.title}</p>
-                    <p className="text-sm text-gray-600 mb-3">
+                    <h3 className="font-bold text-fundry-navy mb-3 sm:mb-4 text-sm sm:text-base">COMPANY</h3>
+                    <p className="mb-2 font-semibold text-sm sm:text-base">{campaign.title}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-3">
                       {campaign.businessAddress || 'Business Address'}<br/>
                       {campaign.country}
                     </p>
-                    <div className="border-b border-gray-400 w-64 mb-2"></div>
+                    <div className="border-b border-gray-400 w-full max-w-64 mb-2"></div>
                     <p className="text-xs text-gray-600">Authorized Representative</p>
-                    <p className="text-xs text-gray-600 mt-4">Date: ________________</p>
+                    <p className="text-xs text-gray-600 mt-3 sm:mt-4">Date: ________________</p>
                   </div>
                   <div>
-                    <h3 className="font-bold text-fundry-navy mb-4">INVESTOR</h3>
-                    <p className="mb-2 font-semibold">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-sm text-gray-600 mb-3">
+                    <h3 className="font-bold text-fundry-navy mb-3 sm:mb-4 text-sm sm:text-base">INVESTOR</h3>
+                    <p className="mb-2 font-semibold text-sm sm:text-base">{user?.firstName} {user?.lastName}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-3">
                       Email: {user?.email}<br/>
                       Investment Amount: ${getCurrentInvestmentAmount().toLocaleString()}
                     </p>
-                    <div className="border-b border-gray-400 w-64 mb-2"></div>
+                    <div className="border-b border-gray-400 w-full max-w-64 mb-2"></div>
                     <p className="text-xs text-gray-600">Investor Signature</p>
-                    <p className="text-xs text-gray-600 mt-4">Date: {new Date().toLocaleDateString()}</p>
+                    <p className="text-xs text-gray-600 mt-3 sm:mt-4">Date: {new Date().toLocaleDateString()}</p>
                   </div>
                 </div>
                 
                 {/* Agreement Summary */}
-                <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h4 className="font-bold text-fundry-navy mb-2">Agreement Summary</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
+                <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-bold text-fundry-navy mb-2 text-sm sm:text-base">Agreement Summary</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
+                    <div className="space-y-1">
                       <p><strong>Investment Amount:</strong> ${getCurrentInvestmentAmount().toLocaleString()}</p>
                       <p><strong>Valuation Cap:</strong> ${(parseFloat(campaign.valuationCap || "1000000")).toLocaleString()}</p>
                     </div>
-                    <div>
+                    <div className="space-y-1">
                       <p><strong>Discount Rate:</strong> {campaign.discountRate}%</p>
                       <p><strong>Company:</strong> {campaign.title}</p>
                     </div>

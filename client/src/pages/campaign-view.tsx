@@ -278,13 +278,7 @@ export default function CampaignView() {
                   {isProcessing ? "Processing..." : "INVEST"}
                 </Button>
 
-                {/* Watch for Updates Button */}
-                <Button 
-                  variant="outline"
-                  className="w-full border-2 border-gray-300 text-gray-700 font-medium py-3 text-base mb-6 rounded-lg hover:bg-gray-50"
-                >
-                  WATCH FOR UPDATES
-                </Button>
+
 
                 {/* Investment Terms */}
                 <div className="border-t pt-4">

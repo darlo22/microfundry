@@ -967,7 +967,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let submittedData = null;
 
       if (kycVerification) {
-        status = kycVerification.status || "not_started";
+        // Map 'approved' status to 'verified' for withdrawal access
+        status = kycVerification.status === 'approved' ? 'verified' : kycVerification.status || "not_started";
         lastUpdated = kycVerification.submittedAt;
         completionPercentage = status === "verified" ? 100 : (status === "pending" || status === "under_review") ? 85 : 0;
         

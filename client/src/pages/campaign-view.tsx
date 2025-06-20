@@ -1065,6 +1065,8 @@ export default function CampaignView() {
           isOpen={showInvestmentModal}
           onClose={() => setShowInvestmentModal(false)}
           campaign={campaign}
+          initialAmount={investmentAmount}
+          onAmountChange={setInvestmentAmount}
         />
       )}
 

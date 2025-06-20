@@ -41,6 +41,7 @@ interface InvestmentModalProps {
   onClose: () => void;
   campaign: CampaignWithStats;
   initialAmount?: string;
+  onAmountChange?: (amount: string) => void;
 }
 
 type InvestmentStep = 'amount' | 'auth' | 'safe-review' | 'terms' | 'signature' | 'payment' | 'confirmation';
@@ -65,7 +66,7 @@ interface AuthFormData {
   confirmPassword: string;
 }
 
-export default function InvestmentModal({ isOpen, onClose, campaign, initialAmount }: InvestmentModalProps) {
+export default function InvestmentModal({ isOpen, onClose, campaign, initialAmount, onAmountChange }: InvestmentModalProps) {
   const [currentStep, setCurrentStep] = useState<InvestmentStep>('amount');
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
   const [customAmount, setCustomAmount] = useState<string>('');
@@ -120,6 +121,13 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       setSelectedAmount(0); // Clear preset selections when using custom amount
     }
   }, [isOpen, initialAmount]);
+
+  // Notify parent component when custom amount changes
+  useEffect(() => {
+    if (onAmountChange && customAmount) {
+      onAmountChange(customAmount);
+    }
+  }, [customAmount, onAmountChange]);
 
   // Investment mutation
   const createInvestmentMutation = useMutation({

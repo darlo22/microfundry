@@ -155,6 +155,9 @@ export default function AdminDashboard() {
     scheduledFor: "",
     scheduleEnabled: false
   });
+  const [selectedSpecificUsers, setSelectedSpecificUsers] = useState<User[]>([]);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -343,6 +346,40 @@ export default function AdminDashboard() {
     setPauseCampaignModalOpen(true);
   };
 
+  // Message sending mutation
+  const sendMessageMutation = useMutation({
+    mutationFn: async (messageData: typeof messageForm) => {
+      return apiRequest("POST", "/api/admin/send-message", messageData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/messages'] });
+      setMessageForm({
+        recipientType: "all",
+        recipientIds: [],
+        title: "",
+        message: "",
+        priority: "normal",
+        category: "general",
+        scheduledFor: "",
+        scheduleEnabled: false
+      });
+      setSelectedSpecificUsers([]);
+      setSendingMessage(false);
+      toast({
+        title: "Message Sent",
+        description: "Your message has been sent successfully.",
+      });
+    },
+    onError: () => {
+      setSendingMessage(false);
+      toast({
+        title: "Send Failed",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Additional user management mutations
   const resetPasswordMutation = useMutation({
     mutationFn: async (userId: string) => {
@@ -417,6 +454,56 @@ export default function AdminDashboard() {
     });
   };
 
+  // Message center handlers
+  const handleSendMessage = () => {
+    if (!messageForm.title || !messageForm.message) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in both title and message content.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (messageForm.recipientType === "specific" && selectedSpecificUsers.length === 0) {
+      toast({
+        title: "No Recipients Selected",
+        description: "Please select at least one specific user to send the message.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSendingMessage(true);
+    const messageData = {
+      ...messageForm,
+      recipientIds: messageForm.recipientType === "specific" 
+        ? selectedSpecificUsers.map(user => user.id)
+        : []
+    };
+    sendMessageMutation.mutate(messageData);
+  };
+
+  const handleAddSpecificUser = (user: User) => {
+    if (!selectedSpecificUsers.find(u => u.id === user.id)) {
+      setSelectedSpecificUsers([...selectedSpecificUsers, user]);
+    }
+    setUserSearchQuery('');
+  };
+
+  const handleRemoveSpecificUser = (userId: string) => {
+    setSelectedSpecificUsers(selectedSpecificUsers.filter(user => user.id !== userId));
+  };
+
+  const filteredUsers = useMemo(() => {
+    if (!users?.data || !userSearchQuery) return [];
+    return users.data.filter(user => 
+      user.firstName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(userSearchQuery.toLowerCase())
+    );
+  }, [users?.data, userSearchQuery]);
+
   // Check admin authentication on mount
   useEffect(() => {
     const checkAdminAuth = async () => {
@@ -476,6 +563,12 @@ export default function AdminDashboard() {
   const { data: investments, isLoading: investmentsLoading } = useQuery<Investment[]>({
     queryKey: ['/api/admin/investments'],
     enabled: !!adminUser && (activeTab === "safes" || activeTab === "transactions" || activeTab === "overview")
+  });
+
+  // Messages query for Message Center
+  const { data: messages, isLoading: messagesLoading } = useQuery({
+    queryKey: ['/api/admin/messages'],
+    enabled: !!adminUser && activeTab === "message-center"
   });
 
   if (isLoading) {

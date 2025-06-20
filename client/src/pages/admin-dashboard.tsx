@@ -2990,15 +2990,15 @@ export default function AdminDashboard() {
                   <CardContent className="space-y-4 p-6">
                     <div className="space-y-2">
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">Tier 1 Fee (&lt; ${platformSettings?.fee_tier_1_max?.value || '1,000'}):</span>
+                        <span className="text-gray-600">Tier 1 Fee (&lt; $1,000):</span>
                         <span className="font-medium text-green-700">{platformSettings?.fee_tier_1_percentage?.value || '0'}%</span>
                       </div>
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">Tier 2 Fee (${platformSettings?.fee_tier_1_max?.value || '1,000'} - ${platformSettings?.fee_tier_2_max?.value || '50,000'}):</span>
+                        <span className="text-gray-600">Tier 2 Fee ($1,000 - $50,000):</span>
                         <span className="font-medium text-blue-700">{platformSettings?.fee_tier_2_percentage?.value || '3'}%</span>
                       </div>
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">Tier 3 Fee (&gt; ${platformSettings?.fee_tier_2_max?.value || '50,000'}):</span>
+                        <span className="text-gray-600">Tier 3 Fee (&gt; $50,000):</span>
                         <span className="font-medium text-purple-700">{platformSettings?.fee_tier_3_percentage?.value || '5'}%</span>
                       </div>
                       <div className="flex justify-between items-center text-sm">

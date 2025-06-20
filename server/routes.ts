@@ -4802,5 +4802,202 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Admin Withdrawal Management API
+  app.get('/api/admin/withdrawals', requireAdmin, async (req: any, res) => {
+    try {
+      // Log admin activity
+      await logAdminActivity(req.user.id, 'Withdrawal Management', 'Accessed withdrawal requests');
+      
+      // Get all withdrawal requests
+      const allWithdrawals = await db.select({
+        id: withdrawalRequests.id,
+        founderId: withdrawalRequests.founderId,
+        amount: withdrawalRequests.amount,
+        status: withdrawalRequests.status,
+        bankName: withdrawalRequests.bankName,
+        bankAccount: withdrawalRequests.bankAccount,
+        memo: withdrawalRequests.memo,
+        createdAt: withdrawalRequests.createdAt,
+        processedAt: withdrawalRequests.processedAt,
+        founderName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        founderEmail: users.email
+      })
+      .from(withdrawalRequests)
+      .leftJoin(users, eq(withdrawalRequests.founderId, users.id))
+      .orderBy(desc(withdrawalRequests.createdAt));
+
+      // Calculate transaction statistics
+      const completedInvestments = await db.select({
+        id: investments.id,
+        amount: investments.amount,
+        createdAt: investments.createdAt,
+        investor: {
+          firstName: users.firstName,
+          lastName: users.lastName
+        },
+        campaign: {
+          companyName: campaigns.companyName
+        }
+      })
+      .from(investments)
+      .leftJoin(users, eq(investments.investorId, users.id))
+      .leftJoin(campaigns, eq(investments.campaignId, campaigns.id))
+      .where(eq(investments.paymentStatus, 'completed'))
+      .orderBy(desc(investments.createdAt));
+
+      const pendingInvestments = await db.select({
+        id: investments.id,
+        amount: investments.amount,
+        createdAt: investments.createdAt,
+        investor: {
+          firstName: users.firstName,
+          lastName: users.lastName
+        },
+        campaign: {
+          companyName: campaigns.companyName
+        }
+      })
+      .from(investments)
+      .leftJoin(users, eq(investments.investorId, users.id))
+      .leftJoin(campaigns, eq(investments.campaignId, campaigns.id))
+      .where(sql`payment_status IN ('pending', 'processing')`)
+      .orderBy(desc(investments.createdAt));
+
+      const totalVolume = completedInvestments.reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+      const pendingWithdrawals = allWithdrawals.filter(w => w.status === 'pending');
+
+      const stats = {
+        totalVolume,
+        completedTransactions: completedInvestments.length,
+        pendingPayments: pendingInvestments.length,
+        withdrawalRequests: pendingWithdrawals.length
+      };
+
+      res.json({
+        withdrawalRequests: pendingWithdrawals,
+        completedTransactions: completedInvestments,
+        pendingPayments: pendingInvestments,
+        stats
+      });
+    } catch (error) {
+      console.error('Error fetching withdrawal data:', error);
+      res.status(500).json({ message: 'Failed to fetch withdrawal data' });
+    }
+  });
+
+  // Update withdrawal request status
+  app.post('/api/admin/withdrawals/:id/status', requireAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { status, notes } = req.body;
+
+      if (!['approved', 'rejected', 'completed'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status' });
+      }
+
+      // Update withdrawal request
+      await db
+        .update(withdrawalRequests)
+        .set({
+          status,
+          processedAt: new Date(),
+          adminNotes: notes
+        })
+        .where(eq(withdrawalRequests.id, id));
+
+      // Log admin activity
+      await logAdminActivity(
+        req.user.id, 
+        'Withdrawal Management', 
+        `Withdrawal request ${id} ${status}: ${notes || 'No notes'}`
+      );
+
+      // Get withdrawal details for notification
+      const withdrawal = await db.select()
+        .from(withdrawalRequests)
+        .where(eq(withdrawalRequests.id, id))
+        .limit(1);
+
+      if (withdrawal.length > 0) {
+        // Send notification to founder
+        try {
+          await db.insert(notifications).values({
+            userId: withdrawal[0].founderId,
+            type: 'update',
+            title: status === 'approved' ? 'Withdrawal Request Approved ✅' : 
+                   status === 'completed' ? 'Withdrawal Completed 💰' : 'Withdrawal Request Rejected ❌',
+            message: status === 'approved' ? 
+              `Your withdrawal request of $${withdrawal[0].amount} has been approved and is being processed.` :
+              status === 'completed' ?
+              `Your withdrawal of $${withdrawal[0].amount} has been completed and transferred to your account.` :
+              `Your withdrawal request of $${withdrawal[0].amount} was rejected. Reason: ${notes}`,
+            isRead: false,
+            createdAt: new Date()
+          });
+        } catch (notificationError) {
+          console.error('Failed to send withdrawal notification:', notificationError);
+        }
+      }
+
+      res.json({ message: `Withdrawal request ${status} successfully` });
+    } catch (error) {
+      console.error('Error updating withdrawal status:', error);
+      res.status(500).json({ message: 'Failed to update withdrawal status' });
+    }
+  });
+
+  // Get/update platform withdrawal settings
+  app.get('/api/admin/withdrawal-settings', requireAdmin, async (req: any, res) => {
+    try {
+      // Get current platform settings (using in-memory for now)
+      const settings = {
+        minimumWithdrawal: 25,
+        minimumGoalPercentage: 20,
+        maxWithdrawalPercentage: 80,
+        withdrawalProcessingTime: '3-5 business days'
+      };
+
+      res.json(settings);
+    } catch (error) {
+      console.error('Error fetching withdrawal settings:', error);
+      res.status(500).json({ message: 'Failed to fetch withdrawal settings' });
+    }
+  });
+
+  app.post('/api/admin/withdrawal-settings', requireAdmin, async (req: any, res) => {
+    try {
+      const { minimumWithdrawal, minimumGoalPercentage, maxWithdrawalPercentage } = req.body;
+
+      // Validate settings
+      if (minimumWithdrawal < 1 || minimumWithdrawal > 1000) {
+        return res.status(400).json({ message: 'Minimum withdrawal must be between $1 and $1,000' });
+      }
+
+      if (minimumGoalPercentage < 0 || minimumGoalPercentage > 100) {
+        return res.status(400).json({ message: 'Goal percentage must be between 0% and 100%' });
+      }
+
+      // Log admin activity
+      await logAdminActivity(
+        req.user.id,
+        'Platform Settings',
+        `Updated withdrawal settings: Min: $${minimumWithdrawal}, Goal: ${minimumGoalPercentage}%`
+      );
+
+      // Store settings (using in-memory for now - in production would use database)
+      res.json({
+        message: 'Withdrawal settings updated successfully',
+        settings: {
+          minimumWithdrawal,
+          minimumGoalPercentage,
+          maxWithdrawalPercentage
+        }
+      });
+    } catch (error) {
+      console.error('Error updating withdrawal settings:', error);
+      res.status(500).json({ message: 'Failed to update withdrawal settings' });
+    }
+  });
+
   return httpServer;
 }

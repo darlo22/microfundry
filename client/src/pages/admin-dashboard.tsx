@@ -169,6 +169,10 @@ export default function AdminDashboard() {
   const [transactionStats, setTransactionStats] = useState<any>({});
   const [completedTransactions, setCompletedTransactions] = useState<any[]>([]);
   const [pendingPayments, setPendingPayments] = useState<any[]>([]);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);
+  const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
+  const [withdrawalAction, setWithdrawalAction] = useState<'approve' | 'reject' | 'complete' | ''>('');
+  const [withdrawalNotes, setWithdrawalNotes] = useState('');
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -231,6 +235,33 @@ export default function AdminDashboard() {
       toast({
         title: "Failed to Send",
         description: "Could not send reminder email.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Withdrawal management mutations
+  const updateWithdrawalMutation = useMutation({
+    mutationFn: async (data: { id: string; status: string; notes: string }) => {
+      return apiRequest("POST", `/api/admin/withdrawals/${data.id}/status`, {
+        status: data.status,
+        notes: data.notes
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/withdrawals'] });
+      setWithdrawalModalOpen(false);
+      setWithdrawalAction('');
+      setWithdrawalNotes('');
+      toast({
+        title: "Withdrawal Updated",
+        description: "Withdrawal request status has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update withdrawal request status.",
         variant: "destructive",
       });
     }

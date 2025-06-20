@@ -146,6 +146,9 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
       return response.json();
     },
     onSuccess: async (data) => {
+      console.log('Login successful, user data:', data);
+      console.log('Selected user type:', selectedUserType);
+      
       // Invalidate user query and wait for it to complete
       await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       
@@ -162,7 +165,7 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
           const context = JSON.parse(storedContext);
           const isRecent = Date.now() - context.timestamp < 30 * 60 * 1000;
           if (isRecent) {
-            // Don't redirect, let the investment modal handle continuation
+            console.log('Investment context found, not redirecting');
             return;
           }
         } catch (error) {
@@ -170,9 +173,24 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
         }
       }
       
-      // Use proper router navigation with a small delay to ensure auth state is updated
+      // Use the actual user type from the server response for routing
       setTimeout(() => {
-        const dashboardRoute = selectedUserType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
+        const userType = data.user?.userType || selectedUserType;
+        let dashboardRoute;
+        
+        if (userType === "founder") {
+          dashboardRoute = "/founder-dashboard";
+        } else if (userType === "investor") {
+          dashboardRoute = "/investor-dashboard";
+        } else if (userType === "admin") {
+          dashboardRoute = "/admin-dashboard";
+        } else {
+          // Fallback based on selected type
+          dashboardRoute = selectedUserType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
+        }
+        
+        console.log('User type from server:', userType);
+        console.log('Redirecting to:', dashboardRoute);
         setLocation(dashboardRoute);
       }, 100);
     },

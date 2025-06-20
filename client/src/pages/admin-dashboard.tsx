@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,8 +33,9 @@ import {
   Key,
   Send,
   Bell,
-  Clock,
+  Search,
   X,
+  Clock,
   Star,
   Save
 } from "lucide-react";
@@ -496,13 +497,13 @@ export default function AdminDashboard() {
   };
 
   const filteredUsers = useMemo(() => {
-    if (!users?.data || !userSearchQuery) return [];
-    return users.data.filter(user => 
+    if (!users || !userSearchQuery) return [];
+    return users.filter((user: User) => 
       user.firstName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
       user.lastName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(userSearchQuery.toLowerCase())
     );
-  }, [users?.data, userSearchQuery]);
+  }, [users, userSearchQuery]);
 
   // Check admin authentication on mount
   useEffect(() => {
@@ -1761,7 +1762,11 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Recipients</label>
-                        <select className="w-full p-3 border rounded-lg bg-white">
+                        <select 
+                          className="w-full p-3 border rounded-lg bg-white"
+                          value={messageForm.recipientType}
+                          onChange={(e) => setMessageForm({...messageForm, recipientType: e.target.value})}
+                        >
                           <option value="all">All Users</option>
                           <option value="founders">All Founders</option>
                           <option value="investors">All Investors</option>
@@ -1770,7 +1775,11 @@ export default function AdminDashboard() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Priority</label>
-                        <select className="w-full p-3 border rounded-lg bg-white">
+                        <select 
+                          className="w-full p-3 border rounded-lg bg-white"
+                          value={messageForm.priority}
+                          onChange={(e) => setMessageForm({...messageForm, priority: e.target.value})}
+                        >
                           <option value="normal">Normal</option>
                           <option value="high">High</option>
                           <option value="urgent">Urgent</option>
@@ -1778,9 +1787,71 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
+                    {/* Specific Users Selection */}
+                    {messageForm.recipientType === "specific" && (
+                      <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Search Users</label>
+                          <div className="relative">
+                            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <input
+                              type="text"
+                              placeholder="Search by name or email..."
+                              className="w-full pl-10 p-3 border rounded-lg"
+                              value={userSearchQuery}
+                              onChange={(e) => setUserSearchQuery(e.target.value)}
+                            />
+                          </div>
+                          
+                          {/* Search Results */}
+                          {userSearchQuery && filteredUsers.length > 0 && (
+                            <div className="max-h-48 overflow-y-auto border rounded-lg bg-white">
+                              {filteredUsers.slice(0, 10).map((user: User) => (
+                                <div
+                                  key={user.id}
+                                  className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                                  onClick={() => handleAddSpecificUser(user)}
+                                >
+                                  <div>
+                                    <p className="font-medium">{user.firstName} {user.lastName}</p>
+                                    <p className="text-sm text-gray-500">{user.email} • {user.userType}</p>
+                                  </div>
+                                  <Button size="sm" variant="outline">Add</Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Selected Users */}
+                        {selectedSpecificUsers.length > 0 && (
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Selected Recipients ({selectedSpecificUsers.length})</label>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedSpecificUsers.map((user) => (
+                                <div key={user.id} className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                  <span>{user.firstName} {user.lastName}</span>
+                                  <button
+                                    onClick={() => handleRemoveSpecificUser(user.id)}
+                                    className="hover:bg-blue-200 rounded-full p-0.5"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Message Category</label>
-                      <select className="w-full p-3 border rounded-lg bg-white">
+                      <select 
+                        className="w-full p-3 border rounded-lg bg-white"
+                        value={messageForm.category}
+                        onChange={(e) => setMessageForm({...messageForm, category: e.target.value})}
+                      >
                         <option value="general">General</option>
                         <option value="announcement">Announcement</option>
                         <option value="update">Platform Update</option>
@@ -1795,6 +1866,8 @@ export default function AdminDashboard() {
                         type="text" 
                         placeholder="Enter message title..."
                         className="w-full p-3 border rounded-lg"
+                        value={messageForm.title}
+                        onChange={(e) => setMessageForm({...messageForm, title: e.target.value})}
                       />
                     </div>
 
@@ -1804,27 +1877,46 @@ export default function AdminDashboard() {
                         placeholder="Enter your message content..."
                         rows={6}
                         className="w-full p-3 border rounded-lg resize-none"
+                        value={messageForm.message}
+                        onChange={(e) => setMessageForm({...messageForm, message: e.target.value})}
                       />
                     </div>
 
                     <div className="flex items-center justify-between pt-4 border-t">
                       <div className="flex items-center space-x-4">
                         <label className="flex items-center space-x-2">
-                          <input type="checkbox" className="rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="rounded"
+                            checked={messageForm.scheduleEnabled}
+                            onChange={(e) => setMessageForm({...messageForm, scheduleEnabled: e.target.checked})}
+                          />
                           <span className="text-sm">Schedule for later</span>
                         </label>
-                        <input 
-                          type="datetime-local" 
-                          className="p-2 border rounded-lg text-sm"
-                        />
+                        {messageForm.scheduleEnabled && (
+                          <input 
+                            type="datetime-local" 
+                            className="p-2 border rounded-lg text-sm"
+                            value={messageForm.scheduledFor}
+                            onChange={(e) => setMessageForm({...messageForm, scheduledFor: e.target.value})}
+                          />
+                        )}
                       </div>
                       <div className="flex items-center space-x-3">
                         <Button variant="outline">
                           Save Draft
                         </Button>
-                        <Button className="bg-orange-600 hover:bg-orange-700">
-                          <Send className="w-4 h-4 mr-2" />
-                          Send Message
+                        <Button 
+                          className="bg-orange-600 hover:bg-orange-700"
+                          onClick={handleSendMessage}
+                          disabled={sendingMessage}
+                        >
+                          {sendingMessage ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          ) : (
+                            <Send className="w-4 h-4 mr-2" />
+                          )}
+                          {sendingMessage ? "Sending..." : "Send Message"}
                         </Button>
                       </div>
                     </div>
@@ -1843,73 +1935,66 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {/* Sample message entries */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                          <h4 className="font-medium">Platform Maintenance Notice</h4>
-                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Announcement</span>
+                    {messagesLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange"></div>
+                      </div>
+                    ) : messages && messages.length > 0 ? (
+                      messages.slice(0, 10).map((message: any) => (
+                        <div key={message.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-3 h-3 rounded-full ${
+                                message.priority === 'urgent' ? 'bg-red-500' : 
+                                message.priority === 'high' ? 'bg-yellow-500' : 'bg-green-500'
+                              }`}></div>
+                              <h4 className="font-medium">{message.title}</h4>
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                message.category === 'announcement' ? 'bg-blue-100 text-blue-800' :
+                                message.category === 'update' ? 'bg-purple-100 text-purple-800' :
+                                message.category === 'security' ? 'bg-red-100 text-red-800' :
+                                message.category === 'reminder' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {message.category.charAt(0).toUpperCase() + message.category.slice(1)}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Sent to {message.recipientType === 'all' ? 'All Users' : 
+                                      message.recipientType === 'founders' ? 'All Founders' : 
+                                      message.recipientType === 'investors' ? 'All Investors' : 
+                                      'Specific Users'} • {new Date(message.createdAt).toLocaleDateString()}
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {message.message.length > 100 ? message.message.substring(0, 100) + '...' : message.message}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button variant="outline" size="sm">
+                              View
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              Resend
+                            </Button>
+                          </div>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">Sent to All Users • 2 days ago</p>
-                        <p className="text-sm text-gray-500 mt-1">Scheduled maintenance on June 25th from 2:00 AM to 4:00 AM EST...</p>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">No messages sent yet</p>
+                        <p className="text-sm text-gray-400">Start by composing your first message above</p>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Resend
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                          <h4 className="font-medium">New Feature: Enhanced Analytics</h4>
-                          <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">Update</span>
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1">Sent to All Founders • 5 days ago</p>
-                        <p className="text-sm text-gray-500 mt-1">We're excited to announce new analytics features for your campaigns...</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Resend
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                          <h4 className="font-medium">Payment Processing Update</h4>
-                          <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">High Priority</span>
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1">Sent to All Investors • 1 week ago</p>
-                        <p className="text-sm text-gray-500 mt-1">Important updates to our payment processing system...</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Resend
-                        </Button>
-                      </div>
-                    </div>
+                    )}
                   </div>
 
-                  <div className="mt-6 text-center">
-                    <Button variant="outline">
-                      Load More Messages
-                    </Button>
-                  </div>
+                  {messages && messages.length > 10 && (
+                    <div className="mt-6 text-center">
+                      <Button variant="outline">
+                        Load More Messages
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 

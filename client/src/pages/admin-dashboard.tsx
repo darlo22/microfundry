@@ -32,7 +32,11 @@ import {
   Phone,
   Key,
   Send,
-  Bell
+  Bell,
+  Clock,
+  X,
+  Star,
+  Save
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
@@ -1232,29 +1236,7 @@ export default function AdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {withdrawalRequests?.map((request: WithdrawalRequest) => (
-                        <div key={request.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
-                            <p className="font-medium">{request.founderName}</p>
-                            <p className="text-sm text-gray-600">
-                              Requested: {new Date(request.requestedAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold">{request.amount}</p>
-                            <div className="flex items-center space-x-2 mt-2">
-                              <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                                <CheckCircle className="w-4 h-4 mr-1" />
-                                Approve
-                              </Button>
-                              <Button size="sm" variant="destructive">
-                                <X className="w-4 h-4 mr-1" />
-                                Reject
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )) || <p className="text-gray-500 text-center py-4">No withdrawal requests</p>}
+                      <p className="text-gray-500 text-center py-4">No withdrawal requests found</p>
                     </div>
                   </CardContent>
                 </Card>

@@ -3557,12 +3557,15 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   // Helper function to log admin activities
-  const logAdminActivity = async (adminId: string, action: string, details: string) => {
+  const logAdminActivity = async (adminId: string, action: string, details: any) => {
     try {
       await db.insert(adminLogs).values({
         adminId,
         action,
-        details,
+        targetType: typeof details === 'object' ? details.targetType || null : null,
+        targetId: typeof details === 'object' ? details.targetId || null : null,
+        details: typeof details === 'string' ? details : JSON.stringify(details),
+        ipAddress: null,
         createdAt: new Date()
       });
     } catch (error) {
@@ -3574,7 +3577,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   app.get('/api/admin/stats', requireAdmin, async (req: any, res) => {
     try {
       // Log admin activity
-      await logAdminActivity(req.user.id, 'Dashboard Access', 'Viewed admin dashboard overview');
+      await logAdminActivity(req.user.id, 'dashboard_access', {
+        targetType: 'dashboard',
+        description: 'Accessed admin dashboard overview'
+      });
       
       const [
         totalCampaigns,
@@ -3832,16 +3838,18 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           amount: investment.amount,
           reminder: true
         }),
-        read: false
+        read: false,
+        createdAt: new Date()
       });
 
       // Log admin activity
-      await logAdminActivity(req.user.id, 'reminder_sent', JSON.stringify({
-        investmentId,
+      await logAdminActivity(req.user.id, 'reminder_sent', {
+        targetType: 'investment',
+        targetId: investmentId.toString(),
         investorEmail: investment.investor?.email,
         campaignId: investment.campaignId,
         customMessage: message
-      }));
+      });
 
       res.json({ message: "Reminder sent successfully via email and notification" });
     } catch (error) {

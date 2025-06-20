@@ -369,7 +369,7 @@ export default function AdminDashboard() {
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats?.totalFounders + stats?.totalInvestors || 0}</div>
+                  <div className="text-2xl font-bold">{(stats?.totalFounders || 0) + (stats?.totalInvestors || 0)}</div>
                 </CardContent>
               </Card>
               

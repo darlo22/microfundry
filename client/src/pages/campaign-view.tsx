@@ -273,7 +273,7 @@ export default function CampaignView() {
                 <Button 
                   onClick={handleInvest}
                   disabled={isProcessing}
-                  className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 text-base mb-4 rounded-lg"
+                  className="w-full bg-fundry-orange hover:bg-orange-600 text-white font-bold py-3 text-base mb-4 rounded-lg"
                 >
                   {isProcessing ? "Processing..." : "INVEST"}
                 </Button>
@@ -300,9 +300,7 @@ export default function CampaignView() {
                         <span className="font-medium">{campaign.discountRate}%</span>
                       </div>
                     )}
-                    <div className="text-xs text-gray-500 mt-3">
-                      Investor Perks: $100, $500, $1K, $5K, $10K, $25K, $50K, $100K, $500K, $1M
-                    </div>
+
                   </div>
                 </div>
 

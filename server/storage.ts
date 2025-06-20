@@ -31,22 +31,9 @@ import {
   type KycVerification,
   type InsertKycVerification,
 } from "@shared/schema";
-import { db } from "./db";
+import { db, safeDbOperation } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
-
-// Helper function to wrap database operations with error handling
-const safeDbOperation = async <T>(operation: () => Promise<T>, fallback?: T): Promise<T | undefined> => {
-  try {
-    return await operation();
-  } catch (error) {
-    console.error('Database operation failed:', error);
-    if (fallback !== undefined) {
-      return fallback;
-    }
-    return undefined;
-  }
-};
 
 export interface IStorage {
   // User operations for email/password auth

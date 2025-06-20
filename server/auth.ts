@@ -167,22 +167,57 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Login endpoint
-  app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err: any, user: any, info: any) => {
-      if (err) {
-        return res.status(500).json({ message: "Internal server error" });
+  // Login endpoint with enhanced error handling
+  app.post("/api/login", async (req, res, next) => {
+    try {
+      // Wrap passport authentication in a promise for better error handling
+      const authenticateUser = () => {
+        return new Promise((resolve, reject) => {
+          passport.authenticate("local", (err: any, user: any, info: any) => {
+            if (err) {
+              console.error("Passport authentication error:", err);
+              return reject(new Error("Authentication failed"));
+            }
+            if (!user) {
+              return resolve({ success: false, message: info?.message || "Invalid credentials" });
+            }
+            resolve({ success: true, user });
+          })(req, res, next);
+        });
+      };
+
+      const authResult: any = await authenticateUser();
+
+      if (!authResult.success) {
+        return res.status(401).json({ message: authResult.message });
       }
-      if (!user) {
-        return res.status(401).json({ message: info?.message || "Invalid credentials" });
+
+      // Login user with error handling
+      const loginUser = () => {
+        return new Promise((resolve, reject) => {
+          req.login(authResult.user, (err) => {
+            if (err) {
+              console.error("Login session error:", err);
+              return reject(new Error("Session creation failed"));
+            }
+            resolve(authResult.user);
+          });
+        });
+      };
+
+      await loginUser();
+      res.json({ user: authResult.user, message: "Login successful" });
+
+    } catch (error: any) {
+      console.error("Login endpoint error:", error);
+      
+      // Provide specific error messages for debugging
+      if (error.message.includes("database") || error.message.includes("connection")) {
+        return res.status(500).json({ message: "Database connection error. Please try again." });
       }
-      req.login(user, (err) => {
-        if (err) {
-          return res.status(500).json({ message: "Login failed" });
-        }
-        res.json({ user, message: "Login successful" });
-      });
-    })(req, res, next);
+      
+      res.status(500).json({ message: "Login failed" });
+    }
   });
 
   // Logout endpoint

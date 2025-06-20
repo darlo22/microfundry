@@ -3679,6 +3679,55 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  app.get('/api/admin/investments', requireAdmin, async (req: any, res) => {
+    try {
+      // Log admin activity
+      await logAdminActivity(req.user.id, 'Transactions Management', 'Accessed investment transactions');
+      
+      const allInvestments = await db.select({
+        id: investments.id,
+        campaignId: investments.campaignId,
+        investorId: investments.investorId,
+        amount: investments.amount,
+        status: investments.status,
+        paymentStatus: investments.paymentStatus,
+        createdAt: investments.createdAt,
+        investorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        investorEmail: users.email,
+        campaignName: campaigns.companyName
+      })
+      .from(investments)
+      .leftJoin(users, eq(investments.investorId, users.id))
+      .leftJoin(campaigns, eq(investments.campaignId, campaigns.id))
+      .orderBy(desc(investments.createdAt));
+
+      // Format the response to include nested objects for compatibility
+      const formattedInvestments = allInvestments.map(inv => ({
+        id: inv.id,
+        campaignId: inv.campaignId,
+        investorId: inv.investorId,
+        amount: inv.amount,
+        status: inv.status,
+        paymentStatus: inv.paymentStatus,
+        createdAt: inv.createdAt,
+        investor: {
+          firstName: inv.investorName?.split(' ')[0] || '',
+          lastName: inv.investorName?.split(' ')[1] || '',
+          email: inv.investorEmail
+        },
+        campaign: {
+          companyName: inv.campaignName,
+          title: inv.campaignName
+        }
+      }));
+
+      res.json(formattedInvestments);
+    } catch (error) {
+      console.error("Error fetching admin investments:", error);
+      res.status(500).json({ message: "Failed to fetch investments" });
+    }
+  });
+
   app.get('/api/admin/withdrawals', requireAdmin, async (req: any, res) => {
     try {
       res.json([]);

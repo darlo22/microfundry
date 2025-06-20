@@ -416,10 +416,10 @@ export default function AdminDashboard() {
     enabled: !!adminUser && activeTab === "withdrawals"
   });
 
-  // Investments query for SAFE agreements
+  // Investments query for all admin sections
   const { data: investments, isLoading: investmentsLoading } = useQuery<Investment[]>({
     queryKey: ['/api/admin/investments'],
-    enabled: !!adminUser && activeTab === "safes"
+    enabled: !!adminUser && (activeTab === "safes" || activeTab === "transactions" || activeTab === "overview")
   });
 
   if (isLoading) {

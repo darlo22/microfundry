@@ -500,8 +500,6 @@ export const adminLogsRelations = relations(adminLogs, ({ one }) => ({
 export type AdminLog = typeof adminLogs.$inferSelect;
 export type InsertAdminLog = typeof adminLogs.$inferInsert;
 
-
-
 // Platform settings table for managing fees and KYC requirements
 export const platformSettings = pgTable("platform_settings", {
   id: serial("id").primaryKey(),
@@ -525,30 +523,7 @@ export const platformSettingsRelations = relations(platformSettings, ({ one }) =
 
 export type PlatformSetting = typeof platformSettings.$inferSelect;
 export type InsertPlatformSetting = typeof platformSettings.$inferInsert;
-
-// Team members table for admin team management
-export const teamMembers = pgTable("team_members", {
-  id: serial("id").primaryKey(),
-  email: varchar("email").notNull().unique(),
-  fullName: varchar("full_name").notNull(),
-  role: varchar("role").notNull().default("admin"), // admin, manager, analyst, etc.
-  department: varchar("department").notNull().default("operations"),
-  responsibilities: text("responsibilities"),
-  isActive: boolean("is_active").default(true),
-  invitedBy: varchar("invited_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
-  invitedByUser: one(users, {
-    fields: [teamMembers.invitedBy],
-    references: [users.id],
-  }),
-}));
-
-export type TeamMember = typeof teamMembers.$inferSelect;
-export type InsertTeamMember = typeof teamMembers.$inferInsert;
+export type InsertAdminLog = typeof adminLogs.$inferInsert;
 
 // Admin messages exports
 export type AdminMessage = typeof adminMessages.$inferSelect;

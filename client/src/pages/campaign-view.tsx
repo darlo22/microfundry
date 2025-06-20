@@ -44,6 +44,7 @@ export default function CampaignView() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [investmentAmount, setInvestmentAmount] = useState<string>("");
 
   // Get campaign ID from URL params (either /campaign/:id or /c/:privateLink)
   const campaignId = params.id;
@@ -263,6 +264,8 @@ export default function CampaignView() {
                       type="number"
                       placeholder="0"
                       min={campaign.minimumInvestment}
+                      value={investmentAmount}
+                      onChange={(e) => setInvestmentAmount(e.target.value)}
                       className="flex-1 px-3 py-3 border-0 focus:ring-0 focus:outline-none text-lg bg-transparent"
                     />
                   </div>

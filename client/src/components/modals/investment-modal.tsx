@@ -40,6 +40,7 @@ interface InvestmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   campaign: CampaignWithStats;
+  initialAmount?: string;
 }
 
 type InvestmentStep = 'amount' | 'auth' | 'safe-review' | 'terms' | 'signature' | 'payment' | 'confirmation';
@@ -64,7 +65,7 @@ interface AuthFormData {
   confirmPassword: string;
 }
 
-export default function InvestmentModal({ isOpen, onClose, campaign }: InvestmentModalProps) {
+export default function InvestmentModal({ isOpen, onClose, campaign, initialAmount }: InvestmentModalProps) {
   const [currentStep, setCurrentStep] = useState<InvestmentStep>('amount');
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
   const [customAmount, setCustomAmount] = useState<string>('');
@@ -111,6 +112,14 @@ export default function InvestmentModal({ isOpen, onClose, campaign }: Investmen
 
   // Budpay configuration
   const BUDPAY_PUBLIC_KEY = import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key';
+
+  // Initialize custom amount with initial amount when modal opens
+  useEffect(() => {
+    if (isOpen && initialAmount) {
+      setCustomAmount(initialAmount);
+      setSelectedAmount(0); // Clear preset selections when using custom amount
+    }
+  }, [isOpen, initialAmount]);
 
   // Investment mutation
   const createInvestmentMutation = useMutation({

@@ -2431,6 +2431,156 @@ export default function AdminDashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Investment Details Modal */}
+      <Dialog open={investmentDetailsModalOpen} onOpenChange={setInvestmentDetailsModalOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 backdrop-blur-sm shadow-2xl rounded-2xl border border-orange-200/50">
+          <DialogHeader className="text-center pb-6 border-b border-orange-200/50">
+            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
+              Investment Details
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2">
+              Complete information about this investment commitment
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedInvestment && (
+            <div className="space-y-6 py-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white/50 p-4 rounded-lg border border-orange-200">
+                  <h3 className="font-semibold text-orange-800 mb-3">Investment Information</h3>
+                  <div className="space-y-2">
+                    <p><span className="font-medium">Amount:</span> ${parseFloat(selectedInvestment.amount).toLocaleString()}</p>
+                    <p><span className="font-medium">Status:</span> <span className="capitalize">{selectedInvestment.status}</span></p>
+                    <p><span className="font-medium">Payment Status:</span> <span className="capitalize">{selectedInvestment.paymentStatus}</span></p>
+                    <p><span className="font-medium">Committed Date:</span> {new Date(selectedInvestment.createdAt).toLocaleDateString()}</p>
+                    <p><span className="font-medium">Days Pending:</span> {Math.ceil((Date.now() - new Date(selectedInvestment.createdAt).getTime()) / (1000 * 60 * 60 * 24))} days</p>
+                  </div>
+                </div>
+                
+                <div className="bg-white/50 p-4 rounded-lg border border-orange-200">
+                  <h3 className="font-semibold text-orange-800 mb-3">Investor Information</h3>
+                  <div className="space-y-2">
+                    <p><span className="font-medium">Name:</span> {selectedInvestment.investor?.firstName} {selectedInvestment.investor?.lastName}</p>
+                    <p><span className="font-medium">Type:</span> Individual Investor</p>
+                    <p><span className="font-medium">Investment ID:</span> #{selectedInvestment.id}</p>
+                    <p><span className="font-medium">Investor ID:</span> #{selectedInvestment.investorId}</p>
+                  </div>
+                </div>
+                
+                <div className="bg-white/50 p-4 rounded-lg border border-orange-200">
+                  <h3 className="font-semibold text-orange-800 mb-3">Campaign Information</h3>
+                  <div className="space-y-2">
+                    <p><span className="font-medium">Campaign:</span> {selectedInvestment.campaign?.title || selectedInvestment.campaign?.companyName}</p>
+                    <p><span className="font-medium">Campaign ID:</span> #{selectedInvestment.campaignId}</p>
+                  </div>
+                </div>
+                
+                <div className="bg-white/50 p-4 rounded-lg border border-orange-200">
+                  <h3 className="font-semibold text-orange-800 mb-3">Action Required</h3>
+                  <div className="space-y-2">
+                    <p className="text-orange-700 font-medium">Payment Processing</p>
+                    <p className="text-sm text-gray-600">Investor needs to complete payment to finalize investment</p>
+                    <p className="text-xs text-orange-600">Send reminder email to prompt payment completion</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 pt-4 border-t border-orange-200">
+                <Button variant="outline" onClick={() => setInvestmentDetailsModalOpen(false)}>
+                  Close
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setInvestmentDetailsModalOpen(false);
+                    handleSendReminder(selectedInvestment);
+                  }}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  Send Reminder
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Reminder Modal */}
+      <Dialog open={sendReminderModalOpen} onOpenChange={setSendReminderModalOpen}>
+        <DialogContent className="max-w-2xl bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 backdrop-blur-sm shadow-2xl rounded-2xl border border-orange-200/50">
+          <DialogHeader className="text-center pb-6 border-b border-orange-200/50">
+            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
+              Send Payment Reminder
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2">
+              Send a friendly reminder email to complete the investment payment
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedInvestment && (
+            <div className="space-y-6 py-6">
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                <h3 className="font-semibold text-orange-800 mb-2">Investment Summary</h3>
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Investor:</span> {selectedInvestment.investor?.firstName} {selectedInvestment.investor?.lastName}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Amount:</span> ${parseFloat(selectedInvestment.amount).toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Campaign:</span> {selectedInvestment.campaign?.title || selectedInvestment.campaign?.companyName}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Pending for:</span> {Math.ceil((Date.now() - new Date(selectedInvestment.createdAt).getTime()) / (1000 * 60 * 60 * 24))} days
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Custom Message (Optional)
+                </label>
+                <textarea
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="Add a personal message to include with the reminder email..."
+                  id="reminderMessage"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  A standard reminder message will be sent. Add custom text here to personalize the email.
+                </p>
+              </div>
+              
+              <div className="flex justify-end space-x-3 pt-4 border-t border-orange-200">
+                <Button variant="outline" onClick={() => setSendReminderModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    const messageElement = document.getElementById('reminderMessage') as HTMLTextAreaElement;
+                    const customMessage = messageElement?.value || "This is a friendly reminder to complete your investment payment.";
+                    handleSendReminderConfirm(customMessage);
+                  }}
+                  className="bg-orange-600 hover:bg-orange-700"
+                  disabled={sendReminderMutation.isPending}
+                >
+                  {sendReminderMutation.isPending ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="w-4 h-4 mr-2" />
+                      Send Reminder
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

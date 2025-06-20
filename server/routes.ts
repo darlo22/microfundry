@@ -3737,6 +3737,102 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Send investment reminder email
+  app.post("/api/admin/send-reminder", requireAdmin, async (req: any, res) => {
+    try {
+      const { investmentId, message } = req.body;
+
+      // Get investment details with investor and campaign info
+      const investment = await db.query.investments.findFirst({
+        where: eq(investments.id, investmentId),
+        with: {
+          investor: true,
+          campaign: true
+        }
+      });
+
+      if (!investment) {
+        return res.status(404).json({ message: "Investment not found" });
+      }
+
+      // Send reminder email
+      const emailSubject = `Payment Reminder: Complete Your Investment in ${investment.campaign?.companyName || 'Campaign'}`;
+      const emailHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Payment Reminder - Fundry</title>
+        </head>
+        <body style="font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #f97316, #1e40af); padding: 30px; border-radius: 12px; text-align: center; margin-bottom: 30px;">
+            <div style="background: white; width: 60px; height: 60px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+              <span style="font-size: 28px; font-weight: bold; color: #f97316;">F</span>
+            </div>
+            <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">Payment Reminder</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Complete your investment to secure your position</p>
+          </div>
+
+          <div style="background: #f8fafc; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+            <h2 style="color: #1e40af; margin: 0 0 15px 0; font-size: 20px;">Investment Summary</h2>
+            <p style="margin: 8px 0;"><strong>Campaign:</strong> ${investment.campaign?.companyName || 'N/A'}</p>
+            <p style="margin: 8px 0;"><strong>Investment Amount:</strong> $${parseFloat(investment.amount).toLocaleString()}</p>
+            <p style="margin: 8px 0;"><strong>Commitment Date:</strong> ${new Date(investment.createdAt).toLocaleDateString()}</p>
+            <p style="margin: 8px 0;"><strong>Status:</strong> Payment Pending</p>
+          </div>
+
+          <div style="margin-bottom: 25px;">
+            <h3 style="color: #f97316; margin: 0 0 15px 0;">Complete Your Payment</h3>
+            <p>Hi ${investment.investor?.firstName || 'Investor'},</p>
+            <p>This is a friendly reminder that your investment commitment is still awaiting payment completion. To secure your investment position, please complete your payment as soon as possible.</p>
+            ${message && message !== "This is a friendly reminder to complete your investment payment." ? `<p><strong>Additional Message:</strong> ${message}</p>` : ''}
+          </div>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` : 'http://localhost:5000'}/investor-dashboard" 
+               style="background: linear-gradient(135deg, #f97316, #ea580c); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+              Complete Payment
+            </a>
+          </div>
+
+          <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 6px; margin: 25px 0;">
+            <p style="margin: 0; font-size: 14px; color: #92400e;">
+              <strong>Important:</strong> This investment commitment will expire if payment is not completed within a reasonable timeframe. 
+              Please complete your payment to avoid losing your investment opportunity.
+            </p>
+          </div>
+
+          <div style="text-align: center; padding: 20px 0; border-top: 1px solid #e5e7eb; margin-top: 30px; color: #6b7280; font-size: 14px;">
+            <p>Questions? Contact us at <a href="mailto:support@microfundry.com" style="color: #f97316;">support@microfundry.com</a></p>
+            <p style="margin: 10px 0 0 0;">© 2025 Fundry. All rights reserved.</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      await sendEmail({
+        to: investment.investor?.email || '',
+        from: 'support@microfundry.com',
+        subject: emailSubject,
+        html: emailHtml
+      });
+
+      // Log admin activity
+      await logAdminActivity(req.user.id, 'reminder_sent', {
+        investmentId,
+        investorEmail: investment.investor?.email,
+        campaignId: investment.campaignId,
+        customMessage: message
+      });
+
+      res.json({ message: "Reminder email sent successfully" });
+    } catch (error) {
+      console.error("Error sending reminder email:", error);
+      res.status(500).json({ message: "Failed to send reminder email" });
+    }
+  });
+
   // Campaign management endpoints
   app.put('/api/admin/campaigns/:id/status', requireAdmin, async (req: any, res) => {
     try {

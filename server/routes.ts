@@ -17,7 +17,7 @@ import multer from "multer";
 import path from "path";
 import { TwoFactorService } from "./twoFactorService";
 import { emailService } from "./services/email";
-import { eq, and, gt, sql, desc, or } from "drizzle-orm";
+import { eq, and, gt, sql, desc, or, ne, inArray, gte } from "drizzle-orm";
 import { 
   emailVerificationTokens, 
   passwordResetTokens,
@@ -27,7 +27,8 @@ import {
   adminLogs,
   notifications,
   campaignComments,
-  campaignQuestions
+  campaignQuestions,
+  adminMessages
 } from "@shared/schema";
 import Stripe from "stripe";
 import fs from "fs";
@@ -3811,15 +3812,38 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         </html>
       `;
 
+      // Send email
+      await emailService.sendEmail({
+        to: investment.investor?.email || '',
+        from: 'support@microfundry.com',
+        subject: emailSubject,
+        html: emailHtml
+      });
+
+      // Send in-app notification
+      await db.insert(notifications).values({
+        userId: investment.investorId.toString(),
+        type: 'investment',
+        title: 'Payment Reminder',
+        message: `Please complete your payment for your $${parseFloat(investment.amount).toLocaleString()} investment in ${investment.campaign?.companyName || 'Campaign'}. ${message && message !== "This is a friendly reminder to complete your investment payment." ? `Admin message: ${message}` : ''}`,
+        data: JSON.stringify({
+          investmentId: investment.id,
+          campaignId: investment.campaignId,
+          amount: investment.amount,
+          reminder: true
+        }),
+        read: false
+      });
+
       // Log admin activity
-      await logAdminActivity(req.user.id, 'reminder_sent', {
+      await logAdminActivity(req.user.id, 'reminder_sent', JSON.stringify({
         investmentId,
         investorEmail: investment.investor?.email,
         campaignId: investment.campaignId,
         customMessage: message
-      });
+      }));
 
-      res.json({ message: "Reminder email sent successfully" });
+      res.json({ message: "Reminder sent successfully via email and notification" });
     } catch (error) {
       console.error("Error sending reminder email:", error);
       res.status(500).json({ message: "Failed to send reminder email" });

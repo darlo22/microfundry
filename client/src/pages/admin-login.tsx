@@ -27,10 +27,6 @@ export default function AdminLogin() {
     setError("");
 
     try {
-      // Add timeout to prevent hanging
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
       const response = await fetch('/api/admin/login', {
         method: 'POST',
         headers: {
@@ -38,10 +34,7 @@ export default function AdminLogin() {
         },
         credentials: 'include',
         body: JSON.stringify(formData),
-        signal: controller.signal,
       });
-
-      clearTimeout(timeoutId);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: "Authentication failed" }));
@@ -63,12 +56,8 @@ export default function AdminLogin() {
       setLocation("/admin-dashboard");
       
     } catch (error: any) {
-      if (error.name === 'AbortError') {
-        setError("Request timeout. Please try again.");
-      } else {
-        setError("Connection error. Please try again.");
-      }
       console.error('Admin login error:', error);
+      setError("Connection error. Please try again.");
     } finally {
       setIsLoading(false);
     }

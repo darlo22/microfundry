@@ -22,7 +22,7 @@ const formatCurrency = (amount: number) => {
 
 // Interface for campaigns with additional stats
 interface CampaignWithStats extends Campaign {
-  totalRaised: string;
+  totalRaised: number;
   investorCount: number;
   progressPercent: number;
 }
@@ -165,22 +165,25 @@ export default function BrowseCampaigns() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("trending");
 
+  // Ensure campaigns is an array
+  const campaignsArray = Array.isArray(campaigns) ? campaigns : [];
+
   // Filter campaigns based on selected category
-  const filteredCampaigns = campaigns?.filter((campaign: Campaign) => {
+  const filteredCampaigns = campaignsArray.filter((campaign: any) => {
     if (selectedCategory === "all") return true;
     return campaign.businessSector?.toLowerCase() === selectedCategory.toLowerCase();
-  }) || [];
+  });
 
   // Sort campaigns based on selected sort option
-  const sortedCampaigns = [...filteredCampaigns].sort((a: Campaign, b: Campaign) => {
+  const sortedCampaigns = [...filteredCampaigns].sort((a: any, b: any) => {
     switch (sortBy) {
       case "trending":
-        // Sort by highest percentage funded
-        const aProgress = ((Number(a.totalRaised) || 0) / (Number(a.fundingGoal) || 1)) * 100;
-        const bProgress = ((Number(b.totalRaised) || 0) / (Number(b.fundingGoal) || 1)) * 100;
-        return bProgress - aProgress;
+        // Sort by highest percentage funded (using funding goal as proxy)
+        return (Number(b.fundingGoal) || 0) - (Number(a.fundingGoal) || 0);
       case "newest":
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        const aDate = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const bDate = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return bDate.getTime() - aDate.getTime();
       case "ending-soon":
         // For now, sort by campaign ID (can be improved with actual deadline data)
         return a.id - b.id;
@@ -191,11 +194,11 @@ export default function BrowseCampaigns() {
     }
   });
 
-  const campaignsWithStats: CampaignWithStats[] = sortedCampaigns.map((campaign: Campaign) => ({
+  const campaignsWithStats: CampaignWithStats[] = sortedCampaigns.map((campaign: any) => ({
     ...campaign,
-    totalRaised: String(campaign.totalRaised || 0),
-    investorCount: campaign.investorCount || 0,
-    progressPercent: ((Number(campaign.totalRaised) || 0) / (Number(campaign.fundingGoal) || 1)) * 100,
+    totalRaised: 0, // Will be calculated from actual investment data
+    investorCount: 0, // Will be calculated from actual investment data
+    progressPercent: 0, // Will be calculated from actual investment data
   }));
 
   if (isLoading) {

@@ -72,83 +72,75 @@ interface WithdrawalRequest {
 }
 
 export default function AdminDashboard() {
-  const { user, isLoading: userLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isLoading, setIsLoading] = useState(true);
+  const [adminUser, setAdminUser] = useState<any>(null);
+
+  // Check admin authentication on mount
+  useEffect(() => {
+    const checkAdminAuth = async () => {
+      try {
+        const response = await fetch('/api/admin/verify', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          setAdminUser(userData);
+        } else {
+          setLocation("/admin-login");
+          return;
+        }
+      } catch (error) {
+        console.error('Admin auth check failed:', error);
+        setLocation("/admin-login");
+        return;
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAdminAuth();
+  }, [setLocation]);
 
   // Admin stats query
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ['/api/admin/stats'],
-    enabled: user?.userType === "admin"
+    enabled: !!adminUser
   });
 
   // Users query
   const { data: users, isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
-    enabled: user?.userType === "admin" && activeTab === "users"
+    enabled: !!adminUser && activeTab === "users"
   });
 
   // Campaigns query
   const { data: campaigns, isLoading: campaignsLoading } = useQuery<Campaign[]>({
     queryKey: ['/api/admin/campaigns'],
-    enabled: user?.userType === "admin" && activeTab === "campaigns"
+    enabled: !!adminUser && activeTab === "campaigns"
   });
 
   // Withdrawals query
   const { data: withdrawals, isLoading: withdrawalsLoading } = useQuery<WithdrawalRequest[]>({
     queryKey: ['/api/admin/withdrawals'],
-    enabled: user?.userType === "admin" && activeTab === "withdrawals"
+    enabled: !!adminUser && activeTab === "withdrawals"
   });
 
-  useEffect(() => {
-    if (user && user.userType !== "admin") {
-      setLocation("/admin-login");
-    }
-  }, [user, setLocation]);
-
-  // Debug logging
-  console.log('Admin Dashboard - User:', user);
-  console.log('Admin Dashboard - Loading:', userLoading);
-  console.log('Admin Dashboard - User Type:', user?.userType);
-
-  if (userLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange"></div>
-          <p className="text-gray-600">Loading admin dashboard...</p>
+          <p className="text-gray-600">Verifying admin access...</p>
         </div>
       </div>
     );
   }
 
-  if (!user) {
-    console.log('No user found, redirecting to admin login');
-    setLocation("/admin-login");
-    return null;
-  }
-
-  if (user.userType !== "admin") {
-    console.log('User is not admin:', user.userType);
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <CardTitle className="text-red-600">Access Denied</CardTitle>
-            <CardDescription>
-              You don't have admin privileges to access this area.
-              Current user type: {user.userType}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild className="w-full">
-              <Link href="/admin-login">Return to Admin Login</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  if (!adminUser) {
+    return null; // Will redirect to login
   }
 
   const handleLogout = async () => {

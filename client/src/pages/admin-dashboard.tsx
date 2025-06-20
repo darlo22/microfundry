@@ -159,6 +159,10 @@ export default function AdminDashboard() {
   const [selectedSpecificUsers, setSelectedSpecificUsers] = useState<User[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
+
+  // Platform settings state
+  const [platformSettings, setPlatformSettings] = useState<any>({});
+  const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -286,6 +290,29 @@ export default function AdminDashboard() {
       message
     });
   };
+
+  // Platform settings mutation
+  const updatePlatformSettingMutation = useMutation({
+    mutationFn: async (data: { settingKey: string; settingValue: string }) => {
+      return apiRequest("PUT", "/api/admin/platform-settings", data);
+    },
+    onSuccess: () => {
+      setIsUpdatingSettings(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/platform-settings'] });
+      toast({
+        title: "Setting Updated",
+        description: "Platform setting has been updated successfully.",
+      });
+    },
+    onError: () => {
+      setIsUpdatingSettings(false);
+      toast({
+        title: "Update Failed",
+        description: "Failed to update platform setting.",
+        variant: "destructive",
+      });
+    }
+  });
 
   // Campaign management mutations
   const pauseCampaignMutation = useMutation({
@@ -563,6 +590,15 @@ export default function AdminDashboard() {
   const { data: messages, isLoading: messagesLoading } = useQuery<any[]>({
     queryKey: ['/api/admin/messages'],
     enabled: !!adminUser && activeTab === "message-center"
+  });
+
+  // Platform settings query
+  const { data: platformSettingsData, isLoading: platformSettingsLoading } = useQuery<any>({
+    queryKey: ['/api/admin/platform-settings'],
+    enabled: !!adminUser && activeTab === "settings",
+    onSuccess: (data) => {
+      setPlatformSettings(data);
+    }
   });
 
   // Message statistics query

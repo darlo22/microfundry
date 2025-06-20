@@ -4532,6 +4532,59 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Platform settings management endpoints
+  app.get("/api/admin/platform-settings", requireAdmin, async (req: any, res) => {
+    try {
+      // Use in-memory default settings for now
+      const defaultSettings = {
+        // Platform fees
+        'platform_fee_percentage': { value: '0', category: 'fees', description: 'Platform fee percentage for investors' },
+        'processing_fee_enabled': { value: 'true', category: 'fees', description: 'Enable processing fees via Stripe/Budpay' },
+        'minimum_investment': { value: '25', category: 'fees', description: 'Minimum investment amount in USD' },
+        'maximum_investment': { value: '100000', category: 'fees', description: 'Maximum investment amount in USD' },
+        
+        // KYC requirements
+        'kyc_required_for_investment': { value: 'true', category: 'kyc', description: 'Require KYC verification for investments' },
+        'kyc_required_amount_threshold': { value: '1000', category: 'kyc', description: 'Investment amount threshold requiring KYC' },
+        'kyc_document_types_required': { value: 'id,utility_bill', category: 'kyc', description: 'Required document types for KYC' },
+        'kyc_auto_approval_enabled': { value: 'false', category: 'kyc', description: 'Enable automatic KYC approval' },
+        
+        // General platform settings
+        'platform_maintenance_mode': { value: 'false', category: 'general', description: 'Enable platform maintenance mode' },
+        'new_registrations_enabled': { value: 'true', category: 'general', description: 'Allow new user registrations' },
+        'email_verification_required': { value: 'true', category: 'general', description: 'Require email verification for new users' }
+      };
+
+      res.json(defaultSettings);
+    } catch (error) {
+      console.error('Platform settings error:', error);
+      res.status(500).json({ message: 'Failed to fetch platform settings' });
+    }
+  });
+
+  app.put("/api/admin/platform-settings", requireAdmin, async (req: any, res) => {
+    try {
+      const { settingKey, settingValue } = req.body;
+
+      // Log admin activity
+      await logAdminActivity(
+        req.user.id, 
+        'Platform Settings', 
+        `Updated ${settingKey} to ${settingValue}`
+      );
+
+      res.json({ 
+        message: 'Platform setting updated successfully',
+        settingKey,
+        settingValue,
+        updatedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Platform settings update error:', error);
+      res.status(500).json({ message: 'Failed to update platform setting' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

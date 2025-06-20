@@ -143,6 +143,18 @@ export default function AdminDashboard() {
     country: "",
     state: ""
   });
+
+  // Message center state
+  const [messageForm, setMessageForm] = useState({
+    recipientType: "all",
+    recipientIds: [] as string[],
+    title: "",
+    message: "",
+    priority: "normal",
+    category: "general",
+    scheduledFor: "",
+    scheduleEnabled: false
+  });
   
   const { toast } = useToast();
   const queryClient = useQueryClient();

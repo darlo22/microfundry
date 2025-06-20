@@ -3811,13 +3811,6 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         </html>
       `;
 
-      await sendEmail({
-        to: investment.investor?.email || '',
-        from: 'support@microfundry.com',
-        subject: emailSubject,
-        html: emailHtml
-      });
-
       // Log admin activity
       await logAdminActivity(req.user.id, 'reminder_sent', {
         investmentId,
@@ -3830,6 +3823,128 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     } catch (error) {
       console.error("Error sending reminder email:", error);
       res.status(500).json({ message: "Failed to send reminder email" });
+    }
+  });
+
+  // Admin message center endpoints
+  app.post("/api/admin/send-message", requireAdmin, async (req: any, res) => {
+    try {
+      const { recipientType, recipientIds, title, message, priority, category, scheduledFor } = req.body;
+
+      // Create admin message record
+      const adminMessage = await db.insert(adminMessages).values({
+        adminId: req.user.id,
+        recipientType,
+        recipientIds: recipientIds ? JSON.stringify(recipientIds) : null,
+        title,
+        message,
+        priority: priority || 'normal',
+        category: category || 'general',
+        scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
+        sentAt: scheduledFor ? null : new Date(),
+        status: scheduledFor ? 'scheduled' : 'sent'
+      }).returning();
+
+      // Determine recipients based on type
+      let recipients: any[] = [];
+      
+      if (recipientType === 'all') {
+        recipients = await db.select().from(users).where(ne(users.userType, 'admin'));
+      } else if (recipientType === 'founders') {
+        recipients = await db.select().from(users).where(eq(users.userType, 'founder'));
+      } else if (recipientType === 'investors') {
+        recipients = await db.select().from(users).where(eq(users.userType, 'investor'));
+      } else if (recipientType === 'specific' && recipientIds) {
+        recipients = await db.select().from(users).where(inArray(users.id, recipientIds));
+      }
+
+      // Create notifications for each recipient (if not scheduled)
+      if (!scheduledFor && recipients.length > 0) {
+        const notificationInserts = recipients.map(recipient => ({
+          userId: recipient.id,
+          type: category === 'security' ? 'security' : 'general',
+          title: title,
+          message: message,
+          data: JSON.stringify({
+            adminId: req.user.id,
+            messageId: adminMessage[0].id,
+            priority: priority
+          }),
+          read: false
+        }));
+
+        await db.insert(notifications).values(notificationInserts);
+      }
+
+      // Log admin activity
+      await logAdminActivity(req.user.id, 'message_sent', {
+        messageId: adminMessage[0].id,
+        recipientType,
+        recipientCount: recipients.length,
+        title,
+        category,
+        priority,
+        scheduled: !!scheduledFor
+      });
+
+      res.json({ 
+        message: scheduledFor ? "Message scheduled successfully" : "Message sent successfully",
+        recipientCount: recipients.length,
+        messageId: adminMessage[0].id
+      });
+    } catch (error) {
+      console.error("Error sending admin message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Get admin messages
+  app.get("/api/admin/messages", requireAdmin, async (req: any, res) => {
+    try {
+      const messages = await db.select().from(adminMessages)
+        .where(eq(adminMessages.adminId, req.user.id))
+        .orderBy(desc(adminMessages.createdAt))
+        .limit(50);
+
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching admin messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  // Get message statistics
+  app.get("/api/admin/message-stats", requireAdmin, async (req: any, res) => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const [todayMessages] = await db.select({ count: sql<number>`count(*)` })
+        .from(adminMessages)
+        .where(and(
+          eq(adminMessages.adminId, req.user.id),
+          gte(adminMessages.createdAt, today)
+        ));
+
+      const [totalRecipients] = await db.select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(ne(users.userType, 'admin'));
+
+      const [scheduledMessages] = await db.select({ count: sql<number>`count(*)` })
+        .from(adminMessages)
+        .where(and(
+          eq(adminMessages.adminId, req.user.id),
+          eq(adminMessages.status, 'scheduled')
+        ));
+
+      res.json({
+        messagesToday: todayMessages?.count || 0,
+        totalRecipients: totalRecipients?.count || 0,
+        scheduledMessages: scheduledMessages?.count || 0
+      });
+    } catch (error) {
+      console.error("Error fetching message stats:", error);
+      res.status(500).json({ message: "Failed to fetch message statistics" });
     }
   });
 

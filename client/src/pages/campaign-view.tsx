@@ -527,7 +527,7 @@ export default function CampaignView() {
 
           {/* About This Campaign Section */}
           <Card className="border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
-            <div className="relative px-10 py-8 bg-gradient-to-br from-fundry-orange via-orange-500 to-orange-600 overflow-hidden">
+            <div className="relative px-10 py-8 bg-gradient-to-br from-fundry-navy via-blue-800 to-blue-900 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10"></div>
               <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-white/10 to-transparent rounded-full -translate-y-20 translate-x-20"></div>
               

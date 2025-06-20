@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { setupAuth, requireAuth, hashPassword, comparePasswords } from "./auth";
 
 import { isAuthenticated } from "./replitAuth";
-import { db } from "./db";
+import { db, checkDatabaseHealth } from "./db";
 import { 
   insertBusinessProfileSchema,
   insertCampaignSchema,
@@ -49,6 +49,41 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// Safe database operation wrapper to handle control plane errors
+async function safeDbOperation<T>(operation: () => Promise<T>, fallback?: T): Promise<T | undefined> {
+  try {
+    return await operation();
+  } catch (error: any) {
+    console.error('Database operation failed:', error.message);
+    if (error.code === 'XX000' || error.message?.includes('Control plane')) {
+      console.log('Control plane error detected, returning fallback value');
+      return fallback;
+    }
+    throw error;
+  }
+}
+
+// Safe route handler wrapper
+function safeHandler(handler: (req: any, res: any, next?: any) => Promise<void>) {
+  return async (req: any, res: any, next?: any) => {
+    try {
+      await handler(req, res, next);
+    } catch (error: any) {
+      console.error('Route handler error:', error.message);
+      if (error.code === 'XX000' || error.message?.includes('Control plane')) {
+        return res.status(503).json({ 
+          message: "Database temporarily unavailable. Please try again in a moment." 
+        });
+      }
+      if (!res.headersSent) {
+        res.status(500).json({ 
+          message: "Internal server error" 
+        });
+      }
+    }
+  };
+}
+
 // KYC submissions are now handled via database storage
 
 // Configure multer for file uploads
@@ -75,21 +110,7 @@ const upload = multer({
   },
 });
 
-// Helper function to wrap route handlers with error handling
-const safeHandler = (handler: Function) => {
-  return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    try {
-      await handler(req, res, next);
-    } catch (error) {
-      console.error('Route handler error:', error);
-      if (!res.headersSent) {
-        res.status(500).json({ 
-          message: error instanceof Error ? error.message : 'Internal server error' 
-        });
-      }
-    }
-  };
-};
+
 
 export async function registerRoutes(app: Express): Promise<Server> {
 

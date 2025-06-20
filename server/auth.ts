@@ -36,15 +36,34 @@ export async function comparePasswords(supplied: string, stored: string) {
 export function setupAuth(app: Express) {
   const PostgresSessionStore = connectPg(session);
   
+  // Enhanced session store with error handling
+  const sessionStore = new PostgresSessionStore({
+    conString: process.env.DATABASE_URL,
+    tableName: "sessions",
+    createTableIfMissing: false,
+    errorLog: (error: Error) => {
+      if (error.message?.includes('Control plane') || (error as any).code === 'XX000') {
+        console.log('Session store control plane error (non-critical):', error.message);
+      } else {
+        console.error('Session store error:', error);
+      }
+    }
+  });
+
+  // Handle session store errors gracefully
+  sessionStore.on('error', (error: Error) => {
+    if (error.message?.includes('Control plane') || (error as any).code === 'XX000') {
+      console.log('Session store connection issue (retrying):', error.message);
+    } else {
+      console.error('Session store critical error:', error);
+    }
+  });
+  
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "dev-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
-    store: new PostgresSessionStore({
-      conString: process.env.DATABASE_URL,
-      tableName: "sessions",
-      createTableIfMissing: false,
-    }),
+    store: sessionStore,
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,

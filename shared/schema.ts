@@ -36,6 +36,15 @@ export const emailVerificationTokens = pgTable("email_verification_tokens", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Password reset tokens table
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: varchar("id").primaryKey().$defaultFn(() => nanoid()),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: varchar("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // User storage table for email/password authentication
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),

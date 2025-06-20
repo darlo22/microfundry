@@ -33,6 +33,7 @@ import AdminLogin from "@/pages/admin-login";
 import CampaignView from "@/pages/campaign-view";
 import EmailVerification from "@/pages/email-verification";
 import InvestmentSuccess from "@/pages/investment-success";
+import ResetPassword from "@/pages/reset-password";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -66,6 +67,7 @@ function Router() {
       <Route path="/safe-agreement-template" component={SafeAgreementTemplate} />
       <Route path="/investor-accreditation" component={InvestorAccreditation} />
       <Route path="/verify-email" component={EmailVerification} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/investment-success" component={InvestmentSuccess} />
       <Route path="/campaign/:id" component={CampaignView} />
       <Route path="/campaigns/:id" component={CampaignView} />

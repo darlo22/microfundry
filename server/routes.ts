@@ -19,6 +19,7 @@ import { emailService } from "./services/email";
 import { eq, and, gt, sql, desc } from "drizzle-orm";
 import { 
   emailVerificationTokens, 
+  passwordResetTokens,
   users, 
   campaigns, 
   investments, 
@@ -3756,8 +3757,13 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const resetToken = nanoid(32);
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-      // Store reset token (you may need to create a password_reset_tokens table)
-      // For now, we'll just send the email
+      // Store reset token in database
+      await db.insert(passwordResetTokens).values({
+        userId: user.id,
+        token: resetToken,
+        expiresAt
+      });
+
       const resetUrl = `${process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` : 'http://localhost:5000'}/reset-password?token=${resetToken}`;
       
       await emailService.sendPasswordResetEmail(user.email, user.firstName, resetUrl);

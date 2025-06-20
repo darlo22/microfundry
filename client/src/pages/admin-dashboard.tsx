@@ -18,6 +18,7 @@ import {
   Activity,
   Settings,
   LogOut,
+  ArrowUpCircle,
   Shield,
   Eye,
   Edit,
@@ -1756,84 +1757,244 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
 
+              {/* Withdrawal Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Settings className="w-5 h-5 mr-2 text-blue-600" />
+                    Withdrawal Settings
+                  </CardTitle>
+                  <CardDescription>Configure minimum withdrawal amounts and campaign requirements</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="min-withdrawal-amount">Minimum Withdrawal Amount ($)</Label>
+                        <Input
+                          id="min-withdrawal-amount"
+                          type="number"
+                          step="1"
+                          min="1"
+                          max="1000"
+                          defaultValue={25}
+                          className="mt-1"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Minimum amount founders can withdraw</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="min-goal-percentage">Minimum Goal Achievement (%)</Label>
+                        <Input
+                          id="min-goal-percentage"
+                          type="number"
+                          step="1"
+                          min="0"
+                          max="100"
+                          defaultValue={20}
+                          className="mt-1"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Required % of funding goal to enable withdrawals</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Withdrawal Settings
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Transactions and Withdrawal Requests */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Recent Transactions</CardTitle>
-                    <CardDescription>Latest investment transactions</CardDescription>
+                    <CardTitle className="flex items-center">
+                      <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+                      Recent Transactions
+                    </CardTitle>
+                    <CardDescription>Latest completed investment transactions</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {investments && investments.length > 0 ? 
-                        investments.slice(0, 10).map((investment: Investment) => (
-                        <div key={investment.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
-                            <p className="font-medium">
-                              {investment.investor?.firstName} {investment.investor?.lastName} 
-                              {!investment.investor && investment.investorName && investment.investorName}
-                              {!investment.investor && !investment.investorName && `Investor #${investment.investorId}`}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {investment.campaign?.companyName || investment.campaign?.title || `Campaign #${investment.campaignId}`}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {new Date(investment.createdAt).toLocaleDateString()} at {new Date(investment.createdAt).toLocaleTimeString()}
-                            </p>
+                      {investments && investments.filter((inv: Investment) => inv.paymentStatus === 'completed').length > 0 ? 
+                        investments.filter((inv: Investment) => inv.paymentStatus === 'completed').slice(0, 5).map((investment: Investment) => (
+                        <div key={investment.id} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">
+                                {investment.investor?.firstName} {investment.investor?.lastName} 
+                                {!investment.investor && investment.investorName && investment.investorName}
+                                {!investment.investor && !investment.investorName && `Investor #${investment.investorId}`}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {investment.campaign?.companyName || investment.campaign?.title || `Campaign #${investment.campaignId}`}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(investment.createdAt).toLocaleDateString()} at {new Date(investment.createdAt).toLocaleTimeString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold">{formatCurrency(parseFloat(investment.amount))}</p>
-                            <Badge variant={
-                              investment.paymentStatus === 'completed' ? 'default' : 
-                              investment.paymentStatus === 'pending' || investment.paymentStatus === 'processing' ? 'secondary' : 'destructive'
-                            }>
-                              {investment.paymentStatus}
-                            </Badge>
+                            <p className="font-bold text-green-600">{formatCurrency(parseFloat(investment.amount))}</p>
+                            <Badge className="bg-green-100 text-green-800">completed</Badge>
                           </div>
                         </div>
-                      )) : <p className="text-gray-500 text-center py-4">No transactions found</p>}
+                      )) : (
+                        <div className="text-center py-8">
+                          <CheckCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                          <p className="text-gray-500">No completed transactions yet</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Withdrawal Requests</CardTitle>
+                    <CardTitle className="flex items-center">
+                      <ArrowUpCircle className="w-5 h-5 mr-2 text-orange-600" />
+                      Withdrawal Requests
+                    </CardTitle>
                     <CardDescription>Pending founder withdrawal requests</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <p className="text-gray-500 text-center py-4">No withdrawal requests found</p>
+                      {withdrawals && withdrawals.length > 0 ? 
+                        withdrawals.slice(0, 3).map((withdrawal: any) => (
+                        <div key={withdrawal.id} className="p-4 border rounded-lg">
+                          <div className="flex justify-between items-start">
+                            <div className="space-y-1">
+                              <div className="flex items-center space-x-2">
+                                <h3 className="font-medium">{withdrawal.founderName}</h3>
+                                <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                                  {withdrawal.status}
+                                </span>
+                              </div>
+                              <p className="text-lg font-bold text-green-600">{formatCurrency(withdrawal.amount)}</p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(withdrawal.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-green-500 text-green-600 hover:bg-green-50"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-500 text-red-600 hover:bg-red-50"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )) : (
+                        <div className="text-center py-8">
+                          <ArrowUpCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                          <p className="text-gray-500">No withdrawal requests found</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
+              {/* Pending Transactions */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Transaction Analytics</CardTitle>
-                  <CardDescription>Payment method breakdown and platform fees</CardDescription>
+                  <CardTitle className="flex items-center">
+                    <Clock className="w-5 h-5 mr-2 text-orange-600" />
+                    Pending Transactions
+                  </CardTitle>
+                  <CardDescription>Investment commitments awaiting payment</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="text-center p-4 border rounded-lg">
-                      <h3 className="font-medium text-lg">USD Payments</h3>
-                      <p className="text-2xl font-bold text-blue-600">
-                        {investments?.filter((inv: Investment) => inv.paymentStatus === 'completed').length || 0}
-                      </p>
-                      <p className="text-sm text-gray-500">Via Stripe</p>
-                    </div>
-                    <div className="text-center p-4 border rounded-lg">
-                      <h3 className="font-medium text-lg">NGN Payments</h3>
-                      <p className="text-2xl font-bold text-green-600">0</p>
-                      <p className="text-sm text-gray-500">Via Budpay</p>
-                    </div>
-                    <div className="text-center p-4 border rounded-lg">
-                      <h3 className="font-medium text-lg">Platform Fees</h3>
-                      <p className="text-2xl font-bold text-orange-600">
-                        {formatCurrency(0)}
-                      </p>
-                      <p className="text-sm text-gray-500">Total collected</p>
-                    </div>
+                  <div className="space-y-4">
+                    {investments?.filter((inv: Investment) => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').length > 0 ? 
+                      investments.filter(inv => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').map((investment: Investment) => (
+                      <div key={investment.id} className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <h3 className="font-medium text-orange-900">
+                                {investment.investor?.firstName} {investment.investor?.lastName} 
+                                {!investment.investor && investment.investorName && investment.investorName}
+                                {!investment.investor && !investment.investorName && `Investor #${investment.investorId}`}
+                              </h3>
+                              <span className="px-2 py-1 text-xs bg-orange-200 text-orange-800 rounded-full">
+                                {investment.status}
+                              </span>
+                            </div>
+                            <p className="text-sm text-orange-700">
+                              Campaign: {investment.campaign?.companyName || investment.campaign?.title || `Campaign #${investment.campaignId}`}
+                            </p>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <p className="text-xs text-orange-600 font-medium">Investment Amount</p>
+                                <p className="text-lg font-bold text-orange-900">{formatCurrency(parseFloat(investment.amount))}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-orange-600 font-medium">Payment Status</p>
+                                <Badge variant="secondary" className="bg-orange-200 text-orange-800 border-orange-300">
+                                  {investment.paymentStatus}
+                                </Badge>
+                              </div>
+                            </div>
+                            <p className="text-xs text-orange-600">
+                              Committed: {new Date(investment.createdAt).toLocaleDateString()} at {new Date(investment.createdAt).toLocaleTimeString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-orange-200">
+                          <div className="flex items-center space-x-2 text-xs text-orange-600">
+                            <Clock className="h-4 w-4" />
+                            <span>Pending for {Math.ceil((Date.now() - new Date(investment.createdAt).getTime()) / (1000 * 60 * 60 * 24))} days</span>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                              onClick={() => handleViewInvestmentDetails(investment)}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              View Details
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                              onClick={() => handleSendReminder(investment)}
+                            >
+                              <Mail className="w-4 h-4 mr-1" />
+                              Send Reminder
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="text-center py-12 text-gray-500">
+                        <Clock className="mx-auto h-16 w-16 text-gray-400 mb-6" />
+                        <p className="text-xl font-medium mb-2">No pending transactions</p>
+                        <p className="text-sm">All investments have been processed</p>
+                        <p className="text-xs text-gray-400 mt-2">When investors commit to investments, they will appear here until payment is completed</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

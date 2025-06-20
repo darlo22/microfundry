@@ -2468,6 +2468,463 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          {/* Platform Settings Tab */}
+          {activeTab === "settings" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Platform Settings</h2>
+                <p className="text-gray-600">Configure platform-wide settings and policies</p>
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-2">
+                {/* Platform Fees */}
+                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-t-lg">
+                    <CardTitle className="flex items-center gap-2">
+                      <DollarSign className="w-5 h-5" />
+                      Platform Fees
+                    </CardTitle>
+                    <CardDescription className="text-orange-100">
+                      Configure investment fees and processing charges
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 p-6">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-orange-200">
+                        <div>
+                          <label className="font-medium text-gray-800">Platform Fee Percentage</label>
+                          <p className="text-sm text-gray-600">Fee charged to investors</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="number"
+                            className="w-20 text-center"
+                            value={platformSettings?.platform_fee_percentage?.value || '0'}
+                            onChange={(e) => {
+                              const newSettings = { ...platformSettings };
+                              if (!newSettings.platform_fee_percentage) newSettings.platform_fee_percentage = {};
+                              newSettings.platform_fee_percentage.value = e.target.value;
+                              setPlatformSettings(newSettings);
+                            }}
+                            min="0"
+                            max="10"
+                            step="0.1"
+                          />
+                          <span className="text-gray-600">%</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-orange-200">
+                        <div>
+                          <label className="font-medium text-gray-800">Minimum Investment</label>
+                          <p className="text-sm text-gray-600">Minimum amount per investment</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-gray-600">$</span>
+                          <Input
+                            type="number"
+                            className="w-24 text-center"
+                            value={platformSettings?.minimum_investment?.value || '25'}
+                            onChange={(e) => {
+                              const newSettings = { ...platformSettings };
+                              if (!newSettings.minimum_investment) newSettings.minimum_investment = {};
+                              newSettings.minimum_investment.value = e.target.value;
+                              setPlatformSettings(newSettings);
+                            }}
+                            min="1"
+                            max="1000"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-orange-200">
+                        <div>
+                          <label className="font-medium text-gray-800">Maximum Campaign Goal</label>
+                          <p className="text-sm text-gray-600">Maximum funding goal per campaign</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-gray-600">$</span>
+                          <Input
+                            type="number"
+                            className="w-32 text-center"
+                            value={platformSettings?.maximum_investment?.value || '100000'}
+                            onChange={(e) => {
+                              const newSettings = { ...platformSettings };
+                              if (!newSettings.maximum_investment) newSettings.maximum_investment = {};
+                              newSettings.maximum_investment.value = e.target.value;
+                              setPlatformSettings(newSettings);
+                            }}
+                            min="1000"
+                            max="1000000"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      onClick={() => {
+                        setIsUpdatingSettings(true);
+                        Promise.all([
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'platform_fee_percentage',
+                            settingValue: platformSettings?.platform_fee_percentage?.value || '0'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'minimum_investment',
+                            settingValue: platformSettings?.minimum_investment?.value || '25'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'maximum_investment',
+                            settingValue: platformSettings?.maximum_investment?.value || '100000'
+                          })
+                        ]).then(() => {
+                          setIsUpdatingSettings(false);
+                        }).catch(() => {
+                          setIsUpdatingSettings(false);
+                        });
+                      }}
+                      disabled={isUpdatingSettings}
+                      className="w-full bg-orange-600 hover:bg-orange-700"
+                    >
+                      {isUpdatingSettings ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Save Fee Settings
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* KYC Management */}
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                  <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
+                    <CardTitle className="flex items-center gap-2">
+                      <Shield className="w-5 h-5" />
+                      KYC Management
+                    </CardTitle>
+                    <CardDescription className="text-blue-100">
+                      Know Your Customer verification requirements
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 p-6">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-blue-200">
+                        <div>
+                          <label className="font-medium text-gray-800">KYC Required for Investment</label>
+                          <p className="text-sm text-gray-600">Require identity verification</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Select
+                            value={platformSettings?.kyc_required_for_investment?.value || 'true'}
+                            onValueChange={(value) => {
+                              const newSettings = { ...platformSettings };
+                              if (!newSettings.kyc_required_for_investment) newSettings.kyc_required_for_investment = {};
+                              newSettings.kyc_required_for_investment.value = value;
+                              setPlatformSettings(newSettings);
+                            }}
+                          >
+                            <SelectTrigger className="w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="true">Yes</SelectItem>
+                              <SelectItem value="false">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-blue-200">
+                        <div>
+                          <label className="font-medium text-gray-800">KYC Threshold Amount</label>
+                          <p className="text-sm text-gray-600">Minimum investment requiring KYC</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-gray-600">$</span>
+                          <Input
+                            type="number"
+                            className="w-24 text-center"
+                            value={platformSettings?.kyc_required_amount_threshold?.value || '1000'}
+                            onChange={(e) => {
+                              const newSettings = { ...platformSettings };
+                              if (!newSettings.kyc_required_amount_threshold) newSettings.kyc_required_amount_threshold = {};
+                              newSettings.kyc_required_amount_threshold.value = e.target.value;
+                              setPlatformSettings(newSettings);
+                            }}
+                            min="0"
+                            max="10000"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-blue-200">
+                        <div>
+                          <label className="font-medium text-gray-800">Auto KYC Approval</label>
+                          <p className="text-sm text-gray-600">Automatically approve KYC submissions</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Select
+                            value={platformSettings?.kyc_auto_approval_enabled?.value || 'false'}
+                            onValueChange={(value) => {
+                              const newSettings = { ...platformSettings };
+                              if (!newSettings.kyc_auto_approval_enabled) newSettings.kyc_auto_approval_enabled = {};
+                              newSettings.kyc_auto_approval_enabled.value = value;
+                              setPlatformSettings(newSettings);
+                            }}
+                          >
+                            <SelectTrigger className="w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="true">Yes</SelectItem>
+                              <SelectItem value="false">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      onClick={() => {
+                        setIsUpdatingSettings(true);
+                        Promise.all([
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'kyc_required_for_investment',
+                            settingValue: platformSettings?.kyc_required_for_investment?.value || 'true'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'kyc_required_amount_threshold',
+                            settingValue: platformSettings?.kyc_required_amount_threshold?.value || '1000'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'kyc_auto_approval_enabled',
+                            settingValue: platformSettings?.kyc_auto_approval_enabled?.value || 'false'
+                          })
+                        ]).then(() => {
+                          setIsUpdatingSettings(false);
+                        }).catch(() => {
+                          setIsUpdatingSettings(false);
+                        });
+                      }}
+                      disabled={isUpdatingSettings}
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isUpdatingSettings ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Save KYC Settings
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* General Platform Settings */}
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                  <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      General Settings
+                    </CardTitle>
+                    <CardDescription className="text-green-100">
+                      Platform maintenance and registration controls
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 p-6">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-green-200">
+                        <div>
+                          <label className="font-medium text-gray-800">New Registrations</label>
+                          <p className="text-sm text-gray-600">Allow new user sign-ups</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Select
+                            value={platformSettings?.new_registrations_enabled?.value || 'true'}
+                            onValueChange={(value) => {
+                              const newSettings = { ...platformSettings };
+                              if (!newSettings.new_registrations_enabled) newSettings.new_registrations_enabled = {};
+                              newSettings.new_registrations_enabled.value = value;
+                              setPlatformSettings(newSettings);
+                            }}
+                          >
+                            <SelectTrigger className="w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="true">Enabled</SelectItem>
+                              <SelectItem value="false">Disabled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-green-200">
+                        <div>
+                          <label className="font-medium text-gray-800">Email Verification</label>
+                          <p className="text-sm text-gray-600">Require email verification for new users</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Select
+                            value={platformSettings?.email_verification_required?.value || 'true'}
+                            onValueChange={(value) => {
+                              const newSettings = { ...platformSettings };
+                              if (!newSettings.email_verification_required) newSettings.email_verification_required = {};
+                              newSettings.email_verification_required.value = value;
+                              setPlatformSettings(newSettings);
+                            }}
+                          >
+                            <SelectTrigger className="w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="true">Required</SelectItem>
+                              <SelectItem value="false">Optional</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-green-200">
+                        <div>
+                          <label className="font-medium text-gray-800">Maintenance Mode</label>
+                          <p className="text-sm text-gray-600">Temporarily disable platform access</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Select
+                            value={platformSettings?.platform_maintenance_mode?.value || 'false'}
+                            onValueChange={(value) => {
+                              const newSettings = { ...platformSettings };
+                              if (!newSettings.platform_maintenance_mode) newSettings.platform_maintenance_mode = {};
+                              newSettings.platform_maintenance_mode.value = value;
+                              setPlatformSettings(newSettings);
+                            }}
+                          >
+                            <SelectTrigger className="w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="true">On</SelectItem>
+                              <SelectItem value="false">Off</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      onClick={() => {
+                        setIsUpdatingSettings(true);
+                        Promise.all([
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'new_registrations_enabled',
+                            settingValue: platformSettings?.new_registrations_enabled?.value || 'true'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'email_verification_required',
+                            settingValue: platformSettings?.email_verification_required?.value || 'true'
+                          }),
+                          updatePlatformSettingMutation.mutateAsync({
+                            settingKey: 'platform_maintenance_mode',
+                            settingValue: platformSettings?.platform_maintenance_mode?.value || 'false'
+                          })
+                        ]).then(() => {
+                          setIsUpdatingSettings(false);
+                        }).catch(() => {
+                          setIsUpdatingSettings(false);
+                        });
+                      }}
+                      disabled={isUpdatingSettings}
+                      className="w-full bg-green-600 hover:bg-green-700"
+                    >
+                      {isUpdatingSettings ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Save General Settings
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Settings Summary */}
+                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                  <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-t-lg">
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="w-5 h-5" />
+                      Settings Summary
+                    </CardTitle>
+                    <CardDescription className="text-purple-100">
+                      Current platform configuration overview
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 p-6">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">Platform Fee:</span>
+                        <span className="font-medium">{platformSettings?.platform_fee_percentage?.value || '0'}%</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">Investment Range:</span>
+                        <span className="font-medium">
+                          ${platformSettings?.minimum_investment?.value || '25'} - ${platformSettings?.maximum_investment?.value || '100,000'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">KYC Required:</span>
+                        <Badge variant={platformSettings?.kyc_required_for_investment?.value === 'true' ? "default" : "secondary"}>
+                          {platformSettings?.kyc_required_for_investment?.value === 'true' ? 'Yes' : 'No'}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">KYC Threshold:</span>
+                        <span className="font-medium">${platformSettings?.kyc_required_amount_threshold?.value || '1,000'}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">New Registrations:</span>
+                        <Badge variant={platformSettings?.new_registrations_enabled?.value === 'true' ? "default" : "secondary"}>
+                          {platformSettings?.new_registrations_enabled?.value === 'true' ? 'Enabled' : 'Disabled'}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">Email Verification:</span>
+                        <Badge variant={platformSettings?.email_verification_required?.value === 'true' ? "default" : "secondary"}>
+                          {platformSettings?.email_verification_required?.value === 'true' ? 'Required' : 'Optional'}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">Maintenance Mode:</span>
+                        <Badge variant={platformSettings?.platform_maintenance_mode?.value === 'true' ? "destructive" : "default"}>
+                          {platformSettings?.platform_maintenance_mode?.value === 'true' ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4 border-t border-purple-200">
+                      <p className="text-xs text-gray-500 text-center">
+                        Last updated: {new Date().toLocaleString()}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
 
         </main>
       </div>

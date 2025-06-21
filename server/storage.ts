@@ -491,12 +491,12 @@ export class DatabaseStorage implements IStorage {
       : [];
 
     const totalRaised = campaignInvestments
-      .filter(inv => inv.status === 'completed' || inv.status === 'committed' || inv.status === 'paid')
+      .filter(inv => inv.paymentStatus === 'completed')
       .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
 
     const activeCampaigns = founderCampaigns.filter(c => c.status === 'active').length;
     const validInvestments = campaignInvestments.filter(inv => 
-      inv.status === 'completed' || inv.status === 'committed' || inv.status === 'paid'
+      inv.paymentStatus === 'completed'
     );
     const totalInvestors = new Set(validInvestments.map(inv => inv.investorId)).size;
     
@@ -885,7 +885,7 @@ export class DatabaseStorage implements IStorage {
         const weekInvestments = campaignInvestments.filter(inv => {
           const investmentDate = new Date(inv.createdAt || 0);
           return investmentDate >= weekStart && investmentDate < weekEnd &&
-                 (inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed');
+                 inv.paymentStatus === 'completed';
         });
 
         const totalAmount = weekInvestments.reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
@@ -927,7 +927,7 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`,
-            sql`${investments.status} IN ('committed', 'paid', 'completed')`
+            eq(investments.paymentStatus, 'completed')
           )
         );
 
@@ -988,7 +988,7 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`,
-            sql`${investments.status} IN ('committed', 'paid', 'completed')`
+            eq(investments.paymentStatus, 'completed')
           )
         );
 
@@ -1052,7 +1052,7 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`,
-            sql`${investments.status} IN ('committed', 'paid', 'completed')`
+            eq(investments.paymentStatus, 'completed')
           )
         );
 

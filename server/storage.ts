@@ -475,11 +475,16 @@ export class DatabaseStorage implements IStorage {
     totalInvestors: number;
     conversionRate: number;
   }> {
+    console.log(`DEBUG: getFounderStats called with founderId: ${founderId}`);
+    
     // Get founder's campaigns
     const founderCampaigns = await db
       .select()
       .from(campaigns)
       .where(eq(campaigns.founderId, founderId));
+
+    console.log(`DEBUG: Found ${founderCampaigns.length} campaigns for founder ${founderId}`);
+    console.log(`DEBUG: Campaign IDs:`, founderCampaigns.map(c => c.id));
 
     // Get investments for these campaigns
     const campaignIds = founderCampaigns.map(c => c.id);
@@ -490,9 +495,22 @@ export class DatabaseStorage implements IStorage {
           .where(sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`)
       : [];
 
-    const totalRaised = campaignInvestments
-      .filter(inv => inv.paymentStatus === 'completed')
+    console.log(`DEBUG: Found ${campaignInvestments.length} total investments`);
+    console.log(`DEBUG: Investment details:`, campaignInvestments.map(inv => ({
+      id: inv.id,
+      campaignId: inv.campaignId,
+      amount: inv.amount,
+      paymentStatus: inv.paymentStatus,
+      status: inv.status
+    })));
+
+    const completedInvestments = campaignInvestments.filter(inv => inv.paymentStatus === 'completed');
+    console.log(`DEBUG: Found ${completedInvestments.length} completed investments`);
+
+    const totalRaised = completedInvestments
       .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+
+    console.log(`DEBUG: Total raised calculated: ${totalRaised}`);
 
     const activeCampaigns = founderCampaigns.filter(c => c.status === 'active').length;
     const validInvestments = campaignInvestments.filter(inv => 
@@ -505,12 +523,15 @@ export class DatabaseStorage implements IStorage {
       ? Math.round((validInvestments.length / founderCampaigns.length) * 100) 
       : 0;
 
-    return {
+    const result = {
       totalRaised: totalRaised.toString(),
       activeCampaigns,
       totalInvestors,
       conversionRate: Math.min(conversionRate, 100), // Cap at 100%
     };
+
+    console.log(`DEBUG: Final result:`, result);
+    return result;
   }
 
   async getInvestorStats(investorId: string): Promise<{

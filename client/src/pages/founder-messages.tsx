@@ -222,21 +222,21 @@ export default function FounderMessages() {
           <TabsList className="bg-slate-800 border-slate-700 p-1 rounded-xl">
             <TabsTrigger 
               value="comments" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-500 data-[state=active]:text-white text-slate-300 px-6 py-3 rounded-lg font-medium"
+              className="data-[state=active]:bg-white data-[state=active]:text-black text-slate-300 px-6 py-3 rounded-lg font-medium"
             >
               <MessageSquare className="h-4 w-4 mr-2" />
               Campaign Comments ({comments.length})
             </TabsTrigger>
             <TabsTrigger 
               value="questions" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-500 data-[state=active]:text-white text-slate-300 px-6 py-3 rounded-lg font-medium"
+              className="data-[state=active]:bg-white data-[state=active]:text-black text-slate-300 px-6 py-3 rounded-lg font-medium"
             >
               <HelpCircle className="h-4 w-4 mr-2" />
               Q&A ({questions.length})
             </TabsTrigger>
             <TabsTrigger 
               value="notifications" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-500 data-[state=active]:text-white text-slate-300 px-6 py-3 rounded-lg font-medium"
+              className="data-[state=active]:bg-white data-[state=active]:text-black text-slate-300 px-6 py-3 rounded-lg font-medium"
             >
               <Bell className="h-4 w-4 mr-2" />
               Admin Notifications ({notifications.filter(n => !n.isRead).length})

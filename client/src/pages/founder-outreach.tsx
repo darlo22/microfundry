@@ -421,7 +421,7 @@ Founder, {companyName}`
 
     setEmailSubject(subject);
     setEmailMessage(message);
-    setSelectedCampaignId(campaign.id);
+    setSelectedCampaignId(campaign.id.toString());
     setCurrentTemplateIndex(templateIndex);
     
     toast({

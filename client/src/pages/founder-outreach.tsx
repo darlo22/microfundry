@@ -275,29 +275,29 @@ export default function FounderOutreach() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
+    <div className="min-h-screen bg-fundry-navy">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="bg-gradient-to-r from-fundry-orange to-fundry-navy border-b border-orange-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <Link href="/founder-dashboard">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Dashboard
                 </Button>
               </Link>
-              <h1 className="text-xl font-semibold text-gray-900">Investor Outreach</h1>
+              <h1 className="text-xl font-semibold text-white">Investor Outreach</h1>
             </div>
             <div className="flex items-center space-x-3">
               {rateLimit && (
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-orange-100">
                   {rateLimit.remaining} of {rateLimit.dailyLimit} emails remaining today
                 </div>
               )}
               <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="text-white border-white hover:bg-white/20">
                     <Settings className="h-4 w-4 mr-2" />
                     Email Settings
                   </Button>
@@ -353,10 +353,10 @@ export default function FounderOutreach() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="compose" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="compose">Compose Campaign</TabsTrigger>
-            <TabsTrigger value="directory">Investor Directory</TabsTrigger>
-            <TabsTrigger value="analytics">Campaign Analytics</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-white/10 backdrop-blur-sm border-orange-200">
+            <TabsTrigger value="compose" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Compose Campaign</TabsTrigger>
+            <TabsTrigger value="directory" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Investor Directory</TabsTrigger>
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Campaign Analytics</TabsTrigger>
           </TabsList>
 
           {/* Compose Campaign Tab */}
@@ -364,14 +364,14 @@ export default function FounderOutreach() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Investor Selection */}
               <div className="lg:col-span-2 space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Users className="h-5 w-5 mr-2" />
+                <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                    <CardTitle className="flex items-center text-white">
+                      <Users className="h-5 w-5 mr-2 text-fundry-orange" />
                       Select Investors ({selectedInvestors.length}/5)
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 text-white">
                     <div className="flex items-center space-x-4">
                       <div className="flex-1">
                         <Input
@@ -393,14 +393,13 @@ export default function FounderOutreach() {
                     </div>
 
                     {selectedInvestors.length > 0 && (
-                      <div className="border rounded-lg p-4 bg-blue-50">
-                        <h4 className="font-medium text-sm mb-2">Selected Recipients:</h4>
+                      <div className="border border-orange-300 rounded-lg p-4 bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                        <h4 className="font-medium text-sm mb-2 text-orange-100">Selected Recipients:</h4>
                         <div className="flex flex-wrap gap-2">
                           {selectedInvestors.map((investor) => (
                             <Badge
                               key={investor.email}
-                              variant="secondary"
-                              className="cursor-pointer"
+                              className="cursor-pointer bg-fundry-orange text-white hover:bg-orange-600"
                               onClick={() => handleInvestorSelect(investor)}
                             >
                               {investor.name} ×
@@ -417,39 +416,39 @@ export default function FounderOutreach() {
                         filteredInvestors.map((investor: InvestorDirectory) => (
                           <div
                             key={investor.email}
-                            className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                            className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 ${
                               selectedInvestors.find(i => i.email === investor.email)
-                                ? 'bg-blue-100 border-blue-300'
-                                : 'hover:bg-gray-50'
+                                ? 'bg-gradient-to-r from-fundry-orange/30 to-fundry-navy/30 border-fundry-orange shadow-md'
+                                : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-fundry-orange/50'
                             }`}
                             onClick={() => handleInvestorSelect(investor)}
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center space-x-2">
-                                  <h4 className="font-medium text-gray-900">{investor.name}</h4>
-                                  <Badge variant={investor.source === 'directory' ? 'default' : 'secondary'}>
+                                  <h4 className="font-medium text-white">{investor.name}</h4>
+                                  <Badge className={investor.source === 'directory' ? 'bg-fundry-orange text-white' : 'bg-fundry-navy text-white'}>
                                     {investor.source === 'directory' ? 'Directory' : 'Platform'}
                                   </Badge>
                                 </div>
-                                <p className="text-sm text-gray-600">{investor.email}</p>
+                                <p className="text-sm text-orange-100">{investor.email}</p>
                                 {investor.company && (
-                                  <p className="text-sm text-gray-500 flex items-center mt-1">
-                                    <Building className="h-3 w-3 mr-1" />
+                                  <p className="text-sm text-orange-200 flex items-center mt-1">
+                                    <Building className="h-3 w-3 mr-1 text-fundry-orange" />
                                     {investor.company}
                                     {investor.title && ` • ${investor.title}`}
                                   </p>
                                 )}
                                 {investor.location && (
-                                  <p className="text-sm text-gray-500 flex items-center mt-1">
-                                    <MapPin className="h-3 w-3 mr-1" />
+                                  <p className="text-sm text-orange-200 flex items-center mt-1">
+                                    <MapPin className="h-3 w-3 mr-1 text-fundry-orange" />
                                     {investor.location}
                                   </p>
                                 )}
                               </div>
                               <Checkbox
                                 checked={selectedInvestors.some(i => i.email === investor.email)}
-                                readOnly
+                                className="data-[state=checked]:bg-fundry-orange data-[state=checked]:border-fundry-orange"
                               />
                             </div>
                           </div>
@@ -460,14 +459,14 @@ export default function FounderOutreach() {
                 </Card>
 
                 {/* Email Composition */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Mail className="h-5 w-5 mr-2" />
+                <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                    <CardTitle className="flex items-center text-white">
+                      <Mail className="h-5 w-5 mr-2 text-fundry-orange" />
                       Compose Email
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 text-white">
                     <div>
                       <Label htmlFor="subject">Subject Line</Label>
                       <Input
@@ -510,19 +509,19 @@ export default function FounderOutreach() {
 
               {/* Templates & Rate Limit */}
               <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Daily Usage</CardTitle>
+                <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                    <CardTitle className="text-white">Daily Usage</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="text-white">
                     {rateLimit && (
                       <div className="space-y-3">
-                        <Progress value={(rateLimit.used / rateLimit.dailyLimit) * 100} />
+                        <Progress value={(rateLimit.used / rateLimit.dailyLimit) * 100} className="bg-white/20" />
                         <div className="flex justify-between text-sm">
                           <span>Used: {rateLimit.used}</span>
                           <span>Limit: {rateLimit.dailyLimit}</span>
                         </div>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-orange-200">
                           Daily limit resets at midnight
                         </p>
                       </div>
@@ -530,21 +529,21 @@ export default function FounderOutreach() {
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Email Templates</CardTitle>
+                <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                    <CardTitle className="text-white">Email Templates</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="text-white">
                     <div className="space-y-3">
                       {templates.map((template: EmailTemplate) => (
                         <div
                           key={template.id}
-                          className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50"
+                          className="border border-white/20 rounded-lg p-3 cursor-pointer hover:bg-white/20 hover:border-fundry-orange/50 transition-all duration-300"
                           onClick={() => applyTemplate(template)}
                         >
-                          <h4 className="font-medium text-sm">{template.name}</h4>
-                          <p className="text-xs text-gray-500">{template.category}</p>
-                          <p className="text-xs text-gray-600 mt-1 truncate">{template.subject}</p>
+                          <h4 className="font-medium text-sm text-white">{template.name}</h4>
+                          <p className="text-xs text-orange-200">{template.category}</p>
+                          <p className="text-xs text-orange-100 mt-1 truncate">{template.subject}</p>
                         </div>
                       ))}
                     </div>

@@ -6156,10 +6156,12 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         const platformInvestors = await db
           .select({
             id: users.id,
-            name: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+            firstName: users.firstName,
+            lastName: users.lastName,
             email: users.email,
             company: users.company,
-            location: sql<string>`CONCAT(COALESCE(${users.city}, ''), CASE WHEN ${users.city} IS NOT NULL AND ${users.country} IS NOT NULL THEN ', ' ELSE '' END, COALESCE(${users.country}, ''))`,
+            city: users.city,
+            country: users.country,
             bio: users.bio,
           })
           .from(users)
@@ -6168,6 +6170,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
         investors.push(...platformInvestors.map(inv => ({
           ...inv,
+          name: `${inv.firstName || ''} ${inv.lastName || ''}`.trim() || inv.email,
+          location: [inv.city, inv.country].filter(Boolean).join(', '),
           source: 'platform'
         })));
       }

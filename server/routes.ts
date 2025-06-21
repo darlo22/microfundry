@@ -6119,6 +6119,57 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Test email delivery endpoint
+  app.post('/api/test-email-delivery', async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { testEmail } = req.body;
+      if (!testEmail) {
+        return res.status(400).json({ message: 'Test email address required' });
+      }
+
+      console.log('=== EMAIL DELIVERY TEST STARTING ===');
+      console.log('Test email address:', testEmail);
+
+      const emailService = new (await import('./services/email')).EmailService();
+      
+      const testResult = await emailService.sendEmail({
+        to: testEmail,
+        subject: 'Fundry Email Delivery Test',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #f97316;">Email Delivery Test</h2>
+            <p>This is a test email to verify Fundry's email delivery system is working correctly.</p>
+            <p>Test timestamp: ${new Date().toISOString()}</p>
+            <p>If you received this email, the delivery system is functioning properly.</p>
+          </div>
+        `,
+        from: 'Fundry Support <support@microfundry.com>',
+        replyTo: req.user.email
+      });
+
+      console.log('=== EMAIL DELIVERY TEST RESULT ===');
+      console.log('Success:', testResult);
+
+      res.json({ 
+        success: testResult,
+        message: testResult ? 'Test email sent successfully' : 'Test email failed to send',
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Email delivery test error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Email delivery test failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Legacy POST endpoint for email opens
   app.post('/api/email-tracking/open/:trackingId', async (req, res) => {
     try {
@@ -6670,7 +6721,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           try {
             const emailSent = await emailService.sendEmail({
               to: email.recipientEmail,
-              from: `${emailSettings[0].displayName} <${emailSettings[0].verifiedEmail.split('@')[0]}@microfundry.com>`,
+              from: `${emailSettings[0].displayName} <support@microfundry.com>`,
               replyTo: emailSettings[0].verifiedEmail,
               subject: email.personalizedSubject,
               html: `

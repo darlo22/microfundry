@@ -53,12 +53,25 @@ export class EmailService {
         ]
       };
 
+      console.log('Sending email with payload:', {
+        from: emailData.from,
+        to: emailData.to,
+        subject: emailData.subject,
+        hasHtml: !!emailData.html,
+        replyTo: emailData.reply_to
+      });
+
       const result = await resend.emails.send(emailData);
-      console.log('Email sent response:', result);
+      
+      console.log('Full Resend API Response:', JSON.stringify(result, null, 2));
       
       // Check if Resend returned an error
       if (result.error) {
-        console.error('Resend API error:', result.error);
+        console.error('RESEND ERROR DETAILS:', {
+          name: result.error.name,
+          message: result.error.message,
+          details: JSON.stringify(result.error, null, 2)
+        });
         return false;
       }
       

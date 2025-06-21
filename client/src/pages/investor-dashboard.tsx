@@ -18,13 +18,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle, Eye, EyeOff, Smartphone, Tablet, Clock, ExternalLink, Trash2, Target } from "lucide-react";
+import { Search, Download, Settings, Wallet, PieChart, TrendingUp, FileText, User, Filter, Edit, Phone, MapPin, Calendar, Briefcase, DollarSign, Shield, Key, Monitor, CreditCard, Plus, Bell, AlertTriangle, Eye, EyeOff, Smartphone, Tablet, Clock, ExternalLink, Trash2, Target, Check } from "lucide-react";
 import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 import TwoFactorSetupModal from "@/components/modals/two-factor-setup-modal";
@@ -204,6 +204,16 @@ export default function InvestorDashboard() {
       setSelectedCountry(user.country || "");
     }
   }, [user, form]);
+
+  // Update edit investment form when modal opens
+  useEffect(() => {
+    if (editInvestmentModal.isOpen && editInvestmentModal.investment) {
+      editInvestmentForm.reset({
+        amount: parseFloat(editInvestmentModal.investment.amount),
+        notes: editInvestmentModal.investment.notes || "",
+      });
+    }
+  }, [editInvestmentModal.isOpen, editInvestmentModal.investment, editInvestmentForm]);
 
   // Edit Profile Mutation
   const editProfileMutation = useMutation({
@@ -463,6 +473,8 @@ export default function InvestorDashboard() {
   const onSubmit = (data: EditProfileFormData) => {
     editProfileMutation.mutate(data);
   };
+
+
 
   const handlePayNow = (investment: InvestmentWithCampaign) => {
     setSelectedInvestmentForPayment(investment);
@@ -2088,40 +2100,130 @@ This SAFE Agreement has been digitally signed and executed.
         </Elements>
       )}
 
-      {/* Edit Investment Modal */}
+      {/* Comprehensive Edit Investment Modal */}
       <Dialog open={editInvestmentModal.isOpen} onOpenChange={(open) => !open && setEditInvestmentModal({ isOpen: false, investment: null, amount: 0 })}>
-        <DialogContent className="bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border border-orange-200 shadow-2xl rounded-2xl">
+        <DialogContent className="bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border border-orange-200 shadow-2xl rounded-2xl max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-gray-900">Edit Investment</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-blue-600 rounded-full flex items-center justify-center">
+                <DollarSign className="w-4 h-4 text-white" />
+              </div>
+              Edit Investment
+            </DialogTitle>
+            <DialogDescription className="text-gray-600">
+              Update your investment amount and add notes for your records
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Investment Amount</label>
-              <Input
-                type="number"
-                value={editInvestmentModal.amount}
-                onChange={(e) => setEditInvestmentModal(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
-                min={25}
-                step={1}
+          
+          <Form {...editInvestmentForm}>
+            <form onSubmit={editInvestmentForm.handleSubmit(handleEditInvestmentSubmit)} className="space-y-6">
+              {/* Investment Details Card */}
+              <div className="bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg p-4 border border-orange-200">
+                <h3 className="font-semibold text-gray-900 mb-2">Investment Details</h3>
+                {editInvestmentModal.investment && (
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Campaign:</span>
+                      <span className="font-medium text-gray-900">{editInvestmentModal.investment.campaign?.companyName || editInvestmentModal.investment.campaign?.title}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Current Amount:</span>
+                      <span className="font-medium text-gray-900">${parseFloat(editInvestmentModal.investment.amount).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Status:</span>
+                      <span className="font-medium capitalize text-orange-600">{editInvestmentModal.investment.status}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Investment Amount Field */}
+              <FormField
+                control={editInvestmentForm.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-900 font-medium">Investment Amount</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+                        <Input
+                          {...field}
+                          type="number"
+                          min={25}
+                          max={100000}
+                          step={1}
+                          placeholder="Enter amount"
+                          className="pl-10 border-orange-200 focus:border-orange-500 focus:ring-orange-500"
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDescription className="text-xs text-gray-500">
+                      Minimum: $25 • Maximum: $100,000
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => setEditInvestmentModal({ isOpen: false, investment: null, amount: 0 })}
-                variant="outline"
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => editInvestmentModal.investment && handleEditInvestment(editInvestmentModal.investment.id, editInvestmentModal.amount)}
-                className="flex-1 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white"
-                disabled={editInvestmentMutation.isPending}
-              >
-                {editInvestmentMutation.isPending ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-          </div>
+
+              {/* Investment Notes Field */}
+              <FormField
+                control={editInvestmentForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-900 font-medium">
+                      Investment Notes 
+                      <span className="text-gray-500 font-normal">(Optional)</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="Add any notes about this investment (e.g., reasons for investing, expectations, etc.)"
+                        className="border-orange-200 focus:border-orange-500 focus:ring-orange-500 min-h-[80px] resize-none"
+                        maxLength={500}
+                      />
+                    </FormControl>
+                    <FormDescription className="text-xs text-gray-500">
+                      {(field.value?.length || 0)}/500 characters
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-orange-200">
+                <Button
+                  type="button"
+                  onClick={() => setEditInvestmentModal({ isOpen: false, investment: null, amount: 0 })}
+                  variant="outline"
+                  className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={editInvestmentMutation.isPending}
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white"
+                >
+                  {editInvestmentMutation.isPending ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Saving...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Check className="w-4 h-4" />
+                      Save Changes
+                    </div>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 

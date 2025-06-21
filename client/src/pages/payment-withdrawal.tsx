@@ -491,7 +491,7 @@ export default function PaymentWithdrawal() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
+    <div className="min-h-screen bg-fundry-navy">
       {/* Modern Header */}
       <div className="bg-gradient-to-r from-white via-orange-50/50 to-blue-50/30 shadow-lg border-b border-orange-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

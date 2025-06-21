@@ -521,7 +521,12 @@ export default function InvestorDashboard() {
 
 
   const handlePayNow = (investment: InvestmentWithCampaign) => {
-    setSelectedInvestmentForPayment(investment);
+    // Ensure amount is properly formatted as string
+    const formattedInvestment = {
+      ...investment,
+      amount: String(investment.amount), // Convert to string to ensure proper display
+    };
+    setSelectedInvestmentForPayment(formattedInvestment);
     setIsPaymentModalOpen(true);
   };
 

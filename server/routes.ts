@@ -2154,17 +2154,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/campaign-updates/:id/replies', async (req, res) => {
+  // Get replies for a specific update
+  app.get('/api/campaign-updates/:updateId/replies', async (req, res) => {
     try {
-      const updateId = parseInt(req.params.id);
+      const updateId = parseInt(req.params.updateId);
       
-      if (!global.updateReplies) global.updateReplies = {};
-      const replies = global.updateReplies[updateId] || [];
+      const replies = await db.select({
+        id: updateReplies.id,
+        content: updateReplies.content,
+        createdAt: updateReplies.createdAt,
+        user: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email
+        }
+      })
+      .from(updateReplies)
+      .leftJoin(users, eq(updateReplies.userId, users.id))
+      .where(eq(updateReplies.updateId, updateId))
+      .orderBy(desc(updateReplies.createdAt));
       
       res.json(replies);
     } catch (error) {
       console.error('Error fetching replies:', error);
       res.status(500).json({ message: 'Failed to fetch replies' });
+    }
+  });
+
+  // Create a reply to an update (investors only)
+  app.post('/api/campaign-updates/:updateId/replies', requireAuth, async (req: any, res) => {
+    try {
+      const updateId = parseInt(req.params.updateId);
+      const userId = req.user.id;
+      const { content } = req.body;
+
+      if (!content || content.trim().length === 0) {
+        return res.status(400).json({ message: 'Reply content is required' });
+      }
+
+      // Check if user is an investor and has invested in this campaign
+      const update = await db.select({
+        id: campaignUpdates.id,
+        campaignId: campaignUpdates.campaignId,
+        founderId: campaignUpdates.founderId
+      })
+      .from(campaignUpdates)
+      .where(eq(campaignUpdates.id, updateId))
+      .limit(1);
+
+      if (!update.length) {
+        return res.status(404).json({ message: 'Update not found' });
+      }
+
+      const campaignId = update[0].campaignId;
+      const founderId = update[0].founderId;
+
+      // Check if user has invested in this campaign
+      const userInvestment = await db.select()
+        .from(investments)
+        .where(and(
+          eq(investments.campaignId, campaignId),
+          eq(investments.investorId, userId),
+          inArray(investments.paymentStatus, ['completed'])
+        ))
+        .limit(1);
+
+      if (!userInvestment.length) {
+        return res.status(403).json({ message: 'Only investors who have invested in this campaign can reply to updates' });
+      }
+
+      // Create the reply
+      const [reply] = await db.insert(updateReplies).values({
+        updateId,
+        userId,
+        content: content.trim()
+      }).returning();
+
+      // Get user info for response
+      const user = await db.select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+      // Send notification to founder
+      const campaign = await db.select({
+        title: campaigns.title,
+        companyName: campaigns.companyName
+      })
+      .from(campaigns)
+      .where(eq(campaigns.id, campaignId))
+      .limit(1);
+
+      const campaignName = campaign[0]?.companyName || campaign[0]?.title || 'Your Campaign';
+      const investorName = `${user[0]?.firstName} ${user[0]?.lastName}`.trim();
+
+      await db.insert(notifications).values({
+        userId: founderId,
+        type: 'update_reply',
+        title: 'New Reply to Campaign Update',
+        message: `${investorName} replied to your campaign update for ${campaignName}`,
+        data: JSON.stringify({
+          updateId,
+          campaignId,
+          replyId: reply.id,
+          investorId: userId,
+          investorName
+        }),
+        read: false,
+        createdAt: new Date()
+      });
+
+      const replyWithUser = {
+        ...reply,
+        user: user[0]
+      };
+
+      res.json(replyWithUser);
+    } catch (error) {
+      console.error('Error creating reply:', error);
+      res.status(500).json({ message: 'Failed to create reply' });
     }
   });
 

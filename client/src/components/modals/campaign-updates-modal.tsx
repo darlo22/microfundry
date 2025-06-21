@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { CalendarIcon, User, FileText, TrendingUp, DollarSign, Mail, FileIcon } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { CalendarIcon, User, FileText, TrendingUp, DollarSign, Mail, FileIcon, MessageCircle, Send } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/hooks/use-user";
 
 interface CampaignUpdatesModalProps {
   isOpen: boolean;
@@ -166,6 +170,9 @@ export function CampaignUpdatesModal({ isOpen, onClose, campaignId, campaignTitl
                         </div>
                       </div>
                     )}
+
+                    {/* Replies Section */}
+                    <UpdateReplies updateId={update.id} />
                   </CardContent>
                 </Card>
               );

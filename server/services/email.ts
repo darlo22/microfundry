@@ -78,9 +78,11 @@ export class EmailService {
       // Check if we have a valid response with data
       if (!result.data || !result.data.id) {
         console.error('Invalid Resend response - no email ID returned');
+        console.error('Full result object:', JSON.stringify(result, null, 2));
         return false;
       }
       
+      console.log('✅ EMAIL SENT SUCCESSFULLY - ID:', result.data.id);
       return true;
     } catch (error) {
       console.error('Failed to send email:', error);

@@ -234,6 +234,11 @@ export default function FounderOutreach() {
     }
   }, [currentEmailSettings]);
 
+  // Reset pagination when search term or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, sourceFilter]);
+
   const handleInvestorSelect = (investor: InvestorDirectory) => {
     if (selectedInvestors.find(i => i.email === investor.email)) {
       setSelectedInvestors(prev => prev.filter(i => i.email !== investor.email));
@@ -682,7 +687,7 @@ Founder, {companyName}`
                       {loadingInvestors ? (
                         <div className="text-center py-8">Loading investors...</div>
                       ) : (
-                        filteredInvestors.map((investor: InvestorDirectory) => (
+                        investors.map((investor: InvestorDirectory) => (
                           <div
                             key={investor.email}
                             className={`border rounded-lg p-4 cursor-pointer transition-all duration-300 ${
@@ -724,6 +729,40 @@ Founder, {companyName}`
                         ))
                       )}
                     </div>
+                    
+                    {/* Pagination Controls */}
+                    {!loadingInvestors && investors.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-white/20">
+                        <div className="flex items-center justify-between text-sm text-orange-100">
+                          <div>
+                            Showing {Math.min((pagination.currentPage - 1) * 30 + 1, pagination.totalCount)} - {Math.min(pagination.currentPage * 30, pagination.totalCount)} of {pagination.totalCount.toLocaleString()} investors
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                              disabled={!pagination.hasPrev || loadingInvestors}
+                              className="bg-white/10 border-white/20 text-white hover:bg-white/20 disabled:opacity-50"
+                            >
+                              Previous
+                            </Button>
+                            <span className="px-3 py-1 text-white">
+                              Page {pagination.currentPage} of {pagination.totalPages}
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
+                              disabled={!pagination.hasNext || loadingInvestors}
+                              className="bg-white/10 border-white/20 text-white hover:bg-white/20 disabled:opacity-50"
+                            >
+                              Next
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
                 )}

@@ -29,7 +29,9 @@ import {
   campaignComments,
   campaignQuestions,
   adminMessages,
-  kycVerifications
+  kycVerifications,
+  withdrawalRequests,
+  campaignUpdates
 } from "@shared/schema";
 import Stripe from "stripe";
 import fs from "fs";
@@ -877,12 +879,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Insufficient funds for withdrawal" });
       }
 
-      // In a real implementation, this would create a withdrawal request record
-      // For now, we'll simulate the process
+      // Create withdrawal request record in database
+      const [withdrawalRequest] = await db.insert(withdrawalRequests).values({
+        founderId: userId,
+        amount: amount.toString(),
+        status: "pending",
+        bankName: bankName || "Not specified",
+        bankAccount,
+        routingNumber,
+        swiftCode,
+        iban,
+        sortCode,
+        bsb,
+        transitNumber,
+        bankAddress,
+        accountType,
+        country,
+        memo
+      }).returning();
+
+      console.log(`DEBUG: Created withdrawal request:`, withdrawalRequest);
       
       res.json({ 
         message: "Withdrawal request submitted successfully",
-        withdrawalId: Date.now().toString(),
+        withdrawalId: withdrawalRequest.id.toString(),
         amount,
         status: "pending"
       });

@@ -382,6 +382,40 @@ export const otpCodesRelations = relations(otpCodes, ({ one }) => ({
 export type OtpCode = typeof otpCodes.$inferSelect;
 export type InsertOtpCode = typeof otpCodes.$inferInsert;
 
+// Withdrawal requests table for founder fund withdrawals
+export const withdrawalRequests = pgTable("withdrawal_requests", {
+  id: serial("id").primaryKey(),
+  founderId: varchar("founder_id").references(() => users.id).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status", { enum: ["pending", "approved", "rejected", "completed"] }).notNull().default("pending"),
+  bankName: varchar("bank_name").notNull(),
+  bankAccount: varchar("bank_account").notNull(),
+  routingNumber: varchar("routing_number"),
+  swiftCode: varchar("swift_code"),
+  iban: varchar("iban"),
+  sortCode: varchar("sort_code"),
+  bsb: varchar("bsb"),
+  transitNumber: varchar("transit_number"),
+  bankAddress: text("bank_address"),
+  accountType: varchar("account_type"),
+  country: varchar("country").notNull(),
+  memo: text("memo"),
+  adminNotes: text("admin_notes"),
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const withdrawalRequestsRelations = relations(withdrawalRequests, ({ one }) => ({
+  founder: one(users, {
+    fields: [withdrawalRequests.founderId],
+    references: [users.id],
+  }),
+}));
+
+export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
+export type InsertWithdrawalRequest = typeof withdrawalRequests.$inferInsert;
+
 // Update interactions table for likes and shares
 export const updateInteractions = pgTable("update_interactions", {
   id: serial("id").primaryKey(),

@@ -1750,11 +1750,15 @@ export default function AdminDashboard() {
                         });
                         
                         if (response.ok) {
+                          const savedData = await response.json();
                           toast({
                             title: "Settings Saved",
                             description: "Withdrawal settings have been updated successfully.",
                           });
-                          queryClient.invalidateQueries({ queryKey: ['/api/admin/investments'] });
+                          // Invalidate the withdrawal settings query to refetch updated data
+                          queryClient.invalidateQueries({ queryKey: ['/api/admin/withdrawal-settings'] });
+                          // Also invalidate withdrawals to update any dependent calculations
+                          queryClient.invalidateQueries({ queryKey: ['/api/admin/withdrawals'] });
                         } else {
                           throw new Error('Failed to save settings');
                         }

@@ -19,7 +19,10 @@ export function useAuth() {
       return res.json();
     },
     retry: false,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 60 * 1000, // Increased from 5 to 10 minutes
+    gcTime: 15 * 60 * 1000, // Cache for 15 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnMount: false, // Don't refetch on mount if data exists
   });
 
   return {

@@ -36,6 +36,9 @@ declare global {
   }
 }
 
+// Initialize Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
+
 interface InvestmentModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -66,143 +69,120 @@ interface AuthFormData {
   confirmPassword: string;
 }
 
+// Stripe Payment Form Component
+const StripePaymentForm = ({ 
+  clientSecret, 
+  cardholderName, 
+  setCardholderName, 
+  onBack,
+  onSuccess,
+  selectedAmount 
+}: {
+  clientSecret: string;
+  cardholderName: string;
+  setCardholderName: (name: string) => void;
+  onBack: () => void;
+  onSuccess: () => void;
+  selectedAmount: number;
+}) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
 
+  const handleSubmit = async () => {
+    if (!stripe || !elements) return;
 
-// Stripe Elements Wrapper Component with error handling
-const StripeElementsWrapper = ({ stripePromise, clientSecret }: { stripePromise: Promise<any>, clientSecret: string }) => {
-  const [stripeError, setStripeError] = useState<string | null>(null);
-  const [stripeInstance, setStripeInstance] = useState<any>(null);
+    setIsProcessing(true);
+    
+    try {
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) return;
 
-  useEffect(() => {
-    stripePromise
-      .then((stripe) => {
-        if (stripe) {
-          setStripeInstance(stripe);
-        } else {
-          setStripeError("Stripe failed to initialize");
-        }
-      })
-      .catch((error) => {
-        console.error('Stripe loading error:', error);
-        setStripeError("Failed to load payment system");
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            name: cardholderName,
+          },
+        },
       });
-  }, [stripePromise]);
 
-  if (stripeError) {
-    return (
-      <div className="text-center py-4">
-        <p className="text-red-600 mb-2">{stripeError}</p>
-        <p className="text-sm text-gray-500">Please try the Naira payment option instead.</p>
-      </div>
-    );
-  }
-
-  if (!stripeInstance) {
-    return (
-      <div className="text-center py-4">
-        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-        <p className="text-gray-600">Loading payment system...</p>
-      </div>
-    );
-  }
+      if (error) {
+        toast({
+          title: "Payment Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else if (paymentIntent?.status === 'succeeded') {
+        toast({
+          title: "Payment Successful",
+          description: `Investment of $${selectedAmount} confirmed`,
+        });
+        onSuccess();
+      }
+    } catch (error) {
+      toast({
+        title: "Payment Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
-    <Elements stripe={stripeInstance} options={{ clientSecret }}>
-      <div className="space-y-6">
-        {/* Back Button */}
-        <Button
-          variant="outline"
-          onClick={() => {
-            setShowStripeForm(false);
-            setClientSecret('');
-            setCardholderName('');
-          }}
-          className="mb-4"
-        >
-          ← Back to Payment Options
-        </Button>
+    <div className="space-y-6">
+      <Button
+        variant="outline"
+        onClick={onBack}
+        className="mb-4"
+      >
+        ← Back to Payment Options
+      </Button>
 
-        {/* Cardholder Name Input */}
-        <div>
-          <Label htmlFor="cardholder-name">Cardholder Name</Label>
-          <Input
-            id="cardholder-name"
-            value={cardholderName}
-            onChange={(e) => setCardholderName(e.target.value)}
-            placeholder="Full name as it appears on card"
-            autoComplete="cc-name"
+      <div>
+        <Label htmlFor="cardholder-name">Cardholder Name</Label>
+        <Input
+          id="cardholder-name"
+          value={cardholderName}
+          onChange={(e) => setCardholderName(e.target.value)}
+          placeholder="Enter name as it appears on card"
+        />
+      </div>
+
+      <div>
+        <Label>Card Information</Label>
+        <div className="mt-2 p-4 border border-gray-200 rounded-lg">
+          <CardElement
+            options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#374151',
+                  fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+                  '::placeholder': {
+                    color: '#9CA3AF',
+                  },
+                },
+                invalid: {
+                  color: '#EF4444',
+                },
+              },
+            }}
           />
         </div>
-
-        {/* Stripe Card Element */}
-        <div>
-          <Label>Card Details</Label>
-          <div className="mt-2 p-3 border border-gray-300 rounded-md">
-            <CardElement
-              options={{
-                style: {
-                  base: {
-                    fontSize: '16px',
-                    color: '#424770',
-                    '::placeholder': {
-                      color: '#aab7c4',
-                    },
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Payment Button */}
-        <Button
-          onClick={async () => {
-            if (!stripeInstance) return;
-            
-            const elements = stripeInstance.elements ? stripeInstance.elements() : null;
-            if (!elements) return;
-
-            const cardElement = elements.getElement(CardElement);
-            if (!cardElement) return;
-
-            try {
-              const { error, paymentIntent } = await stripeInstance.confirmCardPayment(clientSecret, {
-                payment_method: {
-                  card: cardElement,
-                  billing_details: {
-                    name: cardholderName,
-                  },
-                },
-              });
-
-              if (error) {
-                toast({
-                  title: "Payment Failed",
-                  description: error.message,
-                  variant: "destructive",
-                });
-              } else if (paymentIntent?.status === 'succeeded') {
-                toast({
-                  title: "Payment Successful!",
-                  description: `You have successfully invested $${selectedAmount} in ${campaign.title}`,
-                });
-                setCurrentStep('confirmation');
-              }
-            } catch (error: any) {
-              toast({
-                title: "Payment Error",
-                description: error.message,
-                variant: "destructive",
-              });
-            }
-          }}
-          disabled={!cardholderName.trim()}
-          className="w-full bg-blue-600 hover:bg-blue-700"
-        >
-          Pay ${selectedAmount}
-        </Button>
       </div>
-    </Elements>
+
+      <Button
+        onClick={handleSubmit}
+        disabled={!cardholderName || !stripe || isProcessing}
+        className="w-full bg-blue-600 hover:bg-blue-700"
+      >
+        {isProcessing ? "Processing..." : `Pay $${selectedAmount}`}
+      </Button>
+    </div>
   );
 };
 
@@ -235,7 +215,6 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
   const [cardholderName, setCardholderName] = useState<string>('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [isProcessingNaira, setIsProcessingNaira] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [showStripeForm, setShowStripeForm] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
   const [showSafeViewer, setShowSafeViewer] = useState(false);
@@ -249,814 +228,239 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
 
-  // Helper function to get the current investment amount
-  const getCurrentInvestmentAmount = (): number => {
-    if (customAmount && parseFloat(customAmount) > 0) {
-      return parseFloat(customAmount);
-    }
-    if (selectedAmount > 0) {
-      return selectedAmount;
-    }
-    if (initialAmount && parseFloat(initialAmount) > 0) {
-      return parseFloat(initialAmount);
-    }
-    return 0;
-  };
-
-  // Initialize Stripe with proper error handling
-  const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
-    ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY).catch(error => {
-        console.error('Failed to load Stripe:', error);
-        return null;
-      })
-    : Promise.resolve(null);
-
-  // Budpay configuration
-  const BUDPAY_PUBLIC_KEY = import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key';
-
-  // Initialize custom amount with initial amount when modal opens
-  useEffect(() => {
-    if (isOpen && initialAmount) {
-      setCustomAmount(initialAmount);
-      setSelectedAmount(0); // Clear preset selections when using custom amount
-    }
-  }, [isOpen, initialAmount]);
-
-  // Notify parent component when custom amount changes
-  useEffect(() => {
-    if (onAmountChange && customAmount) {
-      onAmountChange(customAmount);
-    }
-  }, [customAmount, onAmountChange]);
-
-  // Investment mutation
+  // Investment creation mutation
   const createInvestmentMutation = useMutation({
-    mutationFn: async (investmentData: any) => {
-      const response = await apiRequest('POST', '/api/investments', investmentData);
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/investments', data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setCreatedInvestment(data.investment);
       queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
     }
   });
 
-  // Reset modal to payment selection function
-  const resetModalToPaymentSelection = () => {
-    setShowStripeForm(false);
-    setIsProcessing(false);
-    setIsProcessingNaira(false);
-    setCardholderName('');
-    setClientSecret('');
-  };
-
-  // Store investment context in localStorage when modal opens
+  // Exchange rate fetching
   useEffect(() => {
-    if (isOpen && campaign) {
-      const investmentContext = {
-        campaignId: campaign.id,
-        campaignTitle: campaign.title,
-        selectedAmount,
-        currentStep,
-        timestamp: Date.now()
-      };
-      localStorage.setItem('investmentContext', JSON.stringify(investmentContext));
-    }
-  }, [isOpen, campaign, selectedAmount, currentStep]);
-
-  // Restore investment context when user becomes authenticated
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      const storedContext = localStorage.getItem('investmentContext');
-      if (storedContext) {
-        try {
-          const context = JSON.parse(storedContext);
-          // Check if context is recent (within 30 minutes) and matches current campaign
-          const isRecent = Date.now() - context.timestamp < 30 * 60 * 1000;
-          const isMatchingCampaign = context.campaignId === campaign?.id;
-          
-          if (isRecent && isMatchingCampaign && context.currentStep === 'auth') {
-            setSelectedAmount(context.selectedAmount || 0);
-            setCurrentStep('safe-review');
-            
-            toast({
-              title: "Welcome back!",
-              description: "Continuing your investment process...",
-            });
-          }
-        } catch (error) {
-          console.error('Error parsing investment context:', error);
-        }
-      }
-    }
-  }, [isAuthenticated, isLoading, campaign, toast]);
-
-  // Clear investment context when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      localStorage.removeItem('investmentContext');
-    }
-  }, [isOpen]);
-
-  // Fetch exchange rate when investment amount changes
-  useEffect(() => {
-    const amount = selectedAmount || parseFloat(customAmount) || 0;
-    if (amount > 0 && isOpen) {
+    if (selectedAmount > 0) {
       setIsLoadingRate(true);
-      convertUsdToNgn(amount)
-        .then(({ ngn, rate }) => {
-          setNgnAmount(ngn);
-          setExchangeRate(rate);
+      convertUsdToNgn(selectedAmount)
+        .then((result) => {
+          setNgnAmount(result.ngnAmount);
+          setExchangeRate(result.exchangeRate);
         })
         .catch((error) => {
-          console.warn('Failed to fetch exchange rate:', error);
-          // Use fallback rate
-          setNgnAmount(amount * 1650);
-          setExchangeRate({
-            usdToNgn: 1650,
-            source: 'Fallback',
-            lastUpdated: new Date()
-          });
+          console.error('Failed to fetch exchange rate:', error);
         })
         .finally(() => {
           setIsLoadingRate(false);
         });
     }
-  }, [selectedAmount, customAmount, isOpen]);
+  }, [selectedAmount]);
 
-  const minimumInvestment = 25;
-  const maximumInvestment = 5000;
-  const presetAmounts = [100, 250, 500, 1000, 2500];
-
-
-
-  // Direct Budpay payment processing using payment link
-  const handleDirectBudpayPayment = async () => {
-    console.log('Using direct Budpay payment processing');
-    
-    try {
-      toast({
-        title: "Redirecting to Payment",
-        description: "Opening Budpay checkout with payment options...",
-      });
-
-      // Get the actual investment amount
-      const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
-      
-      // Create payment request with backend
-      const paymentData = {
-        campaignId: campaign.id,
-        amount: actualAmount,
-        currency: 'NGN',
-        ngnAmount: ngnAmount,
-        email: user?.email || investorDetails.firstName + '@example.com',
-        reference: `inv_${campaign.id}_${Date.now()}`,
-        paymentMethod: 'budpay',
-        investorDetails: {
-          ...investorDetails,
-          signature: signatureData,
-          agreedToTerms,
-          investmentDate: new Date().toISOString()
+  // Reset modal state when opening
+  useEffect(() => {
+    if (isOpen) {
+      if (initialAmount) {
+        const amount = parseFloat(initialAmount);
+        if (!isNaN(amount)) {
+          setSelectedAmount(amount);
+          setCustomAmount(initialAmount);
         }
-      };
-
-      // Call backend to create Budpay payment link
-      const response = await apiRequest('POST', '/api/create-budpay-payment', paymentData);
-      const result = await response.json();
-
-      if (result.success && result.paymentUrl) {
-        // Open Budpay payment page in a new window
-        const paymentWindow = window.open(
-          result.paymentUrl,
-          'budpay-payment',
-          'width=600,height=700,scrollbars=yes,resizable=yes'
-        );
-
-        // Poll for payment completion
-        const pollPayment = setInterval(async () => {
-          if (paymentWindow?.closed) {
-            clearInterval(pollPayment);
-            setIsProcessingNaira(false);
-            
-            // Check payment status
-            const statusResponse = await apiRequest('GET', `/api/check-payment-status/${paymentData.reference}`);
-            const statusResult = await statusResponse.json();
-            
-            if (statusResult.success && statusResult.status === 'success') {
-              toast({
-                title: "Payment Successful!",
-                description: `You have successfully invested ₦${ngnAmount?.toLocaleString()} in ${campaign.title}`,
-              });
-              
-              // Invalidate queries to refresh data
-              queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-              queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-              
-              setCurrentStep('confirmation');
-            } else {
-              toast({
-                title: "Payment Incomplete",
-                description: "Payment was not completed. Please try again.",
-                variant: "destructive",
-              });
-            }
+      }
+      
+      // Check for investment context in localStorage
+      const investmentContext = localStorage.getItem('investmentContext');
+      if (investmentContext) {
+        try {
+          const context = JSON.parse(investmentContext);
+          if (context.campaignId === campaign.id) {
+            setSelectedAmount(context.amount);
+            setCurrentStep('safe-review');
           }
-        }, 1000);
-
-      } else {
-        throw new Error(result.message || 'Failed to create payment link');
+        } catch (error) {
+          console.error('Failed to parse investment context:', error);
+        }
       }
+    }
+  }, [isOpen, initialAmount, campaign.id]);
 
-    } catch (error: any) {
-      console.error('Direct payment processing error:', error);
-      toast({
-        title: "Payment Error",
-        description: error.message || "Failed to initialize payment",
-        variant: "destructive",
-      });
-      setIsProcessingNaira(false);
+  // Handle authentication success
+  const handleAuthSuccess = () => {
+    localStorage.removeItem('investmentContext');
+    setCurrentStep('safe-review');
+  };
+
+  // Reset modal state on close
+  const handleClose = () => {
+    setCurrentStep('amount');
+    setSelectedAmount(0);
+    setCustomAmount('');
+    setShowStripeForm(false);
+    setClientSecret('');
+    setCardholderName('');
+    onClose();
+  };
+
+  // Handle amount selection
+  const handleAmountSelect = (amount: number) => {
+    setSelectedAmount(amount);
+    if (onAmountChange) {
+      onAmountChange(amount.toString());
     }
   };
 
-  // Payment handler functions
-  const handleUSDPayment = async () => {
-    setIsProcessingPayment(true);
-    try {
-      // Create investment first
-      const investmentData = {
-        campaignId: campaign.id,
-        amount: selectedAmount.toString(),
-        status: 'committed',
-        investorDetails: {
-          ...investorDetails,
-          signature: signatureData,
-          agreedToTerms,
-          investmentDate: new Date().toISOString()
-        }
-      };
+  // Handle custom amount change
+  const handleCustomAmountChange = (value: string) => {
+    setCustomAmount(value);
+    const amount = parseFloat(value);
+    if (!isNaN(amount) && amount >= 25) {
+      setSelectedAmount(amount);
+      if (onAmountChange) {
+        onAmountChange(value);
+      }
+    }
+  };
 
-      const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
-
-      // Process Stripe payment with required fields
-      const response = await apiRequest('POST', '/api/create-payment-intent', {
-        amount: selectedAmount.toString(),
-        investmentId: investmentResponse.investment.id
-      });
-
-      if (response.ok) {
-        const { clientSecret } = await response.json();
-        // Store client secret for inline payment processing
-        setClientSecret(clientSecret);
-        // Stay on payment step to show Stripe form
-        setShowStripeForm(true);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create payment intent');
+  // Proceed to next step
+  const handleNextStep = () => {
+    if (currentStep === 'amount') {
+      if (selectedAmount < 25) {
+        toast({
+          title: "Minimum Investment Required",
+          description: "The minimum investment amount is $25.",
+          variant: "destructive",
+        });
+        return;
       }
       
-    } catch (error: any) {
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process USD payment",
-        variant: "destructive",
-      });
-      setIsProcessingPayment(false);
+      if (!isAuthenticated) {
+        localStorage.setItem('investmentContext', JSON.stringify({
+          campaignId: campaign.id,
+          amount: selectedAmount
+        }));
+        setCurrentStep('auth');
+      } else {
+        setCurrentStep('safe-review');
+      }
+    } else if (currentStep === 'safe-review') {
+      setCurrentStep('terms');
+    } else if (currentStep === 'terms') {
+      setCurrentStep('signature');
+    } else if (currentStep === 'signature') {
+      setCurrentStep('payment');
     }
   };
 
-  const handleNairaPayment = async () => {
-    console.log('Naira payment button clicked');
-    console.log('NGN Amount:', ngnAmount);
-    console.log('Selected Amount:', selectedAmount);
-    
-    if (!ngnAmount) {
-      toast({
-        title: "Currency Error",
-        description: "Naira amount not available",
-        variant: "destructive",
+  // Handle USD payment
+  const handleUSDPayment = () => {
+    if (!createdInvestment) {
+      // Create investment first
+      createInvestmentMutation.mutate({
+        campaignId: campaign.id,
+        amount: selectedAmount,
+        status: 'committed'
       });
-      return;
     }
 
-    if (!import.meta.env.VITE_BUDPAY_PUBLIC_KEY) {
+    // Get client secret for Stripe
+    apiRequest('POST', '/api/create-payment-intent', { 
+      amount: selectedAmount,
+      investmentId: createdInvestment?.id 
+    })
+    .then(response => response.json())
+    .then(data => {
+      setClientSecret(data.clientSecret);
+      setShowStripeForm(true);
+    })
+    .catch(error => {
       toast({
-        title: "Configuration Error",
-        description: "Budpay public key not configured",
+        title: "Payment Setup Failed",
+        description: "Unable to initialize payment. Please try again.",
+        variant: "destructive",
+      });
+    });
+  };
+
+  // Handle NGN payment
+  const handleNGNPayment = () => {
+    if (!ngnAmount || !window.BudPayCheckout) {
+      toast({
+        title: "Payment System Not Ready",
+        description: "Please try again in a moment.",
         variant: "destructive",
       });
       return;
     }
 
     setIsProcessingNaira(true);
-    
-    toast({
-      title: "Initializing Payment",
-      description: "Setting up Budpay checkout...",
-    });
 
     try {
-      // Get the actual investment amount
-      const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
-      
-      // Create Budpay payment request
-      const paymentData = {
-        campaignId: campaign.id,
-        amount: actualAmount,
+      window.BudPayCheckout({
+        key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,
+        email: user?.email || '',
+        amount: Math.round(ngnAmount * 100),
         currency: 'NGN',
-        ngnAmount: ngnAmount,
-        paymentMethod: 'budpay',
-        investorDetails: {
-          ...investorDetails,
-          signature: signatureData,
-          agreedToTerms,
-          investmentDate: new Date().toISOString()
-        }
-      };
-
-      // Initialize Budpay payment
-      const budpayPaymentConfig = {
-        key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,  
-        email: user?.email || investorDetails.firstName + '@example.com',
-        amount: Math.round(ngnAmount), // Amount in Naira, Budpay handles kobo conversion
-        currency: 'NGN',
-        ref: `inv_${campaign.id}_${Date.now()}`,
-        callback: async (response: any) => {
-          console.log('Budpay callback response:', response);
-          try {
-            if (response.status === 'success') {
-              toast({
-                title: "Processing Payment",
-                description: "Verifying payment with backend...",
-              });
-
-              // Process the payment on the backend
-              const backendResponse = await apiRequest('POST', '/api/budpay-payment', {
-                ...paymentData,
-                budpayReference: response.reference,
-                budpayTransactionId: response.trans
-              });
-
-              const result = await backendResponse.json();
-              console.log('Backend verification result:', result);
-
-              if (result.success) {
-                toast({
-                  title: "Payment Successful!",
-                  description: `You have successfully invested ₦${ngnAmount.toLocaleString()} in ${campaign.title}`,
-                });
-                
-                // Invalidate queries to refresh data
-                queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-                queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-                
-                setCurrentStep('confirmation');
-              } else {
-                throw new Error(result.message || 'Payment verification failed');
-              }
-            } else {
-              throw new Error('Payment was cancelled or failed');
-            }
-          } catch (error: any) {
-            console.error('Payment callback error:', error);
+        reference: `inv_${Date.now()}_${campaign.id}`,
+        callback: function(response: any) {
+          if (response.status === 'success') {
             toast({
-              title: "Payment Error",
-              description: error.message || "Payment processing failed",
+              title: "Payment Successful",
+              description: `Investment of ₦${ngnAmount.toLocaleString()} confirmed`,
+            });
+            setCurrentStep('confirmation');
+          } else {
+            toast({
+              title: "Payment Failed",
+              description: "Your payment could not be processed. Please try again.",
               variant: "destructive",
             });
-          } finally {
-            setIsProcessingNaira(false);
           }
+          setIsProcessingNaira(false);
         },
-        onClose: () => {
-          console.log('Budpay modal closed');
+        onClose: function() {
           setIsProcessingNaira(false);
         }
-      };
-
-      console.log('Budpay config:', budpayPaymentConfig);
-
-      // Function to initialize Budpay
-      const initializeBudpay = () => {
-        console.log('Initializing Budpay checkout...');
-        if (window.BudPayCheckout) {
-          console.log('BudPayCheckout found, calling it...');
-          window.BudPayCheckout(budpayPaymentConfig);
-        } else {
-          console.error('BudPayCheckout not found on window object');
-          toast({
-            title: "Payment Error",
-            description: "Budpay checkout failed to load",
-            variant: "destructive",
-          });
-          setIsProcessingNaira(false);
-        }
-      };
-
-      // Load Budpay script and initialize payment
-      if (window.BudPayCheckout && typeof window.BudPayCheckout === 'function') {
-        console.log('Budpay script already loaded');
-        initializeBudpay();
-      } else {
-        console.log('Loading Budpay script...');
-        
-        // Use the correct Budpay checkout script URL
-        const budpayScriptUrl = 'https://inlinecheckout.budpay.com/budpay-inline-checkout.js';
-        
-        const loadBudpayScript = () => {
-          const script = document.createElement('script');
-          script.src = budpayScriptUrl;
-          script.onload = () => {
-            console.log('Budpay script loaded successfully');
-            // Wait a bit for the script to initialize
-            setTimeout(() => {
-              if ('BudPayCheckout' in window && typeof window.BudPayCheckout === 'function') {
-                initializeBudpay();
-              } else {
-                console.warn('BudPayCheckout not available, using direct API approach');
-                handleDirectBudpayPayment();
-              }
-            }, 500);
-          };
-          script.onerror = () => {
-            console.warn('Failed to load Budpay script, using direct API approach');
-            handleDirectBudpayPayment();
-          };
-          document.head.appendChild(script);
-        };
-
-        // Skip script loading, use direct API approach
-        console.log('Using direct Budpay payment processing');
-        handleDirectBudpayPayment();
-      }
-
-    } catch (error: any) {
-      console.error('Budpay payment error:', error);
+      });
+    } catch (error) {
+      setIsProcessingNaira(false);
       toast({
         title: "Payment Error",
-        description: error.message || "Payment failed. Please try again.",
+        description: "Unable to process payment. Please try again.",
         variant: "destructive",
       });
-      setIsProcessingNaira(false);
     }
   };
 
-  const handleAmountSelection = (amount: number) => {
-    setSelectedAmount(amount);
-    setCustomAmount('');
+  // Reset payment modal state
+  const resetPaymentState = () => {
+    setShowStripeForm(false);
+    setClientSecret('');
+    setCardholderName('');
   };
 
-  const handleCustomAmountChange = (value: string) => {
-    const numValue = parseFloat(value) || 0;
-    setCustomAmount(value);
-    setSelectedAmount(numValue);
-  };
-
-  const calculateFee = (amount: number) => {
-    return 0; // Platform fees removed
-  };
-
-  const calculateTotal = (amount: number) => {
-    return amount; // No fees applied
-  };
-
-  const handleNextStep = () => {
-    const stepOrder: InvestmentStep[] = ['amount', 'auth', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'];
-    const currentIndex = stepOrder.indexOf(currentStep);
-    
-    // Get the actual investment amount (either from preset selection or custom input)
-    const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
-    
-    if (currentStep === 'amount' && actualAmount < minimumInvestment) {
-      toast({
-        title: "Invalid Amount",
-        description: `Minimum investment is $${minimumInvestment}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep === 'amount' && actualAmount > maximumInvestment) {
-      toast({
-        title: "Invalid Amount",
-        description: `Maximum investment is $${maximumInvestment}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep === 'auth' && !isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in or create an account to continue",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep === 'terms' && !agreedToTerms) {
-      toast({
-        title: "Terms Required",
-        description: "Please agree to the terms and conditions",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep === 'signature' && !signatureData.trim()) {
-      toast({
-        title: "Signature Required",
-        description: "Please provide your digital signature",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep === 'payment') {
-      handlePayment();
-      return;
-    }
-
-    if (currentIndex < stepOrder.length - 1) {
-      setCurrentStep(stepOrder[currentIndex + 1]);
-    }
-  };
-
-  const handlePrevStep = () => {
-    const stepOrder: InvestmentStep[] = ['amount', 'auth', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'];
-    const currentIndex = stepOrder.indexOf(currentStep);
-    
-    if (currentIndex > 0) {
-      setCurrentStep(stepOrder[currentIndex - 1]);
-    }
-  };
-
-  const handleAuth = async () => {
-    if (authMode === 'signin') {
-      await handleSignIn();
-    } else {
-      await handleSignUp();
-    }
-  };
-
-  const handleSignIn = async () => {
-    setIsAuthenticating(true);
-    try {
-      const response = await apiRequest('POST', '/api/auth/login', {
-        email: authData.email,
-        password: authData.password
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      toast({
-        title: "Signed In Successfully",
-        description: "Welcome back! Proceeding with your investment.",
-      });
-      setCurrentStep('safe-review');
-    } catch (error: any) {
-      toast({
-        title: "Sign In Failed",
-        description: error.message || "Invalid credentials",
-        variant: "destructive",
-      });
-    } finally {
-      setIsAuthenticating(false);
-    }
-  };
-
-  const handleSignUp = async () => {
-    if (authData.password !== authData.confirmPassword) {
-      toast({
-        title: "Password Mismatch",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsAuthenticating(true);
-    try {
-      const response = await apiRequest('POST', '/api/auth/register', {
-        email: authData.email,
-        password: authData.password,
-        firstName: authData.firstName,
-        lastName: authData.lastName,
-        userType: 'investor'
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      
-      // Set investor details with firstName and lastName from auth form
-      setInvestorDetails(prev => ({
-        ...prev,
-        firstName: authData.firstName,
-        lastName: authData.lastName
-      }));
-      
-      toast({
-        title: "Account Created Successfully",
-        description: "Welcome to Fundry! Proceeding with your investment.",
-      });
-      setCurrentStep('safe-review');
-    } catch (error: any) {
-      toast({
-        title: "Registration Failed",
-        description: error.message || "Failed to create account",
-        variant: "destructive",
-      });
-    } finally {
-      setIsAuthenticating(false);
-    }
-  };
-
-  const handlePayment = async () => {
-    setIsProcessingPayment(true);
-    
-    // Get the actual investment amount
-    const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
-    
-    try {
-      const investmentData = {
-        campaignId: campaign.id,
-        amount: actualAmount.toString(),
-        status: 'committed',
-        investorDetails: {
-          ...investorDetails,
-          signature: signatureData,
-          agreedToTerms,
-          investmentDate: new Date().toISOString()
-        }
-      };
-
-      const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
-      setCreatedInvestment(investmentResponse.investment);
-      
-      toast({
-        title: "Investment Successful!",
-        description: `You have successfully committed $${actualAmount} to ${campaign.title}`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process payment",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessingPayment(false);
-    }
-  };
-
-
-
-
-
-  const generateSafeAgreement = (campaign: CampaignWithStats, amount: number) => {
-    return `SIMPLE AGREEMENT FOR FUTURE EQUITY
-
-Company: ${campaign.title}
-Investor: ${user?.firstName} ${user?.lastName}
-Email: ${user?.email}
-Investment Amount: $${amount}
-Discount Rate: ${campaign.discountRate || 20}.00%
-Valuation Cap: $${(campaign.valuationCap || 1000000).toLocaleString()}.00
-Date: ${new Date().toLocaleDateString()}
-
-This agreement represents the investor's commitment to invest in ${campaign.title} under the terms of a Simple Agreement for Future Equity (SAFE).
-
-Investment Terms:
-- Investment Amount: $${amount}
-- Discount Rate: ${campaign.discountRate || 20}.00%
-- Valuation Cap: $${(campaign.valuationCap || 1000000).toLocaleString()}.00
-- Pro Rata Rights: Included
-
-The investment will convert to equity shares upon the next qualifying financing round or liquidity event.
-
-ARTICLE 1: DEFINITIONS
-
-1.1 "Change in Control" means (a) a transaction or series of related transactions in which any "person" or "group" becomes the beneficial owner of more than 50% of the outstanding voting securities of the Company, or (b) any reorganization, merger or consolidation of the Company.
-
-1.2 "Company Capitalization" means the sum, as of immediately prior to the Equity Financing, of (a) all shares of Capital Stock issued and outstanding, assuming exercise or conversion of all outstanding vested and unvested options, warrants and other convertible securities, but excluding this Safe and all other Safes.
-
-1.3 "Conversion Price" means either: (a) the Safe Price or (b) the Discount Price, whichever calculation results in a greater number of shares of Safe Preferred Stock.
-
-1.4 "Discount Price" means the price per share of the Standard Preferred Stock sold in the Equity Financing multiplied by the Discount Rate.
-
-1.5 "Discount Rate" means ${campaign.discountRate || 20}.00%.
-
-1.6 "Dissolution Event" means (a) a voluntary termination of operations, (b) a general assignment for the benefit of the Company's creditors or (c) any other liquidation, dissolution or winding up of the Company.
-
-1.7 "Equity Financing" means a bona fide transaction or series of transactions with the principal purpose of raising capital, pursuant to which the Company issues and sells Preferred Stock at a fixed valuation.
-
-1.8 "Initial Public Offering" means the closing of the Company's first firm commitment underwritten initial public offering of Common Stock pursuant to a registration statement filed under the Securities Act.
-
-1.9 "Liquidity Event" means a Change in Control, a Dissolution Event or an Initial Public Offering.
-
-1.10 "Pro Rata Rights" means a contractual right, but not the obligation, of the Investor to purchase its pro rata share of Private Securities that the Company may issue after the Safe is executed.
-
-1.11 "Safe Price" means $${(amount / parseFloat(campaign.valuationCap || "1000000") * 1000000).toFixed(6)} per share.
-
-1.12 "Valuation Cap" means $${(parseFloat(campaign.valuationCap || "1000000")).toLocaleString()}.00.
-
-ARTICLE 2: CONVERSION EVENTS
-
-2.1 Equity Financing. If there is an Equity Financing before the expiration or termination of this Safe, the Company will automatically issue to the Investor either: (a) a number of shares of Safe Preferred Stock equal to the Purchase Amount divided by the Conversion Price or (b) at the option of the Investor, shares of Standard Preferred Stock.
-
-2.2 Liquidity Event. If there is a Liquidity Event before the expiration or termination of this Safe, the Investor will, at the Investor's option, either: (a) receive a cash payment equal to the Purchase Amount or (b) automatically receive from the Company a number of shares of Common Stock equal to the Purchase Amount divided by the Liquidity Price.
-
-2.3 Dissolution Event. If there is a Dissolution Event before this Safe expires or terminates, the Investor will receive a cash payment equal to the Purchase Amount, due and payable to the Investor immediately prior to, or concurrent with, the consummation of the Dissolution Event.
-
-ARTICLE 3: COMPANY REPRESENTATIONS
-
-3.1 The Company is a corporation duly organized, validly existing and in good standing under the laws of its jurisdiction of incorporation.
-
-3.2 The execution, delivery and performance by the Company of this Safe is within the power of the Company and has been duly authorized by all necessary corporate actions on the part of the Company.
-
-3.3 This Safe constitutes a legal, valid and binding obligation of the Company, enforceable against the Company in accordance with its terms.
-
-ARTICLE 4: INVESTOR REPRESENTATIONS
-
-4.1 The Investor has full legal capacity, power and authority to execute and deliver this Safe and to perform the Investor's obligations hereunder.
-
-4.2 This Safe constitutes valid and binding obligations of the Investor, enforceable in accordance with its terms.
-
-4.3 The Investor is an accredited investor as such term is defined in Rule 501 of Regulation D under the Securities Act.
-
-4.4 The Investor has been advised that this Safe and the underlying securities have not been registered under the Securities Act, or any state securities laws and, therefore, cannot be resold unless they are registered under the Securities Act and applicable state securities laws or unless an exemption from such registration requirements is available.
-
-ARTICLE 5: ADDITIONAL PROVISIONS
-
-5.1 Pro Rata Rights. The Investor shall have Pro Rata Rights, provided the Investor's Purchase Amount is not less than $${Math.max(1000, amount)}.
-
-5.2 Entire Agreement. This Safe constitutes the full and complete understanding and agreement between the parties with respect to the subject matter hereof, and supersedes all prior understandings and agreements relating to such subject matter.
-
-5.3 Notices. Any notice required or permitted by this Safe will be deemed sufficient when delivered personally or by overnight courier or sent by email to the relevant address listed on the signature page.
-
-5.4 Governing Law. This Safe and all rights and obligations hereunder are governed by the laws of the State of Delaware, without regard to the conflicts of law provisions of such jurisdiction.
-
-5.5 Binding Effect. This Safe shall be binding upon and inure to the benefit of the parties and their successors and assigns.
-
-5.6 Severability. If one or more provisions of this Safe are held to be unenforceable under applicable law, the parties agree to renegotiate such provision in good faith.
-
-5.7 Amendment. This Safe may be amended, modified or waived with the written consent of the Company and the Investor.
-
-ARTICLE 6: SIGNATURE
-
-IN WITNESS WHEREOF, the undersigned have executed this Safe as of the date first written above.
-
-COMPANY: ${campaign.title}
-
-By: _________________________
-Name: [Founder Name]
-Title: Chief Executive Officer
-
-INVESTOR: ${user?.firstName} ${user?.lastName}
-
-Email: ${user?.email}
-Investment Amount: $${amount}
-Date: ${new Date().toLocaleDateString()}
-
-Investor Signature:
-Date: ${new Date().toLocaleDateString()}
-
-This is a legally binding agreement. Please consult with legal counsel before proceeding.
-
-IMPORTANT NOTICE: This investment involves significant risk and may result in the loss of the entire investment amount. The investor should consult with legal and financial advisors before executing this agreement.`;
-  };
-
-  const downloadSafeAgreement = (content: string, companyName: string, amount: number) => {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `SAFE_Agreement_${companyName}_$${amount}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
+  // Generate step icons and titles
   const getStepIcon = (step: InvestmentStep) => {
     switch (step) {
-      case 'amount': return DollarSign;
-      case 'auth': return User;
-      case 'safe-review': return FileText;
-      case 'terms': return Shield;
-      case 'signature': return PenTool;
-      case 'payment': return CreditCard;
-      case 'confirmation': return CheckCircle;
-      default: return DollarSign;
+      case 'amount': return <DollarSign className="w-5 h-5" />;
+      case 'auth': return <User className="w-5 h-5" />;
+      case 'safe-review': return <FileText className="w-5 h-5" />;
+      case 'terms': return <Shield className="w-5 h-5" />;
+      case 'signature': return <PenTool className="w-5 h-5" />;
+      case 'payment': return <CreditCard className="w-5 h-5" />;
+      case 'confirmation': return <CheckCircle className="w-5 h-5" />;
     }
   };
 
   const getStepTitle = (step: InvestmentStep) => {
     switch (step) {
       case 'amount': return 'Investment Amount';
-      case 'auth': return 'Authentication';
+      case 'auth': return 'Account Verification';
       case 'safe-review': return 'SAFE Agreement Review';
       case 'terms': return 'Terms & Conditions';
       case 'signature': return 'Digital Signature';
       case 'payment': return 'Payment';
       case 'confirmation': return 'Confirmation';
-      default: return '';
     }
   };
 
@@ -1065,883 +469,217 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     return steps.indexOf(step) + 1;
   };
 
-  const renderProgressIndicator = () => {
-    const steps = ['amount', 'auth', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'];
-    const currentStepIndex = steps.indexOf(currentStep);
-
-    return (
-      <div className="flex justify-center mb-4 px-2">
-        <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto max-w-full">
-          {steps.map((step, index) => (
-            <div key={step} className="flex items-center flex-shrink-0">
-              <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium ${
-                index <= currentStepIndex ? 'bg-fundry-orange text-white' : 'bg-gray-200 text-gray-600'
-              }`}>
-                {index + 1}
-              </div>
-              {index < steps.length - 1 && <div className="w-2 sm:w-3 h-0.5 bg-gray-300 mx-1" />}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderStepContent = () => {
-    const Icon = getStepIcon(currentStep);
-    const stepNumber = getStepNumber(currentStep);
-
-    switch (currentStep) {
-      case 'amount':
-        return (
-          <div className="space-y-4">
-            <div className="text-center px-1">
-              <Icon className="mx-auto h-8 w-8 text-fundry-orange mb-2" />
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">Choose Investment Amount</h3>
-              <p className="text-xs text-gray-600 break-words px-2">Step {stepNumber} of 7: Select how much you'd like to invest</p>
-            </div>
-            
-            {renderProgressIndicator()}
-            
-            <div className="grid grid-cols-2 gap-2 px-2">
-              {presetAmounts.map((amount) => (
-                <Button
-                  key={amount}
-                  variant={selectedAmount === amount ? "default" : "outline"}
-                  onClick={() => handleAmountSelection(amount)}
-                  className={`text-sm px-3 py-2 ${selectedAmount === amount ? "bg-fundry-orange hover:bg-orange-600" : ""}`}
-                >
-                  ${amount}
-                </Button>
-              ))}
-            </div>
-
-            <div className="space-y-1 px-2">
-              <Label htmlFor="custom-amount" className="text-xs">Custom Amount</Label>
-              <Input
-                id="custom-amount"
-                type="number"
-                value={customAmount}
-                onChange={(e) => handleCustomAmountChange(e.target.value)}
-                placeholder={`Min $${minimumInvestment}`}
-                min={minimumInvestment}
-                max={maximumInvestment}
-                className="text-xs h-8"
-              />
-            </div>
-
-            {selectedAmount > 0 && (
-              <div className="bg-gray-50 p-2 mx-2 rounded-lg space-y-1 text-xs">
-                <div className="flex justify-between items-center text-sm font-bold">
-                  <span>Investment Amount:</span>
-                  <span>${selectedAmount}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-
-      case 'auth':
-        if (isAuthenticated) {
-          return (
-            <div className="space-y-6">
-              <div className="text-center">
-                <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Already Authenticated</h3>
-                <p className="text-gray-600">Step {stepNumber} of 7: You're signed in as {user?.email}</p>
-              </div>
-              
-              {renderProgressIndicator()}
-              
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-green-800">
-                  Welcome back, {user?.firstName}! You can proceed with your investment.
-                </p>
-              </div>
-            </div>
-          );
-        }
-
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Authentication Required</h3>
-              <p className="text-gray-600">Step {stepNumber} of 7: Sign in or create an account to continue</p>
-            </div>
-            
-            {renderProgressIndicator()}
-            
-            <div className="flex justify-center mb-6">
-              <FundryLogo className="h-8" />
-            </div>
-
-            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mb-6">
-              <Button
-                variant={authMode === 'signin' ? 'default' : 'outline'}
-                onClick={() => setAuthMode('signin')}
-                className={`flex-1 sm:flex-none text-sm ${authMode === 'signin' ? 'bg-fundry-orange hover:bg-orange-600' : ''}`}
-              >
-                <LogIn className="w-4 h-4 mr-2" />
-                Sign In
-              </Button>
-              <Button
-                variant={authMode === 'signup' ? 'default' : 'outline'}
-                onClick={() => setAuthMode('signup')}
-                className={`flex-1 sm:flex-none text-sm ${authMode === 'signup' ? 'bg-fundry-orange hover:bg-orange-600' : ''}`}
-              >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Sign Up
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              {authMode === 'signup' && (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <Label htmlFor="firstName" className="text-sm">First Name</Label>
-                      <Input
-                        id="firstName"
-                        value={authData.firstName}
-                        onChange={(e) => setAuthData({...authData, firstName: e.target.value})}
-                        placeholder="Enter your first name"
-                        className="text-sm"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName" className="text-sm">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        value={authData.lastName}
-                        onChange={(e) => setAuthData({...authData, lastName: e.target.value})}
-                        placeholder="Enter your last name"
-                        className="text-sm"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-              
-              <div>
-                <Label htmlFor="email" className="text-sm">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={authData.email}
-                  onChange={(e) => setAuthData({...authData, email: e.target.value})}
-                  placeholder="Enter your email"
-                  className="text-sm"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="password" className="text-sm">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={authData.password}
-                  onChange={(e) => setAuthData({...authData, password: e.target.value})}
-                  placeholder="Enter your password"
-                  className="text-sm"
-                />
-              </div>
-              
-              {authMode === 'signup' && (
-                <div>
-                  <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={authData.confirmPassword}
-                    onChange={(e) => setAuthData({...authData, confirmPassword: e.target.value})}
-                    placeholder="Confirm your password"
-                    className="text-sm"
-                  />
-                </div>
-              )}
-
-              <Button
-                onClick={handleAuth}
-                disabled={isAuthenticating}
-                className="w-full bg-fundry-orange hover:bg-orange-600"
-              >
-                {isAuthenticating ? 'Processing...' : (authMode === 'signin' ? 'Sign In' : 'Create Account')}
-              </Button>
-            </div>
-          </div>
-        );
-
-      case 'safe-review':
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">SAFE Agreement Review</h3>
-              <p className="text-gray-600">Step {stepNumber} of 7: Review your investment terms with populated investor details</p>
-            </div>
-            
-            {renderProgressIndicator()}
-            
-            {/* Investor Details Populated in SAFE Agreement */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-              <h4 className="font-semibold text-blue-900 mb-2 text-sm">Investor Information</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <div className="flex flex-col sm:flex-row">
-                  <span className="text-blue-700 min-w-fit">Full Name:</span>
-                  <span className="ml-0 sm:ml-2 font-medium truncate">{user?.firstName} {user?.lastName}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row">
-                  <span className="text-blue-700 min-w-fit">Email:</span>
-                  <span className="ml-0 sm:ml-2 font-medium truncate">{user?.email}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row">
-                  <span className="text-blue-700 min-w-fit">Investment Amount:</span>
-                  <span className="ml-0 sm:ml-2 font-medium">${selectedAmount}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row">
-                  <span className="text-blue-700 min-w-fit">Date:</span>
-                  <span className="ml-0 sm:ml-2 font-medium">{new Date().toLocaleDateString()}</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs font-medium text-gray-700">Investment Amount</Label>
-                  <p className="text-base font-semibold">${selectedAmount}</p>
-                </div>
-                <div>
-                  <Label className="text-xs font-medium text-gray-700">Discount Rate</Label>
-                  <p className="text-base font-semibold">{campaign.discountRate}%</p>
-                </div>
-                <div>
-                  <Label className="text-xs font-medium text-gray-700">Valuation Cap</Label>
-                  <p className="text-base font-semibold">${(parseFloat(campaign.valuationCap || "1000000")).toLocaleString()}</p>
-                </div>
-                <div>
-                  <Label className="text-xs font-medium text-gray-700">Investment Type</Label>
-                  <p className="text-base font-semibold">SAFE Agreement</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6">
-              <div className="text-center mb-4">
-                <Shield className="mx-auto h-8 w-8 text-blue-500 mb-2" />
-                <p className="text-sm text-gray-600">
-                  Your investment will convert to equity upon the next qualifying financing round or liquidity event.
-                </p>
-              </div>
-              
-              <div className="flex flex-col gap-3 max-w-sm mx-auto">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowSafeViewer(true)}
-                  className="w-full flex items-center justify-center gap-2 border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white"
-                >
-                  <FileText className="w-4 h-4" />
-                  View SAFE Agreement
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const safeContent = generateSafeAgreement(campaign, selectedAmount);
-                    downloadSafeAgreement(safeContent, campaign.title, selectedAmount);
-                  }}
-                  className="w-full flex items-center justify-center gap-2 border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white"
-                >
-                  <Download className="w-4 h-4" />
-                  Download SAFE Agreement
-                </Button>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'terms':
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Terms & Conditions</h3>
-              <p className="text-gray-600">Step {stepNumber} of 7: Review and accept the investment terms</p>
-            </div>
-            
-            {renderProgressIndicator()}
-            
-            <div className="bg-gray-50 p-6 rounded-lg max-h-96 overflow-y-auto">
-              <h4 className="font-semibold mb-4">Investment Terms and Conditions</h4>
-              <div className="space-y-4 text-sm">
-                <p>By proceeding with this investment, you acknowledge and agree to the following:</p>
-                
-                <div className="space-y-2">
-                  <h5 className="font-medium">1. Investment Risk</h5>
-                  <p>You understand that investing in early-stage companies involves significant risk and may result in total loss of your investment.</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <h5 className="font-medium">2. SAFE Agreement</h5>
-                  <p>This investment is structured as a Simple Agreement for Future Equity (SAFE) and will convert to equity upon qualifying events.</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <h5 className="font-medium">3. Liquidity</h5>
-                  <p>Your investment may be illiquid and you may not be able to sell or transfer your interest for an extended period.</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <h5 className="font-medium">4. Platform Fees</h5>
-                  <p>Fundry charges a 5% platform fee for investments over $1,000. No fees apply to investments under $1,000.</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <h5 className="font-medium">5. Regulatory Compliance</h5>
-                  <p>You represent that you meet all applicable investor qualifications and regulatory requirements.</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="agree-terms"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="w-4 h-4 text-fundry-orange border-gray-300 rounded focus:ring-fundry-orange"
-              />
-              <Label htmlFor="agree-terms" className="text-sm">
-                I have read, understood, and agree to the terms and conditions
-              </Label>
-            </div>
-          </div>
-        );
-
-      case 'signature':
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Digital Signature</h3>
-              <p className="text-gray-600">Step {stepNumber} of 7: Provide your digital signature to finalize the agreement</p>
-            </div>
-            
-            {renderProgressIndicator()}
-            
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="signature">Digital Signature</Label>
-                <Input
-                  id="signature"
-                  value={signatureData}
-                  onChange={(e) => setSignatureData(e.target.value)}
-                  placeholder="Type your full name as your digital signature"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  By typing your name, you are providing a legally binding digital signature
-                </p>
-              </div>
-              
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-900 mb-2">Signature Preview</h4>
-                <p className="text-sm text-blue-800">
-                  Digitally signed by: <span className="font-medium">{signatureData || '[Your signature will appear here]'}</span>
-                </p>
-                <p className="text-xs text-blue-600 mt-1">
-                  Date: {new Date().toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'payment':
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Icon className="mx-auto h-12 w-12 text-fundry-orange mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure Payment</h3>
-              <p className="text-gray-600">Step {stepNumber} of 7: Complete your investment payment</p>
-            </div>
-            
-            {renderProgressIndicator()}
-            
-            {/* Investment Summary */}
-            <Card className="border-2 border-orange-100 bg-white/90">
-              <CardHeader>
-                <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
-                  <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 text-sm font-bold">$</div>
-                  Investment Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                  <span className="text-gray-600 font-medium">USD Amount:</span>
-                  <span className="font-bold text-xl text-gray-900">${selectedAmount || parseFloat(customAmount) || 0}</span>
-                </div>
-                
-                {ngnAmount && exchangeRate ? (
-                  <>
-                    <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                      <span className="text-gray-600 font-medium">NGN Equivalent:</span>
-                      <span className="font-bold text-xl text-green-700">₦{ngnAmount.toLocaleString('en-NG')}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-500">Exchange Rate:</span>
-                      <span className="text-sm text-gray-600">$1 = ₦{exchangeRate.usdToNgn.toLocaleString('en-NG')}</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex justify-between items-center py-3">
-                    <span className="text-gray-600 font-medium">NGN Equivalent:</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-gray-500">Loading...</span>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Payment Method Selection */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
-                Choose Payment Method
-              </h3>
-              
-              {/* USD Payment Button */}
-              <Button
-                onClick={handleUSDPayment}
-                disabled={isProcessingPayment || isProcessingNaira}
-                className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold">$</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-base">Pay with USD</div>
-                    <div className="text-sm opacity-90">Powered by Stripe</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {isProcessingPayment ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span className="font-bold text-lg">${selectedAmount}</span>
-                  )}
-                </div>
-              </Button>
-
-              {/* NGN Payment Button */}
-              <Button
-                onClick={handleNairaPayment}
-                disabled={isProcessingPayment || isProcessingNaira || !ngnAmount}
-                className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold">₦</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-base">Pay with Naira</div>
-                    <div className="text-sm opacity-90">Powered by Budpay</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {isProcessingNaira ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span className="font-bold text-lg">
-                      {ngnAmount ? `₦${ngnAmount.toLocaleString('en-NG')}` : '...'}
-                    </span>
-                  )}
-                </div>
-              </Button>
-            </div>
-
-            {/* Security Notice */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-blue-900 mb-1">Secure Payment</h4>
-                  <p className="text-sm text-blue-700">
-                    Your payment information is encrypted and secure. Card details will be handled directly by the selected payment processor.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Stripe Elements form - shows when USD payment is selected */}
-            {showStripeForm && clientSecret && (
-              <Card className="border-2 border-blue-100 bg-white/90">
-                <CardHeader>
-                  <CardTitle className="text-lg text-blue-800 flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
-                    Complete USD Payment
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <StripeElementsWrapper stripePromise={stripePromise} clientSecret={clientSecret} />
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        );
-
-      case 'confirmation':
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Icon className="mx-auto h-12 w-12 text-green-500 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Investment Successful!</h3>
-              <p className="text-gray-600">Step {stepNumber} of 7: Your investment has been processed</p>
-            </div>
-            
-            {renderProgressIndicator()}
-            
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <h4 className="font-semibold text-green-900 mb-4">Congratulations!</h4>
-              <p className="text-green-800 mb-4">
-                You have successfully invested ${selectedAmount || parseFloat(customAmount) || 0} in {campaign.title}. Your payment has been processed and you will receive updates on the company's progress.
-              </p>
-              
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Investment ID:</span>
-                  <span className="font-medium">#{Date.now().toString().slice(-6)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Date:</span>
-                  <span className="font-medium">{new Date().toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Status:</span>
-                  <span className="font-medium text-green-600">Paid</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="text-center">
-              <p className="text-sm text-gray-600 mb-4">
-                You can track your investment progress in your investor dashboard.
-              </p>
-              <Button
-                onClick={() => {
-                  onClose();
-                  setLocation('/investor-dashboard');
-                }}
-                className="bg-fundry-orange hover:bg-orange-600"
-              >
-                Go to Dashboard
-              </Button>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  const canProceed = () => {
-    switch (currentStep) {
-      case 'amount':
-        // Get the actual investment amount (either from preset selection or custom input)
-        const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
-        return actualAmount >= minimumInvestment && actualAmount <= maximumInvestment;
-      case 'auth':
-        return isAuthenticated;
-      case 'safe-review':
-        return true;
-      case 'terms':
-        return agreedToTerms;
-      case 'signature':
-        return signatureData.trim().length > 0;
-      case 'payment':
-        return true;
-      case 'confirmation':
-        return false;
-      default:
-        return false;
-    }
-  };
-
-  const handleClose = () => {
-    setCurrentStep('amount');
-    setSelectedAmount(0);
-    setCustomAmount('');
-    setInvestorDetails({
-      firstName: '',
-      lastName: '',
-      phone: '',
-      address: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      investmentExperience: '',
-      accreditedInvestor: false
-    });
-    setAuthData({
-      email: '',
-      password: '',
-      firstName: '',
-      lastName: '',
-      confirmPassword: ''
-    });
-    setAuthMode('signin');
-    setAgreedToTerms(false);
-    setSignatureData('');
-    onClose();
-  };
+  const currentStepNumber = getStepNumber(currentStep);
+  const totalSteps = isAuthenticated ? 6 : 7;
 
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-[450px] w-[90vw] max-h-[90vh] overflow-y-auto overflow-x-hidden">
-          <DialogHeader>
-            <DialogTitle className="text-center text-base sm:text-lg">
-              {getStepTitle(currentStep)}
-            </DialogTitle>
-            <DialogDescription className="text-center text-sm text-gray-600">
-              Complete your investment in {campaign.title}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-2 px-1 overflow-x-hidden">
-            <div className="max-w-full">
-              {renderStepContent()}
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border border-orange-200/50 shadow-xl">
+        <DialogHeader className="text-center pb-6 border-b border-orange-100">
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+              <FundryLogo className="h-8 w-8 text-white" />
             </div>
           </div>
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
+            {getStepTitle(currentStep)}
+          </DialogTitle>
+          <DialogDescription className="text-gray-600">
+            Step {currentStepNumber} of {totalSteps} • Investing in {campaign.title}
+          </DialogDescription>
           
-          <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
-            <Button
-              variant="outline"
-              onClick={handlePrevStep}
-              disabled={currentStep === 'amount' || currentStep === 'confirmation'}
-              className="w-full sm:w-auto"
-            >
-              Previous
-            </Button>
-            
-            <div className="flex flex-col sm:flex-row gap-2">
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
+            <div 
+              className="bg-gradient-to-r from-orange-500 to-blue-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(currentStepNumber / totalSteps) * 100}%` }}
+            />
+          </div>
+        </DialogHeader>
+
+        <div className="py-6">
+          {currentStep === 'amount' && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  How much would you like to invest?
+                </h3>
+                <p className="text-gray-600">
+                  Minimum investment: $25
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[25, 50, 100, 250].map((amount) => (
+                  <Button
+                    key={amount}
+                    variant={selectedAmount === amount ? "default" : "outline"}
+                    onClick={() => handleAmountSelect(amount)}
+                    className="h-12 text-lg font-semibold"
+                  >
+                    ${amount}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="custom-amount">Custom Amount</Label>
+                <Input
+                  id="custom-amount"
+                  type="number"
+                  min="25"
+                  step="1"
+                  placeholder="Enter amount (minimum $25)"
+                  value={customAmount}
+                  onChange={(e) => handleCustomAmountChange(e.target.value)}
+                  className="text-lg h-12"
+                />
+              </div>
+
+              {selectedAmount > 0 && (
+                <Card className="bg-gradient-to-r from-orange-50 to-blue-50 border-orange-200">
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-900 mb-2">
+                        ${selectedAmount.toLocaleString()}
+                      </div>
+                      {ngnAmount && (
+                        <div className="text-lg text-gray-600">
+                          ≈ ₦{ngnAmount.toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               <Button
-                variant="outline"
-                onClick={handleClose}
-                className="w-full sm:w-auto"
+                onClick={handleNextStep}
+                disabled={selectedAmount < 25}
+                className="w-full bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3 text-lg"
               >
-                Cancel
+                Continue to {isAuthenticated ? 'SAFE Agreement' : 'Account Verification'}
               </Button>
-              
-              {currentStep !== 'confirmation' && (
-                <Button
-                  onClick={handleNextStep}
-                  disabled={!canProceed() || isProcessingPayment || createInvestmentMutation.isPending}
-                  className="bg-fundry-orange hover:bg-orange-600 w-full sm:w-auto"
-                >
-                  {currentStep === 'payment' ? 
-                    (isProcessingPayment ? 'Processing...' : 'Commit Investment') : 
-                    'Next'
-                  }
-                </Button>
+            </div>
+          )}
+
+          {currentStep === 'payment' && (
+            <div className="space-y-6">
+              {!showStripeForm ? (
+                <>
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Complete Your Investment
+                    </h3>
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${selectedAmount.toLocaleString()}
+                    </div>
+                    {ngnAmount && (
+                      <div className="text-lg text-gray-600">
+                        ≈ ₦{ngnAmount.toLocaleString()}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <Button
+                      onClick={handleUSDPayment}
+                      disabled={isProcessingPayment || isProcessingNaira}
+                      className="h-16 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {isProcessingPayment ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Processing...
+                        </div>
+                      ) : (
+                        <>
+                          <CreditCard className="w-5 h-5 mr-2" />
+                          Pay ${selectedAmount} (USD)
+                        </>
+                      )}
+                    </Button>
+
+                    <Button
+                      onClick={handleNGNPayment}
+                      disabled={isProcessingNaira || isProcessingPayment || !ngnAmount}
+                      className="h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      {isProcessingNaira ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Processing...
+                        </div>
+                      ) : (
+                        <>
+                          <CreditCard className="w-5 h-5 mr-2" />
+                          Pay ₦{ngnAmount?.toLocaleString()} (NGN)
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <Elements stripe={stripePromise} options={{ clientSecret }}>
+                  <StripePaymentForm
+                    clientSecret={clientSecret}
+                    cardholderName={cardholderName}
+                    setCardholderName={setCardholderName}
+                    onBack={resetPaymentState}
+                    onSuccess={() => setCurrentStep('confirmation')}
+                    selectedAmount={selectedAmount}
+                  />
+                </Elements>
               )}
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          )}
 
-      {/* SAFE Agreement Viewer Modal */}
-      {showSafeViewer && (
-      <Dialog open={showSafeViewer} onOpenChange={setShowSafeViewer}>
-        <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] bg-gradient-to-br from-white via-orange-50/20 to-blue-50/30">
-          <DialogHeader className="border-b pb-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between">
-              <DialogTitle className="text-lg sm:text-xl font-bold text-fundry-navy flex items-center gap-3">
-                <div className="bg-fundry-orange p-2 rounded-lg">
-                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </div>
-                <span className="text-sm sm:text-base">SAFE Agreement Preview</span>
-              </DialogTitle>
-              <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowSafeViewer(false)}
-                  className="w-full sm:w-auto border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white order-2 sm:order-1"
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Close Viewer
-                </Button>
-                <Button
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    const safeContent = generateSafeAgreement(campaign, getCurrentInvestmentAmount());
-                    downloadSafeAgreement(safeContent, campaign.title, getCurrentInvestmentAmount());
-                  }}
-                  className="w-full sm:w-auto border-fundry-orange text-fundry-orange hover:bg-fundry-orange hover:text-white order-1 sm:order-2"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </Button>
+          {currentStep === 'confirmation' && (
+            <div className="text-center space-y-6">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle className="w-12 h-12 text-green-600" />
               </div>
-            </div>
-          </DialogHeader>
-          
-          {/* Scrollable SAFE Agreement Content */}
-          <div className="flex-1 overflow-y-auto max-h-[calc(90vh-180px)] p-3 sm:p-6 bg-white rounded-lg border">
-            <div className="prose prose-sm max-w-none">
-              {/* SAFE Agreement Header */}
-              <div className="text-center mb-6 sm:mb-8 pb-4 sm:pb-6 border-b-2 border-gray-200">
-                <h1 className="text-xl sm:text-2xl font-bold text-fundry-navy mb-2">
-                  SIMPLE AGREEMENT FOR FUTURE EQUITY
-                </h1>
-                <p className="text-base sm:text-lg font-semibold text-gray-700">
-                  {campaign.title}
-                </p>
-                <p className="text-sm text-gray-600 mt-2">
-                  Investment Amount: <span className="font-bold">${getCurrentInvestmentAmount().toLocaleString()}</span>
+              
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  Investment Successful!
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Thank you for investing ${selectedAmount.toLocaleString()} in {campaign.title}
                 </p>
               </div>
 
-              {/* Article 1 - Definitions */}
-              <div className="mb-4 sm:mb-6">
-                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
-                  Article 1: Definitions
-                </h2>
-                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
-                  <p><strong>"Company"</strong> means {campaign.title}, a company incorporated under the laws of {campaign.country || 'Delaware'}.</p>
-                  <p><strong>"Investor"</strong> means {user?.firstName} {user?.lastName} ({user?.email}), the purchaser of this SAFE.</p>
-                  <p><strong>"Purchase Amount"</strong> means ${getCurrentInvestmentAmount().toLocaleString()}.</p>
-                  <p><strong>"Valuation Cap"</strong> means ${(parseFloat(campaign.valuationCap || "1000000")).toLocaleString()}.</p>
-                  <p><strong>"Discount Rate"</strong> means {campaign.discountRate}%.</p>
-                  <p><strong>"Equity Financing"</strong> means a bona fide transaction or series of transactions with the principal purpose of raising capital.</p>
-                </div>
-              </div>
-
-              {/* Article 2 - Investment and Conversion */}
-              <div className="mb-4 sm:mb-6">
-                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
-                  Article 2: Investment and Conversion
-                </h2>
-                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
-                  <p>2.1 <strong>Investment:</strong> The Investor agrees to invest ${getCurrentInvestmentAmount().toLocaleString()} in the Company in exchange for the right to receive shares of the Company's capital stock upon the occurrence of an Equity Financing or Liquidity Event.</p>
-                  <p>2.2 <strong>Conversion Trigger:</strong> This SAFE will automatically convert into shares of the Company's preferred stock issued in the next Equity Financing at either:</p>
-                  <ul className="ml-4 sm:ml-6 list-disc space-y-1">
-                    <li>The price per share equal to the Valuation Cap divided by the Company's fully-diluted capitalization; or</li>
-                    <li>A discount of {campaign.discountRate}% to the price per share of the securities sold in the Equity Financing;</li>
-                    <li>Whichever calculation results in a greater number of shares for the Investor.</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Article 3 - Company Representations */}
-              <div className="mb-4 sm:mb-6">
-                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
-                  Article 3: Company Representations
-                </h2>
-                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
-                  <p>3.1 The Company is a corporation duly organized, validly existing, and in good standing under the laws of its jurisdiction of incorporation.</p>
-                  <p>3.2 The execution and delivery of this SAFE has been duly authorized by the Company.</p>
-                  <p>3.3 This SAFE constitutes a valid and binding obligation of the Company.</p>
-                  <p>3.4 The Company has the corporate power and authority to execute and deliver this SAFE.</p>
-                </div>
-              </div>
-
-              {/* Article 4 - Investor Representations */}
-              <div className="mb-4 sm:mb-6">
-                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
-                  Article 4: Investor Representations
-                </h2>
-                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
-                  <p>4.1 The Investor has full legal capacity to execute and deliver this SAFE.</p>
-                  <p>4.2 This SAFE constitutes a valid and binding obligation of the Investor.</p>
-                  <p>4.3 The Investor understands that this investment involves substantial risk and may result in total loss.</p>
-                  <p>4.4 The Investor is investing for their own account and not for the benefit of any other person.</p>
-                </div>
-              </div>
-
-              {/* Article 5 - Miscellaneous */}
-              <div className="mb-4 sm:mb-6">
-                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
-                  Article 5: Miscellaneous
-                </h2>
-                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
-                  <p>5.1 <strong>Governing Law:</strong> This SAFE shall be governed by and construed in accordance with the laws of Delaware.</p>
-                  <p>5.2 <strong>Amendment:</strong> This SAFE may only be amended with the written consent of both parties.</p>
-                  <p>5.3 <strong>Assignment:</strong> This SAFE may not be transferred or assigned without the Company's written consent.</p>
-                  <p>5.4 <strong>Severability:</strong> If any provision is held invalid, the remainder shall continue in full force and effect.</p>
-                </div>
-              </div>
-
-              {/* Article 6 - Risk Disclosures */}
-              <div className="mb-6 sm:mb-8">
-                <h2 className="text-base sm:text-lg font-bold text-fundry-navy mb-2 sm:mb-3 pb-2 border-b border-gray-300">
-                  Article 6: Risk Disclosures
-                </h2>
-                <div className="bg-yellow-50 p-3 sm:p-4 rounded-lg border border-yellow-200 space-y-2 sm:space-y-3 text-xs sm:text-sm leading-relaxed">
-                  <p><strong>IMPORTANT RISK DISCLOSURES:</strong></p>
-                  <ul className="ml-4 sm:ml-6 list-disc space-y-1 sm:space-y-2">
-                    <li><strong>Total Loss Risk:</strong> You may lose your entire investment.</li>
-                    <li><strong>Illiquidity:</strong> Your investment cannot be easily sold or transferred.</li>
-                    <li><strong>Dilution:</strong> Your percentage ownership may be reduced in future financing rounds.</li>
-                    <li><strong>No Guaranteed Returns:</strong> There is no assurance of any return on investment.</li>
-                    <li><strong>Company Failure:</strong> The Company may fail and cease operations.</li>
-                    <li><strong>Conversion Uncertainty:</strong> Conversion to equity depends on future financing events.</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Signature Block */}
-              <div className="border-t-2 border-gray-200 pt-4 sm:pt-6">
-                <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2">
-                  <div>
-                    <h3 className="font-bold text-fundry-navy mb-3 sm:mb-4 text-sm sm:text-base">COMPANY</h3>
-                    <p className="mb-2 font-semibold text-sm sm:text-base">{campaign.title}</p>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-3">
-                      {campaign.businessAddress || 'Business Address'}<br/>
-                      {campaign.country}
-                    </p>
-                    <div className="border-b border-gray-400 w-full max-w-64 mb-2"></div>
-                    <p className="text-xs text-gray-600">Authorized Representative</p>
-                    <p className="text-xs text-gray-600 mt-3 sm:mt-4">Date: ________________</p>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-fundry-navy mb-3 sm:mb-4 text-sm sm:text-base">INVESTOR</h3>
-                    <p className="mb-2 font-semibold text-sm sm:text-base">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-3">
-                      Email: {user?.email}<br/>
-                      Investment Amount: ${getCurrentInvestmentAmount().toLocaleString()}
-                    </p>
-                    <div className="border-b border-gray-400 w-full max-w-64 mb-2"></div>
-                    <p className="text-xs text-gray-600">Investor Signature</p>
-                    <p className="text-xs text-gray-600 mt-3 sm:mt-4">Date: {new Date().toLocaleDateString()}</p>
-                  </div>
-                </div>
-                
-                {/* Agreement Summary */}
-                <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h4 className="font-bold text-fundry-navy mb-2 text-sm sm:text-base">Agreement Summary</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
-                    <div className="space-y-1">
-                      <p><strong>Investment Amount:</strong> ${getCurrentInvestmentAmount().toLocaleString()}</p>
-                      <p><strong>Valuation Cap:</strong> ${(parseFloat(campaign.valuationCap || "1000000")).toLocaleString()}</p>
+              <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+                <CardContent className="pt-6">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Investment Amount:</span>
+                      <span className="font-semibold">${selectedAmount.toLocaleString()}</span>
                     </div>
-                    <div className="space-y-1">
-                      <p><strong>Discount Rate:</strong> {campaign.discountRate}%</p>
-                      <p><strong>Company:</strong> {campaign.title}</p>
+                    <div className="flex justify-between">
+                      <span>Campaign:</span>
+                      <span className="font-semibold">{campaign.title}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Status:</span>
+                      <span className="font-semibold text-green-600">Confirmed</span>
                     </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
+
+              <Button
+                onClick={handleClose}
+                className="w-full bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3"
+              >
+                Return to Campaign
+              </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    )}
-    </>
+          )}
+
+          {/* Add other step content here as needed */}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -6828,6 +6828,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           failed++;
         }
       }
+    }
 
       console.log(`Upload completed: ${successful} successful, ${failed} failed, ${duplicates} duplicates, ${missingData} missing data`);
 

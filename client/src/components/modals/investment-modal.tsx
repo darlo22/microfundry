@@ -750,7 +750,7 @@ This SAFE Agreement represents the terms of investment in ${campaign.title}.`;
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="font-medium">Investment Amount:</span>
-                      <div className="text-xl font-bold text-orange-600">${selectedAmount.toLocaleString()}</div>
+                      <div className="text-xl font-bold text-orange-600">${selectedAmount?.toLocaleString() || '0'}</div>
                     </div>
                     <div>
                       <span className="font-medium">Company:</span>
@@ -796,8 +796,8 @@ This SAFE Agreement represents the terms of investment in ${campaign.title}.`;
                     investorName: `${user?.firstName} ${user?.lastName}`,
                     investorEmail: user?.email || '',
                     investmentAmount: selectedAmount,
-                    discountRate: campaign.discountRate || 20,
-                    valuationCap: campaign.valuationCap || 1000000,
+                    discountRate: campaign.discountRate ? parseFloat(campaign.discountRate.toString()) : 20,
+                    valuationCap: campaign.valuationCap ? parseFloat(campaign.valuationCap.toString()) : 1000000,
                     date: new Date().toLocaleDateString(),
                     agreementId: `${campaign.id}_${Date.now()}`
                   }}

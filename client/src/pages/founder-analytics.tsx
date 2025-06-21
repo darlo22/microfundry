@@ -19,34 +19,34 @@ export default function FounderAnalytics() {
 
   // Fetch founder stats
   const { data: founderStats, isLoading: statsLoading } = useQuery({
-    queryKey: ["/api/analytics/founder", user?.id],
+    queryKey: [`/api/analytics/founder/${user?.id}`],
     enabled: !!user?.id,
   });
 
   // Fetch campaigns for filtering
   const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
-    queryKey: ["/api/campaigns/founder", user?.id],
+    queryKey: [`/api/campaigns/founder/${user?.id}`],
     enabled: !!user?.id,
   });
 
   // Fetch live analytics data
   const { data: investmentTrends = [], isLoading: trendsLoading } = useQuery({
-    queryKey: ["/api/analytics/investment-trends", user?.id],
+    queryKey: [`/api/analytics/investment-trends/${user?.id}`],
     enabled: !!user?.id,
   });
 
   const { data: investorDistribution = [], isLoading: distributionLoading } = useQuery({
-    queryKey: ["/api/analytics/investor-distribution", user?.id],
+    queryKey: [`/api/analytics/investor-distribution/${user?.id}`],
     enabled: !!user?.id,
   });
 
   const { data: monthlyGrowth = [], isLoading: growthLoading } = useQuery({
-    queryKey: ["/api/analytics/monthly-growth", user?.id],
+    queryKey: [`/api/analytics/monthly-growth/${user?.id}`],
     enabled: !!user?.id,
   });
 
   const { data: investorInsights, isLoading: insightsLoading } = useQuery({
-    queryKey: ["/api/analytics/investor-insights", user?.id],
+    queryKey: [`/api/analytics/investor-insights/${user?.id}`],
     enabled: !!user?.id,
   });
 

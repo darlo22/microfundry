@@ -181,15 +181,15 @@ export default function FounderDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Button
                 variant="outline"
-                className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-fundry-navy border-2 border-fundry-navy hover:border-fundry-orange hover:shadow-lg group transition-all duration-300 hover:scale-105"
+                className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-fundry-orange border-2 border-fundry-orange hover:border-orange-600 hover:shadow-lg group transition-all duration-300 hover:scale-105"
                 onClick={() => setShowCampaignModal(true)}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 shadow-md">
-                  <Plus className="text-white" size={20} />
+                <div className="w-10 h-10 bg-gradient-to-br from-white to-orange-100 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                  <Plus className="text-fundry-orange" size={20} />
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-white group-hover:text-fundry-orange transition-colors duration-300 text-xs sm:text-sm mb-1">Create Campaign</div>
-                  <div className="text-xs text-slate-300 leading-tight">Start a new fundraising campaign</div>
+                  <div className="font-bold text-white group-hover:text-white transition-colors duration-300 text-xs sm:text-sm mb-1">Create Campaign</div>
+                  <div className="text-xs text-white leading-tight">Start a new fundraising campaign</div>
                 </div>
               </Button>
 

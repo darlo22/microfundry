@@ -6598,7 +6598,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           try {
             const emailSent = await emailService.sendEmail({
               to: email.recipientEmail,
-              from: `${emailSettings[0].displayName} <support@microfundry.com>`,
+              from: `${emailSettings[0].displayName} <${emailSettings[0].verifiedEmail.split('@')[0]}@microfundry.com>`,
               replyTo: emailSettings[0].verifiedEmail,
               subject: email.personalizedSubject,
               html: `

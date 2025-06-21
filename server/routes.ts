@@ -6735,49 +6735,18 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 <head>
                   <meta charset="UTF-8">
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>Business Partnership Inquiry</title>
                 </head>
-                <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-                  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <body style="margin: 0; padding: 0; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">
+                  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #333333; font-size: 16px; line-height: 1.5;">
                     
-                    <!-- Header -->
-                    <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 30px 40px; text-align: center;">
-                      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.5px;">
-                        Strategic Business Partnership
-                      </h1>
-                      <p style="color: #e0e7ff; margin: 8px 0 0 0; font-size: 14px; font-weight: 400;">
-                        Growth Investment Opportunity
-                      </p>
-                    </div>
-
-                    <!-- Main Content -->
-                    <div style="padding: 40px; color: #374151; line-height: 1.7; font-size: 16px;">
-                      ${email.personalizedMessage.replace(/\n/g, '<br><br>').replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1e40af;">$1</strong>').replace(/✅/g, '<span style="color: #10b981; font-weight: 600;">✅</span>')}
-                    </div>
-
-                    <!-- Signature Section -->
-                    <div style="border-top: 2px solid #e5e7eb; padding: 30px 40px; background-color: #f9fafb;">
-                      <div style="color: #374151; font-size: 16px; line-height: 1.6;">
-                        <p style="margin: 0 0 10px 0; font-weight: 600; color: #1f2937;">
-                          Best regards,
-                        </p>
-                        <p style="margin: 0 0 15px 0; font-size: 18px; font-weight: 700; color: #1e40af;">
-                          ${emailSettings[0].displayName}
-                        </p>
-                        ${emailSettings[0].signature ? `
-                          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; line-height: 1.5;">
-                            ${emailSettings[0].signature.replace(/\n/g, '<br>')}
-                          </div>
-                        ` : ''}
-                      </div>
-                    </div>
-
-                    <!-- Footer -->
-                    <div style="padding: 20px 40px; background-color: #1f2937; text-align: center;">
-                      <p style="margin: 0; color: #9ca3af; font-size: 12px; line-height: 1.4;">
-                        This message was sent regarding a business partnership opportunity.<br>
-                        If you're not interested, please disregard this message.
-                      </p>
+                    ${email.personalizedMessage.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/✅/g, '✅')}
+                    
+                    <br><br>
+                    
+                    <div style="margin-top: 30px;">
+                      <p style="margin: 0; font-weight: 600;">Best regards,</p>
+                      <p style="margin: 5px 0 0 0; font-weight: 700;">${emailSettings[0].displayName}</p>
+                      ${emailSettings[0].signature ? `<p style="margin: 15px 0 0 0; color: #666666; font-size: 14px;">${emailSettings[0].signature.replace(/\n/g, '<br>')}</p>` : ''}
                     </div>
 
                   </div>
@@ -6827,6 +6796,11 @@ ${emailSettings[0].signature || ''}`
               .where(eq(outreachEmails.id, email.id));
             
             sentCount++;
+          }
+
+          // Add delay between emails to respect Resend's rate limit (2 requests per second)
+          if (i < emails.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 600)); // 600ms delay
           }
         }
 

@@ -235,12 +235,13 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
   const [cardholderName, setCardholderName] = useState<string>('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [isProcessingNaira, setIsProcessingNaira] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showStripeForm, setShowStripeForm] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
   const [showSafeViewer, setShowSafeViewer] = useState(false);
   const [ngnAmount, setNgnAmount] = useState<number | null>(null);
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
   const [isLoadingRate, setIsLoadingRate] = useState(false);
-  const [clientSecret, setClientSecret] = useState('');
-  const [showStripeForm, setShowStripeForm] = useState(false);
   const [createdInvestment, setCreatedInvestment] = useState<any>(null);
 
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -307,114 +308,6 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     setIsProcessingNaira(false);
     setCardholderName('');
     setClientSecret('');
-  };
-                id="cardholder-name"
-                value={cardholderName}
-                onChange={(e) => setCardholderName(e.target.value)}
-                placeholder="Enter name as it appears on card"
-                className="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-orange-600" />
-                Card Information
-              </Label>
-              <div className="mt-2 p-4 border border-gray-200 rounded-lg bg-white">
-                <CardElement
-                  options={{
-                    style: {
-                      base: {
-                        fontSize: '16px',
-                        color: '#374151',
-                        fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-                        '::placeholder': {
-                          color: '#9CA3AF',
-                        },
-                      },
-                      invalid: {
-                        color: '#EF4444',
-                      },
-                    },
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <div className="flex items-start gap-2">
-                <Shield className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-800">
-                  <p className="font-medium">Secure Payment</p>
-                  <p>Your payment information is encrypted and secure. We use Stripe for secure payment processing.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-50 p-6 rounded-lg">
-          <h4 className="font-semibold mb-4">Investment Summary</h4>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span>Company:</span>
-              <span className="font-medium">{campaign.title}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Investment Amount:</span>
-              <div className="text-right">
-                <div className="font-medium">${selectedAmount}</div>
-                {ngnAmount && !isLoadingRate && (
-                  <div className="text-sm text-gray-600">
-                    ≈ ₦{ngnAmount.toLocaleString()}
-                  </div>
-                )}
-                {isLoadingRate && (
-                  <div className="text-sm text-gray-500">Converting...</div>
-                )}
-              </div>
-            </div>
-            <div className="flex justify-between text-lg font-bold border-t pt-2">
-              <span>Total:</span>
-              <div className="text-right">
-                <div>${selectedAmount}</div>
-                {ngnAmount && !isLoadingRate && (
-                  <div className="text-base font-normal text-gray-600">
-                    ≈ ₦{ngnAmount.toLocaleString()}
-                  </div>
-                )}
-              </div>
-            </div>
-            {exchangeRate && (
-              <div className="text-xs text-gray-500 text-right border-t pt-2">
-                Exchange rate: $1 = ₦{exchangeRate.usdToNgn} ({exchangeRate.source})
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <Button
-            onClick={handlePayment}
-            disabled={!stripe || isPaymentProcessing}
-            className="w-full bg-blue-900 hover:bg-blue-800"
-          >
-            {isPaymentProcessing ? 'Processing Payment...' : `Pay $${selectedAmount} (USD)`}
-          </Button>
-          
-          {ngnAmount && !isLoadingRate && (
-            <Button
-              onClick={handleNairaPayment}
-              disabled={isPaymentProcessing}
-              className="w-full bg-green-600 hover:bg-green-700"
-            >
-              {isPaymentProcessing ? 'Processing Payment...' : `Pay ₦${ngnAmount.toLocaleString()} (NGN)`}
-            </Button>
-          )}
-        </div>
-      </div>
-    );
   };
 
   // Store investment context in localStorage when modal opens

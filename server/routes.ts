@@ -6126,24 +6126,44 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
-  // Get investor directory (Admin-curated + Platform users)
+  // Get investor directory (Admin-curated + Platform users) with pagination
   app.get('/api/founder/investor-directory', async (req: any, res) => {
     try {
       if (!req.isAuthenticated() || req.user.userType !== 'founder') {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
-      const { source = 'all', search, tags, limit = 50 } = req.query;
-      const limitNum = parseInt(limit as string) || 50;
+      const { source = 'all', search, page = 1, limit = 30 } = req.query;
+      const limitNum = parseInt(limit as string) || 30;
+      const pageNum = parseInt(page as string) || 1;
+      const offset = (pageNum - 1) * limitNum;
       const searchTerm = search ? (search as string).toLowerCase() : '';
 
       let investors = [];
+      let totalCount = 0;
 
-      // Get directory investors with safer approach
+      // Get directory investors with pagination
       if (source === 'all' || source === 'directory') {
         try {
           const client = await pool.connect();
           try {
+            // Count total directory investors
+            let countQuery = `
+              SELECT COUNT(*) as total
+              FROM investor_directory 
+              WHERE is_active = true
+            `;
+            
+            const countParams = [];
+            if (searchTerm) {
+              countQuery += ` AND (LOWER(name) LIKE $1 OR LOWER(email) LIKE $1 OR LOWER(company) LIKE $1)`;
+              countParams.push(`%${searchTerm}%`);
+            }
+            
+            const countResult = await client.query(countQuery, countParams);
+            const directoryCount = parseInt(countResult.rows[0].total);
+            
+            // Get directory investors for current page
             let directoryQuery = `
               SELECT id, name, email, company, location, bio, 'directory' as source
               FROM investor_directory 
@@ -6156,10 +6176,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               queryParams.push(`%${searchTerm}%`);
             }
             
-            directoryQuery += ` LIMIT ${Math.floor(limitNum / 2)}`;
+            directoryQuery += ` ORDER BY name OFFSET ${offset} LIMIT ${limitNum}`;
             
             const directoryResult = await client.query(directoryQuery, queryParams);
             investors.push(...directoryResult.rows);
+            totalCount = directoryCount;
           } finally {
             client.release();
           }
@@ -6168,17 +6189,37 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         }
       }
 
-      // Get platform investors with safer approach
-      if (source === 'all' || source === 'platform') {
+      // Get platform investors with pagination (only if we haven't reached limit)
+      if ((source === 'all' || source === 'platform') && investors.length < limitNum) {
         try {
           const client = await pool.connect();
           try {
+            // Count total platform investors
+            let countQuery = `
+              SELECT COUNT(*) as total
+              FROM users 
+              WHERE user_type = 'investor'
+            `;
+            
+            const countParams = [];
+            if (searchTerm) {
+              countQuery += ` AND (LOWER(email) LIKE $1 OR LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1)`;
+              countParams.push(`%${searchTerm}%`);
+            }
+            
+            const countResult = await client.query(countQuery, countParams);
+            const platformCount = parseInt(countResult.rows[0].total);
+            
+            // Calculate remaining slots and offset for platform users
+            const remainingSlots = limitNum - investors.length;
+            const platformOffset = Math.max(0, offset - (source === 'all' ? totalCount : 0));
+            
             let platformQuery = `
               SELECT 
                 id, 
                 CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as name,
                 email,
-                company,
+                '' as company,
                 CONCAT(COALESCE(city, ''), CASE WHEN city IS NOT NULL AND country IS NOT NULL THEN ', ' ELSE '' END, COALESCE(country, '')) as location,
                 bio,
                 'platform' as source
@@ -6188,17 +6229,23 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             
             const queryParams = [];
             if (searchTerm) {
-              platformQuery += ` AND (LOWER(email) LIKE $1 OR LOWER(company) LIKE $1 OR LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1)`;
+              platformQuery += ` AND (LOWER(email) LIKE $1 OR LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1)`;
               queryParams.push(`%${searchTerm}%`);
             }
             
-            platformQuery += ` LIMIT ${Math.floor(limitNum / 2)}`;
+            platformQuery += ` ORDER BY first_name, last_name OFFSET ${platformOffset} LIMIT ${remainingSlots}`;
             
             const platformResult = await client.query(platformQuery, queryParams);
             investors.push(...platformResult.rows.map(inv => ({
               ...inv,
               name: inv.name.trim() || inv.email
             })));
+            
+            if (source === 'all') {
+              totalCount += platformCount;
+            } else {
+              totalCount = platformCount;
+            }
           } finally {
             client.release();
           }
@@ -6207,7 +6254,21 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         }
       }
 
-      res.json(investors);
+      const totalPages = Math.ceil(totalCount / limitNum);
+      const hasNext = pageNum < totalPages;
+      const hasPrev = pageNum > 1;
+
+      res.json({
+        investors,
+        pagination: {
+          currentPage: pageNum,
+          totalPages,
+          totalCount,
+          limit: limitNum,
+          hasNext,
+          hasPrev
+        }
+      });
     } catch (error) {
       console.error('Error fetching investor directory:', error);
       res.status(500).json({ message: 'Failed to fetch investor directory' });

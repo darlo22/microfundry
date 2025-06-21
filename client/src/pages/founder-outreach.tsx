@@ -102,6 +102,7 @@ export default function FounderOutreach() {
   const [emailRecipients, setEmailRecipients] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [sourceFilter, setSourceFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>("none");
@@ -123,14 +124,23 @@ export default function FounderOutreach() {
     },
   });
 
-  // Fetch investor directory
-  const { data: investors = [], isLoading: loadingInvestors } = useQuery({
-    queryKey: ["/api/founder/investor-directory", sourceFilter, searchTerm],
+  // Fetch investor directory with pagination
+  const { data: investorData, isLoading: loadingInvestors } = useQuery({
+    queryKey: ["/api/founder/investor-directory", sourceFilter, searchTerm, currentPage],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/founder/investor-directory?source=${sourceFilter}&search=${searchTerm}`);
+      const response = await apiRequest("GET", `/api/founder/investor-directory?source=${sourceFilter}&search=${searchTerm}&page=${currentPage}&limit=30`);
       return response.json();
     },
   });
+
+  const investors = investorData?.investors || [];
+  const pagination = investorData?.pagination || {
+    currentPage: 1,
+    totalPages: 1,
+    totalCount: 0,
+    hasNext: false,
+    hasPrev: false
+  };
 
   // Fetch email templates
   const { data: templates = [] } = useQuery({
@@ -640,13 +650,13 @@ Founder, {companyName}`
                         />
                       </div>
                       <Select value={sourceFilter} onValueChange={setSourceFilter}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[180px] bg-white/10 border-white/20 text-white">
                           <SelectValue placeholder="Filter by source" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Sources</SelectItem>
-                          <SelectItem value="directory">Admin Directory</SelectItem>
-                          <SelectItem value="platform">Platform Users</SelectItem>
+                        <SelectContent className="bg-white border-gray-200">
+                          <SelectItem value="all" className="text-fundry-navy hover:bg-gray-100">All Sources</SelectItem>
+                          <SelectItem value="directory" className="text-fundry-navy hover:bg-gray-100">Admin Directory</SelectItem>
+                          <SelectItem value="platform" className="text-fundry-navy hover:bg-gray-100">Platform Users</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

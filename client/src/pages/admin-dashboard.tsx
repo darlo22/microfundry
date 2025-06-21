@@ -874,15 +874,15 @@ export default function AdminDashboard() {
           <div className="flex items-center space-x-4">
             <Shield className="w-8 h-8 text-fundry-orange" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Fundry Admin Centre</h1>
+              <h1 className="text-2xl font-bold text-fundry-navy">Fundry Admin Centre</h1>
               <p className="text-sm text-gray-600">Platform oversight and management</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-green-100 text-green-800">
+            <Badge variant="secondary" className="bg-fundry-navy text-white">
               Admin: {adminUser.firstName} {adminUser.lastName}
             </Badge>
-            <Button onClick={handleLogout} variant="outline" size="sm">
+            <Button onClick={handleLogout} variant="outline" size="sm" className="border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white">
               <LogOut className="w-4 h-4 mr-2" />
               Logout
             </Button>
@@ -896,7 +896,7 @@ export default function AdminDashboard() {
           <div className="space-y-2">
             <Button 
               variant={activeTab === "overview" ? "default" : "ghost"} 
-              className="w-full justify-start"
+              className={`w-full justify-start ${activeTab === "overview" ? "bg-fundry-orange text-white hover:bg-orange-600" : "text-gray-700 hover:bg-gray-100"}`}
               onClick={() => setActiveTab("overview")}
             >
               <Activity className="w-4 h-4 mr-2" />
@@ -904,7 +904,7 @@ export default function AdminDashboard() {
             </Button>
             <Button 
               variant={activeTab === "users" ? "default" : "ghost"} 
-              className="w-full justify-start"
+              className={`w-full justify-start ${activeTab === "users" ? "bg-fundry-orange text-white hover:bg-orange-600" : "text-gray-700 hover:bg-gray-100"}`}
               onClick={() => setActiveTab("users")}
             >
               <Users className="w-4 h-4 mr-2" />
@@ -912,7 +912,7 @@ export default function AdminDashboard() {
             </Button>
             <Button 
               variant={activeTab === "founders" ? "default" : "ghost"} 
-              className="w-full justify-start"
+              className={`w-full justify-start ${activeTab === "founders" ? "bg-fundry-orange text-white hover:bg-orange-600" : "text-gray-700 hover:bg-gray-100"}`}
               onClick={() => setActiveTab("founders")}
             >
               <User className="w-4 h-4 mr-2" />
@@ -920,7 +920,7 @@ export default function AdminDashboard() {
             </Button>
             <Button 
               variant={activeTab === "investors" ? "default" : "ghost"} 
-              className="w-full justify-start"
+              className={`w-full justify-start ${activeTab === "investors" ? "bg-fundry-orange text-white hover:bg-orange-600" : "text-gray-700 hover:bg-gray-100"}`}
               onClick={() => setActiveTab("investors")}
             >
               <Users className="w-4 h-4 mr-2" />
@@ -929,7 +929,7 @@ export default function AdminDashboard() {
             <Link href="/admin/investor-outreach">
               <Button 
                 variant="ghost" 
-                className="w-full justify-start"
+                className="w-full justify-start text-gray-700 hover:bg-gray-100"
               >
                 <Send className="w-4 h-4 mr-2" />
                 Investor Outreach
@@ -937,7 +937,7 @@ export default function AdminDashboard() {
             </Link>
             <Button 
               variant={activeTab === "campaigns" ? "default" : "ghost"} 
-              className="w-full justify-start"
+              className={`w-full justify-start ${activeTab === "campaigns" ? "bg-fundry-orange text-white hover:bg-orange-600" : "text-gray-700 hover:bg-gray-100"}`}
               onClick={() => setActiveTab("campaigns")}
             >
               <TrendingUp className="w-4 h-4 mr-2" />
@@ -946,7 +946,7 @@ export default function AdminDashboard() {
             <Link href="/admin-kyc-management">
               <Button 
                 variant="ghost" 
-                className="w-full justify-start"
+                className="w-full justify-start text-gray-700 hover:bg-gray-100"
               >
                 <Shield className="w-4 h-4 mr-2" />
                 KYC Management
@@ -954,7 +954,7 @@ export default function AdminDashboard() {
             </Link>
             <Button 
               variant={activeTab === "transactions" ? "default" : "ghost"} 
-              className="w-full justify-start"
+              className={`w-full justify-start ${activeTab === "transactions" ? "bg-fundry-orange text-white hover:bg-orange-600" : "text-gray-700 hover:bg-gray-100"}`}
               onClick={() => setActiveTab("transactions")}
             >
               <DollarSign className="w-4 h-4 mr-2" />
@@ -962,7 +962,7 @@ export default function AdminDashboard() {
             </Button>
             <Button 
               variant={activeTab === "safes" ? "default" : "ghost"} 
-              className="w-full justify-start"
+              className={`w-full justify-start ${activeTab === "safes" ? "bg-fundry-orange text-white hover:bg-orange-600" : "text-gray-700 hover:bg-gray-100"}`}
               onClick={() => setActiveTab("safes")}
             >
               <FileText className="w-4 h-4 mr-2" />
@@ -970,7 +970,7 @@ export default function AdminDashboard() {
             </Button>
             <Button 
               variant={activeTab === "message-center" ? "default" : "ghost"} 
-              className="w-full justify-start"
+              className={`w-full justify-start ${activeTab === "message-center" ? "bg-fundry-orange text-white hover:bg-orange-600" : "text-gray-700 hover:bg-gray-100"}`}
               onClick={() => setActiveTab("message-center")}
             >
               <Send className="w-4 h-4 mr-2" />
@@ -978,7 +978,7 @@ export default function AdminDashboard() {
             </Button>
             <Button 
               variant={activeTab === "content" ? "default" : "ghost"} 
-              className="w-full justify-start"
+              className={`w-full justify-start ${activeTab === "content" ? "bg-fundry-orange text-white hover:bg-orange-600" : "text-gray-700 hover:bg-gray-100"}`}
               onClick={() => setActiveTab("content")}
             >
               <Bell className="w-4 h-4 mr-2" />
@@ -986,7 +986,7 @@ export default function AdminDashboard() {
             </Button>
             <Button 
               variant={activeTab === "reports" ? "default" : "ghost"} 
-              className="w-full justify-start"
+              className={`w-full justify-start ${activeTab === "reports" ? "bg-fundry-orange text-white hover:bg-orange-600" : "text-gray-700 hover:bg-gray-100"}`}
               onClick={() => setActiveTab("reports")}
             >
               <FileText className="w-4 h-4 mr-2" />
@@ -994,7 +994,7 @@ export default function AdminDashboard() {
             </Button>
             <Button 
               variant={activeTab === "settings" ? "default" : "ghost"} 
-              className="w-full justify-start"
+              className={`w-full justify-start ${activeTab === "settings" ? "bg-fundry-orange text-white hover:bg-orange-600" : "text-gray-700 hover:bg-gray-100"}`}
               onClick={() => setActiveTab("settings")}
             >
               <Settings className="w-4 h-4 mr-2" />
@@ -1008,63 +1008,63 @@ export default function AdminDashboard() {
           {activeTab === "overview" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Dashboard Overview</h2>
+                <h2 className="text-3xl font-bold text-fundry-navy">Dashboard Overview</h2>
                 <p className="text-gray-600">Real-time platform statistics and activity</p>
               </div>
 
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card>
+                <Card className="border-l-4 border-l-fundry-orange">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-fundry-navy">Total Campaigns</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-fundry-orange" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats?.totalCampaigns || 0}</div>
-                    <p className="text-xs text-muted-foreground">
+                    <div className="text-2xl font-bold text-fundry-navy">{stats?.totalCampaigns || 0}</div>
+                    <p className="text-xs text-gray-600">
                       {stats?.activeCampaigns || 0} active
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-l-4 border-l-fundry-navy">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Funds Raised</CardTitle>
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-fundry-navy">Total Funds Raised</CardTitle>
+                    <DollarSign className="h-4 w-4 text-fundry-orange" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">
+                    <div className="text-2xl font-bold text-fundry-navy">
                       {formatCurrency(stats?.totalFundsRaised || 0)}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-600">
                       Across all campaigns
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-l-4 border-l-fundry-orange">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Platform Users</CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-fundry-navy">Platform Users</CardTitle>
+                    <Users className="h-4 w-4 text-fundry-orange" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">
+                    <div className="text-2xl font-bold text-fundry-navy">
                       {(stats?.totalFounders || 0) + (stats?.totalInvestors || 0)}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-600">
                       {stats?.totalFounders || 0} founders, {stats?.totalInvestors || 0} investors
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-l-4 border-l-fundry-navy">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">SAFE Agreements</CardTitle>
-                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-fundry-navy">SAFE Agreements</CardTitle>
+                    <FileText className="h-4 w-4 text-fundry-orange" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats?.totalSafes || 0}</div>
-                    <p className="text-xs text-muted-foreground">
+                    <div className="text-2xl font-bold text-fundry-navy">{stats?.totalSafes || 0}</div>
+                    <p className="text-xs text-gray-600">
                       Generated agreements
                     </p>
                   </CardContent>
@@ -1072,10 +1072,10 @@ export default function AdminDashboard() {
               </div>
 
               {/* Recent Activity */}
-              <Card>
+              <Card className="border-l-4 border-l-fundry-orange">
                 <CardHeader>
-                  <CardTitle>Recent Admin Activity</CardTitle>
-                  <CardDescription>Latest administrative actions on the platform</CardDescription>
+                  <CardTitle className="text-fundry-navy">Recent Admin Activity</CardTitle>
+                  <CardDescription className="text-gray-600">Latest administrative actions on the platform</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -1090,17 +1090,17 @@ export default function AdminDashboard() {
                         const getActivityIcon = (action: string) => {
                           switch (action) {
                             case 'Dashboard Access':
-                              return <Activity className="w-4 h-4 text-blue-500" />;
+                              return <Activity className="w-4 h-4 text-fundry-orange" />;
                             case 'User Management':
-                              return <Users className="w-4 h-4 text-green-500" />;
+                              return <Users className="w-4 h-4 text-fundry-navy" />;
                             case 'System Monitoring':
-                              return <TrendingUp className="w-4 h-4 text-purple-500" />;
+                              return <TrendingUp className="w-4 h-4 text-fundry-orange" />;
                             case 'Data Fix':
-                              return <Settings className="w-4 h-4 text-orange-500" />;
+                              return <Settings className="w-4 h-4 text-fundry-navy" />;
                             case 'Email Configuration':
-                              return <Mail className="w-4 h-4 text-indigo-500" />;
+                              return <Mail className="w-4 h-4 text-fundry-orange" />;
                             case 'Security Review':
-                              return <Shield className="w-4 h-4 text-red-500" />;
+                              return <Shield className="w-4 h-4 text-fundry-navy" />;
                             default:
                               return <Activity className="w-4 h-4 text-gray-500" />;
                           }

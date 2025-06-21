@@ -74,6 +74,7 @@ export interface InvestmentWithCampaign {
   paymentStatus: string;
   agreementSigned: boolean;
   createdAt: string;
+  notes?: string;
   campaign: {
     id: number;
     title: string;

@@ -210,7 +210,7 @@ export default function InvestorDashboard() {
     if (editInvestmentModal.isOpen && editInvestmentModal.investment) {
       editInvestmentForm.reset({
         amount: parseFloat(editInvestmentModal.investment.amount),
-        notes: editInvestmentModal.investment.notes || "",
+        notes: (editInvestmentModal.investment as any).notes || "",
       });
     }
   }, [editInvestmentModal.isOpen, editInvestmentModal.investment, editInvestmentForm]);

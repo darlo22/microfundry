@@ -3,14 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CalendarIcon, User, FileText, TrendingUp, DollarSign, Mail, FileIcon, MessageCircle, Send, Heart, Eye, MoreHorizontal, Users } from "lucide-react";
+import { Bell, Users, Heart, MessageCircle, Eye, MoreHorizontal } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 
 interface CampaignUpdatesModalProps {
   isOpen: boolean;
@@ -46,28 +44,54 @@ interface UpdateReply {
   };
 }
 
-const updateTypeIcons = {
-  milestone: TrendingUp,
-  financial: DollarSign,
-  general: FileText,
-  announcement: Mail,
-  newsletter: Mail,
-};
 
-const updateTypeColors = {
-  milestone: "bg-green-100 text-green-800 border-green-200",
-  financial: "bg-blue-100 text-blue-800 border-blue-200",
-  general: "bg-gray-100 text-gray-800 border-gray-200",
-  announcement: "bg-orange-100 text-orange-800 border-orange-200",
-  newsletter: "bg-purple-100 text-purple-800 border-purple-200",
-};
 
 export function CampaignUpdatesModal({ isOpen, onClose, campaignId, campaignTitle }: CampaignUpdatesModalProps) {
-  // Fetch campaign updates
   const { data: updates = [], isLoading } = useQuery<CampaignUpdate[]>({
     queryKey: [`/api/campaign-updates/campaign/${campaignId}`],
     enabled: isOpen && !!campaignId,
   });
+
+  const [likedUpdates, setLikedUpdates] = useState<Set<number>>(new Set());
+  const [showReplies, setShowReplies] = useState<Set<number>>(new Set());
+  const [replyTexts, setReplyTexts] = useState<Record<number, string>>({});
+
+  const toggleLike = (updateId: number) => {
+    setLikedUpdates(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(updateId)) {
+        newSet.delete(updateId);
+      } else {
+        newSet.add(updateId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleReplies = (updateId: number) => {
+    setShowReplies(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(updateId)) {
+        newSet.delete(updateId);
+      } else {
+        newSet.add(updateId);
+      }
+      return newSet;
+    });
+  };
+
+  const getBadgeColor = (type: string) => {
+    switch (type) {
+      case 'milestone':
+        return 'bg-blue-100 text-blue-800';
+      case 'financial':
+        return 'bg-green-100 text-green-800';
+      case 'announcement':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

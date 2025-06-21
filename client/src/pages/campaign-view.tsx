@@ -9,7 +9,7 @@ import InvestmentModal from "@/components/modals/investment-modal";
 import { ShareCampaignModal } from "@/components/modals/share-campaign-modal";
 import { EditCampaignModal } from "@/components/modals/edit-campaign-modal";
 import { PitchDeckModal } from "@/components/modals/pitch-deck-modal";
-import { CampaignUpdatesModal } from "@/components/modals/campaign-updates-modal";
+import { CampaignUpdatesModal } from "@/components/modals/campaign-updates-wefunder";
 import { CampaignCommentsModal } from "@/components/modals/campaign-comments-modal";
 import { CampaignQuestionsModal } from "@/components/modals/campaign-questions-modal";
 import { RobustVideoPlayer } from "@/components/RobustVideoPlayer";

@@ -1218,7 +1218,7 @@ export default function AdminDashboard() {
                               </span>
                               <span className="text-sm font-medium text-green-600">
                                 Investments: {investments?.filter((inv: Investment) => 
-                                  inv.investorId === parseInt(user.id) && inv.paymentStatus === 'completed'
+                                  inv.investorId === user.id && inv.paymentStatus === 'completed'
                                 ).length || 0}
                               </span>
                             </div>

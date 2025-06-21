@@ -523,14 +523,16 @@ export class DatabaseStorage implements IStorage {
       .from(investments)
       .where(eq(investments.investorId, investorId));
 
-    // Include all investment statuses for total invested amount
-    const totalInvested = investorInvestments
+    // Only count completed payments for total invested amount
+    const completedInvestments = investorInvestments.filter(inv => 
+      inv.paymentStatus === 'completed'
+    );
+    
+    const totalInvested = completedInvestments
       .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
 
-    // Active investments are those that are committed, paid, or completed
-    const activeInvestments = investorInvestments.filter(inv => 
-      inv.status === 'committed' || inv.status === 'paid' || inv.status === 'completed'
-    ).length;
+    // Active investments are those with completed payments
+    const activeInvestments = completedInvestments.length;
     
     const estimatedValue = (totalInvested * 1.164).toFixed(2); // Growth calculation
 

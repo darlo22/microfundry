@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -310,7 +311,7 @@ export default function AdminInvestorOutreach() {
                           onClick={handlePreviewFile}
                           variant="outline"
                           size="sm"
-                          className="text-white border-white/20 hover:bg-white/20"
+                          className="text-fundry-navy border-white/20 hover:bg-white/20"
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           Preview
@@ -691,6 +692,91 @@ export default function AdminInvestorOutreach() {
           </div>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border border-orange-200 shadow-2xl">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="text-2xl font-bold text-fundry-navy flex items-center">
+              <FileSpreadsheet className="h-6 w-6 mr-3 text-fundry-orange" />
+              File Preview
+            </DialogTitle>
+          </DialogHeader>
+          
+          {previewData.length > 0 ? (
+            <div className="overflow-auto max-h-[60vh]">
+              <div className="bg-white rounded-lg border border-orange-200 shadow-sm">
+                <div className="p-4 bg-gradient-to-r from-fundry-orange/10 to-fundry-navy/10 border-b border-orange-200">
+                  <p className="text-sm font-medium text-fundry-navy">
+                    Showing first {Math.min(previewData.length, 10)} rows from your file
+                  </p>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        {Object.keys(previewData[0] || {}).map((key) => (
+                          <th key={key} className="px-4 py-3 text-left font-medium text-gray-700 border-r border-gray-200 last:border-r-0">
+                            {key}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {previewData.slice(0, 10).map((row, index) => (
+                        <tr key={index} className="border-b border-gray-100 hover:bg-orange-50/30">
+                          {Object.values(row).map((value: any, cellIndex) => (
+                            <td key={cellIndex} className="px-4 py-3 text-gray-600 border-r border-gray-100 last:border-r-0">
+                              {value || '-'}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {previewData.length > 10 && (
+                  <div className="p-4 bg-gradient-to-r from-orange-50 to-blue-50 border-t border-orange-200">
+                    <p className="text-sm text-gray-600 text-center">
+                      ... and {previewData.length - 10} more rows
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center text-gray-500">
+                <FileSpreadsheet className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                <p>No preview data available</p>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex justify-end space-x-3 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowPreview(false)}
+              className="border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white"
+            >
+              Close
+            </Button>
+            {previewData.length > 0 && (
+              <Button
+                onClick={() => {
+                  setShowPreview(false);
+                  handleUpload();
+                }}
+                className="bg-fundry-orange hover:bg-orange-600 text-white"
+              >
+                Proceed with Upload
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

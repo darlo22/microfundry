@@ -151,9 +151,12 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
       });
       onClose();
       
+      // Use the user's actual userType from the login response
+      const userType = data.user?.userType;
+      
       // Check for investment context before redirecting
       const storedContext = localStorage.getItem('investmentContext');
-      if (storedContext && selectedUserType === "investor") {
+      if (storedContext && userType === "investor") {
         try {
           const context = JSON.parse(storedContext);
           const isRecent = Date.now() - context.timestamp < 30 * 60 * 1000;
@@ -166,8 +169,8 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
         }
       }
       
-      // Route based on selected role during sign-in
-      const dashboardRoute = selectedUserType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
+      // Route based on user's actual userType from database
+      const dashboardRoute = userType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
       window.location.href = dashboardRoute;
     },
     onError: (error: any) => {

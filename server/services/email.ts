@@ -54,11 +54,17 @@ export class EmailService {
       };
 
       const result = await resend.emails.send(emailData);
-      console.log('Email sent successfully:', result);
+      console.log('Email sent response:', result);
       
       // Check if Resend returned an error
       if (result.error) {
         console.error('Resend API error:', result.error);
+        return false;
+      }
+      
+      // Check if we have a valid response with data
+      if (!result.data || !result.data.id) {
+        console.error('Invalid Resend response - no email ID returned');
         return false;
       }
       

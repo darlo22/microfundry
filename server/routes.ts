@@ -6649,7 +6649,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 .set({ 
                   status: 'failed', 
                   sentAt: new Date(),
-                  failureReason: 'Domain not verified with email service'
+                  failureReason: 'Email service delivery failed - check sender address and content'
                 })
                 .where(eq(outreachEmails.id, email.id));
               

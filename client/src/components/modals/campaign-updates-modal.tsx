@@ -184,7 +184,34 @@ export function CampaignUpdatesModal({ isOpen, onClose, campaignId, campaignTitl
                     )}
 
                     {/* Replies Section */}
-                    <UpdateReplies updateId={update.id} />
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-600 hover:text-gray-800"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          View Replies
+                        </Button>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <Textarea
+                          placeholder="Write a reply to this update..."
+                          className="mb-3 resize-none"
+                          rows={3}
+                        />
+                        <div className="flex justify-end">
+                          <Button
+                            size="sm"
+                            className="bg-orange-600 hover:bg-orange-700 text-white"
+                          >
+                            <Send className="h-4 w-4 mr-2" />
+                            Send Reply
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -249,11 +276,25 @@ function UpdateReplies({ updateId }: UpdateRepliesProps) {
     createReplyMutation.mutate(replyText.trim());
   };
 
-  // Don't show replies section if user is not authenticated
+  // Show replies section even if user is not authenticated, but limit functionality
+  console.log('UpdateReplies component rendering for updateId:', updateId);
+  console.log('User authentication status:', !!user);
+  
   if (!user) {
     return (
       <div className="mt-4 pt-4 border-t border-gray-200">
-        <p className="text-sm text-gray-500 text-center">
+        <div className="flex items-center justify-between mb-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled
+            className="text-gray-400 cursor-not-allowed"
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            View Replies
+          </Button>
+        </div>
+        <p className="text-sm text-gray-500 text-center py-2">
           Please sign in to view and post replies
         </p>
       </div>

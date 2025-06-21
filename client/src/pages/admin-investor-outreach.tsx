@@ -50,8 +50,21 @@ interface InvestorRecord {
 interface UploadResult {
   successful: number;
   failed: number;
-  errors: string[];
   duplicates: number;
+  missingData: number;
+  totalRows: number;
+  errors: string[];
+  duplicateEmails: string[];
+  missingDataRows: number[];
+  message: string;
+  breakdown: {
+    totalRows: number;
+    successful: number;
+    duplicates: number;
+    missingData: number;
+    otherErrors: number;
+    skippedTotal: number;
+  };
 }
 
 export default function AdminInvestorOutreach() {

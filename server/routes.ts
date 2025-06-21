@@ -6708,7 +6708,12 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       let successful = 0;
       let failed = 0;
       let duplicates = 0;
+      let missingData = 0;
       const errors: string[] = [];
+      const duplicateEmails: string[] = [];
+      const missingDataRows: number[] = [];
+
+      console.log(`Processing ${jsonData.length} rows from uploaded file`);
 
       for (const [index, row] of jsonData.entries()) {
         try {
@@ -6732,7 +6737,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
           // Validate required fields
           if (!investorData.name || !investorData.email) {
-            errors.push(`Row ${rowNum}: Missing name or email`);
+            errors.push(`Row ${rowNum}: Missing required field - Name: ${investorData.name || 'MISSING'}, Email: ${investorData.email || 'MISSING'}`);
+            missingDataRows.push(rowNum);
+            missingData++;
             failed++;
             continue;
           }
@@ -6745,6 +6752,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             .limit(1);
 
           if (existing.length > 0) {
+            duplicateEmails.push(investorData.email);
             duplicates++;
             continue;
           }
@@ -6753,6 +6761,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           await db.insert(investorDirectory).values(investorData);
           successful++;
 
+          if (successful % 100 === 0) {
+            console.log(`Processed ${successful} investors successfully so far...`);
+          }
+
         } catch (error) {
           console.error(`Error processing row ${index + 2}:`, error);
           errors.push(`Row ${index + 2}: ${error.message}`);
@@ -6760,19 +6772,33 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         }
       }
 
+      console.log(`Upload completed: ${successful} successful, ${failed} failed, ${duplicates} duplicates, ${missingData} missing data`);
+
       // Log admin activity
       await logAdminActivity(
         req.user.id,
         'Investor Directory',
-        `Bulk upload: ${successful} added, ${failed} failed, ${duplicates} duplicates`
+        `Bulk upload: ${successful} added, ${failed} failed, ${duplicates} duplicates, ${missingData} missing data from ${jsonData.length} total rows`
       );
 
       res.json({
         successful,
         failed,
         duplicates,
-        errors: errors.slice(0, 10), // Limit error messages
-        message: `Upload completed: ${successful} investors added successfully`
+        missingData,
+        totalRows: jsonData.length,
+        errors: errors.slice(0, 20), // Show more error details
+        duplicateEmails: duplicateEmails.slice(0, 10), // Show some duplicate emails
+        missingDataRows: missingDataRows.slice(0, 10), // Show some rows with missing data
+        message: `Upload completed: ${successful} investors added successfully out of ${jsonData.length} total rows`,
+        breakdown: {
+          totalRows: jsonData.length,
+          successful: successful,
+          duplicates: duplicates,
+          missingData: missingData,
+          otherErrors: failed - missingData,
+          skippedTotal: duplicates + failed
+        }
       });
 
     } catch (error) {

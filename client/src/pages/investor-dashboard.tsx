@@ -643,21 +643,12 @@ export default function InvestorDashboard() {
   const totalPendingCommitments = pendingInvestments.length;
   const totalPaidInvestments = paidInvestments.length;
 
-  if (isLoading && !user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    toast({
-      title: "Authentication Required",
-      description: "Please sign in to access your dashboard.",
-      variant: "destructive",
-    });
-    return null;
   }
 
   return (

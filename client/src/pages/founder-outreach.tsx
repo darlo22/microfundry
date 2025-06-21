@@ -244,6 +244,12 @@ export default function FounderOutreach() {
     setEmailMessage(template.content);
   };
 
+  // Count actual email recipients from the text field
+  const getRecipientCount = () => {
+    if (!emailRecipients.trim()) return 0;
+    return emailRecipients.split(',').filter(email => email.trim().length > 0).length;
+  };
+
   const emailTemplateVariations = [
     {
       subject: `Investment Opportunity: {companyName} - {title}`,
@@ -799,7 +805,7 @@ Founder, {companyName}`
                     </div>
                     <Button
                       onClick={handleSendEmails}
-                      disabled={!selectedInvestors.length || !emailSubject.trim() || !emailMessage.trim() || sendEmailMutation.isPending || !rateLimit?.canSend}
+                      disabled={getRecipientCount() === 0 || !emailSubject.trim() || !emailMessage.trim() || sendEmailMutation.isPending || !rateLimit?.canSend}
                       className="w-full bg-fundry-orange hover:bg-orange-600 text-white"
                     >
                       {sendEmailMutation.isPending ? (
@@ -807,7 +813,7 @@ Founder, {companyName}`
                       ) : (
                         <>
                           <Send className="h-4 w-4 mr-2" />
-                          Send Email Campaign ({selectedInvestors.length} recipients)
+                          Send Email Campaign ({getRecipientCount()} recipients)
                         </>
                       )}
                     </Button>

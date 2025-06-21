@@ -6692,18 +6692,36 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const fileBuffer = req.file.buffer;
       let workbook;
 
-      // Parse file based on type
+      // Parse file based on type with enhanced encoding support
       if (req.file.mimetype === 'text/csv' || req.file.originalname.endsWith('.csv')) {
-        workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+        // Handle CSV files with different encodings and line endings (Windows ^M, etc.)
+        workbook = XLSX.read(fileBuffer, { 
+          type: 'buffer',
+          raw: false,
+          cellDates: true,
+          cellNF: false,
+          cellText: false,
+          codepage: 65001 // UTF-8 encoding
+        });
       } else if (req.file.mimetype.includes('sheet') || req.file.originalname.endsWith('.xlsx') || req.file.originalname.endsWith('.xls')) {
-        workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+        workbook = XLSX.read(fileBuffer, { 
+          type: 'buffer',
+          cellDates: true,
+          cellNF: false,
+          cellText: false
+        });
       } else {
         return res.status(400).json({ message: 'Invalid file format. Please upload Excel or CSV file.' });
       }
 
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+        raw: false,
+        defval: '',
+        blankrows: false,
+        header: 1
+      }).slice(1); // Remove header row
 
       let successful = 0;
       let failed = 0;
@@ -6718,26 +6736,51 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       for (const [index, row] of jsonData.entries()) {
         try {
           const rowNum = index + 2; // Account for header row
+          
+          // Handle both object format and array format from CSV parsing
+          let name, email, company;
+          if (Array.isArray(row)) {
+            // Array format from header: 1 parsing
+            name = row[0]; // Name column
+            email = row[1]; // Email column  
+            company = row[2]; // Company column
+          } else {
+            // Object format
+            name = row.name || row.Name;
+            email = row.email || row.Email;
+            company = row.company || row.Company;
+          }
+          
+          // Skip completely empty rows
+          if (Array.isArray(row) && row.every(cell => !cell || cell.toString().trim() === '')) {
+            continue;
+          }
+
+          // Clean data by removing carriage returns and trimming
+          const cleanName = name ? name.toString().replace(/\r/g, '').trim() : null;
+          const cleanEmail = email ? email.toString().replace(/\r/g, '').trim() : null;
+          const cleanCompany = company ? company.toString().replace(/\r/g, '').trim() : null;
+
           const investorData: any = {
-            name: row.name || row.Name,
-            email: row.email || row.Email,
-            company: row.company || row.Company || null,
-            title: row.title || row.Title || null,
-            location: row.location || row.Location || null,
-            bio: row.bio || row.Bio || null,
-            linkedinUrl: row.linkedinUrl || row.LinkedinUrl || row.linkedin_url || null,
-            investmentFocus: row.investmentFocus || row.InvestmentFocus || row.investment_focus || null,
-            minimumInvestment: row.minimumInvestment || row.MinimumInvestment || row.minimum_investment || null,
-            maximumInvestment: row.maximumInvestment || row.MaximumInvestment || row.maximum_investment || null,
-            tags: row.tags || row.Tags ? (row.tags || row.Tags).split(',').map((tag: string) => tag.trim()) : null,
+            name: cleanName,
+            email: cleanEmail,
+            company: cleanCompany,
+            title: Array.isArray(row) ? null : (row.title || row.Title || null),
+            location: Array.isArray(row) ? null : (row.location || row.Location || null),
+            bio: Array.isArray(row) ? null : (row.bio || row.Bio || null),
+            linkedinUrl: Array.isArray(row) ? null : (row.linkedinUrl || row.LinkedinUrl || row.linkedin_url || null),
+            investmentFocus: Array.isArray(row) ? null : (row.investmentFocus || row.InvestmentFocus || row.investment_focus || null),
+            minimumInvestment: Array.isArray(row) ? null : (row.minimumInvestment || row.MinimumInvestment || row.minimum_investment || null),
+            maximumInvestment: Array.isArray(row) ? null : (row.maximumInvestment || row.MaximumInvestment || row.maximum_investment || null),
+            tags: Array.isArray(row) ? null : (row.tags || row.Tags ? (row.tags || row.Tags).split(',').map((tag: string) => tag.trim()) : null),
             source: 'directory',
             addedBy: req.user.id,
             isActive: true
           };
 
           // Validate required fields
-          if (!investorData.name || !investorData.email) {
-            errors.push(`Row ${rowNum}: Missing required field - Name: ${investorData.name || 'MISSING'}, Email: ${investorData.email || 'MISSING'}`);
+          if (!investorData.name || !investorData.email || investorData.name === '' || investorData.email === '') {
+            errors.push(`Row ${rowNum}: Missing required field - Name: "${investorData.name || 'MISSING'}", Email: "${investorData.email || 'MISSING'}"`);
             missingDataRows.push(rowNum);
             missingData++;
             failed++;

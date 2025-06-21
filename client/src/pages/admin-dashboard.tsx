@@ -1653,111 +1653,7 @@ export default function AdminDashboard() {
                 </Card>
               </div>
 
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="text-orange-700">Pending Transactions</CardTitle>
-                  <CardDescription>Investment commitments awaiting payment processing</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {investments && investments.filter(inv => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').length > 0 ? 
-                      investments.filter(inv => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').map((investment: Investment) => (
-                      <div key={investment.id} className="border-2 border-orange-200 rounded-lg bg-orange-50 p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <h3 className="font-bold text-lg text-orange-900">
-                                {investment.investor?.firstName} {investment.investor?.lastName} 
-                                {!investment.investor && investment.investorName && investment.investorName}
-                                {!investment.investor && !investment.investorName && `Investor #${investment.investorId}`}
-                              </h3>
-                              <Badge variant="secondary" className="bg-orange-200 text-orange-800 border-orange-300">
-                                {investment.paymentStatus.toUpperCase()}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-orange-700 font-medium mb-1">
-                              Campaign: {investment.campaign?.companyName || investment.campaign?.title || `Campaign #${investment.campaignId}`}
-                            </p>
-                            <p className="text-xs text-orange-600">
-                              Investment ID: #{investment.id} | Commitment Date: {new Date(investment.createdAt).toLocaleDateString()} at {new Date(investment.createdAt).toLocaleTimeString()}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold text-orange-800 text-2xl">{formatCurrency(parseFloat(investment.amount))}</p>
-                            <p className="text-xs text-orange-600 mt-1">Investment Amount</p>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-orange-200">
-                          <div className="bg-white/50 p-3 rounded-lg">
-                            <p className="text-xs font-medium text-orange-800 uppercase tracking-wide">Investor Details</p>
-                            <p className="text-sm text-orange-900 mt-1">
-                              Email: {investment.investor?.email || 'Not available'}
-                            </p>
-                            <p className="text-sm text-orange-900">
-                              Type: Individual Investor
-                            </p>
-                          </div>
-                          
-                          <div className="bg-white/50 p-3 rounded-lg">
-                            <p className="text-xs font-medium text-orange-800 uppercase tracking-wide">Investment Status</p>
-                            <p className="text-sm text-orange-900 mt-1">
-                              Status: {investment.status || 'Committed'}
-                            </p>
-                            <p className="text-sm text-orange-900">
-                              Payment: {investment.paymentStatus}
-                            </p>
-                          </div>
-                          
-                          <div className="bg-white/50 p-3 rounded-lg">
-                            <p className="text-xs font-medium text-orange-800 uppercase tracking-wide">Action Required</p>
-                            <p className="text-sm text-orange-900 mt-1">
-                              Payment Processing
-                            </p>
-                            <p className="text-xs text-orange-600">
-                              Awaiting investor payment completion
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-orange-200">
-                          <div className="flex items-center space-x-2 text-xs text-orange-600">
-                            <Clock className="h-4 w-4" />
-                            <span>Pending for {Math.ceil((Date.now() - new Date(investment.createdAt).getTime()) / (1000 * 60 * 60 * 24))} days</span>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="border-orange-300 text-orange-700 hover:bg-orange-100"
-                              onClick={() => handleViewInvestmentDetails(investment)}
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              View Details
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="border-orange-300 text-orange-700 hover:bg-orange-100"
-                              onClick={() => handleSendReminder(investment)}
-                            >
-                              <Mail className="w-4 h-4 mr-1" />
-                              Send Reminder
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )) : (
-                      <div className="text-center py-12 text-gray-500">
-                        <Clock className="mx-auto h-16 w-16 text-gray-400 mb-6" />
-                        <p className="text-xl font-medium mb-2">No pending transactions</p>
-                        <p className="text-sm">All investments have been processed</p>
-                        <p className="text-xs text-gray-400 mt-2">When investors commit to investments, they will appear here until payment is completed</p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+
 
               {/* Withdrawal Settings */}
               <Card>
@@ -2627,6 +2523,113 @@ export default function AdminDashboard() {
               </div>
 
               {/* Pending Transactions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-orange-700">Pending Transactions</CardTitle>
+                  <CardDescription>Investment commitments awaiting payment processing</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {investments && investments.filter(inv => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').length > 0 ? 
+                      investments.filter(inv => inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing').map((investment: Investment) => (
+                      <div key={investment.id} className="border-2 border-orange-200 rounded-lg bg-orange-50 p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <h3 className="font-bold text-lg text-orange-900">
+                                {investment.investor?.firstName} {investment.investor?.lastName} 
+                                {!investment.investor && investment.investorName && investment.investorName}
+                                {!investment.investor && !investment.investorName && `Investor #${investment.investorId}`}
+                              </h3>
+                              <Badge variant="secondary" className="bg-orange-200 text-orange-800 border-orange-300">
+                                {investment.paymentStatus.toUpperCase()}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-orange-700 font-medium mb-1">
+                              Campaign: {investment.campaign?.companyName || investment.campaign?.title || `Campaign #${investment.campaignId}`}
+                            </p>
+                            <p className="text-xs text-orange-600">
+                              Investment ID: #{investment.id} | Commitment Date: {new Date(investment.createdAt).toLocaleDateString()} at {new Date(investment.createdAt).toLocaleTimeString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-orange-800 text-2xl">{formatCurrency(parseFloat(investment.amount))}</p>
+                            <p className="text-xs text-orange-600 mt-1">Investment Amount</p>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-orange-200">
+                          <div className="bg-white/50 p-3 rounded-lg">
+                            <p className="text-xs font-medium text-orange-800 uppercase tracking-wide">Investor Details</p>
+                            <p className="text-sm text-orange-900 mt-1">
+                              Email: {investment.investor?.email || 'Not available'}
+                            </p>
+                            <p className="text-sm text-orange-900">
+                              Type: Individual Investor
+                            </p>
+                          </div>
+                          
+                          <div className="bg-white/50 p-3 rounded-lg">
+                            <p className="text-xs font-medium text-orange-800 uppercase tracking-wide">Investment Status</p>
+                            <p className="text-sm text-orange-900 mt-1">
+                              Status: {investment.status || 'Committed'}
+                            </p>
+                            <p className="text-sm text-orange-900">
+                              Payment: {investment.paymentStatus}
+                            </p>
+                          </div>
+                          
+                          <div className="bg-white/50 p-3 rounded-lg">
+                            <p className="text-xs font-medium text-orange-800 uppercase tracking-wide">Action Required</p>
+                            <p className="text-sm text-orange-900 mt-1">
+                              Payment Processing
+                            </p>
+                            <p className="text-xs text-orange-600">
+                              Awaiting investor payment completion
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-orange-200">
+                          <div className="flex items-center space-x-2 text-xs text-orange-600">
+                            <Clock className="h-4 w-4" />
+                            <span>Pending for {Math.ceil((Date.now() - new Date(investment.createdAt).getTime()) / (1000 * 60 * 60 * 24))} days</span>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                              onClick={() => handleViewInvestmentDetails(investment)}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              View Details
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                              onClick={() => handleSendReminder(investment)}
+                            >
+                              <Mail className="w-4 h-4 mr-1" />
+                              Send Reminder
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="text-center py-12 text-gray-500">
+                        <Clock className="mx-auto h-16 w-16 text-gray-400 mb-6" />
+                        <p className="text-xl font-medium mb-2">No pending transactions</p>
+                        <p className="text-sm">All investments have been processed</p>
+                        <p className="text-xs text-gray-400 mt-2">When investors commit to investments, they will appear here until payment is completed</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Withdrawal Requests */}
               <Card>
                 <CardHeader>
                   <CardTitle>Withdrawal Requests</CardTitle>

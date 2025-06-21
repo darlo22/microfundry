@@ -47,7 +47,14 @@ const editProfileSchema = z.object({
   investmentExperience: z.string().optional(),
 });
 
+// Edit Investment Form Schema
+const editInvestmentSchema = z.object({
+  amount: z.number().min(25, "Minimum investment is $25").max(100000, "Maximum investment is $100,000"),
+  notes: z.string().max(500, "Notes must be less than 500 characters").optional(),
+});
+
 type EditProfileFormData = z.infer<typeof editProfileSchema>;
+type EditInvestmentFormData = z.infer<typeof editInvestmentSchema>;
 
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
@@ -423,12 +430,13 @@ export default function InvestorDashboard() {
 
   // Edit investment mutation
   const editInvestmentMutation = useMutation({
-    mutationFn: async ({ id, amount }: { id: number; amount: number }) => {
-      return apiRequest("PATCH", `/api/investments/${id}`, { amount });
+    mutationFn: async ({ id, amount, notes }: { id: number; amount: number; notes?: string }) => {
+      return apiRequest("PATCH", `/api/investments/${id}`, { amount, notes });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/investments/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/stats"] });
+      setEditInvestmentModal({ isOpen: false, investment: null, amount: 0 });
       toast({
         title: "Investment Updated",
         description: "Your investment amount has been updated successfully.",

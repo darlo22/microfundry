@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { CalendarIcon, User, FileText, TrendingUp, DollarSign, Mail } from "lucide-react";
+import { CalendarIcon, User, FileText, TrendingUp, DollarSign, Mail, FileIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface CampaignUpdatesModalProps {
@@ -22,6 +22,7 @@ interface CampaignUpdate {
   title: string;
   content: string;
   createdAt: string;
+  attachmentUrls?: string[];
   founder?: {
     firstName: string;
     lastName: string;
@@ -109,6 +110,62 @@ export function CampaignUpdatesModal({ isOpen, onClose, campaignId, campaignTitl
                     <div className="prose prose-sm max-w-none text-gray-700">
                       <p className="whitespace-pre-wrap leading-relaxed">{update.content}</p>
                     </div>
+
+                    {/* Attachments Section */}
+                    {update.attachmentUrls && update.attachmentUrls.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <h4 className="text-sm font-medium text-gray-900 mb-3">Attachments</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {update.attachmentUrls.map((url, index) => {
+                            const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+                            const isVideo = /\.(mp4|mov|avi|webm)$/i.test(url);
+                            const fileName = url.split('/').pop() || `attachment-${index + 1}`;
+                            
+                            if (isImage) {
+                              return (
+                                <div key={index} className="relative group">
+                                  <img
+                                    src={url}
+                                    alt={`Attachment ${index + 1}`}
+                                    className="w-full h-48 object-cover rounded-lg border border-gray-200 hover:shadow-lg transition-shadow"
+                                  />
+                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded-lg" />
+                                </div>
+                              );
+                            } else if (isVideo) {
+                              return (
+                                <div key={index} className="relative">
+                                  <video
+                                    src={url}
+                                    controls
+                                    className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                                    preload="metadata"
+                                  />
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div key={index} className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                  <FileIcon className="h-8 w-8 text-orange-500 mr-3 flex-shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-gray-900 truncate">{fileName}</p>
+                                    <p className="text-xs text-gray-500">Document</p>
+                                  </div>
+                                  <a
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="ml-2 text-orange-600 hover:text-orange-700 text-sm font-medium"
+                                  >
+                                    View
+                                  </a>
+                                </div>
+                              );
+                            }
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );

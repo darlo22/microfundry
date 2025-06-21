@@ -55,11 +55,12 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   // Reset state and fetch exchange rate when modal opens
   useEffect(() => {
     if (isOpen) {
+      console.log('Payment modal opened - resetting all state');
       // Reset all state when modal opens
       setIsProcessingNaira(false);
       setIsProcessingStripe(false);
       setIsLoadingUSD(false);
-      setCardholderName('');
+      setCardholderName(user?.email ? user.email.split('@')[0] : '');
       setShowStripeForm(false);
       setClientSecret('');
       
@@ -68,11 +69,13 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         .then(({ ngn, rate }) => {
           setNgnAmount(ngn);
           setExchangeRate(rate);
+          console.log('Exchange rate loaded:', rate);
         })
         .catch((error) => {
           console.warn('Failed to fetch exchange rate:', error);
           // Use fallback rate
-          setNgnAmount(Number(investment.amount) * 1650);
+          const fallbackNgn = Number(investment.amount) * 1650;
+          setNgnAmount(fallbackNgn);
           setExchangeRate({
             usdToNgn: 1650,
             source: 'Fallback',
@@ -82,8 +85,12 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         .finally(() => {
           setIsLoadingRate(false);
         });
+    } else {
+      // Clean up when modal closes
+      console.log('Payment modal closed - cleaning up state');
+      resetModalToPaymentSelection();
     }
-  }, [isOpen, investment.amount]);
+  }, [isOpen, investment.amount, user?.email]);
 
   const resetModalToPaymentSelection = () => {
     setIsProcessingNaira(false);
@@ -99,42 +106,50 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     onClose();
   };
 
-  const handleUSDPayment = () => {
+  const handleUSDPayment = async () => {
     // Prevent simultaneous processing with NGN payment
     if (isProcessingNaira) {
+      toast({
+        title: "Payment in Progress",
+        description: "Please wait for the current payment to complete.",
+        variant: "destructive",
+      });
       return;
     }
     
-    // Immediately show Stripe form and fetch payment intent in background
+    console.log('USD Payment clicked - showing form immediately');
     setShowStripeForm(true);
+    setIsLoadingUSD(true);
     
-    // Get payment intent from backend
-    apiRequest('POST', '/api/create-payment-intent', {
-      amount: investment.amount,
-      investmentId: investment.id
-    })
-    .then(response => response.json())
-    .then(data => {
+    try {
+      console.log('Creating payment intent for investment:', investment.id, 'amount:', investment.amount);
+      
+      const response = await apiRequest('POST', '/api/create-payment-intent', {
+        amount: Number(investment.amount),
+        investmentId: investment.id
+      });
+      
+      const data = await response.json();
+      console.log('Payment intent created:', data);
+      
       if (data.clientSecret) {
         setClientSecret(data.clientSecret);
+        console.log('Client secret set, form ready for payment');
       } else {
-        toast({
-          title: "Payment Setup Failed",
-          description: "Failed to setup payment",
-          variant: "destructive",
-        });
-        setShowStripeForm(false);
+        throw new Error('No client secret received from server');
       }
-    })
-    .catch(error => {
+      
+    } catch (error: any) {
       console.error('Payment setup error:', error);
       toast({
         title: "Payment Setup Failed",
-        description: "Failed to setup payment",
+        description: error.message || "Failed to setup payment. Please try again.",
         variant: "destructive",
       });
       setShowStripeForm(false);
-    });
+    } finally {
+      setIsLoadingUSD(false);
+    }
   };
 
   const handleNairaPayment = async () => {
@@ -257,6 +272,8 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
     setIsProcessingStripe(true);
     
     try {
+      console.log('Starting Stripe payment process...');
+      
       // Create payment method
       const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
@@ -269,14 +286,10 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
 
       if (paymentMethodError) {
         console.error('Payment method error:', paymentMethodError);
-        resetModalToPaymentSelection();
-        toast({
-          title: "Card Error",
-          description: `${paymentMethodError.message}. Please try a different payment method.`,
-          variant: "destructive",
-        });
-        return;
+        throw new Error(paymentMethodError.message || 'Card validation failed');
       }
+
+      console.log('Payment method created successfully');
 
       // Confirm payment
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
@@ -285,47 +298,62 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
 
       if (error) {
         console.error('Stripe payment error:', error);
-        resetModalToPaymentSelection();
-        toast({
-          title: "Card Payment Failed",
-          description: `${error.message}. Please try a different payment method.`,
-          variant: "destructive",
-        });
-        return;
+        throw new Error(error.message || 'Payment confirmation failed');
       }
 
+      console.log('Payment intent status:', paymentIntent?.status);
+
       if (paymentIntent && paymentIntent.status === 'succeeded') {
+        console.log('Payment succeeded, updating backend...');
+        
         // Update investment status in backend
-        await apiRequest('PATCH', `/api/investments/${investment.id}`, {
-          status: 'paid'
+        const updateResponse = await apiRequest('PATCH', `/api/investments/${investment.id}`, {
+          status: 'paid',
+          paymentStatus: 'completed'
         });
+
+        if (!updateResponse.ok) {
+          throw new Error('Failed to update investment status');
+        }
+
+        console.log('Backend updated successfully');
 
         toast({
           title: "Payment Successful!",
           description: `Your investment of $${investment.amount} has been processed successfully.`,
         });
         
-        queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-        onClose();
-      } else {
+        // Clear all states and close modal
         resetModalToPaymentSelection();
-        toast({
-          title: "Payment Incomplete",
-          description: "Payment was not completed. Please try again or use a different payment method.",
-          variant: "destructive",
-        });
+        
+        // Comprehensive cache invalidation to update all related data
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['/api/investments'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/investor-stats'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/founder-stats'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/notifications'] }),
+        ]);
+        
+        console.log('All caches invalidated, closing modal');
+        onClose();
+        
+      } else {
+        console.log('Payment not completed, status:', paymentIntent?.status);
+        throw new Error("Payment was not completed successfully");
       }
+      
     } catch (error: any) {
       console.error('Payment processing error:', error);
+      
+      // Always reset modal state on any error
       resetModalToPaymentSelection();
+      
       toast({
         title: "Payment Failed",
-        description: error.message || "Failed to process payment. Please try again or use a different payment method.",
+        description: error.message || "Payment could not be processed. Please try again or use a different payment method.",
         variant: "destructive",
       });
-    } finally {
-      setIsProcessingStripe(false);
     }
   };
 

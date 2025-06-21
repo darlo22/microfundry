@@ -944,13 +944,26 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       setCreatedInvestment(investmentResponse.investment);
       
       toast({
-        title: "Investment Successful!",
+        title: "Investment Committed!",
         description: `You have successfully committed $${actualAmount} to ${campaign.title}`,
       });
+      
+      // Close the modal and redirect to pending transactions
+      onClose();
+      setLocation('/investor-dashboard');
+      
+      // Add a slight delay to ensure the dashboard loads, then focus on pending transactions
+      setTimeout(() => {
+        const pendingSection = document.getElementById('pending-commitments');
+        if (pendingSection) {
+          pendingSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 500);
+      
     } catch (error: any) {
       toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process payment",
+        title: "Commitment Failed",
+        description: error.message || "Failed to commit investment",
         variant: "destructive",
       });
     } finally {

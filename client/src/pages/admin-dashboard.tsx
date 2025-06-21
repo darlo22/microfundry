@@ -615,10 +615,17 @@ export default function AdminDashboard() {
   });
 
   // Withdrawals query
-  const { data: withdrawals, isLoading: withdrawalsLoading } = useQuery<WithdrawalRequest[]>({
+  const { data: withdrawalsData, isLoading: withdrawalsLoading } = useQuery<{
+    withdrawalRequests: WithdrawalRequest[];
+    completedTransactions: any[];
+    pendingPayments: any[];
+    stats: any;
+  }>({
     queryKey: ['/api/admin/withdrawals'],
     enabled: !!adminUser && activeTab === "withdrawals"
   });
+
+  const withdrawals = withdrawalsData?.withdrawalRequests || [];
 
   // Investments query for all admin sections
   const { data: investments, isLoading: investmentsLoading } = useQuery<Investment[]>({

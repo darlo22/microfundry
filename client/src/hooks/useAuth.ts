@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 export function useAuth() {
-  const { data: user, isLoading, isSuccess } = useQuery({
+  const { data: user, isLoading } = useQuery({
     queryKey: ["/api/user"],
     queryFn: async () => {
       const res = await fetch("/api/user", {
@@ -19,20 +19,12 @@ export function useAuth() {
       return res.json();
     },
     retry: false,
-    staleTime: 10 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    // Set initial data to trigger immediate render
-    initialData: undefined,
+    staleTime: 5 * 60 * 1000,
   });
 
   return {
     user,
     isLoading,
-    isSuccess,
     isAuthenticated: !!user,
-    // Add a flag to show if we've completed the first auth check
-    hasCompletedAuthCheck: isSuccess || !isLoading,
   };
 }

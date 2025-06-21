@@ -105,16 +105,7 @@ const StripeWrapper = ({ children, stripePromise }: { children: React.ReactNode;
 
 export default function InvestorDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const [initialLoad, setInitialLoad] = useState(true);
   const { toast } = useToast();
-
-  // Always show skeleton for first 300ms to ensure immediate display
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setInitialLoad(false);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, []);
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("portfolio");
@@ -652,62 +643,10 @@ export default function InvestorDashboard() {
   const totalPendingCommitments = pendingInvestments.length;
   const totalPaidInvestments = paidInvestments.length;
 
-  // Show skeleton loading during initial load or auth loading
-  if (initialLoad || isLoading || !user) {
+  if (isLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          {/* Header Skeleton */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gray-200 rounded-full animate-pulse"></div>
-              <div>
-                <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-2"></div>
-                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Stats Cards Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="group bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-gray-200 rounded-lg animate-pulse"></div>
-                  <div className="text-right">
-                    <div className="h-4 w-20 bg-gray-200 rounded animate-pulse mb-2"></div>
-                    <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-200 rounded-full mr-2 animate-pulse"></div>
-                  <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {/* Tab Navigation Skeleton */}
-          <div className="bg-white rounded-xl p-2 shadow-sm border border-gray-100 mb-8">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-1">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Content Skeleton */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-4"></div>
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 w-full bg-gray-200 rounded animate-pulse"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-        <Footer />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }

@@ -19,16 +19,7 @@ import type { CampaignWithStats, UserStats } from "@/lib/types";
 
 export default function FounderDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const [initialLoad, setInitialLoad] = useState(true);
   const { toast } = useToast();
-
-  // Always show skeleton for first 300ms to ensure immediate display
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setInitialLoad(false);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, []);
   const [, setLocation] = useLocation();
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -75,71 +66,10 @@ export default function FounderDashboard() {
     retry: false,
   });
 
-  if (initialLoad || isLoading || !user) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900">
-        <Navbar />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          {/* Welcome Section Skeleton */}
-          <div className="mb-6 sm:mb-8">
-            <div className="bg-gradient-to-r from-gray-700 to-gray-800 p-6 sm:p-8 rounded-2xl shadow-xl">
-              <div className="h-8 w-64 bg-gray-600 rounded animate-pulse mb-2"></div>
-              <div className="h-4 w-48 bg-gray-600 rounded animate-pulse"></div>
-            </div>
-          </div>
-
-          {/* Navigation Tabs Skeleton */}
-          <div className="mb-6 sm:mb-8">
-            <div className="bg-slate-800 rounded-xl shadow-xl border border-slate-700 p-1">
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="h-10 w-24 bg-gray-700 rounded-lg animate-pulse"></div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Stats Cards Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-slate-800 rounded-xl shadow-xl border border-slate-700 p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-gray-700 rounded-lg animate-pulse"></div>
-                  <div className="text-right">
-                    <div className="h-4 w-20 bg-gray-700 rounded animate-pulse mb-2"></div>
-                    <div className="h-8 w-16 bg-gray-700 rounded animate-pulse"></div>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-700 rounded-full mr-2 animate-pulse"></div>
-                  <div className="h-4 w-16 bg-gray-700 rounded animate-pulse"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick Actions Skeleton */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 sm:mb-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-slate-800 rounded-xl shadow-xl border border-slate-700 p-6">
-                <div className="w-12 h-12 bg-gray-700 rounded-lg animate-pulse mb-4"></div>
-                <div className="h-6 w-32 bg-gray-700 rounded animate-pulse mb-2"></div>
-                <div className="h-4 w-24 bg-gray-700 rounded animate-pulse"></div>
-              </div>
-            ))}
-          </div>
-
-          {/* Content Section Skeleton */}
-          <div className="bg-slate-800 rounded-xl shadow-xl border border-slate-700 p-6">
-            <div className="h-6 w-40 bg-gray-700 rounded animate-pulse mb-4"></div>
-            <div className="grid gap-4">
-              {[1, 2].map((i) => (
-                <div key={i} className="h-32 bg-gray-700 rounded-lg animate-pulse"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-        <Footer />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fundry-orange"></div>
       </div>
     );
   }

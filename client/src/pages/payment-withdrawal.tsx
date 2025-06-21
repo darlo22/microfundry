@@ -1028,7 +1028,6 @@ export default function PaymentWithdrawal() {
                 </form>
               </DialogContent>
             </Dialog>
-          </TabsContent>
 
             {/* Recent Transactions */}
             <Card>

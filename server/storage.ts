@@ -467,7 +467,10 @@ export class DatabaseStorage implements IStorage {
   async createCampaignUpdate(update: InsertCampaignUpdate): Promise<CampaignUpdate> {
     const [campaignUpdate] = await db
       .insert(campaignUpdates)
-      .values(update)
+      .values({
+        ...update,
+        attachmentUrls: update.attachmentUrls || null
+      })
       .returning();
     return campaignUpdate;
   }

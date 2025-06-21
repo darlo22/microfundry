@@ -102,7 +102,30 @@ export default function FounderUpdates() {
   // Create update mutation
   const createUpdateMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest("POST", "/api/campaign-updates", data);
+      const formData = new FormData();
+      formData.append('campaignId', data.campaignId);
+      formData.append('title', data.title);
+      formData.append('content', data.content);
+      formData.append('type', data.type);
+      
+      // Append files if any
+      if (attachedFiles.length > 0) {
+        attachedFiles.forEach((file) => {
+          formData.append('attachments', file);
+        });
+      }
+      
+      const response = await fetch('/api/campaign-updates', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -821,6 +844,51 @@ export default function FounderUpdates() {
                 <div className="text-gray-700 whitespace-pre-line leading-relaxed mb-6">
                   {update.content}
                 </div>
+
+                {/* Attachments Display */}
+                {update.attachmentUrls && update.attachmentUrls.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Attachments</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {update.attachmentUrls.map((url: string, index: number) => (
+                        <div key={index} className="border rounded-lg overflow-hidden bg-gray-50">
+                          {url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                            <img
+                              src={url}
+                              alt={`Attachment ${index + 1}`}
+                              className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => window.open(url, '_blank')}
+                            />
+                          ) : url.match(/\.(mp4|webm|mov)$/i) ? (
+                            <video
+                              src={url}
+                              controls
+                              className="w-full h-48 object-cover"
+                              preload="metadata"
+                            />
+                          ) : (
+                            <div className="p-4 flex items-center justify-center h-48">
+                              <div className="text-center">
+                                <FileIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-600">
+                                  {url.split('/').pop()?.split('-').slice(1).join('-') || 'Document'}
+                                </p>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(url, '_blank')}
+                                  className="mt-2"
+                                >
+                                  Download
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Interactive Buttons Section */}
                 <div className="border-t border-gray-200 pt-4">

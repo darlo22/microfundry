@@ -1769,8 +1769,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Campaign updates endpoints
-  app.post('/api/campaign-updates', requireAuth, async (req: any, res) => {
+  // Campaign updates endpoints with file upload support
+  const updateUpload = multer({
+    storage: multer.diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, 'uploads/updates');
+      },
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+      }
+    }),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'video/mp4', 'video/webm', 'video/quicktime',
+        'application/pdf', 'application/msword', 
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/plain', 'text/csv'
+      ];
+      
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Invalid file type'), false);
+      }
+    }
+  });
+
+  app.post('/api/campaign-updates', requireAuth, updateUpload.array('attachments', 10), async (req: any, res) => {
     try {
       const founderId = req.user.id;
       const { campaignId, title, content, type } = req.body;
@@ -1790,11 +1820,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log the update creation for audit trail
       console.log(`Founder ${founderId} creating update for campaign ${campaignId} with ${confirmedInvestments.length} confirmed investors`);
 
+      // Process uploaded files
+      const attachmentUrls = req.files ? req.files.map((file: any) => `/uploads/updates/${file.filename}`) : [];
+
       const updateData = {
         campaignId: parseInt(campaignId),
         title,
         content,
         type,
+        attachmentUrls: attachmentUrls.length > 0 ? attachmentUrls : null,
       };
 
       const update = await storage.createCampaignUpdate(updateData);

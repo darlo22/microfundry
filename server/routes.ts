@@ -5003,7 +5003,14 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       // Log admin activity
       await logAdminActivity(req.user.id, 'Withdrawal Management', 'Accessed withdrawal requests');
       
-      // Get all withdrawal requests
+      // Get withdrawal settings
+      const withdrawalSettings = {
+        minimumWithdrawal: 25,
+        minimumGoalPercentage: 0.5, // Using lowered threshold
+        maxWithdrawalPercentage: 80
+      };
+      
+      // Get all withdrawal requests with campaign completion validation
       const allWithdrawals = await db.select({
         id: withdrawalRequests.id,
         founderId: withdrawalRequests.founderId,
@@ -5015,11 +5022,38 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         createdAt: withdrawalRequests.createdAt,
         processedAt: withdrawalRequests.processedAt,
         founderName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        founderEmail: users.email
+        founderEmail: users.email,
+        // Calculate campaign completion percentage
+        campaignCompletionPercentage: sql<number>`
+          COALESCE(
+            (SELECT 
+              ROUND(
+                (SUM(CAST(i.amount AS DECIMAL)) / c.funding_goal) * 100, 2
+              )
+              FROM campaigns c
+              LEFT JOIN investments i ON c.id = i.campaign_id AND i.payment_status = 'completed'
+              WHERE c.founder_id = withdrawal_requests.founder_id
+              GROUP BY c.funding_goal
+              ORDER BY c.created_at DESC
+              LIMIT 1
+            ), 0
+          )
+        `
       })
       .from(withdrawalRequests)
       .leftJoin(users, eq(withdrawalRequests.founderId, users.id))
       .orderBy(desc(withdrawalRequests.createdAt));
+
+      // Filter withdrawal requests that meet campaign completion and minimum amount requirements
+      const validWithdrawals = allWithdrawals.filter(withdrawal => {
+        const amount = parseFloat(withdrawal.amount);
+        const completionPercentage = withdrawal.campaignCompletionPercentage || 0;
+        
+        console.log(`DEBUG: Withdrawal ${withdrawal.id} - Amount: $${amount}, Completion: ${completionPercentage}%, Min Required: ${withdrawalSettings.minimumGoalPercentage}%`);
+        
+        return amount >= withdrawalSettings.minimumWithdrawal && 
+               completionPercentage >= withdrawalSettings.minimumGoalPercentage;
+      });
 
       // Calculate transaction statistics
       const completedInvestments = await db.select({
@@ -5059,7 +5093,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       .orderBy(desc(investments.createdAt));
 
       const totalVolume = completedInvestments.reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
-      const pendingWithdrawals = allWithdrawals.filter(w => w.status === 'pending');
+      const pendingWithdrawals = validWithdrawals.filter(w => w.status === 'pending');
 
       const stats = {
         totalVolume,

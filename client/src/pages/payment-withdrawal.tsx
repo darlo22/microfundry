@@ -176,6 +176,8 @@ export default function PaymentWithdrawal() {
   const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
   const [kycModalOpen, setKycModalOpen] = useState(false);
   const [safeModalOpen, setSafeModalOpen] = useState(false);
+  const [viewSafeModalOpen, setViewSafeModalOpen] = useState(false);
+  const [selectedSafeAgreement, setSelectedSafeAgreement] = useState<any>(null);
 
   // Fetch user's withdrawal data and KYC status
   const { data: withdrawalInfo, isLoading: withdrawalLoading } = useQuery({
@@ -1124,97 +1126,8 @@ export default function PaymentWithdrawal() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => {
-                                    // Generate and view comprehensive SAFE agreement
-                                    const safeContent = `
-SIMPLE AGREEMENT FOR FUTURE EQUITY
-
-This Simple Agreement for Future Equity ("SAFE") is entered into on ${new Date(agreement.agreementDate).toLocaleDateString()} between:
-
-COMPANY: ${agreement.companyName}
-INVESTOR: ${agreement.investorName}
-INVESTMENT AMOUNT: $${parseFloat(agreement.investmentAmount).toLocaleString()}
-VALUATION CAP: $${agreement.valuationCap.toLocaleString()}
-DISCOUNT RATE: ${agreement.discountRate}%
-
-ARTICLE 1: DEFINITIONS
-
-1.1 "Company" means ${agreement.companyName}, a company incorporated under applicable laws.
-1.2 "Investor" means ${agreement.investorName}.
-1.3 "Purchase Amount" means $${parseFloat(agreement.investmentAmount).toLocaleString()}.
-1.4 "Valuation Cap" means $${agreement.valuationCap.toLocaleString()}.
-1.5 "Discount Rate" means ${agreement.discountRate}%.
-
-ARTICLE 2: INVESTMENT TERMS
-
-2.1 Investment: The Investor agrees to invest $${parseFloat(agreement.investmentAmount).toLocaleString()} in the Company.
-2.2 Future Equity: This investment will convert to equity shares upon a qualifying financing round.
-2.3 Conversion Price: The lower of (a) the Valuation Cap divided by the Company's fully-diluted shares, or (b) the Discount Rate applied to the price per share in the qualifying financing.
-
-ARTICLE 3: CONVERSION EVENTS
-
-3.1 Equity Financing: Upon a qualifying equity financing round of at least $1,000,000, this SAFE will automatically convert to the same class of shares sold in such financing.
-3.2 Liquidity Event: Upon a sale, merger, or IPO, the Investor will receive the greater of (a) the Purchase Amount, or (b) the proceeds from the converted shares.
-3.3 Dissolution: Upon dissolution, the Investor receives the Purchase Amount before any distributions to common shareholders.
-
-ARTICLE 4: INVESTOR RIGHTS
-
-4.1 Information Rights: The Company will provide quarterly financial statements and annual reports.
-4.2 Inspection Rights: The Investor may inspect Company books and records upon reasonable notice.
-4.3 Pro Rata Rights: The Investor has the right to participate in future financing rounds pro rata to their ownership percentage.
-
-ARTICLE 5: COMPANY REPRESENTATIONS
-
-5.1 The Company is duly incorporated and in good standing.
-5.2 The Company has the authority to enter into this agreement.
-5.3 All material information provided to the Investor is accurate and complete.
-5.4 The Company will use the investment funds for business operations.
-
-ARTICLE 6: MISCELLANEOUS
-
-6.1 Governing Law: This agreement is governed by the laws of the jurisdiction where the Company is incorporated.
-6.2 Amendment: This agreement may only be amended in writing signed by both parties.
-6.3 Severability: If any provision is invalid, the remainder of the agreement remains in effect.
-
-SIGNATURES:
-
-Company: ${agreement.companyName}
-By: _________________________
-Name: [Founder Name]
-Title: Chief Executive Officer
-Date: ${new Date(agreement.agreementDate).toLocaleDateString()}
-
-Investor: ${agreement.investorName}
-Signature: _________________________
-Date: ${new Date(agreement.agreementDate).toLocaleDateString()}
-
----
-This agreement represents a binding legal contract. Both parties should seek independent legal counsel before signing.
-                                    `;
-                                    
-                                    const newTab = window.open();
-                                    if (newTab) {
-                                      newTab.document.write(`
-                                        <html>
-                                          <head>
-                                            <title>SAFE Agreement - ${agreement.companyName}</title>
-                                            <style>
-                                              body { font-family: 'Times New Roman', serif; line-height: 1.6; margin: 40px; }
-                                              h1, h2 { color: #333; }
-                                              .header { text-align: center; margin-bottom: 30px; }
-                                              .signature-block { margin-top: 50px; }
-                                            </style>
-                                          </head>
-                                          <body>
-                                            <div class="header">
-                                              <h1>SIMPLE AGREEMENT FOR FUTURE EQUITY</h1>
-                                              <p><strong>${agreement.companyName}</strong></p>
-                                            </div>
-                                            <pre style="white-space: pre-wrap; font-family: 'Times New Roman', serif;">${safeContent}</pre>
-                                          </body>
-                                        </html>
-                                      `);
-                                      newTab.document.close();
-                                    }
+                                    setSelectedSafeAgreement(agreement);
+                                    setViewSafeModalOpen(true);
                                   }}
                                 >
                                   <Eye className="h-4 w-4 mr-1" />
@@ -1326,6 +1239,238 @@ This agreement represents a binding legal contract. Both parties should seek ind
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* SAFE Agreement Viewer Modal */}
+        <Dialog open={viewSafeModalOpen} onOpenChange={setViewSafeModalOpen}>
+          <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50">
+            <DialogHeader className="text-center pb-6">
+              <div className="mx-auto w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center mb-4">
+                <FileText className="h-8 w-8 text-white" />
+              </div>
+              <DialogTitle className="text-2xl font-bold text-fundry-navy">
+                SAFE Agreement
+              </DialogTitle>
+              {selectedSafeAgreement && (
+                <p className="text-gray-600 mt-2">
+                  {selectedSafeAgreement.companyName} • ${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()} Investment
+                </p>
+              )}
+            </DialogHeader>
+            
+            {selectedSafeAgreement && (
+              <div className="bg-white rounded-lg p-8 shadow-sm font-serif">
+                <div className="text-center mb-8">
+                  <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                    SIMPLE AGREEMENT FOR FUTURE EQUITY
+                  </h1>
+                  <p className="text-lg text-gray-700">
+                    <strong>{selectedSafeAgreement.companyName}</strong>
+                  </p>
+                </div>
+
+                <div className="space-y-6 text-gray-800 leading-relaxed">
+                  <div>
+                    <p className="mb-4">
+                      This Simple Agreement for Future Equity ("SAFE") is entered into on{" "}
+                      <strong>{new Date(selectedSafeAgreement.agreementDate).toLocaleDateString()}</strong> between:
+                    </p>
+                    
+                    <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p><strong>COMPANY:</strong> {selectedSafeAgreement.companyName}</p>
+                          <p><strong>INVESTOR:</strong> {selectedSafeAgreement.investorName}</p>
+                        </div>
+                        <div>
+                          <p><strong>INVESTMENT AMOUNT:</strong> ${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()}</p>
+                          <p><strong>VALUATION CAP:</strong> ${selectedSafeAgreement.valuationCap.toLocaleString()}</p>
+                          <p><strong>DISCOUNT RATE:</strong> {selectedSafeAgreement.discountRate}%</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 1: DEFINITIONS</h2>
+                    <div className="space-y-2 ml-4">
+                      <p>1.1 "Company" means {selectedSafeAgreement.companyName}, a company incorporated under applicable laws.</p>
+                      <p>1.2 "Investor" means {selectedSafeAgreement.investorName}.</p>
+                      <p>1.3 "Purchase Amount" means ${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()}.</p>
+                      <p>1.4 "Valuation Cap" means ${selectedSafeAgreement.valuationCap.toLocaleString()}.</p>
+                      <p>1.5 "Discount Rate" means {selectedSafeAgreement.discountRate}%.</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 2: INVESTMENT TERMS</h2>
+                    <div className="space-y-2 ml-4">
+                      <p>2.1 Investment: The Investor agrees to invest ${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()} in the Company.</p>
+                      <p>2.2 Future Equity: This investment will convert to equity shares upon a qualifying financing round.</p>
+                      <p>2.3 Conversion Price: The lower of (a) the Valuation Cap divided by the Company's fully-diluted shares, or (b) the Discount Rate applied to the price per share in the qualifying financing.</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 3: CONVERSION EVENTS</h2>
+                    <div className="space-y-2 ml-4">
+                      <p>3.1 Equity Financing: Upon a qualifying equity financing round of at least $1,000,000, this SAFE will automatically convert to the same class of shares sold in such financing.</p>
+                      <p>3.2 Liquidity Event: Upon a sale, merger, or IPO, the Investor will receive the greater of (a) the Purchase Amount, or (b) the proceeds from the converted shares.</p>
+                      <p>3.3 Dissolution: Upon dissolution, the Investor receives the Purchase Amount before any distributions to common shareholders.</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 4: INVESTOR RIGHTS</h2>
+                    <div className="space-y-2 ml-4">
+                      <p>4.1 Information Rights: The Company will provide quarterly financial statements and annual reports.</p>
+                      <p>4.2 Inspection Rights: The Investor may inspect Company books and records upon reasonable notice.</p>
+                      <p>4.3 Pro Rata Rights: The Investor has the right to participate in future financing rounds pro rata to their ownership percentage.</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 5: COMPANY REPRESENTATIONS</h2>
+                    <div className="space-y-2 ml-4">
+                      <p>5.1 The Company is duly incorporated and in good standing.</p>
+                      <p>5.2 The Company has the authority to enter into this agreement.</p>
+                      <p>5.3 All material information provided to the Investor is accurate and complete.</p>
+                      <p>5.4 The Company will use the investment funds for business operations.</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 6: MISCELLANEOUS</h2>
+                    <div className="space-y-2 ml-4">
+                      <p>6.1 Governing Law: This agreement is governed by the laws of the jurisdiction where the Company is incorporated.</p>
+                      <p>6.2 Amendment: This agreement may only be amended in writing signed by both parties.</p>
+                      <p>6.3 Severability: If any provision is invalid, the remainder of the agreement remains in effect.</p>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-6 mt-8">
+                    <h2 className="text-xl font-semibold mb-4 text-fundry-navy">SIGNATURES</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                        <p><strong>Company:</strong> {selectedSafeAgreement.companyName}</p>
+                        <div className="border-b border-gray-300 h-8"></div>
+                        <p>Name: [Founder Name]</p>
+                        <p>Title: Chief Executive Officer</p>
+                        <p>Date: {new Date(selectedSafeAgreement.agreementDate).toLocaleDateString()}</p>
+                      </div>
+                      <div className="space-y-4">
+                        <p><strong>Investor:</strong> {selectedSafeAgreement.investorName}</p>
+                        <div className="border-b border-gray-300 h-8"></div>
+                        <p>Date: {new Date(selectedSafeAgreement.agreementDate).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
+                    <p className="text-yellow-800 text-sm">
+                      <strong>Important:</strong> This agreement represents a binding legal contract. Both parties should seek independent legal counsel before signing.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => setViewSafeModalOpen(false)}
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    className="bg-fundry-orange hover:bg-orange-600"
+                    onClick={() => {
+                      // Generate and download complete SAFE agreement
+                      const safeContent = `SIMPLE AGREEMENT FOR FUTURE EQUITY
+
+This Simple Agreement for Future Equity ("SAFE") is entered into on ${new Date(selectedSafeAgreement.agreementDate).toLocaleDateString()} between:
+
+COMPANY: ${selectedSafeAgreement.companyName}
+INVESTOR: ${selectedSafeAgreement.investorName}
+INVESTMENT AMOUNT: $${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()}
+VALUATION CAP: $${selectedSafeAgreement.valuationCap.toLocaleString()}
+DISCOUNT RATE: ${selectedSafeAgreement.discountRate}%
+
+ARTICLE 1: DEFINITIONS
+
+1.1 "Company" means ${selectedSafeAgreement.companyName}, a company incorporated under applicable laws.
+1.2 "Investor" means ${selectedSafeAgreement.investorName}.
+1.3 "Purchase Amount" means $${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()}.
+1.4 "Valuation Cap" means $${selectedSafeAgreement.valuationCap.toLocaleString()}.
+1.5 "Discount Rate" means ${selectedSafeAgreement.discountRate}%.
+
+ARTICLE 2: INVESTMENT TERMS
+
+2.1 Investment: The Investor agrees to invest $${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()} in the Company.
+2.2 Future Equity: This investment will convert to equity shares upon a qualifying financing round.
+2.3 Conversion Price: The lower of (a) the Valuation Cap divided by the Company's fully-diluted shares, or (b) the Discount Rate applied to the price per share in the qualifying financing.
+
+ARTICLE 3: CONVERSION EVENTS
+
+3.1 Equity Financing: Upon a qualifying equity financing round of at least $1,000,000, this SAFE will automatically convert to the same class of shares sold in such financing.
+3.2 Liquidity Event: Upon a sale, merger, or IPO, the Investor will receive the greater of (a) the Purchase Amount, or (b) the proceeds from the converted shares.
+3.3 Dissolution: Upon dissolution, the Investor receives the Purchase Amount before any distributions to common shareholders.
+
+ARTICLE 4: INVESTOR RIGHTS
+
+4.1 Information Rights: The Company will provide quarterly financial statements and annual reports.
+4.2 Inspection Rights: The Investor may inspect Company books and records upon reasonable notice.
+4.3 Pro Rata Rights: The Investor has the right to participate in future financing rounds pro rata to their ownership percentage.
+
+ARTICLE 5: COMPANY REPRESENTATIONS
+
+5.1 The Company is duly incorporated and in good standing.
+5.2 The Company has the authority to enter into this agreement.
+5.3 All material information provided to the Investor is accurate and complete.
+5.4 The Company will use the investment funds for business operations.
+
+ARTICLE 6: MISCELLANEOUS
+
+6.1 Governing Law: This agreement is governed by the laws of the jurisdiction where the Company is incorporated.
+6.2 Amendment: This agreement may only be amended in writing signed by both parties.
+6.3 Severability: If any provision is invalid, the remainder of the agreement remains in effect.
+
+SIGNATURES:
+
+Company: ${selectedSafeAgreement.companyName}
+By: _________________________
+Name: [Founder Name]
+Title: Chief Executive Officer
+Date: ${new Date(selectedSafeAgreement.agreementDate).toLocaleDateString()}
+
+Investor: ${selectedSafeAgreement.investorName}
+Signature: _________________________
+Date: ${new Date(selectedSafeAgreement.agreementDate).toLocaleDateString()}
+
+---
+This agreement represents a binding legal contract. Both parties should seek independent legal counsel before signing.`;
+                      
+                      const blob = new Blob([safeContent], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = `SAFE_Agreement_${selectedSafeAgreement.companyName.replace(/\s+/g, '_')}_${selectedSafeAgreement.id}.txt`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      URL.revokeObjectURL(url);
+                      
+                      toast({
+                        title: "Download Started",
+                        description: "Your SAFE agreement is being downloaded.",
+                      });
+                    }}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Agreement
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

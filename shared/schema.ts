@@ -196,7 +196,9 @@ export const campaignUpdates = pgTable("campaign_updates", {
   campaignId: integer("campaign_id").references(() => campaigns.id).notNull(),
   title: varchar("title").notNull(),
   content: text("content").notNull(),
+  type: varchar("type").notNull().default("announcement"), // announcement, milestone, financial, progress
   attachmentUrls: jsonb("attachment_urls"), // Array of file URLs
+  views: integer("views").notNull().default(0),
   isPublic: boolean("is_public").notNull().default(true),
   scheduledFor: timestamp("scheduled_for"),
   createdAt: timestamp("created_at").defaultNow(),

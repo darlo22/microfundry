@@ -277,27 +277,27 @@ export default function FounderOutreach() {
   return (
     <div className="min-h-screen bg-fundry-navy">
       {/* Header */}
-      <div className="bg-gradient-to-r from-fundry-orange to-fundry-navy border-b border-orange-200 sticky top-0 z-10">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <Link href="/founder-dashboard">
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
+                <Button variant="ghost" size="sm" className="text-fundry-navy hover:bg-blue-50">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Dashboard
                 </Button>
               </Link>
-              <h1 className="text-xl font-semibold text-white">Investor Outreach</h1>
+              <h1 className="text-xl font-semibold text-fundry-navy">Investor Outreach</h1>
             </div>
             <div className="flex items-center space-x-3">
               {rateLimit && (
-                <div className="text-sm text-orange-100">
+                <div className="text-sm text-fundry-navy">
                   {rateLimit.remaining} of {rateLimit.dailyLimit} emails remaining today
                 </div>
               )}
               <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-white border-white hover:bg-white/20">
+                  <Button variant="outline" size="sm" className="text-fundry-navy border-fundry-navy hover:bg-blue-50">
                     <Settings className="h-4 w-4 mr-2" />
                     Email Settings
                   </Button>
@@ -468,31 +468,33 @@ export default function FounderOutreach() {
                   </CardHeader>
                   <CardContent className="space-y-4 text-white">
                     <div>
-                      <Label htmlFor="subject">Subject Line</Label>
+                      <Label htmlFor="subject" className="text-white">Subject Line</Label>
                       <Input
                         id="subject"
                         value={emailSubject}
                         onChange={(e) => setEmailSubject(e.target.value)}
                         placeholder="Partnership opportunity with {name}"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-orange-200"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="message">Message</Label>
+                      <Label htmlFor="message" className="text-white">Message</Label>
                       <Textarea
                         id="message"
                         value={emailMessage}
                         onChange={(e) => setEmailMessage(e.target.value)}
                         placeholder="Hi {name},&#10;&#10;I hope this email finds you well..."
                         rows={8}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-orange-200"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-orange-200 mt-1">
                         Use {"{name}"} to personalize with recipient's name
                       </p>
                     </div>
                     <Button
                       onClick={handleSendEmails}
                       disabled={!selectedInvestors.length || !emailSubject.trim() || !emailMessage.trim() || sendEmailMutation.isPending || !rateLimit?.canSend}
-                      className="w-full"
+                      className="w-full bg-fundry-orange hover:bg-orange-600 text-white"
                     >
                       {sendEmailMutation.isPending ? (
                         "Sending..."
@@ -555,33 +557,33 @@ export default function FounderOutreach() {
 
           {/* Directory Tab */}
           <TabsContent value="directory">
-            <Card>
-              <CardHeader>
-                <CardTitle>Complete Investor Directory</CardTitle>
+            <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+              <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                <CardTitle className="text-white">Complete Investor Directory</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {investors.map((investor: InvestorDirectory) => (
-                    <div key={investor.email} className="border rounded-lg p-4">
+                    <div key={investor.email} className="border border-white/20 rounded-lg p-4 bg-white/5 hover:bg-white/10 transition-all duration-300">
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium">{investor.name}</h4>
-                        <Badge variant={investor.source === 'directory' ? 'default' : 'secondary'}>
+                        <h4 className="font-medium text-white">{investor.name}</h4>
+                        <Badge className={investor.source === 'directory' ? 'bg-fundry-orange text-white' : 'bg-fundry-navy text-white'}>
                           {investor.source === 'directory' ? 'Directory' : 'Platform'}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{investor.email}</p>
+                      <p className="text-sm text-orange-100 mb-2">{investor.email}</p>
                       {investor.company && (
-                        <p className="text-sm text-gray-500 mb-1">{investor.company}</p>
+                        <p className="text-sm text-orange-200 mb-1">{investor.company}</p>
                       )}
                       {investor.bio && (
-                        <p className="text-xs text-gray-500 line-clamp-2">{investor.bio}</p>
+                        <p className="text-xs text-orange-200 line-clamp-2">{investor.bio}</p>
                       )}
                       {investor.linkedinUrl && (
                         <a
                           href={investor.linkedinUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:underline flex items-center mt-2"
+                          className="text-xs text-fundry-orange hover:text-orange-300 hover:underline flex items-center mt-2"
                         >
                           <ExternalLink className="h-3 w-3 mr-1" />
                           LinkedIn Profile
@@ -598,40 +600,40 @@ export default function FounderOutreach() {
           <TabsContent value="analytics">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Email Campaign History</CardTitle>
+                <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                    <CardTitle className="text-white">Email Campaign History</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="text-white">
                     <div className="space-y-4">
                       {campaigns.map((campaign: EmailCampaign) => (
-                        <div key={campaign.id} className="border rounded-lg p-4">
+                        <div key={campaign.id} className="border border-white/20 rounded-lg p-4 bg-white/5 hover:bg-white/10 transition-all duration-300">
                           <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-medium">{campaign.subject}</h4>
-                            <Badge variant={campaign.status === 'sent' ? 'default' : 'secondary'}>
+                            <h4 className="font-medium text-white">{campaign.subject}</h4>
+                            <Badge className={campaign.status === 'sent' ? 'bg-fundry-orange text-white' : 'bg-fundry-navy text-white'}>
                               {campaign.status}
                             </Badge>
                           </div>
                           <div className="grid grid-cols-4 gap-4 text-sm">
                             <div>
-                              <p className="text-gray-500">Sent</p>
-                              <p className="font-medium">{campaign.sentCount}</p>
+                              <p className="text-orange-200">Sent</p>
+                              <p className="font-medium text-white">{campaign.sentCount}</p>
                             </div>
                             <div>
-                              <p className="text-gray-500">Delivered</p>
-                              <p className="font-medium">{campaign.deliveredCount}</p>
+                              <p className="text-orange-200">Delivered</p>
+                              <p className="font-medium text-white">{campaign.deliveredCount}</p>
                             </div>
                             <div>
-                              <p className="text-gray-500">Opened</p>
-                              <p className="font-medium">{campaign.openedCount}</p>
+                              <p className="text-orange-200">Opened</p>
+                              <p className="font-medium text-white">{campaign.openedCount}</p>
                             </div>
                             <div>
-                              <p className="text-gray-500">Replied</p>
-                              <p className="font-medium">{campaign.repliedCount}</p>
+                              <p className="text-orange-200">Replied</p>
+                              <p className="font-medium text-white">{campaign.repliedCount}</p>
                             </div>
                           </div>
                           {campaign.sentAt && (
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-xs text-orange-100 mt-2">
                               Sent: {new Date(campaign.sentAt).toLocaleDateString()}
                             </p>
                           )}
@@ -643,33 +645,33 @@ export default function FounderOutreach() {
               </div>
 
               <div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Performance Summary</CardTitle>
+                <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                    <CardTitle className="text-white">Performance Summary</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="text-white">
                     <div className="space-y-4">
                       <div className="text-center">
                         <p className="text-2xl font-bold text-fundry-orange">
                           {campaigns.reduce((sum: number, c: EmailCampaign) => sum + c.sentCount, 0)}
                         </p>
-                        <p className="text-sm text-gray-500">Total Emails Sent</p>
+                        <p className="text-sm text-orange-200">Total Emails Sent</p>
                       </div>
-                      <Separator />
+                      <Separator className="bg-white/20" />
                       <div className="text-center">
-                        <p className="text-xl font-bold text-green-600">
+                        <p className="text-xl font-bold text-green-400">
                           {campaigns.reduce((sum: number, c: EmailCampaign) => sum + c.repliedCount, 0)}
                         </p>
-                        <p className="text-sm text-gray-500">Total Replies</p>
+                        <p className="text-sm text-orange-200">Total Replies</p>
                       </div>
-                      <Separator />
+                      <Separator className="bg-white/20" />
                       <div className="text-center">
-                        <p className="text-lg font-bold text-blue-600">
+                        <p className="text-lg font-bold text-blue-400">
                           {campaigns.length > 0 
                             ? Math.round((campaigns.reduce((sum: number, c: EmailCampaign) => sum + c.openedCount, 0) / campaigns.reduce((sum: number, c: EmailCampaign) => sum + c.sentCount, 0)) * 100)
                             : 0}%
                         </p>
-                        <p className="text-sm text-gray-500">Average Open Rate</p>
+                        <p className="text-sm text-orange-200">Average Open Rate</p>
                       </div>
                     </div>
                   </CardContent>

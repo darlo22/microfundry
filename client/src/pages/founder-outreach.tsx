@@ -99,6 +99,7 @@ export default function FounderOutreach() {
   const [selectedInvestors, setSelectedInvestors] = useState<InvestorDirectory[]>([]);
   const [emailSubject, setEmailSubject] = useState("");
   const [emailMessage, setEmailMessage] = useState("");
+  const [emailRecipients, setEmailRecipients] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [sourceFilter, setSourceFilter] = useState("all");
   const [isComposeOpen, setIsComposeOpen] = useState(false);
@@ -198,6 +199,7 @@ export default function FounderOutreach() {
       setSelectedInvestors([]);
       setEmailSubject("");
       setEmailMessage("");
+      setEmailRecipients("");
       setIsComposeOpen(false);
     },
     onError: (error: any) => {
@@ -441,10 +443,16 @@ Founder, {companyName}`
   };
 
   const handleSendEmails = () => {
-    if (!selectedInvestors.length) {
+    // Parse email recipients from the text field
+    const emailList = emailRecipients
+      .split(',')
+      .map(email => email.trim())
+      .filter(email => email.length > 0);
+
+    if (emailList.length === 0) {
       toast({
         title: "No Recipients",
-        description: "Please select at least one investor.",
+        description: "Please enter email addresses or select investors.",
         variant: "destructive",
       });
       return;
@@ -468,10 +476,11 @@ Founder, {companyName}`
       return;
     }
 
-    const recipients = selectedInvestors.map(inv => ({
-      name: inv.name,
-      email: inv.email,
-      source: inv.source
+    // Create recipients from email list
+    const recipients = emailList.map(email => ({
+      name: email.split('@')[0], // Use email prefix as name if no name available
+      email: email,
+      source: 'manual'
     }));
 
     sendEmailMutation.mutate({
@@ -709,6 +718,37 @@ Founder, {companyName}`
                         </Button>
                       )}
                     </div>
+                    
+                    {/* Email Recipients Field */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label htmlFor="recipients" className="text-white">Email Recipients</Label>
+                        <Button
+                          onClick={() => {
+                            const emails = selectedInvestors.map(inv => inv.email).join(', ');
+                            setEmailRecipients(emails);
+                          }}
+                          disabled={selectedInvestors.length === 0}
+                          variant="outline"
+                          size="sm"
+                          className="bg-fundry-orange/20 hover:bg-fundry-orange/30 text-white border border-fundry-orange/40 text-xs"
+                        >
+                          Use Selected ({selectedInvestors.length})
+                        </Button>
+                      </div>
+                      <Textarea
+                        id="recipients"
+                        value={emailRecipients}
+                        onChange={(e) => setEmailRecipients(e.target.value)}
+                        placeholder="Enter email addresses separated by commas (e.g., investor1@email.com, investor2@email.com)"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-orange-200 min-h-[80px]"
+                        rows={3}
+                      />
+                      <p className="text-xs text-orange-200 mt-1">
+                        Enter email addresses manually or click "Use Selected" to populate from your investor selection
+                      </p>
+                    </div>
+                    
                     <div>
                       <div className="flex items-center justify-between">
                         <Label htmlFor="subject" className="text-white">Subject Line</Label>

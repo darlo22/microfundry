@@ -9,7 +9,7 @@ import { CalendarIcon, User, FileText, TrendingUp, DollarSign, Mail, FileIcon, M
 import { formatDistanceToNow } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useUser } from "@/hooks/use-user";
+import { useAuth } from "@/hooks/useAuth";
 
 interface CampaignUpdatesModalProps {
   isOpen: boolean;
@@ -189,5 +189,139 @@ export function CampaignUpdatesModal({ isOpen, onClose, campaignId, campaignTitl
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// UpdateReplies component for handling replies to campaign updates
+interface UpdateRepliesProps {
+  updateId: number;
+}
+
+function UpdateReplies({ updateId }: UpdateRepliesProps) {
+  const [showReplies, setShowReplies] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch replies for this update
+  const { data: replies = [], isLoading: repliesLoading } = useQuery({
+    queryKey: [`/api/campaign-updates/${updateId}/replies`],
+    enabled: showReplies,
+  });
+
+  // Create reply mutation
+  const createReplyMutation = useMutation({
+    mutationFn: async (content: string) => {
+      return apiRequest("POST", `/api/campaign-updates/${updateId}/replies`, { content });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/campaign-updates/${updateId}/replies`] });
+      setReplyText("");
+      toast({
+        title: "Reply sent",
+        description: "Your reply has been sent to the founder",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reply",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmitReply = () => {
+    if (!replyText.trim()) return;
+    createReplyMutation.mutate(replyText.trim());
+  };
+
+  // Don't show replies section if user is not authenticated
+  if (!user) return null;
+
+  return (
+    <div className="mt-4 pt-4 border-t border-gray-200">
+      <div className="flex items-center justify-between mb-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowReplies(!showReplies)}
+          className="text-gray-600 hover:text-gray-800"
+        >
+          <MessageCircle className="h-4 w-4 mr-2" />
+          {showReplies ? 'Hide Replies' : 'View Replies'}
+          {replies.length > 0 && !showReplies && (
+            <span className="ml-1 text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full">
+              {replies.length}
+            </span>
+          )}
+        </Button>
+      </div>
+
+      {showReplies && (
+        <div className="space-y-4">
+          {/* Reply form */}
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <Textarea
+              placeholder="Write a reply to this update..."
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              className="mb-3 resize-none"
+              rows={3}
+            />
+            <div className="flex justify-end">
+              <Button
+                onClick={handleSubmitReply}
+                disabled={!replyText.trim() || createReplyMutation.isPending}
+                size="sm"
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                {createReplyMutation.isPending ? (
+                  "Sending..."
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Send Reply
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Existing replies */}
+          {repliesLoading ? (
+            <div className="text-center py-4 text-gray-500">Loading replies...</div>
+          ) : replies.length > 0 ? (
+            <div className="space-y-3">
+              {replies.map((reply: any) => (
+                <div key={reply.id} className="bg-white border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                        <User className="h-4 w-4 text-orange-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {reply.user?.firstName} {reply.user?.lastName}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatDistanceToNow(new Date(reply.createdAt))} ago
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{reply.content}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-4 text-gray-500">
+              No replies yet. Be the first to reply!
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

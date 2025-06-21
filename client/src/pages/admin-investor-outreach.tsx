@@ -738,7 +738,7 @@ export default function AdminInvestorOutreach() {
                 </div>
                 
                 {previewData.length > 10 && (
-                  <div className="p-4 bg-gradient-to-r from-orange-50 to-blue-50 border-t border-orange-200">
+                  <div className="p-4 bg-gray-50 border-t">
                     <p className="text-sm text-gray-600 text-center">
                       ... and {previewData.length - 10} more rows
                     </p>

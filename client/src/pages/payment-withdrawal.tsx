@@ -618,6 +618,9 @@ export default function PaymentWithdrawal() {
                                 bankName: "",
                                 bankAddress: ""
                               }));
+                              // Reset bank selection state
+                              setShowCustomBankInput(false);
+                              setCustomBankName("");
                             }}
                           >
                             <SelectTrigger>
@@ -633,10 +636,58 @@ export default function PaymentWithdrawal() {
                           </Select>
                         </div>
 
+                        {/* Bank Name Dropdown with Country-Specific Banks */}
+                        {withdrawalData.country && (
+                          <div>
+                            <Label htmlFor="bankName">Bank Name</Label>
+                            <Select
+                              value={showCustomBankInput ? "custom" : withdrawalData.bankName}
+                              onValueChange={(value) => {
+                                if (value === "custom") {
+                                  setShowCustomBankInput(true);
+                                  setWithdrawalData(prev => ({ ...prev, bankName: customBankName }));
+                                } else {
+                                  setShowCustomBankInput(false);
+                                  setWithdrawalData(prev => ({ ...prev, bankName: value }));
+                                }
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select your bank" />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-60 overflow-y-auto">
+                                {BANKS_BY_COUNTRY[withdrawalData.country]?.map((bank) => (
+                                  <SelectItem key={bank} value={bank}>
+                                    {bank}
+                                  </SelectItem>
+                                )) || null}
+                                <SelectItem value="custom">Other (Enter manually)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+
+                        {/* Custom Bank Name Input */}
+                        {showCustomBankInput && (
+                          <div>
+                            <Label htmlFor="customBankName">Enter Bank Name</Label>
+                            <Input
+                              id="customBankName"
+                              value={customBankName}
+                              onChange={(e) => {
+                                setCustomBankName(e.target.value);
+                                setWithdrawalData(prev => ({ ...prev, bankName: e.target.value }));
+                              }}
+                              placeholder="Enter your bank name"
+                              required
+                            />
+                          </div>
+                        )}
+
                         {/* Dynamic Banking Fields Based on Country */}
                         {withdrawalData.country && (() => {
                           const bankingConfig = getBankingFieldsForCountry(withdrawalData.country);
-                          return bankingConfig.fields.map((field) => {
+                          return bankingConfig.fields.filter(field => field !== 'bankName').map((field) => {
                             const fieldKey = field as keyof typeof withdrawalData;
                             return (
                               <div key={field}>

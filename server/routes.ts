@@ -951,6 +951,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get founder's SAFE agreements (from investments received)
+  app.get('/api/safe-agreements', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      console.log(`DEBUG: Fetching SAFE agreements for founder ${userId}`);
+
+      // Get founder's campaigns
+      const campaigns = await storage.getCampaignsByFounder(userId);
+      console.log(`DEBUG: Found ${campaigns.length} campaigns for founder`);
+      
+      const safeAgreements = [];
+
+      // Get all completed investments for founder's campaigns
+      for (const campaign of campaigns) {
+        const campaignInvestments = await storage.getInvestmentsByCampaign(campaign.id);
+        console.log(`DEBUG: Campaign ${campaign.id} has ${campaignInvestments.length} investments`);
+        
+        // Add each completed investment as a SAFE agreement
+        for (const investment of campaignInvestments) {
+          if (investment.paymentStatus === 'completed') {
+            console.log(`DEBUG: Adding SAFE agreement for investment ${investment.id}: $${investment.amount}`);
+            
+            // Get investor details
+            const investor = await storage.getUser(investment.investorId);
+            
+            safeAgreements.push({
+              id: investment.id,
+              investmentAmount: investment.amount,
+              investorName: investor ? `${investor.firstName || ''} ${investor.lastName || ''}`.trim() : 'Unknown Investor',
+              investorEmail: investor?.email || 'unknown@email.com',
+              campaignTitle: campaign.title,
+              companyName: campaign.companyName,
+              discountRate: campaign.discountRate || 20,
+              valuationCap: campaign.valuationCap || 1000000,
+              agreementDate: investment.createdAt,
+              status: 'signed'
+            });
+          }
+        }
+      }
+
+      console.log(`DEBUG: Total SAFE agreements found: ${safeAgreements.length}`);
+
+      // Sort by date (most recent first)
+      safeAgreements.sort((a, b) => new Date(b.agreementDate || 0).getTime() - new Date(a.agreementDate || 0).getTime());
+
+      res.json(safeAgreements);
+    } catch (error) {
+      console.error("Error fetching SAFE agreements:", error);
+      res.status(500).json({ message: "Failed to fetch SAFE agreements" });
+    }
+  });
+
   // KYC endpoints
   app.get('/api/kyc-status/:userId', requireAuth, async (req: any, res) => {
     try {

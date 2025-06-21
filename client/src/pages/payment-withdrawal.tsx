@@ -197,6 +197,11 @@ export default function PaymentWithdrawal() {
     enabled: !!user?.id,
   });
 
+  const { data: safeAgreements, isLoading: safeAgreementsLoading } = useQuery({
+    queryKey: ["/api/safe-agreements"],
+    enabled: !!user?.id,
+  });
+
   // Mutations
   const withdrawalMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -1086,12 +1091,183 @@ export default function PaymentWithdrawal() {
                   <div>
                     <h3 className="font-medium mb-4">Your SAFE Agreements</h3>
                     <div className="space-y-3">
-                      {/* This would show actual SAFE agreements from the API */}
-                      <div className="text-center py-8 text-gray-500">
-                        <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <p>No SAFE agreements yet</p>
-                        <p className="text-sm mt-1">SAFE agreements will appear here when you make investments</p>
-                      </div>
+                      {safeAgreementsLoading ? (
+                        <div className="animate-pulse space-y-4">
+                          {[...Array(2)].map((_, i) => (
+                            <div key={i} className="h-20 bg-gray-200 rounded-lg"></div>
+                          ))}
+                        </div>
+                      ) : safeAgreements && safeAgreements.length > 0 ? (
+                        safeAgreements.map((agreement: any) => (
+                          <div key={agreement.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className="bg-green-100 p-2 rounded-lg">
+                                    <FileText className="h-4 w-4 text-green-600" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-gray-900">{agreement.companyName}</h4>
+                                    <p className="text-sm text-gray-600">
+                                      SAFE Agreement • ${parseFloat(agreement.investmentAmount).toLocaleString()} Investment
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-xs text-gray-500 ml-11">
+                                  <p>Investor: {agreement.investorName} ({agreement.investorEmail})</p>
+                                  <p>Date: {new Date(agreement.agreementDate).toLocaleDateString()}</p>
+                                  <p>Discount Rate: {agreement.discountRate}% • Valuation Cap: ${(agreement.valuationCap / 1000000).toFixed(1)}M</p>
+                                </div>
+                              </div>
+                              <div className="flex flex-col gap-2 ml-4">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    // Generate and view comprehensive SAFE agreement
+                                    const safeContent = `
+SIMPLE AGREEMENT FOR FUTURE EQUITY
+
+This Simple Agreement for Future Equity ("SAFE") is entered into on ${new Date(agreement.agreementDate).toLocaleDateString()} between:
+
+COMPANY: ${agreement.companyName}
+INVESTOR: ${agreement.investorName}
+INVESTMENT AMOUNT: $${parseFloat(agreement.investmentAmount).toLocaleString()}
+VALUATION CAP: $${agreement.valuationCap.toLocaleString()}
+DISCOUNT RATE: ${agreement.discountRate}%
+
+ARTICLE 1: DEFINITIONS
+
+1.1 "Company" means ${agreement.companyName}, a company incorporated under applicable laws.
+1.2 "Investor" means ${agreement.investorName}.
+1.3 "Purchase Amount" means $${parseFloat(agreement.investmentAmount).toLocaleString()}.
+1.4 "Valuation Cap" means $${agreement.valuationCap.toLocaleString()}.
+1.5 "Discount Rate" means ${agreement.discountRate}%.
+
+ARTICLE 2: INVESTMENT TERMS
+
+2.1 Investment: The Investor agrees to invest $${parseFloat(agreement.investmentAmount).toLocaleString()} in the Company.
+2.2 Future Equity: This investment will convert to equity shares upon a qualifying financing round.
+2.3 Conversion Price: The lower of (a) the Valuation Cap divided by the Company's fully-diluted shares, or (b) the Discount Rate applied to the price per share in the qualifying financing.
+
+ARTICLE 3: CONVERSION EVENTS
+
+3.1 Equity Financing: Upon a qualifying equity financing round of at least $1,000,000, this SAFE will automatically convert to the same class of shares sold in such financing.
+3.2 Liquidity Event: Upon a sale, merger, or IPO, the Investor will receive the greater of (a) the Purchase Amount, or (b) the proceeds from the converted shares.
+3.3 Dissolution: Upon dissolution, the Investor receives the Purchase Amount before any distributions to common shareholders.
+
+ARTICLE 4: INVESTOR RIGHTS
+
+4.1 Information Rights: The Company will provide quarterly financial statements and annual reports.
+4.2 Inspection Rights: The Investor may inspect Company books and records upon reasonable notice.
+4.3 Pro Rata Rights: The Investor has the right to participate in future financing rounds pro rata to their ownership percentage.
+
+ARTICLE 5: COMPANY REPRESENTATIONS
+
+5.1 The Company is duly incorporated and in good standing.
+5.2 The Company has the authority to enter into this agreement.
+5.3 All material information provided to the Investor is accurate and complete.
+5.4 The Company will use the investment funds for business operations.
+
+ARTICLE 6: MISCELLANEOUS
+
+6.1 Governing Law: This agreement is governed by the laws of the jurisdiction where the Company is incorporated.
+6.2 Amendment: This agreement may only be amended in writing signed by both parties.
+6.3 Severability: If any provision is invalid, the remainder of the agreement remains in effect.
+
+SIGNATURES:
+
+Company: ${agreement.companyName}
+By: _________________________
+Name: [Founder Name]
+Title: Chief Executive Officer
+Date: ${new Date(agreement.agreementDate).toLocaleDateString()}
+
+Investor: ${agreement.investorName}
+Signature: _________________________
+Date: ${new Date(agreement.agreementDate).toLocaleDateString()}
+
+---
+This agreement represents a binding legal contract. Both parties should seek independent legal counsel before signing.
+                                    `;
+                                    
+                                    const newTab = window.open();
+                                    if (newTab) {
+                                      newTab.document.write(`
+                                        <html>
+                                          <head>
+                                            <title>SAFE Agreement - ${agreement.companyName}</title>
+                                            <style>
+                                              body { font-family: 'Times New Roman', serif; line-height: 1.6; margin: 40px; }
+                                              h1, h2 { color: #333; }
+                                              .header { text-align: center; margin-bottom: 30px; }
+                                              .signature-block { margin-top: 50px; }
+                                            </style>
+                                          </head>
+                                          <body>
+                                            <div class="header">
+                                              <h1>SIMPLE AGREEMENT FOR FUTURE EQUITY</h1>
+                                              <p><strong>${agreement.companyName}</strong></p>
+                                            </div>
+                                            <pre style="white-space: pre-wrap; font-family: 'Times New Roman', serif;">${safeContent}</pre>
+                                          </body>
+                                        </html>
+                                      `);
+                                      newTab.document.close();
+                                    }
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  View
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="bg-fundry-orange hover:bg-orange-600"
+                                  onClick={() => {
+                                    // Generate and download SAFE agreement
+                                    const safeContent = `SIMPLE AGREEMENT FOR FUTURE EQUITY
+
+Company: ${agreement.companyName}
+Investor: ${agreement.investorName}
+Investment Amount: $${parseFloat(agreement.investmentAmount).toLocaleString()}
+Valuation Cap: $${agreement.valuationCap.toLocaleString()}
+Discount Rate: ${agreement.discountRate}%
+Date: ${new Date(agreement.agreementDate).toLocaleDateString()}
+
+[Full SAFE Agreement Content - Legal Document]
+
+This agreement represents the investment of $${parseFloat(agreement.investmentAmount).toLocaleString()} by ${agreement.investorName} in ${agreement.companyName} under the terms specified above.`;
+                                    
+                                    const blob = new Blob([safeContent], { type: 'text/plain' });
+                                    const url = URL.createObjectURL(blob);
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.download = `SAFE_Agreement_${agreement.companyName.replace(/\s+/g, '_')}_${agreement.id}.txt`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    URL.revokeObjectURL(url);
+                                    
+                                    toast({
+                                      title: "Download Started",
+                                      description: "Your SAFE agreement is being downloaded.",
+                                    });
+                                  }}
+                                >
+                                  <Download className="h-4 w-4 mr-1" />
+                                  Download
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                          <p>No SAFE agreements yet</p>
+                          <p className="text-sm mt-1">SAFE agreements will appear here when you receive investments</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

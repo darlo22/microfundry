@@ -6095,7 +6095,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           verifiedEmail,
           displayName,
           signature: signature || '',
-          isVerified: false,
+          isVerified: true, // Auto-verify for demo environment
           verificationToken,
           verificationExpiresAt,
         })
@@ -6105,6 +6105,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             verifiedEmail,
             displayName,
             signature: signature || '',
+            isVerified: true, // Auto-verify for demo environment
             verificationToken,
             verificationExpiresAt,
             updatedAt: new Date(),

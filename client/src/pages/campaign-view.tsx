@@ -78,7 +78,7 @@ export default function CampaignView() {
 
   // Fetch campaign updates count
   const { data: updatesData } = useQuery<any[]>({
-    queryKey: [`/api/campaign-updates/${campaign?.id}`],
+    queryKey: [`/api/campaign-updates/campaign/${campaign?.id}`],
     enabled: !!campaign?.id,
   });
   const updatesCount = updatesData?.length || 0;

@@ -1811,6 +1811,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get updates for a specific campaign (public access)
+  app.get('/api/campaign-updates/campaign/:campaignId', async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      const updates = await storage.getCampaignUpdates(parseInt(campaignId));
+      res.json(updates);
+    } catch (error) {
+      console.error('Error fetching campaign updates:', error);
+      res.status(500).json({ message: 'Failed to fetch campaign updates' });
+    }
+  });
+
   app.get('/api/campaign-updates/founder/:founderId', requireAuth, async (req: any, res) => {
     try {
       const founderId = req.params.founderId;

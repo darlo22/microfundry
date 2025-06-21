@@ -6727,130 +6727,23 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               headers: {
                 'X-Priority': '3',
                 'X-MSMail-Priority': 'Normal',
-                'Importance': 'normal',
-                'X-Mailer': 'Fundry Platform',
-                'List-Unsubscribe': `<mailto:unsubscribe@microfundry.com?subject=Unsubscribe>`,
-                'List-Id': 'Investment Opportunities <opportunities.microfundry.com>',
-                'X-Entity-ID': `fundry-outreach-${email.trackingId}`,
-                'X-Campaign-ID': `campaign-${newCampaign.id}`,
-                'Authentication-Results': 'spf=pass smtp.mailfrom=microfundry.com; dkim=pass header.d=microfundry.com',
-                'DKIM-Signature': 'v=1; a=rsa-sha256; c=relaxed/relaxed; d=microfundry.com',
-                'Message-ID': `<${email.trackingId}@microfundry.com>`,
-                'Return-Path': 'support@microfundry.com',
-                'Precedence': 'bulk',
-                'Auto-Submitted': 'auto-generated'
+                'Importance': 'normal'
               },
               html: `
-                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; max-width: 650px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e7eb;">
-                  <!-- Professional Header -->
-                  <div style="background: #ffffff; padding: 30px 40px; border-bottom: 3px solid #f97316;">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                      <div>
-                        <h1 style="color: #1e40af; margin: 0; font-size: 28px; font-weight: 600;">Fundry</h1>
-                        <p style="color: #6b7280; margin: 5px 0 0 0; font-size: 14px;">Micro Investment Platform</p>
-                      </div>
-                      <div style="background: #f97316; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <span style="color: white; font-size: 24px; font-weight: bold;">F</span>
-                      </div>
-                    </div>
-                  </div>
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333333; line-height: 1.6;">
+                  ${email.personalizedMessage.replace(/\n/g, '<br><br>')}
                   
-                  <!-- Main Content -->
-                  <div style="padding: 40px;">
-                    <div style="background: #f8fafc; border-left: 4px solid #1e40af; padding: 20px; margin-bottom: 30px; border-radius: 0 8px 8px 0;">
-                      <h2 style="color: #1e40af; margin: 0 0 10px 0; font-size: 18px;">Business Partnership Inquiry from ${emailSettings[0].displayName}</h2>
-                      <p style="color: #374151; margin: 0; font-size: 14px;">Strategic collaboration with emerging technology companies</p>
-                    </div>
-                    
-                    <!-- Personal Message -->
-                    <div style="line-height: 1.8; color: #374151; font-size: 16px; margin-bottom: 30px;">
-                      ${email.personalizedMessage.replace(/\n/g, '<br>')}
-                    </div>
-                    
-                    <!-- Business Value -->
-                    <div style="background: #f8fafc; border: 1px solid #64748b; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
-                      <h3 style="color: #374151; margin: 0 0 15px 0; font-size: 18px;">Partnership Benefits</h3>
-                      <ul style="color: #374151; margin: 0; padding-left: 20px; line-height: 1.6;">
-                        <li style="margin-bottom: 8px;">Direct access to pre-vetted technology companies</li>
-                        <li style="margin-bottom: 8px;">Clear partnership terms and documentation</li>
-                        <li style="margin-bottom: 8px;">Ongoing communication with founding teams</li>
-                        <li style="margin-bottom: 8px;">Comprehensive business analysis and projections</li>
-                      </ul>
-                    </div>
-                    
-                    <!-- Call to Action -->
-                    <div style="text-align: center; margin: 40px 0;">
-                      <a href="https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'your-replit-domain.repl.co'}/browse-campaigns" 
-                         style="background: #1e40af; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);">
-                        Review Business Opportunities
-                      </a>
-                    </div>
-                    
-                    <!-- Platform Features -->
-                    <div style="background: #f8fafc; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
-                      <h3 style="color: #374151; margin: 0 0 20px 0; font-size: 16px; text-align: center;">Platform Features</h3>
-                      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; text-align: center;">
-                        <div>
-                          <div style="color: #1e40af; font-size: 24px; margin-bottom: 8px;">🔐</div>
-                          <div style="color: #6b7280; font-size: 14px;">Secure Documentation</div>
-                        </div>
-                        <div>
-                          <div style="color: #1e40af; font-size: 24px; margin-bottom: 8px;">📋</div>
-                          <div style="color: #6b7280; font-size: 14px;">Business Analysis</div>
-                        </div>
-                        <div>
-                          <div style="color: #1e40af; font-size: 24px; margin-bottom: 8px;">📈</div>
-                          <div style="color: #6b7280; font-size: 14px;">Growth Tracking</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Professional Footer -->
-                  <div style="background: #f8fafc; padding: 30px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
-                    <div style="margin-bottom: 20px;">
-                      <h3 style="color: #1e40af; margin: 0 0 5px 0; font-size: 20px;">Fundry</h3>
-                      <p style="color: #6b7280; margin: 0; font-size: 14px;">Connecting investors with innovative startups</p>
-                    </div>
-                    
-                    <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
-                      <p style="color: #9ca3af; font-size: 12px; margin: 0 0 10px 0;">
-                        This email was sent by ${emailSettings[0].displayName} via Fundry Platform.<br>
-                        If you no longer wish to receive investment opportunities, 
-                        <a href="mailto:unsubscribe@microfundry.com?subject=Unsubscribe&body=Please remove me from investment opportunity emails" style="color: #6b7280;">click here to unsubscribe</a>.
-                      </p>
-                      <p style="color: #9ca3af; font-size: 11px; margin: 0;">
-                        © 2025 Fundry. All rights reserved. | 
-                        <a href="https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'your-replit-domain.repl.co'}/privacy" style="color: #9ca3af;">Privacy Policy</a> | 
-                        <a href="https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'your-replit-domain.repl.co'}/terms" style="color: #9ca3af;">Terms of Service</a>
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <!-- Email Tracking Pixel -->
-                  <img src="https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'your-replit-domain.repl.co'}/api/email-tracking/open/${email.trackingId}/pixel.png" 
-                       width="1" height="1" style="display: block;" alt="" />
+                  <br><br>
+                  Best regards,<br>
+                  ${emailSettings[0].displayName}
+                  ${emailSettings[0].signature ? `<br><br>${emailSettings[0].signature.replace(/\n/g, '<br>')}` : ''}
                 </div>
               `,
-              text: `
-Business Partnership Inquiry from ${emailSettings[0].displayName}
+              text: `${email.personalizedMessage}
 
-${email.personalizedMessage}
-
-Review business opportunities on our platform:
-https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'your-replit-domain.repl.co'}/browse-campaigns
-
-Partnership Benefits:
-- Direct access to pre-vetted technology companies
-- Clear partnership terms and documentation
-- Ongoing communication with founding teams
-- Comprehensive business analysis and projections
-
-This email was sent by ${emailSettings[0].displayName} via Fundry Platform.
-To unsubscribe: unsubscribe@microfundry.com
-
-© 2025 Fundry. All rights reserved.
-              `
+Best regards,
+${emailSettings[0].displayName}
+${emailSettings[0].signature || ''}`
             });
 
             if (emailSent) {

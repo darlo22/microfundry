@@ -637,6 +637,12 @@ export default function InvestorDashboard() {
     investment.paymentStatus === 'completed'
   );
 
+  // Calculate live stats from actual investment data
+  const totalInvested = paidInvestments.reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0);
+  const totalActiveInvestments = paidInvestments.length;
+  const totalPendingCommitments = pendingInvestments.length;
+  const totalPaidInvestments = paidInvestments.length;
+
   if (isLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -697,7 +703,7 @@ export default function InvestorDashboard() {
               </div>
               <div className="text-right">
                 <p className="text-xs md:text-sm text-gray-500 font-medium uppercase tracking-wide">Total Invested</p>
-                <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">{userStats?.totalInvested || "$0"}</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">${totalInvested.toLocaleString()}</p>
               </div>
             </div>
             <div className="flex items-center text-sm">
@@ -714,7 +720,7 @@ export default function InvestorDashboard() {
               </div>
               <div className="text-right">
                 <p className="text-xs md:text-sm text-gray-500 font-medium uppercase tracking-wide">Active Investments</p>
-                <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">{userStats?.activeInvestments?.toString() || "0"}</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">{totalActiveInvestments}</p>
               </div>
             </div>
             <div className="flex items-center text-sm">

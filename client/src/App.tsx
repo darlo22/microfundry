@@ -28,7 +28,7 @@ import FounderSettings from "@/pages/founder-settings";
 import FounderUpdates from "@/pages/founder-updates";
 import FounderMessages from "@/pages/founder-messages";
 import PaymentWithdrawal from "@/pages/payment-withdrawal";
-import InvestorDashboard from "@/pages/investor-dashboard-new";
+import InvestorDashboard from "@/pages/investor-dashboard-simple";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminLogin from "@/pages/admin-login";
 import AdminKYCManagement from "@/pages/admin-kyc-management";

@@ -19,64 +19,63 @@ export default function InvestorDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("portfolio");
 
-  // Queries that only run when user is available
+  // Queries that run immediately without conditions
   const { data: userInvestments = [], isLoading: investmentsLoading } = useQuery<InvestmentWithCampaign[]>({
     queryKey: ["/api/investments/user"],
-    enabled: !!user?.id,
     retry: false,
   });
 
   const { data: userStats } = useQuery({
     queryKey: ["/api/user/stats"],
-    enabled: !!user?.id,
+    retry: false,
   });
 
-  // Check if we should show loading states
-  const showLoading = authLoading || !user || investmentsLoading;
-
-  // Split investments by payment status
-  const pendingInvestments = userInvestments.filter(inv => 
+  // Always show static content first, then populate with data when available
+  const pendingInvestments = userInvestments?.filter(inv => 
     inv.paymentStatus === 'pending' || inv.paymentStatus === 'processing'
-  );
+  ) || [];
   
-  const paidInvestments = userInvestments.filter(inv => 
+  const paidInvestments = userInvestments?.filter(inv => 
     inv.paymentStatus === 'completed'
-  );
+  ) || [];
 
-  // Calculate stats
+  // Calculate stats - always show some value
   const totalInvested = paidInvestments.reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0);
   const totalActiveInvestments = paidInvestments.length;
   const totalPendingCommitments = pendingInvestments.length;
   const totalPaidInvestments = paidInvestments.length;
 
-  // Stats data with loading fallbacks
+  // Display username immediately
+  const displayName = user?.firstName || user?.email?.split('@')[0] || 'Investor';
+
+  // Stats data - always show values
   const statsData = [
     {
       title: "Total Invested",
-      value: showLoading ? "Loading..." : `$${totalInvested.toLocaleString()}`,
+      value: `$${totalInvested.toLocaleString()}`,
       icon: DollarSign,
-      change: showLoading ? "..." : "+12.5%",
+      change: "+12.5%",
       gradient: "from-blue-500 to-cyan-600"
     },
     {
-      title: "Active Investments",
-      value: showLoading ? "..." : totalActiveInvestments.toString(),
+      title: "Active Investments", 
+      value: totalActiveInvestments.toString(),
       icon: TrendingUp,
-      change: showLoading ? "..." : "+2 this month",
+      change: "+2 this month",
       gradient: "from-emerald-500 to-green-600"
     },
     {
       title: "Pending Commitments",
-      value: showLoading ? "..." : totalPendingCommitments.toString(),
+      value: totalPendingCommitments.toString(),
       icon: PieChart,
-      change: showLoading ? "..." : "Awaiting payment",
+      change: "Awaiting payment",
       gradient: "from-amber-500 to-orange-600"
     },
     {
       title: "Actual Paid Investments",
-      value: showLoading ? "..." : totalPaidInvestments.toString(),
+      value: totalPaidInvestments.toString(),
       icon: Users,
-      change: showLoading ? "..." : "Completed",
+      change: "Completed",
       gradient: "from-purple-500 to-pink-600"
     }
   ];
@@ -98,26 +97,14 @@ export default function InvestorDashboard() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-              {showLoading ? (
-                <Skeleton className="w-16 h-16 rounded-full" />
-              ) : (
-                user?.email?.[0]?.toUpperCase() || "I"
-              )}
+              {displayName[0]?.toUpperCase() || "I"}
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {showLoading ? (
-                  <Skeleton className="h-8 w-48" />
-                ) : (
-                  `Welcome back, ${user?.firstName || user?.email?.split('@')[0] || 'Investor'}`
-                )}
+                Welcome back, {displayName}
               </h1>
               <p className="text-gray-600">
-                {showLoading ? (
-                  <Skeleton className="h-4 w-32" />
-                ) : (
-                  "Manage your investment portfolio"
-                )}
+                Manage your investment portfolio
               </p>
             </div>
           </div>
@@ -135,7 +122,7 @@ export default function InvestorDashboard() {
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {showLoading ? <Skeleton className="h-8 w-16" /> : stat.value}
+                      {stat.value}
                     </p>
                   </div>
                 </div>

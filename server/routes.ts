@@ -2840,6 +2840,42 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Manual payment status update endpoint for successful payments
+  app.post('/api/investments/:id/mark-paid', requireAuth, async (req: any, res) => {
+    try {
+      const investmentId = parseInt(req.params.id);
+      const { paymentReference } = req.body;
+      
+      // Get the investment and verify ownership
+      const investment = await storage.getInvestment(investmentId);
+      if (!investment || investment.investorId !== req.user.id) {
+        return res.status(404).json({ message: 'Investment not found or access denied' });
+      }
+
+      // Update investment to paid status
+      const updatedInvestment = await storage.updateInvestment(investmentId, {
+        status: 'paid',
+        paymentStatus: 'completed',
+        paymentIntentId: paymentReference || `manual_${investmentId}_${Date.now()}`
+      });
+
+      console.log(`Manual update: Investment ${investmentId} marked as paid`);
+
+      res.json({ 
+        success: true, 
+        investment: updatedInvestment,
+        message: 'Investment successfully marked as paid'
+      });
+    } catch (error) {
+      console.error('Error marking investment as paid:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to update investment status',
+        error: (error as Error).message 
+      });
+    }
+  });
+
   // Payment success verification endpoint
   app.get('/api/payment-success/:sessionId', requireAuth, async (req: any, res) => {
     try {

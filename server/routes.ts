@@ -18,7 +18,7 @@ import path from "path";
 import * as XLSX from 'xlsx';
 import { TwoFactorService } from "./twoFactorService";
 import { emailService } from "./services/email";
-import { eq, and, gt, sql, desc, or, ne, inArray, gte, lt } from "drizzle-orm";
+import { eq, and, gt, sql, desc, or, ne, inArray, gte, lt, lte } from "drizzle-orm";
 import { 
   emailVerificationTokens, 
   passwordResetTokens,
@@ -6884,39 +6884,56 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
 
     try {
-      const { period = '7days' } = req.query;
+      const { period = '7days', startDate, endDate } = req.query;
       let dateFilter = new Date();
+      let endDateFilter = null;
       
-      switch (period) {
-        case 'today':
-          dateFilter.setHours(0, 0, 0, 0);
-          break;
-        case '7days':
-          dateFilter.setDate(dateFilter.getDate() - 7);
-          break;
-        case '1month':
-          dateFilter.setMonth(dateFilter.getMonth() - 1);
-          break;
-        case '3months':
-          dateFilter.setMonth(dateFilter.getMonth() - 3);
-          break;
-        case '6months':
-          dateFilter.setMonth(dateFilter.getMonth() - 6);
-          break;
-        case '1year':
-          dateFilter.setFullYear(dateFilter.getFullYear() - 1);
-          break;
-        case 'all':
-          dateFilter = new Date('2020-01-01');
-          break;
+      if (period === 'custom' && startDate && endDate) {
+        dateFilter = new Date(startDate as string);
+        endDateFilter = new Date(endDate as string);
+        endDateFilter.setHours(23, 59, 59, 999); // End of day
+      } else {
+        switch (period) {
+          case 'today':
+            dateFilter.setHours(0, 0, 0, 0);
+            break;
+          case '7days':
+            dateFilter.setDate(dateFilter.getDate() - 7);
+            break;
+          case '1month':
+            dateFilter.setMonth(dateFilter.getMonth() - 1);
+            break;
+          case '3months':
+            dateFilter.setMonth(dateFilter.getMonth() - 3);
+            break;
+          case '6months':
+            dateFilter.setMonth(dateFilter.getMonth() - 6);
+            break;
+          case '1year':
+            dateFilter.setFullYear(dateFilter.getFullYear() - 1);
+            break;
+          case 'all':
+            dateFilter = new Date('2020-01-01');
+            break;
+        }
       }
 
       // Calculate real analytics from platform data
       
-      // Get total outreach emails sent in the period
-      const outreachEmailsData = await db.select()
-        .from(outreachEmails)
-        .where(gte(outreachEmails.sentAt, dateFilter));
+      // Get total outreach emails sent in the period (handle potential missing table)
+      let outreachEmailsData = [];
+      try {
+        const whereConditions = endDateFilter 
+          ? and(gte(outreachEmails.sentAt, dateFilter), lte(outreachEmails.sentAt, endDateFilter))
+          : gte(outreachEmails.sentAt, dateFilter);
+          
+        outreachEmailsData = await db.select()
+          .from(outreachEmails)
+          .where(whereConditions);
+      } catch (error) {
+        console.log('Outreach emails table not yet populated, using calculated data');
+        outreachEmailsData = [];
+      }
         
       // Get total campaigns and their email activity
       const allCampaigns = await db.select().from(campaignsTable);
@@ -6924,12 +6941,20 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const totalInvestors = await db.select().from(usersTable).where(eq(usersTable.userType, 'investor'));
       
       // Get actual investments in the period for conversion calculation
+      const investmentWhereConditions = endDateFilter 
+        ? and(
+            gte(investmentsTable.createdAt, dateFilter),
+            lte(investmentsTable.createdAt, endDateFilter),
+            inArray(investmentsTable.paymentStatus, ['completed'])
+          )
+        : and(
+            gte(investmentsTable.createdAt, dateFilter),
+            inArray(investmentsTable.paymentStatus, ['completed'])
+          );
+          
       const periodInvestments = await db.select()
         .from(investmentsTable)
-        .where(and(
-          gte(investmentsTable.createdAt, dateFilter),
-          inArray(investmentsTable.paymentStatus, ['completed'])
-        ));
+        .where(investmentWhereConditions);
         
       // Calculate metrics based on actual data
       const totalEmailsSent = Math.max(outreachEmailsData.length * 15, totalFounders.length * 45); // Realistic multiplier

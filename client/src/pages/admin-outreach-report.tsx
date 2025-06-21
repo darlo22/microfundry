@@ -54,16 +54,36 @@ export default function AdminOutreachReport() {
   const [customEndDate, setCustomEndDate] = useState('');
   const { toast } = useToast();
 
+  // Build query parameters for API calls
+  const getQueryParams = () => {
+    const params = new URLSearchParams({ period: selectedPeriod });
+    if (selectedPeriod === 'custom' && customStartDate && customEndDate) {
+      params.append('startDate', customStartDate);
+      params.append('endDate', customEndDate);
+    }
+    return params.toString();
+  };
+
   // Fetch outreach analytics
   const { data: outreachAnalytics, isLoading: analyticsLoading } = useQuery<OutreachAnalytics>({
-    queryKey: ['/api/admin/outreach-analytics', selectedPeriod],
-    enabled: true,
+    queryKey: ['/api/admin/outreach-analytics', selectedPeriod, customStartDate, customEndDate],
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/outreach-analytics?${getQueryParams()}`);
+      if (!response.ok) throw new Error('Failed to fetch analytics');
+      return response.json();
+    },
+    enabled: selectedPeriod !== 'custom' || (customStartDate && customEndDate),
   });
 
   // Fetch campaign outreach data
   const { data: campaignOutreach, isLoading: campaignLoading } = useQuery<CampaignOutreach[]>({
-    queryKey: ['/api/admin/campaign-outreach', selectedPeriod],
-    enabled: true,
+    queryKey: ['/api/admin/campaign-outreach', selectedPeriod, customStartDate, customEndDate],
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/campaign-outreach?${getQueryParams()}`);
+      if (!response.ok) throw new Error('Failed to fetch campaign data');
+      return response.json();
+    },
+    enabled: selectedPeriod !== 'custom' || (customStartDate && customEndDate),
   });
 
   const handleExportReport = () => {

@@ -46,12 +46,10 @@ export function setupAuth(app: Express) {
       createTableIfMissing: false,
     }),
     cookie: {
-      secure: false, // Set to false for development to fix session issues
+      secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: 'lax', // Allow cross-site requests for proper session handling
     },
-    name: 'connect.sid',
   };
 
   app.set("trust proxy", 1);
@@ -88,14 +86,11 @@ export function setupAuth(app: Express) {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser(async (id: string, done) => {
     try {
-      console.log('Deserializing user with ID:', id);
-      const user = await storage.getUser(String(id));
+      const user = await storage.getUser(id);
       if (!user) {
-        console.log('User not found during deserialization:', id);
         // User not found, clear the session
         return done(null, false);
       }
-      console.log('User deserialized successfully:', user.id);
       done(null, user);
     } catch (error) {
       console.error('Session deserialization error:', error);
@@ -167,57 +162,22 @@ export function setupAuth(app: Express) {
     }
   });
 
-  // Login endpoint with enhanced error handling
-  app.post("/api/login", async (req, res, next) => {
-    try {
-      // Wrap passport authentication in a promise for better error handling
-      const authenticateUser = () => {
-        return new Promise((resolve, reject) => {
-          passport.authenticate("local", (err: any, user: any, info: any) => {
-            if (err) {
-              console.error("Passport authentication error:", err);
-              return reject(new Error("Authentication failed"));
-            }
-            if (!user) {
-              return resolve({ success: false, message: info?.message || "Invalid credentials" });
-            }
-            resolve({ success: true, user });
-          })(req, res, next);
-        });
-      };
-
-      const authResult: any = await authenticateUser();
-
-      if (!authResult.success) {
-        return res.status(401).json({ message: authResult.message });
+  // Login endpoint
+  app.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err: any, user: any, info: any) => {
+      if (err) {
+        return res.status(500).json({ message: "Internal server error" });
       }
-
-      // Login user with error handling
-      const loginUser = () => {
-        return new Promise((resolve, reject) => {
-          req.login(authResult.user, (err) => {
-            if (err) {
-              console.error("Login session error:", err);
-              return reject(new Error("Session creation failed"));
-            }
-            resolve(authResult.user);
-          });
-        });
-      };
-
-      await loginUser();
-      res.json({ user: authResult.user, message: "Login successful" });
-
-    } catch (error: any) {
-      console.error("Login endpoint error:", error);
-      
-      // Provide specific error messages for debugging
-      if (error.message.includes("database") || error.message.includes("connection")) {
-        return res.status(500).json({ message: "Database connection error. Please try again." });
+      if (!user) {
+        return res.status(401).json({ message: info?.message || "Invalid credentials" });
       }
-      
-      res.status(500).json({ message: "Login failed" });
-    }
+      req.login(user, (err) => {
+        if (err) {
+          return res.status(500).json({ message: "Login failed" });
+        }
+        res.json({ user, message: "Login successful" });
+      });
+    })(req, res, next);
   });
 
   // Logout endpoint
@@ -231,20 +191,13 @@ export function setupAuth(app: Express) {
   // Get current user with enhanced error handling
   app.get("/api/user", async (req, res) => {
     try {
-      console.log('User authentication check:', {
-        isAuthenticated: req.isAuthenticated(),
-        hasUser: !!req.user,
-        userId: req.user?.id
-      });
-
       if (!req.isAuthenticated() || !req.user) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
       // Verify user still exists in database
-      const user = await storage.getUser(String(req.user.id));
+      const user = await storage.getUser(req.user.id);
       if (!user) {
-        console.log('User not found in database:', req.user.id);
         // User no longer exists, clear session
         req.logout((err) => {
           if (err) console.error('Logout error:', err);
@@ -252,7 +205,6 @@ export function setupAuth(app: Express) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      console.log('User authenticated successfully:', user.id);
       res.json(user);
     } catch (error) {
       console.error('User authentication check failed:', error);

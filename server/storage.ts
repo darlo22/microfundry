@@ -30,13 +30,23 @@ import {
   type InsertNotificationPreferences,
   type KycVerification,
   type InsertKycVerification,
-  passwordResetTokens,
-  type PasswordResetToken,
-  type InsertPasswordResetToken,
 } from "@shared/schema";
-import { db, safeDbOperation } from "./db";
+import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+
+// Helper function to wrap database operations with error handling
+const safeDbOperation = async <T>(operation: () => Promise<T>, fallback?: T): Promise<T | undefined> => {
+  try {
+    return await operation();
+  } catch (error) {
+    console.error('Database operation failed:', error);
+    if (fallback !== undefined) {
+      return fallback;
+    }
+    return undefined;
+  }
+};
 
 export interface IStorage {
   // User operations for email/password auth
@@ -116,12 +126,6 @@ export interface IStorage {
 
   // Account management operations
   deactivateUser(userId: string, reason: string): Promise<void>;
-
-  // Password reset operations
-  createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
-  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
-  deletePasswordResetToken(token: string): Promise<void>;
-  updateUserPassword(userId: string, hashedPassword: string): Promise<User>;
 
   // Payment methods operations
   getPaymentMethods(userId: string): Promise<PaymentMethod[]>;
@@ -678,7 +682,16 @@ export class DatabaseStorage implements IStorage {
     return result.rows[0];
   }
 
-  // Security methods - removed duplicate method
+  // Security methods
+  async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        password: hashedPassword,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
 
   async updateUser2FA(userId: string, enabled: boolean): Promise<void> {
     await db
@@ -1092,46 +1105,6 @@ export class DatabaseStorage implements IStorage {
       investorRetentionRate: number;
       averageDecisionTime: number;
     }>;
-  }
-
-  // Password reset operations
-  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
-    return safeDbOperation(async () => {
-      const [createdToken] = await db
-        .insert(passwordResetTokens)
-        .values(token)
-        .returning();
-      return createdToken;
-    }) as Promise<PasswordResetToken>;
-  }
-
-  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
-    return safeDbOperation(async () => {
-      const [resetToken] = await db
-        .select()
-        .from(passwordResetTokens)
-        .where(eq(passwordResetTokens.token, token));
-      return resetToken;
-    });
-  }
-
-  async deletePasswordResetToken(token: string): Promise<void> {
-    return safeDbOperation(async () => {
-      await db
-        .delete(passwordResetTokens)
-        .where(eq(passwordResetTokens.token, token));
-    }) as Promise<void>;
-  }
-
-  async updateUserPassword(userId: string, hashedPassword: string): Promise<User> {
-    return safeDbOperation(async () => {
-      const [updatedUser] = await db
-        .update(users)
-        .set({ password: hashedPassword })
-        .where(eq(users.id, userId))
-        .returning();
-      return updatedUser;
-    }) as Promise<User>;
   }
 }
 

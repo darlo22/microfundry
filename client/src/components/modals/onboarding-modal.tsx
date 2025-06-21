@@ -12,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation } from "wouter";
 
 const registrationSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -48,7 +47,6 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
-  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   // Reset modal state when defaultUserType changes
@@ -145,13 +143,8 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
       const response = await apiRequest("POST", "/api/login", data);
       return response.json();
     },
-    onSuccess: async (data) => {
-      console.log('Login successful, user data:', data);
-      console.log('Selected user type:', selectedUserType);
-      
-      // Invalidate user query and wait for it to complete
-      await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Welcome back!",
         description: "You've been logged in successfully.",
@@ -165,7 +158,7 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
           const context = JSON.parse(storedContext);
           const isRecent = Date.now() - context.timestamp < 30 * 60 * 1000;
           if (isRecent) {
-            console.log('Investment context found, not redirecting');
+            // Don't redirect, let the investment modal handle continuation
             return;
           }
         } catch (error) {
@@ -173,26 +166,9 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
         }
       }
       
-      // Use the actual user type from the server response for routing
-      setTimeout(() => {
-        const userType = data.user?.userType || selectedUserType;
-        let dashboardRoute;
-        
-        if (userType === "founder") {
-          dashboardRoute = "/founder-dashboard";
-        } else if (userType === "investor") {
-          dashboardRoute = "/investor-dashboard";
-        } else if (userType === "admin") {
-          dashboardRoute = "/admin-dashboard";
-        } else {
-          // Fallback based on selected type
-          dashboardRoute = selectedUserType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
-        }
-        
-        console.log('User type from server:', userType);
-        console.log('Redirecting to:', dashboardRoute);
-        setLocation(dashboardRoute);
-      }, 100);
+      // Route based on selected role during sign-in
+      const dashboardRoute = selectedUserType === "founder" ? "/founder-dashboard" : "/investor-dashboard";
+      window.location.href = dashboardRoute;
     },
     onError: (error: any) => {
       toast({
@@ -602,14 +578,6 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
             </Button>
 
             <div className="text-center text-sm text-gray-600">
-              <button
-                type="button"
-                onClick={() => handleModeChange("forgotPassword")}
-                className="text-fundry-orange hover:underline font-medium mb-3 block"
-              >
-                Forgot your password?
-              </button>
-              
               Don't have an account?{" "}
               <button
                 type="button"

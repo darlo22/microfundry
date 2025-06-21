@@ -10,19 +10,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { useQueryClient } from '@tanstack/react-query';
 import { convertUsdToNgn, type ExchangeRate } from '@/lib/currency';
-import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#424770',
-      '::placeholder': {
-        color: '#aab7c4',
-      },
-    },
-  },
-};
+
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -38,14 +27,9 @@ interface PaymentModalProps {
 export default function PaymentModal({ isOpen, onClose, investment }: PaymentModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const stripe = useStripe();
-  const elements = useElements();
   const { user } = useAuth();
   
   const [isProcessingNaira, setIsProcessingNaira] = useState(false);
-  const [isProcessingStripe, setIsProcessingStripe] = useState(false);
-  const [isLoadingUSD, setIsLoadingUSD] = useState(false);
-  const [cardholderName, setCardholderName] = useState('');
   const [ngnAmount, setNgnAmount] = useState<number | null>(null);
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
   const [isLoadingRate, setIsLoadingRate] = useState(true);
@@ -269,12 +253,12 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
 
       if (paymentMethodError) {
         console.error('Payment method error:', paymentMethodError);
+        resetModalToPaymentSelection();
         toast({
           title: "Card Error",
           description: `${paymentMethodError.message}. Please try a different payment method.`,
           variant: "destructive",
         });
-        resetModalToPaymentSelection();
         return;
       }
 
@@ -285,26 +269,12 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
 
       if (error) {
         console.error('Stripe payment error:', error);
-        console.error('Payment error:', error);
-        
-        // Determine error message based on error type
-        let errorMessage = "Payment failed. Please try again or use a different payment method.";
-        if (error.decline_code === 'fraudulent') {
-          errorMessage = "Your card was declined for security reasons. Please contact your card issuer or try a different payment method.";
-        } else if (error.decline_code === 'insufficient_funds') {
-          errorMessage = "Insufficient funds. Please check your account balance or try a different card.";
-        } else if (error.decline_code === 'card_declined') {
-          errorMessage = "Your card was declined. Please contact your card issuer or try a different payment method.";
-        } else if (error.message) {
-          errorMessage = `${error.message}. Please try a different payment method.`;
-        }
-        
+        resetModalToPaymentSelection();
         toast({
           title: "Card Payment Failed",
-          description: errorMessage,
+          description: `${error.message}. Please try a different payment method.`,
           variant: "destructive",
         });
-        resetModalToPaymentSelection();
         return;
       }
 
@@ -323,23 +293,22 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
         queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
         onClose();
       } else {
+        resetModalToPaymentSelection();
         toast({
           title: "Payment Incomplete",
           description: "Payment was not completed. Please try again or use a different payment method.",
           variant: "destructive",
         });
-        resetModalToPaymentSelection();
       }
     } catch (error: any) {
       console.error('Payment processing error:', error);
+      resetModalToPaymentSelection();
       toast({
         title: "Payment Failed",
         description: error.message || "Failed to process payment. Please try again or use a different payment method.",
         variant: "destructive",
       });
-      resetModalToPaymentSelection();
     } finally {
-      // Always reset processing state
       setIsProcessingStripe(false);
     }
   };

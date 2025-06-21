@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { CreditCard, Lock } from 'lucide-react';
@@ -10,19 +8,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { useQueryClient } from '@tanstack/react-query';
 import { convertUsdToNgn, type ExchangeRate } from '@/lib/currency';
-import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
-
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#424770',
-      '::placeholder': {
-        color: '#aab7c4',
-      },
-    },
-  },
-};
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -38,442 +23,255 @@ interface PaymentModalProps {
 export default function PaymentModal({ isOpen, onClose, investment }: PaymentModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const stripe = useStripe();
-  const elements = useElements();
   const { user } = useAuth();
   
   const [isProcessingNaira, setIsProcessingNaira] = useState(false);
-  const [isProcessingStripe, setIsProcessingStripe] = useState(false);
-  const [cardholderName, setCardholderName] = useState('');
   const [ngnAmount, setNgnAmount] = useState<number | null>(null);
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
-  const [isLoadingRate, setIsLoadingRate] = useState(true);
-  const [showStripeForm, setShowStripeForm] = useState(false);
-  const [clientSecret, setClientSecret] = useState('');
+  const [isLoadingRate, setIsLoadingRate] = useState(false);
 
-  // Reset state and fetch exchange rate when modal opens
+  const usdAmount = parseFloat(investment.amount);
+
+  // Fetch exchange rate and convert to NGN
   useEffect(() => {
-    if (isOpen) {
-      // Reset all state when modal opens
-      setIsProcessingNaira(false);
-      setIsProcessingStripe(false);
-      setCardholderName('');
-      setShowStripeForm(false);
-      setClientSecret('');
-      
-      setIsLoadingRate(true);
-      convertUsdToNgn(Number(investment.amount))
-        .then(({ ngn, rate }) => {
-          setNgnAmount(ngn);
+    if (isOpen && usdAmount > 0) {
+      const fetchRate = async () => {
+        setIsLoadingRate(true);
+        try {
+          const rate = await convertUsdToNgn(usdAmount);
           setExchangeRate(rate);
-        })
-        .catch((error) => {
-          console.warn('Failed to fetch exchange rate:', error);
-          // Use fallback rate
-          setNgnAmount(Number(investment.amount) * 1650);
-          setExchangeRate({
-            usdToNgn: 1650,
-            source: 'Fallback',
-            lastUpdated: new Date()
+          setNgnAmount(rate.ngnAmount);
+        } catch (error) {
+          console.error('Exchange rate fetch error:', error);
+          toast({
+            title: "Exchange Rate Error",
+            description: "Could not fetch current exchange rates. NGN payment may not be available.",
+            variant: "destructive",
           });
-        })
-        .finally(() => {
+        } finally {
           setIsLoadingRate(false);
-        });
+        }
+      };
+      fetchRate();
     }
-  }, [isOpen, investment.amount]);
+  }, [isOpen, usdAmount, toast]);
 
-  const resetModalToPaymentSelection = () => {
-    setIsProcessingNaira(false);
-    setIsProcessingStripe(false);
-    setShowStripeForm(false);
-    setCardholderName('');
-    setClientSecret('');
-  };
+  // Handle USD Stripe checkout redirect
+  const handleUSDPayment = async () => {
+    try {
+      // Redirect to Stripe checkout session
+      const response = await apiRequest('POST', '/api/create-checkout-session', {
+        investmentId: investment.id,
+        amount: usdAmount,
+        currency: 'usd'
+      });
 
-  const handleClose = () => {
-    resetModalToPaymentSelection();
-    onClose();
-  };
-
-  const handleUSDPayment = () => {
-    // Prevent simultaneous processing with NGN payment
-    if (isProcessingNaira) {
-      return;
-    }
-    
-    // Immediately show Stripe form and fetch payment intent in background
-    setShowStripeForm(true);
-    
-    // Get payment intent from backend
-    apiRequest('POST', '/api/create-payment-intent', {
-      amount: investment.amount,
-      investmentId: investment.id
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.clientSecret) {
-        setClientSecret(data.clientSecret);
+      if (response.url) {
+        window.location.href = response.url;
       } else {
-        toast({
-          title: "Payment Setup Failed",
-          description: "Failed to setup payment",
-          variant: "destructive",
-        });
-        setShowStripeForm(false);
+        throw new Error('No checkout URL received');
       }
-    })
-    .catch(error => {
-      console.error('Payment setup error:', error);
+    } catch (error: any) {
+      console.error('USD payment error:', error);
       toast({
-        title: "Payment Setup Failed",
-        description: "Failed to setup payment",
+        title: "Payment Error",
+        description: error.message || "Failed to initiate USD payment. Please try again.",
         variant: "destructive",
       });
-      setShowStripeForm(false);
-    });
+    }
   };
 
-  const handleNairaPayment = async () => {
-    if (!ngnAmount) {
+  // Handle NGN Budpay payment
+  const handleNGNPayment = async () => {
+    if (!ngnAmount || !user?.email) {
       toast({
-        title: "Currency Error",
-        description: "Unable to calculate Naira amount. Please try again.",
+        title: "Payment Error",
+        description: "Missing payment information. Please try again.",
         variant: "destructive",
       });
       return;
     }
 
     setIsProcessingNaira(true);
-    
+
     try {
-      // Create payment request with backend using direct API approach
-      const paymentData = {
-        campaignId: investment.campaignId,
-        amount: parseFloat(investment.amount),
+      // Get Budpay payment configuration
+      const budpayResponse = await apiRequest('POST', '/api/budpay-payment', {
+        investmentId: investment.id,
+        amount: ngnAmount,
         currency: 'NGN',
-        ngnAmount: ngnAmount,
-        email: user?.email || '',
-        reference: `inv_${investment.id}_${Date.now()}`,
-        paymentMethod: 'budpay',
-        investmentId: investment.id
-      };
+        email: user.email,
+        fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
+      });
 
-      console.log('Creating Budpay payment link:', paymentData);
+      if (budpayResponse.authorization_url) {
+        // Open Budpay checkout
+        if (typeof window !== 'undefined' && (window as any).BudPayCheckout) {
+          (window as any).BudPayCheckout({
+            key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,
+            email: user.email,
+            amount: ngnAmount * 100, // Convert to kobo
+            currency: 'NGN',
+            reference: budpayResponse.reference,
+            callback: async (response: any) => {
+              if (response.status === 'success') {
+                try {
+                  // Verify payment on backend
+                  await apiRequest('POST', '/api/verify-budpay-payment', {
+                    reference: response.reference,
+                    investmentId: investment.id
+                  });
 
-      // Call backend to create Budpay payment link
-      const response = await apiRequest('POST', '/api/create-budpay-payment', paymentData);
-      const result = await response.json();
+                  toast({
+                    title: "Payment Successful!",
+                    description: `Your investment of ₦${ngnAmount.toLocaleString()} has been processed successfully.`,
+                  });
 
-      if (result.success && result.paymentUrl) {
-        // Open Budpay payment page in a new window
-        const paymentWindow = window.open(
-          result.paymentUrl,
-          'budpay-payment',
-          'width=600,height=700,scrollbars=yes,resizable=yes'
-        );
-
-        if (!paymentWindow) {
-          throw new Error('Popup blocked. Please allow popups for payment processing.');
-        }
-
-        // Poll for payment completion
-        const pollPaymentStatus = async () => {
-          try {
-            const statusResponse = await apiRequest('GET', `/api/check-payment-status/${result.reference}`);
-            const statusResult = await statusResponse.json();
-            
-            if (statusResult.success && statusResult.status === 'success') {
-              // Payment successful
-              toast({
-                title: "Payment Successful!",
-                description: `Your investment of ₦${ngnAmount.toLocaleString('en-NG')} has been processed successfully.`,
-              });
-              
-              queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-              queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-              paymentWindow.close();
-              onClose();
+                  // Refresh data
+                  queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
+                  queryClient.invalidateQueries({ queryKey: ['/api/investor-stats'] });
+                  
+                  onClose();
+                } catch (verifyError: any) {
+                  console.error('Payment verification error:', verifyError);
+                  toast({
+                    title: "Payment Verification Failed",
+                    description: "Payment was processed but verification failed. Please contact support.",
+                    variant: "destructive",
+                  });
+                }
+              } else {
+                toast({
+                  title: "Payment Failed",
+                  description: "Your payment was not successful. Please try again.",
+                  variant: "destructive",
+                });
+              }
               setIsProcessingNaira(false);
-              return;
+            },
+            onClose: () => {
+              setIsProcessingNaira(false);
             }
-          } catch (error) {
-            console.error('Error checking payment status:', error);
-          }
-          
-          // Continue polling if payment window is still open
-          if (!paymentWindow.closed) {
-            setTimeout(pollPaymentStatus, 3000);
-          } else {
-            // Payment window closed, stop processing
-            setIsProcessingNaira(false);
-            toast({
-              title: "Payment Window Closed",
-              description: "Payment was cancelled or completed. Please check your investment status.",
-            });
-          }
-        };
-
-        // Start polling after a short delay
-        setTimeout(pollPaymentStatus, 2000);
-
+          });
+        } else {
+          throw new Error('Budpay checkout not available');
+        }
       } else {
-        throw new Error(result.message || 'Failed to create payment link');
+        throw new Error('Failed to initialize Budpay payment');
       }
-
     } catch (error: any) {
-      console.error('Naira payment error:', error);
+      console.error('NGN payment error:', error);
       toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process Naira payment",
+        title: "Payment Error",
+        description: error.message || "Failed to initiate NGN payment. Please try again.",
         variant: "destructive",
       });
       setIsProcessingNaira(false);
     }
   };
 
-  const handleStripePayment = async () => {
-    if (!stripe || !elements) {
-      toast({
-        title: "Payment System Error",
-        description: "Payment system is not ready. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!cardholderName.trim()) {
-      toast({
-        title: "Missing Information",
-        description: "Please enter the cardholder name.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsProcessingStripe(true);
-    
-    try {
-      // Create payment method
-      const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: elements.getElement(CardElement)!,
-        billing_details: {
-          name: cardholderName,
-          email: user?.email,
-        },
-      });
-
-      if (paymentMethodError) {
-        console.error('Payment method error:', paymentMethodError);
-        toast({
-          title: "Card Error",
-          description: `${paymentMethodError.message}. Please try a different payment method.`,
-          variant: "destructive",
-        });
-        resetModalToPaymentSelection();
-        return;
-      }
-
-      // Confirm payment
-      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: paymentMethod.id,
-      });
-
-      if (error) {
-        console.error('Stripe payment error:', error);
-        console.error('Payment error:', error);
-        
-        // Determine error message based on error type
-        let errorMessage = "Payment failed. Please try again or use a different payment method.";
-        if (error.decline_code === 'fraudulent') {
-          errorMessage = "Your card was declined for security reasons. Please contact your card issuer or try a different payment method.";
-        } else if (error.decline_code === 'insufficient_funds') {
-          errorMessage = "Insufficient funds. Please check your account balance or try a different card.";
-        } else if (error.decline_code === 'card_declined') {
-          errorMessage = "Your card was declined. Please contact your card issuer or try a different payment method.";
-        } else if (error.message) {
-          errorMessage = `${error.message}. Please try a different payment method.`;
-        }
-        
-        toast({
-          title: "Card Payment Failed",
-          description: errorMessage,
-          variant: "destructive",
-        });
-        resetModalToPaymentSelection();
-        return;
-      }
-
-      if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Update investment status in backend
-        await apiRequest('PATCH', `/api/investments/${investment.id}`, {
-          status: 'paid'
-        });
-
-        toast({
-          title: "Payment Successful!",
-          description: `Your investment of $${investment.amount} has been processed successfully.`,
-        });
-        
-        queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-        onClose();
-      } else {
-        toast({
-          title: "Payment Incomplete",
-          description: "Payment was not completed. Please try again or use a different payment method.",
-          variant: "destructive",
-        });
-        resetModalToPaymentSelection();
-      }
-    } catch (error: any) {
-      console.error('Payment processing error:', error);
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process payment. Please try again or use a different payment method.",
-        variant: "destructive",
-      });
-      resetModalToPaymentSelection();
-    } finally {
-      // Always reset processing state
-      setIsProcessingStripe(false);
-    }
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border-0 shadow-2xl">
-        <DialogHeader className="text-center pb-4 sm:pb-6">
-          <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mb-3 sm:mb-4">
-            <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-          </div>
-          <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md mx-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border-2 border-orange-200/50 shadow-2xl backdrop-blur-sm">
+        <DialogHeader className="bg-gradient-to-r from-orange-500 to-orange-600 -mx-6 -mt-6 px-6 py-4 rounded-t-lg">
+          <DialogTitle className="text-white text-center font-bold">
             Complete Payment
           </DialogTitle>
-          <div className="mt-3 space-y-1">
-            <p className="text-gray-600">
-              Investment Amount: <span className="font-bold text-lg">${investment.amount}</span>
-            </p>
-            {isLoadingRate ? (
-              <p className="text-sm text-gray-500">
-                <span className="inline-block w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></span>
-                Loading Naira equivalent...
-              </p>
-            ) : (
-              <p className="text-sm text-gray-500">
-                Equivalent: <span className="font-medium">₦{ngnAmount?.toLocaleString('en-NG')}</span>
-                {exchangeRate && (
-                  <span className="text-xs text-gray-400 ml-2">
-                    (Rate: {exchangeRate.usdToNgn})
-                  </span>
-                )}
-              </p>
-            )}
-          </div>
         </DialogHeader>
 
-        <div className="space-y-4 sm:space-y-6">
-          {!showStripeForm ? (
-            <>
-              {/* Payment Method Selection */}
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 text-center">Choose Payment Method</h3>
-                
-                {/* USD Payment Button */}
-                <Button
-                  onClick={handleUSDPayment}
-                  disabled={isProcessingNaira || isLoadingRate}
-                  className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
-                  Pay ${investment.amount} (USD)
-                </Button>
-
-                {/* NGN Payment Button */}
-                <Button
-                  onClick={handleNairaPayment}
-                  disabled={isProcessingStripe || isLoadingRate || !ngnAmount}
-                  className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  {isProcessingNaira ? (
-                    <span className="inline-block w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 sm:mr-3"></span>
-                  ) : (
-                    <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
-                  )}
-                  {isProcessingNaira ? 'Processing...' : `Pay ₦${ngnAmount?.toLocaleString('en-NG')} (NGN)`}
-                </Button>
+        <div className="space-y-6 pt-4">
+          {/* Investment Summary */}
+          <Card className="border-orange-200 bg-orange-50">
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <h3 className="font-semibold text-orange-900 mb-2">Investment Summary</h3>
+                <div className="text-2xl font-bold text-orange-800">
+                  ${usdAmount.toLocaleString()}
+                </div>
+                <p className="text-sm text-orange-700 mt-1">
+                  {investment.campaignTitle || 'Campaign Investment'}
+                </p>
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Security Notice */}
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
-                <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-                  <Lock className="w-4 h-4" />
-                  <span>Your payment information is secure and encrypted</span>
+          {/* Payment Method Selection */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
+              Choose Payment Method
+            </h3>
+            
+            {/* USD Payment Button */}
+            <Button
+              onClick={handleUSDPayment}
+              disabled={isProcessingNaira}
+              className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-lg font-bold">$</span>
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">Pay with USD</div>
+                  <div className="text-sm opacity-90">Powered by Stripe</div>
                 </div>
               </div>
-            </>
-          ) : (
-            <>
-              {/* Stripe Form */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Card Payment</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowStripeForm(false)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    Back
-                  </Button>
+              <div className="text-right">
+                <div className="font-bold">${usdAmount.toLocaleString()}</div>
+                <div className="text-xs opacity-75">Credit/Debit Card</div>
+              </div>
+            </Button>
+
+            {/* NGN Payment Button */}
+            <Button
+              onClick={handleNGNPayment}
+              disabled={isProcessingNaira || isLoadingRate || !ngnAmount}
+              className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-lg font-bold">₦</span>
                 </div>
-
-                <Card>
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="cardholderName" className="text-sm font-medium text-gray-700">
-                          Cardholder Name
-                        </Label>
-                        <Input
-                          id="cardholderName"
-                          value={cardholderName}
-                          onChange={(e) => setCardholderName(e.target.value)}
-                          placeholder="Enter cardholder name"
-                          disabled={isProcessingStripe}
-                          className="mt-1"
-                          autoComplete="cc-name"
-                        />
-                      </div>
-
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700">
-                          Card Details
-                        </Label>
-                        <div className="mt-1 p-3 border border-gray-300 rounded-md">
-                          <CardElement options={CARD_ELEMENT_OPTIONS} />
-                        </div>
-                      </div>
-
-                      <Button
-                        onClick={handleStripePayment}
-                        disabled={!clientSecret || isProcessingStripe}
-                        className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
-                      >
-                        {isProcessingStripe ? (
-                          <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-                        ) : (
-                          <CreditCard className="w-5 h-5 mr-2" />
-                        )}
-                        {isProcessingStripe ? 'Processing...' : `Pay $${investment.amount}`}
-                      </Button>
+                <div className="text-left">
+                  <div className="font-semibold">Pay with Naira</div>
+                  <div className="text-sm opacity-90">Powered by Budpay</div>
+                </div>
+              </div>
+              <div className="text-right">
+                {isLoadingRate ? (
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                ) : ngnAmount ? (
+                  <>
+                    <div className="font-bold">₦{ngnAmount.toLocaleString()}</div>
+                    <div className="text-xs opacity-75">
+                      Rate: {exchangeRate?.rate ? `₦${exchangeRate.rate.toFixed(2)}/$` : 'N/A'}
                     </div>
-                  </CardContent>
-                </Card>
+                  </>
+                ) : (
+                  <div className="text-sm">Rate unavailable</div>
+                )}
               </div>
-            </>
-          )}
+            </Button>
+
+            {isProcessingNaira && (
+              <div className="text-center text-sm text-gray-600">
+                <div className="animate-spin w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full mx-auto mb-2" />
+                Processing Naira payment...
+              </div>
+            )}
+          </div>
+
+          {/* Security Notice */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <Lock className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-gray-700">
+                <p className="font-medium">Secure Payment</p>
+                <p>Your payment information is encrypted and secure. Choose your preferred currency above.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

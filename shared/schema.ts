@@ -360,12 +360,6 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
 
-export type EmailVerificationToken = typeof emailVerificationTokens.$inferSelect;
-export type InsertEmailVerificationToken = typeof emailVerificationTokens.$inferInsert;
-
-export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
-export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
-
 // OTP codes table for email-based 2FA
 export const otpCodes = pgTable("otp_codes", {
   id: serial("id").primaryKey(),

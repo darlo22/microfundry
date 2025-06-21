@@ -9,6 +9,7 @@ import Footer from "@/components/layout/footer";
 import { FundryLogo } from "@/components/ui/fundry-logo";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import heroImage from "@assets/ChatGPT Image Jun 21, 2025, 09_45_41 AM (1)_1750496219995.png";
 
 export default function Landing() {
   const { user, isAuthenticated } = useAuth();
@@ -139,29 +140,13 @@ export default function Landing() {
             </div>
 
             <div className="relative">
-              <Card className="transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-gray-900">Campaign Dashboard</h3>
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Active</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <div className="text-2xl font-bold text-fundry-orange">$3,250</div>
-                        <div className="text-sm text-gray-600">Raised of $5,000</div>
-                      </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <div className="text-2xl font-bold text-fundry-navy">23</div>
-                        <div className="text-sm text-gray-600">Investors</div>
-                      </div>
-                    </div>
-                    <div className="bg-gray-200 rounded-full h-2">
-                      <div className="bg-fundry-orange h-2 rounded-full" style={{ width: "65%" }}></div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                <img 
+                  src={heroImage} 
+                  alt="Entrepreneurs collaborating on startup fundraising" 
+                  className="rounded-lg shadow-2xl w-full h-auto object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>

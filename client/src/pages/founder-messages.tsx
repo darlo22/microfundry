@@ -502,7 +502,7 @@ export default function FounderMessages() {
                   value={answerText}
                   onChange={(e) => setAnswerText(e.target.value)}
                   placeholder="Provide a detailed answer to help the investor..."
-                  className="min-h-[120px] resize-none"
+                  className="min-h-[120px] resize-none text-gray-900 placeholder:text-gray-500"
                 />
               </div>
               

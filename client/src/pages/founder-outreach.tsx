@@ -174,10 +174,7 @@ export default function FounderOutreach() {
 
   // Send email campaign mutation
   const sendEmailMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/founder/email-campaigns", {
-      method: "POST",
-      body: data,
-    }),
+    mutationFn: (data: any) => apiRequest("POST", "/api/founder/email-campaigns", data),
     onSuccess: (data: any) => {
       toast({
         title: "Email Campaign Sent",

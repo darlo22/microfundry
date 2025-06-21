@@ -6424,7 +6424,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
-      const campaigns = await db
+      const emailCampaignResults = await db
         .select({
           id: emailCampaigns.id,
           subject: emailCampaigns.subject,
@@ -6443,7 +6443,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         .where(eq(emailCampaigns.founderId, req.user.id))
         .orderBy(emailCampaigns.createdAt);
 
-      res.json(campaigns);
+      res.json(emailCampaignResults);
     } catch (error) {
       console.error('Error fetching email campaigns:', error);
       res.status(500).json({ message: 'Failed to fetch email campaigns' });

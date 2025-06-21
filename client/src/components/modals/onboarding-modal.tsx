@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ForgotPasswordModal } from "./forgot-password-modal";
 
 const registrationSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -47,6 +48,7 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { toast } = useToast();
 
   // Reset modal state when defaultUserType changes
@@ -212,6 +214,7 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader className="text-center">
@@ -572,6 +575,16 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
               )}
             </div>
 
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-sm text-fundry-orange hover:underline font-medium"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
             <Button
               type="submit"
               disabled={loginMutation.isPending}
@@ -594,5 +607,11 @@ export default function OnboardingModal({ isOpen, onClose, mode, onModeChange, d
         )}
       </DialogContent>
     </Dialog>
+
+    <ForgotPasswordModal 
+      isOpen={showForgotPassword}
+      onClose={() => setShowForgotPassword(false)}
+    />
+  </>
   );
 }

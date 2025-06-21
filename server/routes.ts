@@ -1516,6 +1516,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get founder's own campaigns (without founderId param)
+  app.get('/api/campaigns/founder', requireAuth, async (req: any, res) => {
+    try {
+      const founderId = req.user.id;
+      const campaigns = await storage.getCampaignsByFounder(founderId);
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching founder campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch campaigns" });
+    }
+  });
+
   app.get('/api/campaigns/founder/:founderId', requireAuth, async (req: any, res) => {
     try {
       const { founderId } = req.params;

@@ -62,7 +62,7 @@ export default function FounderUpdates() {
 
   // Fetch campaign updates
   const { data: updates = [], isLoading: updatesLoading } = useQuery<CampaignUpdate[]>({
-    queryKey: ["/api/campaign-updates/founder", user?.id],
+    queryKey: [`/api/campaign-updates/founder/${user?.id}`],
     enabled: !!user?.id,
   });
 
@@ -109,7 +109,7 @@ export default function FounderUpdates() {
         title: "Update Published",
         description: "Your campaign update has been published successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/campaign-updates/founder", user?.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/campaign-updates/founder/${user?.id}`] });
       setIsCreateDialogOpen(false);
       resetForm();
     },
@@ -132,7 +132,7 @@ export default function FounderUpdates() {
         title: "Update Modified",
         description: "Your campaign update has been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/campaign-updates/founder", user?.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/campaign-updates/founder/${user?.id}`] });
       setEditingUpdate(null);
       resetForm();
     },
@@ -155,7 +155,7 @@ export default function FounderUpdates() {
         title: "Update Deleted",
         description: "Your campaign update has been deleted successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/campaign-updates/founder", user?.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/campaign-updates/founder/${user?.id}`] });
     },
     onError: () => {
       toast({

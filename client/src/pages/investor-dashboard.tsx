@@ -198,7 +198,7 @@ export default function InvestorDashboard() {
 
   // Fetch campaign updates for invested campaigns
   const { data: campaignUpdates = [], isLoading: isLoadingUpdates } = useQuery({
-    queryKey: ["/api/campaign-updates/investor", user?.id],
+    queryKey: [`/api/campaign-updates/investor/${user?.id}`],
     enabled: !!user && activeTab === "updates",
   });
 

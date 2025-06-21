@@ -250,7 +250,7 @@ export default function AdminInvestorOutreach() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/admin">
+              <Link href="/admin-dashboard">
                 <Button variant="ghost" size="sm" className="text-fundry-navy hover:bg-blue-50">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Admin Dashboard

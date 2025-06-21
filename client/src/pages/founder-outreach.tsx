@@ -730,39 +730,37 @@ Founder, {companyName}`
                       )}
                     </div>
                     
-                    {/* Pagination Controls */}
-                    {!loadingInvestors && investors.length > 0 && (
-                      <div className="mt-4 pt-4 border-t border-white/20">
-                        <div className="flex items-center justify-between text-sm text-orange-100">
-                          <div>
-                            Showing {Math.min((pagination.currentPage - 1) * 30 + 1, pagination.totalCount)} - {Math.min(pagination.currentPage * 30, pagination.totalCount)} of {pagination.totalCount.toLocaleString()} investors
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                              disabled={!pagination.hasPrev || loadingInvestors}
-                              className="bg-white/10 border-white/20 text-white hover:bg-white/20 disabled:opacity-50"
-                            >
-                              Previous
-                            </Button>
-                            <span className="px-3 py-1 text-white">
-                              Page {pagination.currentPage} of {pagination.totalPages}
-                            </span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
-                              disabled={!pagination.hasNext || loadingInvestors}
-                              className="bg-white/10 border-white/20 text-white hover:bg-white/20 disabled:opacity-50"
-                            >
-                              Next
-                            </Button>
-                          </div>
+                    {/* Pagination Controls - Always show when pagination exists */}
+                    <div className="mt-4 pt-4 border-t border-white/20">
+                      <div className="flex items-center justify-between text-sm text-orange-100">
+                        <div>
+                          Showing {Math.min((pagination.currentPage - 1) * 30 + 1, pagination.totalCount)} - {Math.min(pagination.currentPage * 30, pagination.totalCount)} of {pagination.totalCount.toLocaleString()} investors
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={!pagination.hasPrev || loadingInvestors}
+                            className="bg-white/10 border-white/20 text-white hover:bg-white/20 disabled:opacity-50"
+                          >
+                            Previous
+                          </Button>
+                          <span className="px-3 py-1 text-white">
+                            Page {pagination.currentPage} of {pagination.totalPages}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
+                            disabled={!pagination.hasNext || loadingInvestors}
+                            className="bg-white/10 border-white/20 text-white hover:bg-white/20 disabled:opacity-50"
+                          >
+                            Next
+                          </Button>
                         </div>
                       </div>
-                    )}
+                    </div>
                   </CardContent>
                 </Card>
                 )}
@@ -993,36 +991,96 @@ Founder, {companyName}`
                 <CardTitle className="text-white">Complete Investor Directory</CardTitle>
               </CardHeader>
               <CardContent className="text-white">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {investors.map((investor: InvestorDirectory) => (
-                    <div key={investor.email} className="border border-white/20 rounded-lg p-4 bg-white/5 hover:bg-white/10 transition-all duration-300">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium text-white">{investor.name}</h4>
-                        <Badge className={investor.source === 'directory' ? 'bg-fundry-orange text-white' : 'bg-fundry-navy text-white'}>
-                          {investor.source === 'directory' ? 'Directory' : 'Platform'}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-orange-100 mb-2">{investor.email}</p>
-                      {investor.company && (
-                        <p className="text-sm text-orange-200 mb-1">{investor.company}</p>
-                      )}
-                      {investor.bio && (
-                        <p className="text-xs text-orange-200 line-clamp-2">{investor.bio}</p>
-                      )}
-                      {investor.linkedinUrl && (
-                        <a
-                          href={investor.linkedinUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-fundry-orange hover:text-orange-300 hover:underline flex items-center mt-2"
-                        >
-                          <ExternalLink className="h-3 w-3 mr-1" />
-                          LinkedIn Profile
-                        </a>
-                      )}
-                    </div>
-                  ))}
+                {/* Search and Filter Controls */}
+                <div className="flex items-center space-x-4 mb-6">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Search investors by name, email, or company..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="bg-white/10 border-white/20 text-white placeholder-orange-200"
+                    />
+                  </div>
+                  <Select value={sourceFilter} onValueChange={setSourceFilter}>
+                    <SelectTrigger className="w-[180px] bg-white/10 border-white/20 text-white">
+                      <SelectValue placeholder="Filter by source" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="all" className="text-fundry-navy hover:bg-gray-100">All Sources</SelectItem>
+                      <SelectItem value="directory" className="text-fundry-navy hover:bg-gray-100">Admin Directory</SelectItem>
+                      <SelectItem value="platform" className="text-fundry-navy hover:bg-gray-100">Platform Users</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+
+                {loadingInvestors ? (
+                  <div className="text-center py-8">Loading investors...</div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {investors.map((investor: InvestorDirectory) => (
+                        <div key={investor.email} className="border border-white/20 rounded-lg p-4 bg-white/5 hover:bg-white/10 transition-all duration-300">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-medium text-white">{investor.name}</h4>
+                            <Badge className={investor.source === 'directory' ? 'bg-fundry-orange text-white' : 'bg-fundry-navy text-white'}>
+                              {investor.source === 'directory' ? 'Directory' : 'Platform'}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-orange-100 mb-2">{investor.email}</p>
+                          {investor.company && (
+                            <p className="text-sm text-orange-200 mb-1">{investor.company}</p>
+                          )}
+                          {investor.bio && (
+                            <p className="text-xs text-orange-200 line-clamp-2">{investor.bio}</p>
+                          )}
+                          {investor.linkedinUrl && (
+                            <a
+                              href={investor.linkedinUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-fundry-orange hover:text-orange-300 hover:underline flex items-center mt-2"
+                            >
+                              <ExternalLink className="h-3 w-3 mr-1" />
+                              LinkedIn Profile
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Pagination Controls */}
+                    <div className="mt-6 pt-4 border-t border-white/20">
+                      <div className="flex items-center justify-between text-sm text-orange-100">
+                        <div>
+                          Showing {Math.min((pagination.currentPage - 1) * 30 + 1, pagination.totalCount)} - {Math.min(pagination.currentPage * 30, pagination.totalCount)} of {pagination.totalCount.toLocaleString()} investors
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={!pagination.hasPrev || loadingInvestors}
+                            className="bg-white/10 border-white/20 text-white hover:bg-white/20 disabled:opacity-50"
+                          >
+                            Previous
+                          </Button>
+                          <span className="px-3 py-1 text-white">
+                            Page {pagination.currentPage} of {pagination.totalPages}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
+                            disabled={!pagination.hasNext || loadingInvestors}
+                            className="bg-white/10 border-white/20 text-white hover:bg-white/20 disabled:opacity-50"
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

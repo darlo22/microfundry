@@ -657,6 +657,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkAdminAuth = async () => {
       try {
+        // Add a small delay to prevent race conditions
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         // First check regular user auth
         const userResponse = await fetch('/api/user', {
           credentials: 'include'
@@ -671,11 +674,21 @@ export default function AdminDashboard() {
           }
         }
         
-        // If not authenticated or not admin, redirect to login
-        setLocation("/admin-login");
+        // Only redirect if we get a clear non-admin response
+        if (userResponse.status === 401 || userResponse.status === 403) {
+          setLocation("/admin-login");
+        } else {
+          // For other errors, try again after a short delay
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }
       } catch (error) {
         console.error('Admin auth check failed:', error);
-        setLocation("/admin-login");
+        // Don't immediately redirect on network errors
+        setTimeout(() => {
+          setLocation("/admin-login");
+        }, 2000);
       } finally {
         setIsLoading(false);
       }

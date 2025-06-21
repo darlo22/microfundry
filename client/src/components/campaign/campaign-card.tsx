@@ -120,7 +120,7 @@ export default function CampaignCard({ campaign, isFounder = false, onEdit, onSh
               <Button 
                 variant="outline" 
                 onClick={() => onEdit?.(campaign)}
-                className="border-slate-500 text-slate-300 hover:border-fundry-orange hover:text-fundry-orange bg-transparent"
+                className="bg-fundry-navy border-2 border-white text-white hover:border-white hover:text-white"
               >
                 <Edit className="mr-2" size={16} />
                 Edit

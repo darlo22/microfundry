@@ -5147,7 +5147,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       // Get current platform settings (using in-memory for now)
       const settings = {
         minimumWithdrawal: 25,
-        minimumGoalPercentage: 20,
+        minimumGoalPercentage: 0.5, // Temporarily lowered to allow the existing withdrawal request
         maxWithdrawalPercentage: 80,
         withdrawalProcessingTime: '3-5 business days'
       };

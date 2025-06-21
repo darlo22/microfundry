@@ -6757,9 +6757,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                   
                   <!-- Main Content -->
                   <div style="padding: 40px;">
-                    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin-bottom: 30px; border-radius: 0 8px 8px 0;">
-                      <h2 style="color: #92400e; margin: 0 0 10px 0; font-size: 18px;">Investment Opportunity from ${emailSettings[0].displayName}</h2>
-                      <p style="color: #d97706; margin: 0; font-size: 14px;">Exclusive opportunity to support innovative startups</p>
+                    <div style="background: #f8fafc; border-left: 4px solid #1e40af; padding: 20px; margin-bottom: 30px; border-radius: 0 8px 8px 0;">
+                      <h2 style="color: #1e40af; margin: 0 0 10px 0; font-size: 18px;">Business Partnership Inquiry from ${emailSettings[0].displayName}</h2>
+                      <p style="color: #374151; margin: 0; font-size: 14px;">Strategic collaboration with emerging technology companies</p>
                     </div>
                     
                     <!-- Personal Message -->
@@ -6767,40 +6767,40 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                       ${email.personalizedMessage.replace(/\n/g, '<br>')}
                     </div>
                     
-                    <!-- Value Proposition -->
-                    <div style="background: #f0f9ff; border: 1px solid #0ea5e9; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
-                      <h3 style="color: #0369a1; margin: 0 0 15px 0; font-size: 18px;">Why Consider This Opportunity?</h3>
-                      <ul style="color: #0f172a; margin: 0; padding-left: 20px; line-height: 1.6;">
-                        <li style="margin-bottom: 8px;">Early access to vetted startup investments</li>
-                        <li style="margin-bottom: 8px;">Transparent SAFE agreement terms</li>
-                        <li style="margin-bottom: 8px;">Direct communication with founders</li>
-                        <li style="margin-bottom: 8px;">Detailed financial projections and business plans</li>
+                    <!-- Business Value -->
+                    <div style="background: #f8fafc; border: 1px solid #64748b; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+                      <h3 style="color: #374151; margin: 0 0 15px 0; font-size: 18px;">Partnership Benefits</h3>
+                      <ul style="color: #374151; margin: 0; padding-left: 20px; line-height: 1.6;">
+                        <li style="margin-bottom: 8px;">Direct access to pre-vetted technology companies</li>
+                        <li style="margin-bottom: 8px;">Clear partnership terms and documentation</li>
+                        <li style="margin-bottom: 8px;">Ongoing communication with founding teams</li>
+                        <li style="margin-bottom: 8px;">Comprehensive business analysis and projections</li>
                       </ul>
                     </div>
                     
                     <!-- Call to Action -->
                     <div style="text-align: center; margin: 40px 0;">
                       <a href="https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'your-replit-domain.repl.co'}/browse-campaigns" 
-                         style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);">
-                        View Investment Opportunities
+                         style="background: #1e40af; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);">
+                        Review Business Opportunities
                       </a>
                     </div>
                     
-                    <!-- Trust Indicators -->
-                    <div style="background: #f9fafb; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
-                      <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 16px; text-align: center;">Platform Security & Compliance</h3>
+                    <!-- Platform Features -->
+                    <div style="background: #f8fafc; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+                      <h3 style="color: #374151; margin: 0 0 20px 0; font-size: 16px; text-align: center;">Platform Features</h3>
                       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; text-align: center;">
                         <div>
-                          <div style="color: #059669; font-size: 24px; margin-bottom: 8px;">🔒</div>
-                          <div style="color: #6b7280; font-size: 14px;">Bank-Level Security</div>
+                          <div style="color: #1e40af; font-size: 24px; margin-bottom: 8px;">🔐</div>
+                          <div style="color: #6b7280; font-size: 14px;">Secure Documentation</div>
                         </div>
                         <div>
-                          <div style="color: #059669; font-size: 24px; margin-bottom: 8px;">📊</div>
-                          <div style="color: #6b7280; font-size: 14px;">Financial Transparency</div>
+                          <div style="color: #1e40af; font-size: 24px; margin-bottom: 8px;">📋</div>
+                          <div style="color: #6b7280; font-size: 14px;">Business Analysis</div>
                         </div>
                         <div>
-                          <div style="color: #059669; font-size: 24px; margin-bottom: 8px;">⚖️</div>
-                          <div style="color: #6b7280; font-size: 14px;">Legal Compliance</div>
+                          <div style="color: #1e40af; font-size: 24px; margin-bottom: 8px;">📈</div>
+                          <div style="color: #6b7280; font-size: 14px;">Growth Tracking</div>
                         </div>
                       </div>
                     </div>
@@ -6833,18 +6833,18 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 </div>
               `,
               text: `
-Investment Opportunity from ${emailSettings[0].displayName}
+Business Partnership Inquiry from ${emailSettings[0].displayName}
 
 ${email.personalizedMessage}
 
-View this opportunity and others on our platform:
+Review business opportunities on our platform:
 https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'your-replit-domain.repl.co'}/browse-campaigns
 
-Platform Benefits:
-- Early access to vetted startup investments
-- Transparent SAFE agreement terms  
-- Direct communication with founders
-- Detailed financial projections and business plans
+Partnership Benefits:
+- Direct access to pre-vetted technology companies
+- Clear partnership terms and documentation
+- Ongoing communication with founding teams
+- Comprehensive business analysis and projections
 
 This email was sent by ${emailSettings[0].displayName} via Fundry Platform.
 To unsubscribe: unsubscribe@microfundry.com

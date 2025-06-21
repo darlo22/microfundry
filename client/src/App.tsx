@@ -27,6 +27,7 @@ import FounderAnalytics from "@/pages/founder-analytics";
 import FounderSettings from "@/pages/founder-settings";
 import FounderUpdates from "@/pages/founder-updates";
 import FounderMessages from "@/pages/founder-messages";
+import FounderOutreach from "@/pages/founder-outreach";
 import PaymentWithdrawal from "@/pages/payment-withdrawal";
 import InvestorDashboard from "@/pages/investor-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";

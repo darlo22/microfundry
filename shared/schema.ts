@@ -693,3 +693,221 @@ export const insertFileUploadSchema = createInsertSchema(fileUploads).omit({
 });
 export type InsertFileUpload = z.infer<typeof insertFileUploadSchema>;
 export type FileUpload = typeof fileUploads.$inferSelect;
+
+// Investor Directory Table - Admin-curated list of investors
+export const investorDirectory = pgTable("investor_directory", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull().unique(),
+  company: varchar("company"),
+  title: varchar("title"),
+  investmentFocus: text("investment_focus"), // Areas of interest
+  minimumInvestment: decimal("minimum_investment", { precision: 10, scale: 2 }),
+  maximumInvestment: decimal("maximum_investment", { precision: 10, scale: 2 }),
+  location: varchar("location"),
+  linkedinUrl: varchar("linkedin_url"),
+  bio: text("bio"),
+  tags: text("tags").array(), // Investment stages, sectors, etc.
+  isActive: boolean("is_active").default(true),
+  addedBy: varchar("added_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const investorDirectoryRelations = relations(investorDirectory, ({ one }) => ({
+  addedByUser: one(users, {
+    fields: [investorDirectory.addedBy],
+    references: [users.id],
+  }),
+}));
+
+// Founder Email Settings Table
+export const founderEmailSettings = pgTable("founder_email_settings", {
+  id: serial("id").primaryKey(),
+  founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+  verifiedEmail: varchar("verified_email").notNull(),
+  displayName: varchar("display_name").notNull(),
+  signature: text("signature"),
+  isVerified: boolean("is_verified").default(false),
+  verificationToken: varchar("verification_token"),
+  verificationExpiresAt: timestamp("verification_expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const founderEmailSettingsRelations = relations(founderEmailSettings, ({ one }) => ({
+  founder: one(users, {
+    fields: [founderEmailSettings.founderId],
+    references: [users.id],
+  }),
+}));
+
+// Email Campaigns Table
+export const emailCampaigns = pgTable("email_campaigns", {
+  id: serial("id").primaryKey(),
+  founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  campaignId: integer("campaign_id").references(() => campaigns.id),
+  subject: varchar("subject").notNull(),
+  message: text("message").notNull(),
+  recipientCount: integer("recipient_count").default(0),
+  sentCount: integer("sent_count").default(0),
+  deliveredCount: integer("delivered_count").default(0),
+  openedCount: integer("opened_count").default(0),
+  repliedCount: integer("replied_count").default(0),
+  status: varchar("status", { enum: ["draft", "sending", "sent", "failed"] }).default("draft"),
+  scheduledFor: timestamp("scheduled_for"),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const emailCampaignsRelations = relations(emailCampaigns, ({ one, many }) => ({
+  founder: one(users, {
+    fields: [emailCampaigns.founderId],
+    references: [users.id],
+  }),
+  campaign: one(campaigns, {
+    fields: [emailCampaigns.campaignId],
+    references: [campaigns.id],
+  }),
+  emails: many(outreachEmails),
+}));
+
+// Individual Outreach Emails Table
+export const outreachEmails = pgTable("outreach_emails", {
+  id: serial("id").primaryKey(),
+  emailCampaignId: integer("email_campaign_id").notNull().references(() => emailCampaigns.id, { onDelete: "cascade" }),
+  recipientEmail: varchar("recipient_email").notNull(),
+  recipientName: varchar("recipient_name"),
+  recipientSource: varchar("recipient_source", { enum: ["directory", "platform", "custom", "manual"] }).notNull(),
+  personalizedSubject: varchar("personalized_subject").notNull(),
+  personalizedMessage: text("personalized_message").notNull(),
+  status: varchar("status", { enum: ["pending", "sent", "delivered", "opened", "replied", "bounced", "failed"] }).default("pending"),
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  openedAt: timestamp("opened_at"),
+  repliedAt: timestamp("replied_at"),
+  errorMessage: text("error_message"),
+  trackingId: varchar("tracking_id").unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const outreachEmailsRelations = relations(outreachEmails, ({ one }) => ({
+  emailCampaign: one(emailCampaigns, {
+    fields: [outreachEmails.emailCampaignId],
+    references: [emailCampaigns.id],
+  }),
+}));
+
+// Email Templates Table
+export const emailTemplates = pgTable("email_templates", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  category: varchar("category", { enum: ["introduction", "follow_up", "pitch", "update", "custom"] }).notNull(),
+  subject: varchar("subject").notNull(),
+  content: text("content").notNull(),
+  variables: text("variables").array(), // Available merge fields
+  isDefault: boolean("is_default").default(false),
+  isPublic: boolean("is_public").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const emailTemplatesRelations = relations(emailTemplates, ({ one }) => ({
+  createdByUser: one(users, {
+    fields: [emailTemplates.createdBy],
+    references: [users.id],
+  }),
+}));
+
+// Founder Custom Investor Lists Table
+export const founderInvestorLists = pgTable("founder_investor_lists", {
+  id: serial("id").primaryKey(),
+  founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  investors: jsonb("investors").notNull(), // Array of investor objects
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const founderInvestorListsRelations = relations(founderInvestorLists, ({ one }) => ({
+  founder: one(users, {
+    fields: [founderInvestorLists.founderId],
+    references: [users.id],
+  }),
+}));
+
+// Rate Limiting Table
+export const emailRateLimiting = pgTable("email_rate_limiting", {
+  id: serial("id").primaryKey(),
+  founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  date: varchar("date").notNull(), // YYYY-MM-DD format
+  emailsSent: integer("emails_sent").default(0),
+  lastEmailAt: timestamp("last_email_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const emailRateLimitingRelations = relations(emailRateLimiting, ({ one }) => ({
+  founder: one(users, {
+    fields: [emailRateLimiting.founderId],
+    references: [users.id],
+  }),
+}));
+
+// Type exports for new tables
+export type InvestorDirectory = typeof investorDirectory.$inferSelect;
+export type InsertInvestorDirectory = typeof investorDirectory.$inferInsert;
+
+export type FounderEmailSettings = typeof founderEmailSettings.$inferSelect;
+export type InsertFounderEmailSettings = typeof founderEmailSettings.$inferInsert;
+
+export type EmailCampaign = typeof emailCampaigns.$inferSelect;
+export type InsertEmailCampaign = typeof emailCampaigns.$inferInsert;
+
+export type OutreachEmail = typeof outreachEmails.$inferSelect;
+export type InsertOutreachEmail = typeof outreachEmails.$inferInsert;
+
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+export type InsertEmailTemplate = typeof emailTemplates.$inferInsert;
+
+export type FounderInvestorList = typeof founderInvestorLists.$inferSelect;
+export type InsertFounderInvestorList = typeof founderInvestorLists.$inferInsert;
+
+export type EmailRateLimit = typeof emailRateLimiting.$inferSelect;
+export type InsertEmailRateLimit = typeof emailRateLimiting.$inferInsert;
+
+// Schema validation for forms
+export const insertInvestorDirectorySchema = createInsertSchema(investorDirectory).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFounderEmailSettingsSchema = createInsertSchema(founderEmailSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEmailCampaignSchema = createInsertSchema(emailCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFounderInvestorListSchema = createInsertSchema(founderInvestorLists).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});

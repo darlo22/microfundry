@@ -34,7 +34,14 @@ import {
   withdrawalRequests,
   campaignUpdates,
   updateInteractions,
-  updateReplies
+  updateReplies,
+  founderEmailSettings,
+  investorDirectory,
+  emailCampaigns,
+  outreachEmails,
+  emailTemplates,
+  founderInvestorLists,
+  emailRateLimiting
 } from "@shared/schema";
 import Stripe from "stripe";
 import fs from "fs";
@@ -5987,6 +5994,549 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     } catch (error) {
       console.error('Error submitting question:', error);
       res.status(500).json({ message: 'Failed to submit question' });
+    }
+  });
+
+  // ========================
+  // INVESTOR OUTREACH SYSTEM
+  // ========================
+
+  // Get founder email settings
+  app.get('/api/founder/email-settings', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const settings = await db
+        .select()
+        .from(founderEmailSettings)
+        .where(eq(founderEmailSettings.founderId, req.user.id))
+        .limit(1);
+
+      if (settings.length === 0) {
+        return res.json(null);
+      }
+
+      res.json(settings[0]);
+    } catch (error) {
+      console.error('Error fetching email settings:', error);
+      res.status(500).json({ message: 'Failed to fetch email settings' });
+    }
+  });
+
+  // Create or update founder email settings
+  app.post('/api/founder/email-settings', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { verifiedEmail, displayName, signature } = req.body;
+
+      if (!verifiedEmail || !displayName) {
+        return res.status(400).json({ message: 'Email and display name are required' });
+      }
+
+      // Generate verification token
+      const verificationToken = nanoid();
+      const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      const emailSettings = await db
+        .insert(founderEmailSettings)
+        .values({
+          founderId: req.user.id,
+          verifiedEmail,
+          displayName,
+          signature: signature || '',
+          isVerified: false,
+          verificationToken,
+          verificationExpiresAt,
+        })
+        .onConflictDoUpdate({
+          target: founderEmailSettings.founderId,
+          set: {
+            verifiedEmail,
+            displayName,
+            signature: signature || '',
+            verificationToken,
+            verificationExpiresAt,
+            updatedAt: new Date(),
+          },
+        })
+        .returning();
+
+      // Send verification email (would integrate with email service)
+      // TODO: Send actual verification email
+
+      res.json({ 
+        message: 'Email settings saved. Verification email sent.',
+        settings: emailSettings[0] 
+      });
+    } catch (error) {
+      console.error('Error saving email settings:', error);
+      res.status(500).json({ message: 'Failed to save email settings' });
+    }
+  });
+
+  // Get investor directory (Admin-curated + Platform users)
+  app.get('/api/founder/investor-directory', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { source = 'all', search, tags, limit = 50 } = req.query;
+
+      let investors = [];
+
+      // Get admin-curated investors
+      if (source === 'all' || source === 'directory') {
+        const directoryInvestors = await db
+          .select()
+          .from(investorDirectory)
+          .where(eq(investorDirectory.isActive, true))
+          .limit(parseInt(limit as string) / 2);
+
+        investors.push(...directoryInvestors.map(inv => ({
+          ...inv,
+          source: 'directory'
+        })));
+      }
+
+      // Get platform-registered investors
+      if (source === 'all' || source === 'platform') {
+        const platformInvestors = await db
+          .select({
+            id: users.id,
+            name: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+            email: users.email,
+            company: users.company,
+            location: sql<string>`CONCAT(COALESCE(${users.city}, ''), CASE WHEN ${users.city} IS NOT NULL AND ${users.country} IS NOT NULL THEN ', ' ELSE '' END, COALESCE(${users.country}, ''))`,
+            bio: users.bio,
+          })
+          .from(users)
+          .where(eq(users.userType, 'investor'))
+          .limit(parseInt(limit as string) / 2);
+
+        investors.push(...platformInvestors.map(inv => ({
+          ...inv,
+          source: 'platform'
+        })));
+      }
+
+      // Apply search filter
+      if (search) {
+        const searchTerm = (search as string).toLowerCase();
+        investors = investors.filter(inv => 
+          inv.name?.toLowerCase().includes(searchTerm) ||
+          inv.email?.toLowerCase().includes(searchTerm) ||
+          inv.company?.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      res.json(investors);
+    } catch (error) {
+      console.error('Error fetching investor directory:', error);
+      res.status(500).json({ message: 'Failed to fetch investor directory' });
+    }
+  });
+
+  // Get founder's custom investor lists
+  app.get('/api/founder/investor-lists', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const lists = await db
+        .select()
+        .from(founderInvestorLists)
+        .where(eq(founderInvestorLists.founderId, req.user.id))
+        .orderBy(founderInvestorLists.createdAt);
+
+      res.json(lists);
+    } catch (error) {
+      console.error('Error fetching investor lists:', error);
+      res.status(500).json({ message: 'Failed to fetch investor lists' });
+    }
+  });
+
+  // Create custom investor list
+  app.post('/api/founder/investor-lists', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { name, description, investors } = req.body;
+
+      if (!name || !investors || !Array.isArray(investors)) {
+        return res.status(400).json({ message: 'Name and investors array are required' });
+      }
+
+      const [newList] = await db
+        .insert(founderInvestorLists)
+        .values({
+          founderId: req.user.id,
+          name,
+          description: description || '',
+          investors: JSON.stringify(investors),
+        })
+        .returning();
+
+      res.json(newList);
+    } catch (error) {
+      console.error('Error creating investor list:', error);
+      res.status(500).json({ message: 'Failed to create investor list' });
+    }
+  });
+
+  // Get email templates
+  app.get('/api/founder/email-templates', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { category } = req.query;
+
+      let query = db.select().from(emailTemplates).where(eq(emailTemplates.isPublic, true));
+
+      if (category) {
+        query = query.where(eq(emailTemplates.category, category as string));
+      }
+
+      const templates = await query.orderBy(emailTemplates.isDefault, emailTemplates.name);
+
+      res.json(templates);
+    } catch (error) {
+      console.error('Error fetching email templates:', error);
+      res.status(500).json({ message: 'Failed to fetch email templates' });
+    }
+  });
+
+  // Check daily email rate limit
+  app.get('/api/founder/email-rate-limit', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+
+      const rateLimit = await db
+        .select()
+        .from(emailRateLimiting)
+        .where(
+          and(
+            eq(emailRateLimiting.founderId, req.user.id),
+            eq(emailRateLimiting.date, today)
+          )
+        )
+        .limit(1);
+
+      const dailyLimit = 5;
+      const used = rateLimit.length > 0 ? rateLimit[0].emailsSent : 0;
+
+      res.json({
+        dailyLimit,
+        used,
+        remaining: Math.max(0, dailyLimit - used),
+        canSend: used < dailyLimit
+      });
+    } catch (error) {
+      console.error('Error checking rate limit:', error);
+      res.status(500).json({ message: 'Failed to check rate limit' });
+    }
+  });
+
+  // Create and send email campaign
+  app.post('/api/founder/email-campaigns', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { campaignId, subject, message, recipients, scheduledFor } = req.body;
+
+      if (!subject || !message || !recipients || !Array.isArray(recipients)) {
+        return res.status(400).json({ message: 'Subject, message, and recipients are required' });
+      }
+
+      if (recipients.length === 0 || recipients.length > 5) {
+        return res.status(400).json({ message: 'Must have 1-5 recipients per campaign' });
+      }
+
+      // Check rate limit
+      const today = new Date().toISOString().split('T')[0];
+      const rateLimit = await db
+        .select()
+        .from(emailRateLimiting)
+        .where(
+          and(
+            eq(emailRateLimiting.founderId, req.user.id),
+            eq(emailRateLimiting.date, today)
+          )
+        )
+        .limit(1);
+
+      const currentUsage = rateLimit.length > 0 ? rateLimit[0].emailsSent : 0;
+      if (currentUsage + recipients.length > 5) {
+        return res.status(400).json({ 
+          message: `Daily limit exceeded. You can send ${5 - currentUsage} more emails today.` 
+        });
+      }
+
+      // Check if founder has verified email settings
+      const emailSettings = await db
+        .select()
+        .from(founderEmailSettings)
+        .where(eq(founderEmailSettings.founderId, req.user.id))
+        .limit(1);
+
+      if (emailSettings.length === 0 || !emailSettings[0].isVerified) {
+        return res.status(400).json({ message: 'Please verify your email settings first' });
+      }
+
+      // Create email campaign
+      const [newCampaign] = await db
+        .insert(emailCampaigns)
+        .values({
+          founderId: req.user.id,
+          campaignId: campaignId || null,
+          subject,
+          message,
+          recipientCount: recipients.length,
+          status: scheduledFor ? 'draft' : 'sending',
+          scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
+        })
+        .returning();
+
+      // Create individual emails
+      const emails = [];
+      for (const recipient of recipients) {
+        const trackingId = nanoid();
+        const personalizedSubject = subject.replace(/\{name\}/g, recipient.name || 'there');
+        const personalizedMessage = message
+          .replace(/\{name\}/g, recipient.name || 'there')
+          .replace(/\{email\}/g, recipient.email);
+
+        const [email] = await db
+          .insert(outreachEmails)
+          .values({
+            emailCampaignId: newCampaign.id,
+            recipientEmail: recipient.email,
+            recipientName: recipient.name,
+            recipientSource: recipient.source || 'manual',
+            personalizedSubject,
+            personalizedMessage,
+            trackingId,
+            status: 'pending',
+          })
+          .returning();
+
+        emails.push(email);
+      }
+
+      // If not scheduled, send immediately
+      if (!scheduledFor) {
+        // TODO: Integrate with actual email service (Resend, SendGrid, etc.)
+        // For now, mark as sent
+        await db
+          .update(outreachEmails)
+          .set({ 
+            status: 'sent', 
+            sentAt: new Date() 
+          })
+          .where(eq(outreachEmails.emailCampaignId, newCampaign.id));
+
+        await db
+          .update(emailCampaigns)
+          .set({ 
+            status: 'sent', 
+            sentAt: new Date(),
+            sentCount: recipients.length 
+          })
+          .where(eq(emailCampaigns.id, newCampaign.id));
+
+        // Update rate limiting
+        if (rateLimit.length > 0) {
+          await db
+            .update(emailRateLimiting)
+            .set({ 
+              emailsSent: currentUsage + recipients.length,
+              lastEmailAt: new Date(),
+              updatedAt: new Date()
+            })
+            .where(eq(emailRateLimiting.id, rateLimit[0].id));
+        } else {
+          await db
+            .insert(emailRateLimiting)
+            .values({
+              founderId: req.user.id,
+              date: today,
+              emailsSent: recipients.length,
+              lastEmailAt: new Date(),
+            });
+        }
+
+        // Send copies to platform investors' message center
+        for (const recipient of recipients) {
+          if (recipient.source === 'platform') {
+            const platformUser = await db
+              .select()
+              .from(users)
+              .where(eq(users.email, recipient.email))
+              .limit(1);
+
+            if (platformUser.length > 0) {
+              await db.insert(notifications).values({
+                userId: platformUser[0].id,
+                type: 'outreach',
+                title: `New message from ${emailSettings[0].displayName}`,
+                message: personalizedMessage.substring(0, 200) + '...',
+                category: 'general',
+                priority: 'medium',
+                isRead: false,
+              });
+            }
+          }
+        }
+      }
+
+      res.json({
+        message: scheduledFor ? 'Email campaign scheduled successfully' : 'Email campaign sent successfully',
+        campaign: newCampaign,
+        emails: emails.length
+      });
+
+    } catch (error) {
+      console.error('Error creating email campaign:', error);
+      res.status(500).json({ message: 'Failed to create email campaign' });
+    }
+  });
+
+  // Get founder's email campaigns and analytics
+  app.get('/api/founder/email-campaigns', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const campaigns = await db
+        .select({
+          id: emailCampaigns.id,
+          subject: emailCampaigns.subject,
+          recipientCount: emailCampaigns.recipientCount,
+          sentCount: emailCampaigns.sentCount,
+          deliveredCount: emailCampaigns.deliveredCount,
+          openedCount: emailCampaigns.openedCount,
+          repliedCount: emailCampaigns.repliedCount,
+          status: emailCampaigns.status,
+          sentAt: emailCampaigns.sentAt,
+          createdAt: emailCampaigns.createdAt,
+          campaignName: campaigns.companyName,
+        })
+        .from(emailCampaigns)
+        .leftJoin(campaigns, eq(emailCampaigns.campaignId, campaigns.id))
+        .where(eq(emailCampaigns.founderId, req.user.id))
+        .orderBy(emailCampaigns.createdAt);
+
+      res.json(campaigns);
+    } catch (error) {
+      console.error('Error fetching email campaigns:', error);
+      res.status(500).json({ message: 'Failed to fetch email campaigns' });
+    }
+  });
+
+  // Get detailed email campaign analytics
+  app.get('/api/founder/email-campaigns/:campaignId/analytics', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { campaignId } = req.params;
+
+      const campaign = await db
+        .select()
+        .from(emailCampaigns)
+        .where(
+          and(
+            eq(emailCampaigns.id, parseInt(campaignId)),
+            eq(emailCampaigns.founderId, req.user.id)
+          )
+        )
+        .limit(1);
+
+      if (campaign.length === 0) {
+        return res.status(404).json({ message: 'Campaign not found' });
+      }
+
+      const emails = await db
+        .select()
+        .from(outreachEmails)
+        .where(eq(outreachEmails.emailCampaignId, parseInt(campaignId)))
+        .orderBy(outreachEmails.createdAt);
+
+      res.json({
+        campaign: campaign[0],
+        emails,
+        analytics: {
+          totalSent: emails.filter(e => e.status !== 'pending').length,
+          delivered: emails.filter(e => e.status === 'delivered').length,
+          opened: emails.filter(e => e.openedAt).length,
+          replied: emails.filter(e => e.repliedAt).length,
+          bounced: emails.filter(e => e.status === 'bounced').length,
+          failed: emails.filter(e => e.status === 'failed').length,
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching campaign analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch campaign analytics' });
+    }
+  });
+
+  // Admin: Manage investor directory
+  app.get('/api/admin/investor-directory', requireAdmin, async (req: any, res) => {
+    try {
+      const investors = await db
+        .select()
+        .from(investorDirectory)
+        .orderBy(investorDirectory.createdAt);
+
+      res.json(investors);
+    } catch (error) {
+      console.error('Error fetching admin investor directory:', error);
+      res.status(500).json({ message: 'Failed to fetch investor directory' });
+    }
+  });
+
+  // Admin: Add investor to directory
+  app.post('/api/admin/investor-directory', requireAdmin, async (req: any, res) => {
+    try {
+      const investorData = req.body;
+      
+      const [newInvestor] = await db
+        .insert(investorDirectory)
+        .values({
+          ...investorData,
+          addedBy: req.user.id,
+        })
+        .returning();
+
+      // Log admin activity
+      await logAdminActivity(
+        req.user.id,
+        'Investor Directory',
+        `Added investor: ${newInvestor.name} (${newInvestor.email})`
+      );
+
+      res.json(newInvestor);
+    } catch (error) {
+      console.error('Error adding investor to directory:', error);
+      res.status(500).json({ message: 'Failed to add investor to directory' });
     }
   });
 

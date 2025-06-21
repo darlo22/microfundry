@@ -56,8 +56,13 @@ const editInvestmentSchema = z.object({
 type EditProfileFormData = z.infer<typeof editProfileSchema>;
 type EditInvestmentFormData = z.infer<typeof editInvestmentSchema>;
 
-// Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
+// Initialize Stripe with error handling
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY).catch(error => {
+      console.warn('Stripe failed to load:', error);
+      return null;
+    })
+  : Promise.resolve(null);
 
 export default function InvestorDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();

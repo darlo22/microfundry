@@ -6044,6 +6044,122 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   // ========================
+  // EMAIL TRACKING SYSTEM
+  // ========================
+
+  // Track email opens
+  app.post('/api/email-tracking/open/:trackingId', async (req, res) => {
+    try {
+      const { trackingId } = req.params;
+      
+      // Find the email by tracking ID
+      const email = await db
+        .select()
+        .from(outreachEmails)
+        .where(eq(outreachEmails.trackingId, trackingId))
+        .limit(1);
+
+      if (email.length > 0 && !email[0].openedAt) {
+        // Mark email as opened
+        await db
+          .update(outreachEmails)
+          .set({ 
+            openedAt: new Date(),
+            status: 'opened'
+          })
+          .where(eq(outreachEmails.id, email[0].id));
+
+        // Update campaign statistics
+        const campaignId = email[0].emailCampaignId;
+        const openedCount = await db
+          .select({ count: sql`count(*)` })
+          .from(outreachEmails)
+          .where(
+            and(
+              eq(outreachEmails.emailCampaignId, campaignId),
+              sql`opened_at IS NOT NULL`
+            )
+          );
+
+        await db
+          .update(emailCampaigns)
+          .set({ 
+            openedCount: parseInt(openedCount[0].count as string)
+          })
+          .where(eq(emailCampaigns.id, campaignId));
+      }
+
+      // Return 1x1 transparent pixel
+      const pixel = Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
+        'base64'
+      );
+      
+      res.set({
+        'Content-Type': 'image/png',
+        'Content-Length': pixel.length,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
+      res.send(pixel);
+    } catch (error) {
+      console.error('Error tracking email open:', error);
+      res.status(200).send(); // Always return 200 for tracking pixels
+    }
+  });
+
+  // Track email replies (webhook endpoint for email services)
+  app.post('/api/email-tracking/reply/:trackingId', async (req, res) => {
+    try {
+      const { trackingId } = req.params;
+      
+      // Find the email by tracking ID
+      const email = await db
+        .select()
+        .from(outreachEmails)
+        .where(eq(outreachEmails.trackingId, trackingId))
+        .limit(1);
+
+      if (email.length > 0 && !email[0].repliedAt) {
+        // Mark email as replied
+        await db
+          .update(outreachEmails)
+          .set({ 
+            repliedAt: new Date(),
+            status: 'replied'
+          })
+          .where(eq(outreachEmails.id, email[0].id));
+
+        // Update campaign statistics
+        const campaignId = email[0].emailCampaignId;
+        const repliedCount = await db
+          .select({ count: sql`count(*)` })
+          .from(outreachEmails)
+          .where(
+            and(
+              eq(outreachEmails.emailCampaignId, campaignId),
+              sql`replied_at IS NOT NULL`
+            )
+          );
+
+        await db
+          .update(emailCampaigns)
+          .set({ 
+            repliedCount: parseInt(repliedCount[0].count as string)
+          })
+          .where(eq(emailCampaigns.id, campaignId));
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error tracking email reply:', error);
+      res.status(500).json({ message: 'Failed to track reply' });
+    }
+  });
+
+  // ========================
   // INVESTOR OUTREACH SYSTEM
   // ========================
 
@@ -6220,7 +6336,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as name,
                 email,
                 '' as company,
-                CONCAT(COALESCE(city, ''), CASE WHEN city IS NOT NULL AND country IS NOT NULL THEN ', ' ELSE '' END, COALESCE(country, '')) as location,
+                CONCAT(COALESCE(state, ''), CASE WHEN state IS NOT NULL AND country IS NOT NULL THEN ', ' ELSE '' END, COALESCE(country, '')) as location,
                 bio,
                 'platform' as source
               FROM users 
@@ -6474,22 +6590,92 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       // If not scheduled, send immediately
       if (!scheduledFor) {
-        // TODO: Integrate with actual email service (Resend, SendGrid, etc.)
-        // For now, mark as sent
-        await db
-          .update(outreachEmails)
-          .set({ 
-            status: 'sent', 
-            sentAt: new Date() 
-          })
-          .where(eq(outreachEmails.emailCampaignId, newCampaign.id));
+        let sentCount = 0;
+        let deliveredCount = 0;
+        
+        // Send emails using actual email service
+        for (const email of emails) {
+          try {
+            const emailSent = await emailService.sendEmail({
+              to: email.recipientEmail,
+              from: `${emailSettings[0].displayName} <${emailSettings[0].verifiedEmail}>`,
+              subject: email.personalizedSubject,
+              html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <div style="background: linear-gradient(135deg, #f97316 0%, #1e40af 100%); padding: 20px; border-radius: 8px 8px 0 0;">
+                    <h2 style="color: white; margin: 0;">Investment Opportunity</h2>
+                  </div>
+                  <div style="background: white; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #e5e7eb;">
+                    ${email.personalizedMessage.replace(/\n/g, '<br>')}
+                    <br><br>
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                      <p style="margin: 0; color: #6b7280; font-size: 14px;">
+                        Best regards,<br>
+                        ${emailSettings[0].displayName}<br>
+                        ${emailSettings[0].signature || ''}
+                      </p>
+                    </div>
+                    <div style="margin-top: 20px; text-align: center;">
+                      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==" 
+                           width="1" height="1" style="display: block;" 
+                           onload="fetch('${process.env.REPLIT_DOMAINS || 'http://localhost:5000'}/api/email-tracking/open/${email.trackingId}', { method: 'POST' }).catch(() => {})" />
+                    </div>
+                  </div>
+                </div>
+              `,
+              headers: {
+                'X-Campaign-ID': newCampaign.id.toString(),
+                'X-Email-ID': email.id.toString(),
+                'X-Tracking-ID': email.trackingId
+              }
+            });
+
+            if (emailSent) {
+              await db
+                .update(outreachEmails)
+                .set({ 
+                  status: 'delivered', 
+                  sentAt: new Date(),
+                  deliveredAt: new Date()
+                })
+                .where(eq(outreachEmails.id, email.id));
+              
+              sentCount++;
+              deliveredCount++;
+            } else {
+              await db
+                .update(outreachEmails)
+                .set({ 
+                  status: 'failed', 
+                  sentAt: new Date(),
+                  failureReason: 'Email delivery failed'
+                })
+                .where(eq(outreachEmails.id, email.id));
+              
+              sentCount++;
+            }
+          } catch (error) {
+            console.error(`Failed to send email to ${email.recipientEmail}:`, error);
+            await db
+              .update(outreachEmails)
+              .set({ 
+                status: 'failed', 
+                sentAt: new Date(),
+                failureReason: error.message || 'Unknown error'
+              })
+              .where(eq(outreachEmails.id, email.id));
+            
+            sentCount++;
+          }
+        }
 
         await db
           .update(emailCampaigns)
           .set({ 
             status: 'sent', 
             sentAt: new Date(),
-            sentCount: recipients.length 
+            sentCount,
+            deliveredCount
           })
           .where(eq(emailCampaigns.id, newCampaign.id));
 

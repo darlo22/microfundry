@@ -184,7 +184,7 @@ export default function FounderMessages() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-fundry-navy">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -197,15 +197,6 @@ export default function FounderMessages() {
                 Back to Dashboard
               </Button>
             </Link>
-            <div className="flex items-center gap-2">
-              <Link href="/landing">
-                <img 
-                  src="/attached_assets/WhatsApp Image 2025-06-20 at 12.22.18_1750418617903.jpeg" 
-                  alt="Fundry" 
-                  className="h-12 w-auto cursor-pointer"
-                />
-              </Link>
-            </div>
           </div>
           
           <div className="bg-gradient-to-r from-fundry-orange to-fundry-navy p-6 rounded-2xl text-white shadow-xl">

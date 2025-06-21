@@ -33,6 +33,18 @@ interface CampaignUpdate {
   };
 }
 
+interface UpdateReply {
+  id: number;
+  updateId: number;
+  userId: string;
+  content: string;
+  createdAt: string;
+  user?: {
+    firstName: string;
+    lastName: string;
+  };
+}
+
 const updateTypeIcons = {
   milestone: TrendingUp,
   financial: DollarSign,
@@ -205,7 +217,7 @@ function UpdateReplies({ updateId }: UpdateRepliesProps) {
   const queryClient = useQueryClient();
 
   // Fetch replies for this update
-  const { data: replies = [], isLoading: repliesLoading } = useQuery({
+  const { data: replies = [], isLoading: repliesLoading } = useQuery<UpdateReply[]>({
     queryKey: [`/api/campaign-updates/${updateId}/replies`],
     enabled: showReplies,
   });
@@ -238,7 +250,15 @@ function UpdateReplies({ updateId }: UpdateRepliesProps) {
   };
 
   // Don't show replies section if user is not authenticated
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <p className="text-sm text-gray-500 text-center">
+          Please sign in to view and post replies
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-4 pt-4 border-t border-gray-200">
@@ -251,9 +271,9 @@ function UpdateReplies({ updateId }: UpdateRepliesProps) {
         >
           <MessageCircle className="h-4 w-4 mr-2" />
           {showReplies ? 'Hide Replies' : 'View Replies'}
-          {replies.length > 0 && !showReplies && (
+          {(replies as UpdateReply[]).length > 0 && !showReplies && (
             <span className="ml-1 text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full">
-              {replies.length}
+              {(replies as UpdateReply[]).length}
             </span>
           )}
         </Button>
@@ -292,9 +312,9 @@ function UpdateReplies({ updateId }: UpdateRepliesProps) {
           {/* Existing replies */}
           {repliesLoading ? (
             <div className="text-center py-4 text-gray-500">Loading replies...</div>
-          ) : replies.length > 0 ? (
+          ) : (replies as UpdateReply[]).length > 0 ? (
             <div className="space-y-3">
-              {replies.map((reply: any) => (
+              {(replies as UpdateReply[]).map((reply) => (
                 <div key={reply.id} className="bg-white border border-gray-200 rounded-lg p-3">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center space-x-2">

@@ -260,6 +260,8 @@ export const adminMessages = pgTable("admin_messages", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   businessProfile: one(businessProfiles, {

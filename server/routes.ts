@@ -32,7 +32,9 @@ import {
   adminMessages,
   kycVerifications,
   withdrawalRequests,
-  campaignUpdates
+  campaignUpdates,
+  updateInteractions,
+  updateReplies
 } from "@shared/schema";
 import Stripe from "stripe";
 import fs from "fs";
@@ -1820,6 +1822,173 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching campaign updates:', error);
       res.status(500).json({ message: 'Failed to fetch campaign updates' });
+    }
+  });
+
+  // Get interactions for a specific update
+  app.get('/api/campaign-updates/:updateId/interactions', async (req, res) => {
+    try {
+      const { updateId } = req.params;
+      
+      // Get likes count
+      const likesResult = await db.select({ count: sql<number>`count(*)` })
+        .from(updateInteractions)
+        .where(and(
+          eq(updateInteractions.updateId, parseInt(updateId)),
+          eq(updateInteractions.interactionType, 'like')
+        ));
+      
+      // Get shares count
+      const sharesResult = await db.select({ count: sql<number>`count(*)` })
+        .from(updateInteractions)
+        .where(and(
+          eq(updateInteractions.updateId, parseInt(updateId)),
+          eq(updateInteractions.interactionType, 'share')
+        ));
+      
+      // Get views count
+      const viewsResult = await db.select({ count: sql<number>`count(*)` })
+        .from(updateInteractions)
+        .where(and(
+          eq(updateInteractions.updateId, parseInt(updateId)),
+          eq(updateInteractions.interactionType, 'view')
+        ));
+      
+      // Get replies count
+      const repliesResult = await db.select({ count: sql<number>`count(*)` })
+        .from(updateReplies)
+        .where(eq(updateReplies.updateId, parseInt(updateId)));
+      
+      res.json({
+        likes: likesResult[0]?.count || 0,
+        shares: sharesResult[0]?.count || 0,
+        views: viewsResult[0]?.count || 0,
+        replies: repliesResult[0]?.count || 0
+      });
+    } catch (error) {
+      console.error('Error fetching update interactions:', error);
+      res.status(500).json({ message: 'Failed to fetch interactions' });
+    }
+  });
+
+  // Like/unlike an update
+  app.post('/api/campaign-updates/:updateId/like', requireAuth, async (req: any, res) => {
+    try {
+      const { updateId } = req.params;
+      const userId = req.user.id;
+      
+      // Check if user already liked this update
+      const existingLike = await db.select()
+        .from(updateInteractions)
+        .where(and(
+          eq(updateInteractions.updateId, parseInt(updateId)),
+          eq(updateInteractions.userId, userId),
+          eq(updateInteractions.interactionType, 'like')
+        ));
+      
+      if (existingLike.length > 0) {
+        // Remove like
+        await db.delete(updateInteractions)
+          .where(and(
+            eq(updateInteractions.updateId, parseInt(updateId)),
+            eq(updateInteractions.userId, userId),
+            eq(updateInteractions.interactionType, 'like')
+          ));
+        
+        // Get updated count
+        const countResult = await db.select({ count: sql<number>`count(*)` })
+          .from(updateInteractions)
+          .where(and(
+            eq(updateInteractions.updateId, parseInt(updateId)),
+            eq(updateInteractions.interactionType, 'like')
+          ));
+        
+        res.json({ liked: false, count: countResult[0]?.count || 0 });
+      } else {
+        // Add like
+        await db.insert(updateInteractions).values({
+          updateId: parseInt(updateId),
+          userId,
+          interactionType: 'like'
+        });
+        
+        // Get updated count
+        const countResult = await db.select({ count: sql<number>`count(*)` })
+          .from(updateInteractions)
+          .where(and(
+            eq(updateInteractions.updateId, parseInt(updateId)),
+            eq(updateInteractions.interactionType, 'like')
+          ));
+        
+        res.json({ liked: true, count: countResult[0]?.count || 0 });
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      res.status(500).json({ message: 'Failed to update like status' });
+    }
+  });
+
+  // Add a reply to an update
+  app.post('/api/campaign-updates/:updateId/reply', requireAuth, async (req: any, res) => {
+    try {
+      const { updateId } = req.params;
+      const { content } = req.body;
+      const userId = req.user.id;
+      
+      if (!content?.trim()) {
+        return res.status(400).json({ message: 'Reply content is required' });
+      }
+      
+      // Add reply
+      const reply = await db.insert(updateReplies).values({
+        updateId: parseInt(updateId),
+        userId,
+        content: content.trim()
+      }).returning();
+      
+      // Get updated replies count
+      const countResult = await db.select({ count: sql<number>`count(*)` })
+        .from(updateReplies)
+        .where(eq(updateReplies.updateId, parseInt(updateId)));
+      
+      res.json({ 
+        reply: reply[0], 
+        count: countResult[0]?.count || 0 
+      });
+    } catch (error) {
+      console.error('Error adding reply:', error);
+      res.status(500).json({ message: 'Failed to add reply' });
+    }
+  });
+
+  // Share an update
+  app.post('/api/campaign-updates/:updateId/share', requireAuth, async (req: any, res) => {
+    try {
+      const { updateId } = req.params;
+      const userId = req.user.id;
+      
+      // Record share (allow multiple shares from same user)
+      await db.insert(updateInteractions).values({
+        updateId: parseInt(updateId),
+        userId,
+        interactionType: 'share'
+      });
+      
+      // Get updated shares count
+      const countResult = await db.select({ count: sql<number>`count(*)` })
+        .from(updateInteractions)
+        .where(and(
+          eq(updateInteractions.updateId, parseInt(updateId)),
+          eq(updateInteractions.interactionType, 'share')
+        ));
+      
+      res.json({ 
+        shared: true, 
+        count: countResult[0]?.count || 0 
+      });
+    } catch (error) {
+      console.error('Error recording share:', error);
+      res.status(500).json({ message: 'Failed to record share' });
     }
   });
 

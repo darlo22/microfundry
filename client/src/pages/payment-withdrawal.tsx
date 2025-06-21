@@ -1224,19 +1224,70 @@ This agreement represents a binding legal contract. Both parties should seek ind
                                   size="sm"
                                   className="bg-fundry-orange hover:bg-orange-600"
                                   onClick={() => {
-                                    // Generate and download SAFE agreement
+                                    // Generate and download complete SAFE agreement
                                     const safeContent = `SIMPLE AGREEMENT FOR FUTURE EQUITY
 
+This Simple Agreement for Future Equity ("SAFE") is entered into on ${new Date(agreement.agreementDate).toLocaleDateString()} between:
+
+COMPANY: ${agreement.companyName}
+INVESTOR: ${agreement.investorName}
+INVESTMENT AMOUNT: $${parseFloat(agreement.investmentAmount).toLocaleString()}
+VALUATION CAP: $${agreement.valuationCap.toLocaleString()}
+DISCOUNT RATE: ${agreement.discountRate}%
+
+ARTICLE 1: DEFINITIONS
+
+1.1 "Company" means ${agreement.companyName}, a company incorporated under applicable laws.
+1.2 "Investor" means ${agreement.investorName}.
+1.3 "Purchase Amount" means $${parseFloat(agreement.investmentAmount).toLocaleString()}.
+1.4 "Valuation Cap" means $${agreement.valuationCap.toLocaleString()}.
+1.5 "Discount Rate" means ${agreement.discountRate}%.
+
+ARTICLE 2: INVESTMENT TERMS
+
+2.1 Investment: The Investor agrees to invest $${parseFloat(agreement.investmentAmount).toLocaleString()} in the Company.
+2.2 Future Equity: This investment will convert to equity shares upon a qualifying financing round.
+2.3 Conversion Price: The lower of (a) the Valuation Cap divided by the Company's fully-diluted shares, or (b) the Discount Rate applied to the price per share in the qualifying financing.
+
+ARTICLE 3: CONVERSION EVENTS
+
+3.1 Equity Financing: Upon a qualifying equity financing round of at least $1,000,000, this SAFE will automatically convert to the same class of shares sold in such financing.
+3.2 Liquidity Event: Upon a sale, merger, or IPO, the Investor will receive the greater of (a) the Purchase Amount, or (b) the proceeds from the converted shares.
+3.3 Dissolution: Upon dissolution, the Investor receives the Purchase Amount before any distributions to common shareholders.
+
+ARTICLE 4: INVESTOR RIGHTS
+
+4.1 Information Rights: The Company will provide quarterly financial statements and annual reports.
+4.2 Inspection Rights: The Investor may inspect Company books and records upon reasonable notice.
+4.3 Pro Rata Rights: The Investor has the right to participate in future financing rounds pro rata to their ownership percentage.
+
+ARTICLE 5: COMPANY REPRESENTATIONS
+
+5.1 The Company is duly incorporated and in good standing.
+5.2 The Company has the authority to enter into this agreement.
+5.3 All material information provided to the Investor is accurate and complete.
+5.4 The Company will use the investment funds for business operations.
+
+ARTICLE 6: MISCELLANEOUS
+
+6.1 Governing Law: This agreement is governed by the laws of the jurisdiction where the Company is incorporated.
+6.2 Amendment: This agreement may only be amended in writing signed by both parties.
+6.3 Severability: If any provision is invalid, the remainder of the agreement remains in effect.
+
+SIGNATURES:
+
 Company: ${agreement.companyName}
-Investor: ${agreement.investorName}
-Investment Amount: $${parseFloat(agreement.investmentAmount).toLocaleString()}
-Valuation Cap: $${agreement.valuationCap.toLocaleString()}
-Discount Rate: ${agreement.discountRate}%
+By: _________________________
+Name: [Founder Name]
+Title: Chief Executive Officer
 Date: ${new Date(agreement.agreementDate).toLocaleDateString()}
 
-[Full SAFE Agreement Content - Legal Document]
+Investor: ${agreement.investorName}
+Signature: _________________________
+Date: ${new Date(agreement.agreementDate).toLocaleDateString()}
 
-This agreement represents the investment of $${parseFloat(agreement.investmentAmount).toLocaleString()} by ${agreement.investorName} in ${agreement.companyName} under the terms specified above.`;
+---
+This agreement represents a binding legal contract. Both parties should seek independent legal counsel before signing.`;
                                     
                                     const blob = new Blob([safeContent], { type: 'text/plain' });
                                     const url = URL.createObjectURL(blob);

@@ -219,23 +219,12 @@ export default function AdminInvestorOutreach() {
   };
 
   const downloadTemplate = () => {
-    const csvContent = "name,email,company,title,location,bio,linkedinUrl,investmentFocus,minimumInvestment,maximumInvestment,tags\n" +
-      "John Smith,john@example.com,Tech Ventures,Partner,San Francisco,Experienced tech investor,https://linkedin.com/in/johnsmith,Technology,1000,50000,\"tech,startup,AI\"\n" +
-      "Jane Doe,jane@example.com,Healthcare Capital,Managing Director,New York,Healthcare investment specialist,https://linkedin.com/in/janedoe,Healthcare,5000,100000,\"healthcare,biotech\"";
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'investor_template.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-
+    // Use the backend API to download the standardized template
+    window.open('/api/admin/investor-directory/template', '_blank');
+    
     toast({
       title: "Template Downloaded",
-      description: "CSV template has been downloaded to your device.",
+      description: "Standardized CSV template has been downloaded to your device.",
     });
   };
 

@@ -6671,6 +6671,17 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Admin: Download investor template CSV
+  app.get('/api/admin/investor-directory/template', requireAdmin, (req, res) => {
+    const templatePath = path.join(process.cwd(), 'uploads', 'investor-template.csv');
+    res.download(templatePath, 'investor-template.csv', (err) => {
+      if (err) {
+        console.error('Template download error:', err);
+        res.status(500).json({ message: 'Failed to download template' });
+      }
+    });
+  });
+
   // Admin: Upload investor directory from CSV/Excel
   app.post('/api/admin/investor-directory/upload', requireAdmin, csvUpload.single('file'), async (req: any, res) => {
     try {

@@ -1,0 +1,4 @@
+name,email,company,title,location,bio,linkedinUrl,investmentFocus,minimumInvestment,maximumInvestment,tags
+John Smith,john@example.com,Tech Ventures,Managing Partner,"San Francisco, CA","Experienced venture capitalist focused on early-stage technology companies with 15 years in the industry.",https://linkedin.com/in/johnsmith,AI/ML Technology,25000,500000,"AI, SaaS, B2B"
+Jane Doe,jane@example.com,Healthcare Capital,Investment Director,"Boston, MA","Healthcare investment specialist with expertise in biotech and medical device startups.",https://linkedin.com/in/janedoe,Healthcare & Biotech,50000,1000000,"Healthcare, Biotech, Medical Devices"
+Michael Chen,michael@example.com,Growth Partners,Senior Associate,"New York, NY","Focus on fintech and financial services startups with proven market traction.",https://linkedin.com/in/michaelchen,FinTech,10000,250000,"FinTech, Financial Services, B2B"

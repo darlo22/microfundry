@@ -278,11 +278,11 @@ export default function AdminInvestorOutreach() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                   <FileSpreadsheet className="h-12 w-12 text-fundry-orange mx-auto mb-4" />
                   <div className="space-y-2">
-                    <p className="text-lg font-medium">Upload Excel or CSV File</p>
-                    <p className="text-sm text-orange-200">
+                    <p className="text-lg font-medium text-fundry-navy">Upload Excel or CSV File</p>
+                    <p className="text-sm text-gray-600">
                       Drag and drop your file here, or click to browse
                     </p>
                   </div>
@@ -290,18 +290,18 @@ export default function AdminInvestorOutreach() {
                     type="file"
                     accept=".xlsx,.xls,.csv"
                     onChange={handleFileSelect}
-                    className="mt-4 bg-white/10 border-white/20 text-white"
+                    className="mt-4"
                   />
                 </div>
 
                 {selectedFile && (
-                  <div className="bg-white/5 rounded-lg p-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <FileSpreadsheet className="h-8 w-8 text-fundry-orange" />
                         <div>
-                          <p className="font-medium">{selectedFile.name}</p>
-                          <p className="text-sm text-orange-200">
+                          <p className="font-medium text-fundry-navy">{selectedFile.name}</p>
+                          <p className="text-sm text-gray-600">
                             {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                           </p>
                         </div>
@@ -311,7 +311,7 @@ export default function AdminInvestorOutreach() {
                           onClick={handlePreviewFile}
                           variant="outline"
                           size="sm"
-                          className="text-fundry-navy border-white/20 hover:bg-white/20"
+                          className="border-fundry-navy/30 text-fundry-navy hover:bg-fundry-navy/10"
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           Preview
@@ -319,7 +319,7 @@ export default function AdminInvestorOutreach() {
                         <Button
                           onClick={handleUpload}
                           disabled={isUploading}
-                          className="bg-fundry-orange hover:bg-orange-600 text-white"
+                          className="bg-fundry-orange hover:bg-fundry-orange/90 text-white"
                         >
                           {isUploading ? "Uploading..." : "Upload"}
                         </Button>
@@ -328,8 +328,8 @@ export default function AdminInvestorOutreach() {
 
                     {isUploading && (
                       <div className="mt-4">
-                        <Progress value={uploadProgress} className="bg-white/20" />
-                        <p className="text-sm text-orange-200 mt-2">
+                        <Progress value={uploadProgress} />
+                        <p className="text-sm text-gray-600 mt-2">
                           Uploading... {uploadProgress}%
                         </p>
                       </div>
@@ -440,9 +440,9 @@ export default function AdminInvestorOutreach() {
 
             {/* File Preview */}
             {showPreview && previewData.length > 0 && (
-              <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
-                <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
-                  <CardTitle className="text-white flex items-center justify-between">
+              <Card className="border-l-4 border-l-fundry-navy">
+                <CardHeader>
+                  <CardTitle className="text-fundry-navy flex items-center justify-between">
                     <span className="flex items-center">
                       <Eye className="h-5 w-5 mr-2 text-fundry-orange" />
                       File Preview
@@ -451,36 +451,36 @@ export default function AdminInvestorOutreach() {
                       onClick={() => setShowPreview(false)}
                       variant="ghost"
                       size="sm"
-                      className="text-white hover:bg-white/20"
+                      className="text-fundry-navy hover:bg-fundry-navy/10"
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-white">
+                <CardContent>
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       <thead>
-                        <tr className="border-b border-white/20">
-                          <th className="text-left p-2 text-orange-200">Name</th>
-                          <th className="text-left p-2 text-orange-200">Email</th>
-                          <th className="text-left p-2 text-orange-200">Company</th>
-                          <th className="text-left p-2 text-orange-200">Location</th>
+                        <tr className="border-b border-gray-200">
+                          <th className="text-left p-2 text-fundry-navy font-medium">Name</th>
+                          <th className="text-left p-2 text-fundry-navy font-medium">Email</th>
+                          <th className="text-left p-2 text-fundry-navy font-medium">Company</th>
+                          <th className="text-left p-2 text-fundry-navy font-medium">Location</th>
                         </tr>
                       </thead>
                       <tbody>
                         {previewData.slice(0, 5).map((row, index) => (
-                          <tr key={index} className="border-b border-white/10">
-                            <td className="p-2">{row.name}</td>
-                            <td className="p-2">{row.email}</td>
-                            <td className="p-2">{row.company}</td>
-                            <td className="p-2">{row.location}</td>
+                          <tr key={index} className="border-b border-gray-100">
+                            <td className="p-2 text-gray-800">{row.name}</td>
+                            <td className="p-2 text-gray-800">{row.email}</td>
+                            <td className="p-2 text-gray-800">{row.company}</td>
+                            <td className="p-2 text-gray-800">{row.location}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                     {previewData.length > 5 && (
-                      <p className="text-sm text-orange-200 mt-2">
+                      <p className="text-sm text-gray-600 mt-2">
                         Showing 5 of {previewData.length} records
                       </p>
                     )}
@@ -490,21 +490,21 @@ export default function AdminInvestorOutreach() {
             )}
 
             {/* Current Directory */}
-            <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
-              <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
-                <CardTitle className="text-white flex items-center">
+            <Card className="border-l-4 border-l-fundry-orange">
+              <CardHeader>
+                <CardTitle className="text-fundry-navy flex items-center">
                   <Users className="h-5 w-5 mr-2 text-fundry-orange" />
                   Current Investor Directory
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-white">
+              <CardContent>
                 {isLoading ? (
-                  <div className="text-center py-8">Loading investors...</div>
+                  <div className="text-center py-8 text-gray-600">Loading investors...</div>
                 ) : investors.length === 0 ? (
                   <div className="text-center py-8">
-                    <Users className="h-12 w-12 text-orange-200 mx-auto mb-4" />
-                    <p className="text-orange-200">No investors in directory yet</p>
-                    <p className="text-sm text-orange-300 mt-2">
+                    <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">No investors in directory yet</p>
+                    <p className="text-sm text-gray-500 mt-2">
                       Upload a CSV or Excel file to get started
                     </p>
                   </div>
@@ -513,26 +513,26 @@ export default function AdminInvestorOutreach() {
                     {investors.map((investor: InvestorRecord) => (
                       <div
                         key={investor.id}
-                        className="border border-white/20 rounded-lg p-4 bg-white/5 hover:bg-white/10 transition-all duration-300"
+                        className="border border-gray-200 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-all duration-300"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
-                              <h4 className="font-medium text-white">{investor.name}</h4>
+                              <h4 className="font-medium text-fundry-navy">{investor.name}</h4>
                               <Badge className={investor.source === 'directory' ? 'bg-fundry-orange text-white' : 'bg-fundry-navy text-white'}>
                                 {investor.source === 'directory' ? 'Directory' : 'Platform'}
                               </Badge>
                             </div>
-                            <p className="text-sm text-orange-100 mb-1">{investor.email}</p>
+                            <p className="text-sm text-gray-600 mb-1">{investor.email}</p>
                             {investor.company && (
-                              <p className="text-sm text-orange-200 flex items-center mb-1">
+                              <p className="text-sm text-gray-700 flex items-center mb-1">
                                 <Building className="h-3 w-3 mr-1 text-fundry-orange" />
                                 {investor.company}
                                 {investor.title && ` • ${investor.title}`}
                               </p>
                             )}
                             {investor.location && (
-                              <p className="text-sm text-orange-200 flex items-center mb-1">
+                              <p className="text-sm text-gray-700 flex items-center mb-1">
                                 <MapPin className="h-3 w-3 mr-1 text-fundry-orange" />
                                 {investor.location}
                               </p>
@@ -545,7 +545,7 @@ export default function AdminInvestorOutreach() {
                                   </Badge>
                                 ))}
                                 {investor.tags.length > 3 && (
-                                  <Badge variant="outline" className="text-xs border-orange-200 text-orange-200">
+                                  <Badge variant="outline" className="text-xs border-gray-300 text-gray-600">
                                     +{investor.tags.length - 3}
                                   </Badge>
                                 )}
@@ -557,7 +557,7 @@ export default function AdminInvestorOutreach() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-orange-200 hover:bg-white/20"
+                                className="text-fundry-navy hover:bg-fundry-navy/10"
                                 onClick={() => window.open(investor.linkedinUrl, '_blank')}
                               >
                                 <ExternalLink className="h-4 w-4" />
@@ -566,7 +566,7 @@ export default function AdminInvestorOutreach() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-red-400 hover:bg-red-500/20"
+                              className="text-red-500 hover:bg-red-500/10"
                               onClick={() => deleteInvestorMutation.mutate(investor.id)}
                               disabled={deleteInvestorMutation.isPending}
                             >
@@ -585,39 +585,39 @@ export default function AdminInvestorOutreach() {
           {/* Instructions & Template */}
           <div className="space-y-6">
             {/* Instructions */}
-            <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
-              <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
-                <CardTitle className="text-white flex items-center">
+            <Card className="border-l-4 border-l-fundry-navy">
+              <CardHeader>
+                <CardTitle className="text-fundry-navy flex items-center">
                   <AlertCircle className="h-5 w-5 mr-2 text-fundry-orange" />
                   Upload Instructions
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-white">
+              <CardContent>
                 <div className="space-y-4 text-sm">
                   <div>
-                    <h4 className="font-medium text-orange-200 mb-2">File Format</h4>
-                    <ul className="space-y-1 text-orange-100">
+                    <h4 className="font-medium text-fundry-navy mb-2">File Format</h4>
+                    <ul className="space-y-1 text-gray-600">
                       <li>• Excel (.xlsx, .xls) or CSV files</li>
                       <li>• Maximum file size: 10MB</li>
                       <li>• First row should contain headers</li>
                     </ul>
                   </div>
 
-                  <Separator className="bg-white/20" />
+                  <Separator />
 
                   <div>
-                    <h4 className="font-medium text-orange-200 mb-2">Required Columns</h4>
-                    <ul className="space-y-1 text-orange-100">
+                    <h4 className="font-medium text-fundry-navy mb-2">Required Columns</h4>
+                    <ul className="space-y-1 text-gray-600">
                       <li>• <strong>name</strong> - Investor's full name</li>
                       <li>• <strong>email</strong> - Valid email address</li>
                     </ul>
                   </div>
 
-                  <Separator className="bg-white/20" />
+                  <Separator />
 
                   <div>
-                    <h4 className="font-medium text-orange-200 mb-2">Optional Columns</h4>
-                    <ul className="space-y-1 text-orange-100">
+                    <h4 className="font-medium text-fundry-navy mb-2">Optional Columns</h4>
+                    <ul className="space-y-1 text-gray-600">
                       <li>• company, title, location</li>
                       <li>• bio, linkedinUrl</li>
                       <li>• investmentFocus</li>
@@ -630,24 +630,24 @@ export default function AdminInvestorOutreach() {
             </Card>
 
             {/* Download Template */}
-            <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
-              <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
-                <CardTitle className="text-white flex items-center">
+            <Card className="border-l-4 border-l-fundry-orange">
+              <CardHeader>
+                <CardTitle className="text-fundry-navy flex items-center">
                   <Download className="h-5 w-5 mr-2 text-fundry-orange" />
                   Template Download
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-white">
+              <CardContent>
                 <div className="text-center space-y-4">
                   <div>
                     <FileSpreadsheet className="h-12 w-12 text-fundry-orange mx-auto mb-3" />
-                    <p className="text-sm text-orange-200">
+                    <p className="text-sm text-gray-600">
                       Download our CSV template with all required and optional columns
                     </p>
                   </div>
                   <Button
                     onClick={downloadTemplate}
-                    className="w-full bg-fundry-orange hover:bg-orange-600 text-white"
+                    className="w-full bg-fundry-orange hover:bg-fundry-orange/90 text-white"
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Download Template
@@ -657,34 +657,34 @@ export default function AdminInvestorOutreach() {
             </Card>
 
             {/* Usage Statistics */}
-            <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
-              <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
-                <CardTitle className="text-white flex items-center">
+            <Card className="border-l-4 border-l-fundry-navy">
+              <CardHeader>
+                <CardTitle className="text-fundry-navy flex items-center">
                   <Mail className="h-5 w-5 mr-2 text-fundry-orange" />
                   Directory Usage
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-white">
+              <CardContent>
                 <div className="space-y-4">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-fundry-orange">
                       {investors.length}
                     </p>
-                    <p className="text-sm text-orange-200">Total Investors</p>
+                    <p className="text-sm text-gray-600">Total Investors</p>
                   </div>
-                  <Separator className="bg-white/20" />
+                  <Separator />
                   <div className="text-center">
-                    <p className="text-xl font-bold text-green-400">
+                    <p className="text-xl font-bold text-fundry-navy">
                       {investors.filter((inv: InvestorRecord) => inv.source === 'directory').length}
                     </p>
-                    <p className="text-sm text-orange-200">Directory Entries</p>
+                    <p className="text-sm text-gray-600">Directory Entries</p>
                   </div>
-                  <Separator className="bg-white/20" />
+                  <Separator />
                   <div className="text-center">
-                    <p className="text-lg font-bold text-blue-400">
+                    <p className="text-lg font-bold text-fundry-orange">
                       {investors.filter((inv: InvestorRecord) => inv.source === 'platform').length}
                     </p>
-                    <p className="text-sm text-orange-200">Platform Users</p>
+                    <p className="text-sm text-gray-600">Platform Users</p>
                   </div>
                 </div>
               </CardContent>
@@ -695,7 +695,7 @@ export default function AdminInvestorOutreach() {
 
       {/* Preview Modal */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border border-orange-200 shadow-2xl">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
           <DialogHeader className="pb-4">
             <DialogTitle className="text-2xl font-bold text-fundry-navy flex items-center">
               <FileSpreadsheet className="h-6 w-6 mr-3 text-fundry-orange" />
@@ -705,8 +705,8 @@ export default function AdminInvestorOutreach() {
           
           {previewData.length > 0 ? (
             <div className="overflow-auto max-h-[60vh]">
-              <div className="bg-white rounded-lg border border-orange-200 shadow-sm">
-                <div className="p-4 bg-gradient-to-r from-fundry-orange/10 to-fundry-navy/10 border-b border-orange-200">
+              <div className="bg-white rounded-lg border shadow-sm">
+                <div className="p-4 bg-gray-50 border-b">
                   <p className="text-sm font-medium text-fundry-navy">
                     Showing first {Math.min(previewData.length, 10)} rows from your file
                   </p>

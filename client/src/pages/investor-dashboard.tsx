@@ -29,8 +29,8 @@ import type { InvestmentWithCampaign, UserStats } from "@/lib/types";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 import TwoFactorSetupModal from "@/components/modals/two-factor-setup-modal";
 import PaymentModal from "@/components/modals/payment-modal";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe, type Stripe } from '@stripe/stripe-js';
 
 // Edit Profile Form Schema
 const editProfileSchema = z.object({
@@ -63,6 +63,45 @@ const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY
       return null;
     })
   : Promise.resolve(null);
+
+// Stripe Wrapper Component with Error Handling
+const StripeWrapper = ({ children, stripePromise }: { children: React.ReactNode; stripePromise: Promise<Stripe | null> }) => {
+  const [stripe, setStripe] = useState<Stripe | null>(null);
+  const [stripeError, setStripeError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    stripePromise
+      .then((stripeInstance) => {
+        setStripe(stripeInstance);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.warn('Stripe failed to initialize:', error);
+        setStripeError('Payment system unavailable');
+        setIsLoading(false);
+      });
+  }, [stripePromise]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (stripeError || !stripe) {
+    // Return children without Elements wrapper when Stripe fails
+    return <>{children}</>;
+  }
+
+  return (
+    <Elements stripe={stripe}>
+      {children}
+    </Elements>
+  );
+};
 
 export default function InvestorDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -2093,7 +2132,7 @@ This SAFE Agreement has been digitally signed and executed.
 
       {/* Payment Modal */}
       {isPaymentModalOpen && selectedInvestmentForPayment && (
-        <Elements stripe={stripePromise}>
+        <StripeWrapper stripePromise={stripePromise}>
           <PaymentModal
             isOpen={isPaymentModalOpen}
             onClose={() => {
@@ -2102,7 +2141,7 @@ This SAFE Agreement has been digitally signed and executed.
             }}
             investment={selectedInvestmentForPayment}
           />
-        </Elements>
+        </StripeWrapper>
       )}
 
       {/* Comprehensive Edit Investment Modal */}

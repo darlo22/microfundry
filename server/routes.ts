@@ -2728,6 +2728,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const { reference } = req.params;
       console.log('Checking payment status for reference:', reference);
 
+      // Extract investment ID from reference (format: inv_INVESTMENTID_TIMESTAMP)
+      const referenceMatch = reference.match(/inv_(\d+)_/);
+      const investmentId = referenceMatch ? parseInt(referenceMatch[1]) : null;
+
       const verificationResponse = await fetch(
         `https://api.budpay.com/api/v2/transaction/verify/${reference}`,
         {
@@ -2743,38 +2747,41 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       console.log('Payment status verification:', verificationData);
 
       if (verificationData.status === true && verificationData.data?.status === 'success') {
-        // Create investment record if payment was successful
-        const metadata = verificationData.data.metadata || {};
-        const campaignId = parseInt(metadata.campaignId);
-        const investorId = metadata.investorId;
-        const amount = parseFloat(metadata.usdAmount);
+        // Update existing investment instead of creating new one
+        if (investmentId) {
+          console.log(`Updating investment ${investmentId} to paid status`);
+          
+          // Get the existing investment to verify it belongs to current user
+          const existingInvestment = await storage.getInvestment(investmentId);
+          
+          if (existingInvestment && existingInvestment.investorId === req.user.id) {
+            // Update the investment status to paid
+            const updatedInvestment = await storage.updateInvestment(investmentId, {
+              status: 'paid',
+              paymentStatus: 'completed',
+              paymentIntentId: reference
+            });
 
-        if (campaignId && investorId && amount) {
-          const investment = await storage.createInvestment({
-            campaignId,
-            investorId,
-            amount: amount.toString(),
-            platformFee: "0",
-            totalAmount: amount.toString(),
-            status: 'paid',
-            paymentStatus: 'completed',
-            paymentIntentId: reference,
-            agreementSigned: true,
-            signedAt: new Date(),
-            ipAddress: req.ip
-          });
+            console.log(`Investment ${investmentId} successfully updated to paid status`);
 
-          res.json({ 
-            success: true, 
-            status: 'success',
-            investment,
-            message: 'Payment verified successfully'
-          });
+            res.json({ 
+              success: true, 
+              status: 'success',
+              investment: updatedInvestment,
+              message: 'Payment verified and investment updated successfully'
+            });
+          } else {
+            console.error('Investment not found or access denied');
+            res.status(404).json({ 
+              success: false, 
+              message: 'Investment not found or access denied'
+            });
+          }
         } else {
-          res.json({ 
-            success: true, 
-            status: 'success',
-            message: 'Payment verified but missing metadata'
+          console.error('Could not extract investment ID from reference:', reference);
+          res.status(400).json({ 
+            success: false, 
+            message: 'Invalid payment reference format'
           });
         }
       } else {
@@ -2804,6 +2811,26 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       
       if (status === 'success') {
         console.log('Payment successful via webhook:', reference);
+        
+        // Extract investment ID from reference and update investment
+        const referenceMatch = reference.match(/inv_(\d+)_/);
+        const investmentId = referenceMatch ? parseInt(referenceMatch[1]) : null;
+        
+        if (investmentId) {
+          try {
+            const existingInvestment = await storage.getInvestment(investmentId);
+            if (existingInvestment) {
+              await storage.updateInvestment(investmentId, {
+                status: 'paid',
+                paymentStatus: 'completed',
+                paymentIntentId: reference
+              });
+              console.log(`Webhook: Investment ${investmentId} updated to paid status`);
+            }
+          } catch (updateError) {
+            console.error('Webhook: Failed to update investment:', updateError);
+          }
+        }
       }
       
       res.status(200).send('OK');

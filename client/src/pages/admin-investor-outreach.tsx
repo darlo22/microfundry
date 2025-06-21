@@ -24,7 +24,8 @@ import {
   Eye,
   AlertCircle,
   CheckCircle,
-  X
+  X,
+  AlertTriangle
 } from "lucide-react";
 import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
@@ -336,40 +337,97 @@ export default function AdminInvestorOutreach() {
                 )}
 
                 {uploadResult && (
-                  <div className="bg-white/5 rounded-lg p-4">
-                    <h4 className="font-medium mb-3 flex items-center">
+                  <div className="bg-white/5 rounded-lg p-6">
+                    <h4 className="font-medium mb-4 flex items-center text-white">
                       <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
-                      Upload Results
+                      Upload Analysis Report
                     </h4>
-                    <div className="grid grid-cols-3 gap-4 mb-3">
-                      <div className="text-center">
+                    
+                    {/* Total Summary */}
+                    <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg p-4 mb-4">
+                      <h5 className="text-lg font-semibold text-white mb-2">File Processing Summary</h5>
+                      <p className="text-orange-200">
+                        Processed {uploadResult.totalRows || uploadResult.breakdown?.totalRows || 'N/A'} total rows from your file
+                      </p>
+                      <p className="text-white font-medium mt-1">
+                        Result: {uploadResult.successful} investors successfully added to directory
+                      </p>
+                    </div>
+
+                    {/* Detailed Breakdown */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                      <div className="text-center bg-green-600/20 rounded-lg p-3">
                         <p className="text-2xl font-bold text-green-400">
                           {uploadResult.successful}
                         </p>
-                        <p className="text-sm text-orange-200">Successful</p>
+                        <p className="text-sm text-green-200">Successfully Added</p>
                       </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-red-400">
-                          {uploadResult.failed}
-                        </p>
-                        <p className="text-sm text-orange-200">Failed</p>
-                      </div>
-                      <div className="text-center">
+                      <div className="text-center bg-yellow-600/20 rounded-lg p-3">
                         <p className="text-2xl font-bold text-yellow-400">
                           {uploadResult.duplicates}
                         </p>
-                        <p className="text-sm text-orange-200">Duplicates</p>
+                        <p className="text-sm text-yellow-200">Duplicate Emails</p>
+                      </div>
+                      <div className="text-center bg-red-600/20 rounded-lg p-3">
+                        <p className="text-2xl font-bold text-red-400">
+                          {uploadResult.missingData || 0}
+                        </p>
+                        <p className="text-sm text-red-200">Missing Data</p>
+                      </div>
+                      <div className="text-center bg-gray-600/20 rounded-lg p-3">
+                        <p className="text-2xl font-bold text-gray-400">
+                          {(uploadResult.breakdown?.otherErrors || 0)}
+                        </p>
+                        <p className="text-sm text-gray-200">Other Errors</p>
                       </div>
                     </div>
+
+                    {/* Why entries were skipped */}
+                    {(uploadResult.duplicates > 0 || uploadResult.missingData > 0 || uploadResult.failed > 0) && (
+                      <div className="bg-amber-600/10 border border-amber-400/20 rounded-lg p-4 mb-4">
+                        <h6 className="font-medium text-amber-300 mb-2 flex items-center">
+                          <AlertTriangle className="h-4 w-4 mr-2" />
+                          Why {(uploadResult.breakdown?.skippedTotal || (uploadResult.duplicates + uploadResult.failed))} entries were skipped:
+                        </h6>
+                        <ul className="text-sm text-amber-200 space-y-1">
+                          {uploadResult.duplicates > 0 && (
+                            <li>• {uploadResult.duplicates} entries had email addresses already in the directory</li>
+                          )}
+                          {uploadResult.missingData > 0 && (
+                            <li>• {uploadResult.missingData} entries were missing required name or email fields</li>
+                          )}
+                          {(uploadResult.breakdown?.otherErrors || 0) > 0 && (
+                            <li>• {uploadResult.breakdown.otherErrors} entries had formatting or processing errors</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Sample duplicate emails */}
+                    {uploadResult.duplicateEmails && uploadResult.duplicateEmails.length > 0 && (
+                      <div className="bg-yellow-600/10 border border-yellow-400/20 rounded-lg p-4 mb-4">
+                        <h6 className="font-medium text-yellow-300 mb-2">Sample Duplicate Emails Found:</h6>
+                        <ul className="text-xs text-yellow-200 space-y-1">
+                          {uploadResult.duplicateEmails.slice(0, 5).map((email, index) => (
+                            <li key={index}>• {email}</li>
+                          ))}
+                          {uploadResult.duplicateEmails.length > 5 && (
+                            <li className="text-yellow-300">• And {uploadResult.duplicateEmails.length - 5} more duplicate emails...</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Error details */}
                     {uploadResult.errors && uploadResult.errors.length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium text-red-400 mb-2">Errors:</p>
-                        <ul className="text-xs text-orange-200 space-y-1">
-                          {uploadResult.errors.slice(0, 5).map((error, index) => (
+                      <div className="bg-red-600/10 border border-red-400/20 rounded-lg p-4">
+                        <h6 className="font-medium text-red-300 mb-2">Processing Errors:</h6>
+                        <ul className="text-xs text-red-200 space-y-1 max-h-32 overflow-y-auto">
+                          {uploadResult.errors.slice(0, 10).map((error, index) => (
                             <li key={index}>• {error}</li>
                           ))}
-                          {uploadResult.errors.length > 5 && (
-                            <li>• And {uploadResult.errors.length - 5} more...</li>
+                          {uploadResult.errors.length > 10 && (
+                            <li className="text-red-300">• And {uploadResult.errors.length - 10} more errors...</li>
                           )}
                         </ul>
                       </div>

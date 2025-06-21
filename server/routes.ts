@@ -817,23 +817,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment withdrawal endpoints
-  app.get('/api/withdrawal-info/:userId', requireAuth, async (req: any, res) => {
+  app.get('/api/withdrawal-info', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.params.userId;
+      const userId = req.user.id;
       
-      // Ensure user can only access their own withdrawal info
-      if (userId !== req.user.id) {
-        return res.status(403).json({ message: "Not authorized to access this information" });
-      }
+      console.log(`DEBUG: Calculating withdrawal info for user ${userId}`);
 
-      // Get user's investment data to calculate balances
-      const investments = await storage.getInvestmentsByInvestor(userId);
+      // Get user's founder statistics to calculate earnings
       const userFounderStats = await storage.getFounderStats(userId);
       
+      console.log(`DEBUG: Founder stats:`, userFounderStats);
+      
       // Calculate available balance from successful investments as founder
-      const availableBalance = parseFloat(userFounderStats.totalRaised) * 0.95; // 5% platform fee
+      const totalEarnings = parseFloat(userFounderStats.totalRaised || "0");
+      const availableBalance = totalEarnings * 0.95; // 5% platform fee deduction
       const pendingWithdrawals = 0; // Would track pending withdrawal requests
-      const totalEarnings = parseFloat(userFounderStats.totalRaised);
+      
+      console.log(`DEBUG: Calculated - Total: ${totalEarnings}, Available: ${availableBalance}`);
 
       res.json({
         availableBalance: availableBalance.toFixed(2),

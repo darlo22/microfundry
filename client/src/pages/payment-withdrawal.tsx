@@ -179,7 +179,7 @@ export default function PaymentWithdrawal() {
 
   // Fetch user's withdrawal data and KYC status
   const { data: withdrawalInfo, isLoading: withdrawalLoading } = useQuery({
-    queryKey: ["/api/withdrawal-info", user?.id],
+    queryKey: ["/api/withdrawal-info"],
     enabled: !!user?.id,
   });
 

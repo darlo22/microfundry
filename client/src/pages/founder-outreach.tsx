@@ -101,6 +101,7 @@ export default function FounderOutreach() {
   const [sourceFilter, setSourceFilter] = useState("all");
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
   const [emailSettings, setEmailSettings] = useState({
     verifiedEmail: "",
     displayName: "",
@@ -148,6 +149,15 @@ export default function FounderOutreach() {
     queryKey: ["/api/founder/email-campaigns"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/founder/email-campaigns");
+      return response.json();
+    },
+  });
+
+  // Fetch founder campaigns for selection
+  const { data: founderCampaigns = [] } = useQuery({
+    queryKey: ["/api/campaigns/founder"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/campaigns/founder");
       return response.json();
     },
   });
@@ -225,6 +235,49 @@ export default function FounderOutreach() {
   const applyTemplate = (template: EmailTemplate) => {
     setEmailSubject(template.subject);
     setEmailMessage(template.content);
+  };
+
+  const generateCampaignEmail = (campaign: any) => {
+    const campaignUrl = `${window.location.origin}/campaign/${campaign.id}`;
+    const fundingGoal = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(campaign.fundingGoal);
+    
+    const subject = `Investment Opportunity: ${campaign.companyName} - ${campaign.title}`;
+    const message = `Hi {name},
+
+I hope this email finds you well.
+
+I'm excited to share an investment opportunity with you for ${campaign.companyName}, a ${campaign.businessSector} startup that's revolutionizing the industry.
+
+🚀 **Campaign Overview:**
+• Company: ${campaign.companyName}
+• Funding Goal: ${fundingGoal}
+• Minimum Investment: $${campaign.minimumInvestment}
+• Business Focus: ${campaign.businessSector}
+
+💡 **Why This Matters:**
+${campaign.description ? campaign.description.substring(0, 200) + '...' : 'This innovative company is positioned for significant growth and offers an exciting opportunity for early investors.'}
+
+🔗 **View Full Campaign:** ${campaignUrl}
+
+We're offering SAFE agreements with attractive terms for early investors. This is a limited-time opportunity to get in on the ground floor of what we believe will be a game-changing company.
+
+I'd love to discuss this opportunity with you further. Would you be available for a brief call this week?
+
+Best regards,
+{signature}
+
+P.S. Feel free to review all the details, including our business plan, financials, and team information at the campaign link above.`;
+
+    setEmailSubject(subject);
+    setEmailMessage(message);
+    setSelectedCampaignId(campaign.id);
+    toast({
+      title: "Campaign Email Generated",
+      description: `Email template created for ${campaign.companyName}`,
+    });
   };
 
   const handleSendEmails = () => {
@@ -467,6 +520,35 @@ export default function FounderOutreach() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4 text-white">
+                    {/* Campaign Selection */}
+                    <div>
+                      <Label htmlFor="campaign" className="text-white">Select Campaign (Optional)</Label>
+                      <Select value={selectedCampaignId} onValueChange={setSelectedCampaignId}>
+                        <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                          <SelectValue placeholder="Choose a campaign to auto-generate email content" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No Campaign Selected</SelectItem>
+                          {founderCampaigns.map((campaign: any) => (
+                            <SelectItem key={campaign.id} value={campaign.id.toString()}>
+                              {campaign.companyName} - {campaign.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {selectedCampaignId && (
+                        <Button
+                          onClick={() => {
+                            const campaign = founderCampaigns.find((c: any) => c.id.toString() === selectedCampaignId);
+                            if (campaign) generateCampaignEmail(campaign);
+                          }}
+                          className="mt-2 bg-fundry-orange/20 hover:bg-fundry-orange/30 text-white border border-fundry-orange/40"
+                          size="sm"
+                        >
+                          Generate Campaign Email
+                        </Button>
+                      )}
+                    </div>
                     <div>
                       <Label htmlFor="subject" className="text-white">Subject Line</Label>
                       <Input

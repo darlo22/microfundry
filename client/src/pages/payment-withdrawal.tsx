@@ -638,9 +638,9 @@ export default function PaymentWithdrawal() {
                   </div>
                 </div>
                 
-                <div className="mt-6 flex justify-center">
+                <div className="mt-6 sm:mt-8 flex justify-center">
                   <Button 
-                    className="bg-fundry-orange hover:bg-orange-600"
+                    className="bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                     onClick={() => {
                       if (kycStatus?.status !== "verified") {
                         toast({
@@ -653,64 +653,73 @@ export default function PaymentWithdrawal() {
                       setWithdrawalModalOpen(true);
                     }}
                   >
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Request Withdrawal
+                    <CreditCard className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="text-sm sm:text-base">Request Withdrawal</span>
                   </Button>
+                </div>
+              </div>
+            </div>
 
-                  <Dialog open={withdrawalModalOpen} onOpenChange={setWithdrawalModalOpen}>
-                    <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Request Withdrawal</DialogTitle>
-                      </DialogHeader>
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          withdrawalMutation.mutate(withdrawalData);
-                        }}
-                        className="space-y-4"
-                      >
-                        <div>
-                          <Label htmlFor="amount">Withdrawal Amount</Label>
-                          <Input
-                            id="amount"
-                            type="number"
-                            step="0.01"
-                            min="1"
-                            max={withdrawalInfo?.availableBalance || 0}
-                            value={withdrawalData.amount}
-                            onChange={(e) => setWithdrawalData(prev => ({ ...prev, amount: e.target.value }))}
-                            placeholder="0.00"
-                            required
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            Available: ${withdrawalInfo?.availableBalance || "0.00"}
-                          </p>
-                        </div>
+            <Dialog open={withdrawalModalOpen} onOpenChange={setWithdrawalModalOpen}>
+              <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/30 to-blue-50/20 border-2 border-orange-200">
+                <DialogHeader className="bg-gradient-to-r from-fundry-navy to-blue-800 -m-6 mb-4 p-6 rounded-t-lg">
+                  <DialogTitle className="text-white text-xl font-bold flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-fundry-orange to-orange-600 rounded-xl">
+                      <CreditCard className="h-5 w-5 text-white" />
+                    </div>
+                    Request Withdrawal
+                  </DialogTitle>
+                </DialogHeader>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    withdrawalMutation.mutate(withdrawalData);
+                  }}
+                  className="space-y-4 p-6"
+                >
+                  <div className="bg-gradient-to-r from-emerald-50 to-green-100 border-2 border-emerald-200 rounded-xl p-4">
+                    <Label htmlFor="amount" className="text-sm font-semibold text-emerald-700">Withdrawal Amount</Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      step="0.01"
+                      min="1"
+                      max={withdrawalInfo?.availableBalance || 0}
+                      value={withdrawalData.amount}
+                      onChange={(e) => setWithdrawalData(prev => ({ ...prev, amount: e.target.value }))}
+                      placeholder="0.00"
+                      required
+                      className="mt-2 border-emerald-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                    <p className="text-xs text-emerald-600 mt-2 font-medium">
+                      Available: ${withdrawalInfo?.availableBalance || "0.00"}
+                    </p>
+                  </div>
 
-                        <div>
-                          <Label htmlFor="country">Country</Label>
-                          <Select
-                            value={withdrawalData.country}
-                            onValueChange={(value) => {
-                              setWithdrawalData(prev => ({ 
-                                ...prev, 
-                                country: value,
-                                // Reset banking fields when country changes
-                                bankAccount: "",
-                                routingNumber: "",
-                                swiftCode: "",
-                                iban: "",
-                                sortCode: "",
-                                bsb: "",
-                                transitNumber: "",
-                                bankName: "",
-                                bankAddress: ""
-                              }));
-                              // Reset bank selection state
-                              setShowCustomBankInput(false);
-                              setCustomBankName("");
-                            }}
-                          >
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-4">
+                    <Label htmlFor="country" className="text-sm font-semibold text-blue-700">Country</Label>
+                    <Select
+                      value={withdrawalData.country}
+                      onValueChange={(value) => {
+                        setWithdrawalData(prev => ({ 
+                          ...prev, 
+                          country: value,
+                          // Reset banking fields when country changes
+                          bankAccount: "",
+                          routingNumber: "",
+                          swiftCode: "",
+                          iban: "",
+                          sortCode: "",
+                          bsb: "",
+                          transitNumber: "",
+                          bankName: "",
+                          bankAddress: ""
+                        }));
+                        // Reset bank selection state
+                        setShowCustomBankInput(false);
+                        setCustomBankName("");
+                      }}
+                    >
                             <SelectTrigger>
                               <SelectValue placeholder="Select your country" />
                             </SelectTrigger>
@@ -721,25 +730,25 @@ export default function PaymentWithdrawal() {
                                 </SelectItem>
                               ))}
                             </SelectContent>
-                          </Select>
-                        </div>
+                    </Select>
+                  </div>
 
-                        {/* Bank Name Dropdown with Country-Specific Banks */}
-                        {withdrawalData.country && (
-                          <div>
-                            <Label htmlFor="bankName">Bank Name</Label>
-                            <Select
-                              value={showCustomBankInput ? "custom" : withdrawalData.bankName}
-                              onValueChange={(value) => {
-                                if (value === "custom") {
-                                  setShowCustomBankInput(true);
-                                  setWithdrawalData(prev => ({ ...prev, bankName: customBankName }));
-                                } else {
-                                  setShowCustomBankInput(false);
-                                  setWithdrawalData(prev => ({ ...prev, bankName: value }));
-                                }
-                              }}
-                            >
+                  {/* Bank Name Dropdown with Country-Specific Banks */}
+                  {withdrawalData.country && (
+                    <div className="bg-gradient-to-r from-purple-50 to-violet-100 border-2 border-purple-200 rounded-xl p-4">
+                      <Label htmlFor="bankName" className="text-sm font-semibold text-purple-700">Bank Name</Label>
+                      <Select
+                        value={showCustomBankInput ? "custom" : withdrawalData.bankName}
+                        onValueChange={(value) => {
+                          if (value === "custom") {
+                            setShowCustomBankInput(true);
+                            setWithdrawalData(prev => ({ ...prev, bankName: customBankName }));
+                          } else {
+                            setShowCustomBankInput(false);
+                            setWithdrawalData(prev => ({ ...prev, bankName: value }));
+                          }
+                        }}
+                      >
                               <SelectTrigger>
                                 <SelectValue placeholder="Select your bank" />
                               </SelectTrigger>
@@ -833,9 +842,193 @@ export default function PaymentWithdrawal() {
                       </form>
                     </DialogContent>
                   </Dialog>
-                </div>
-              </CardContent>
-            </Card>
+
+            <Dialog open={withdrawalModalOpen} onOpenChange={setWithdrawalModalOpen}>
+              <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/30 to-blue-50/20 border-2 border-orange-200">
+                <DialogHeader className="bg-gradient-to-r from-fundry-navy to-blue-800 -m-6 mb-4 p-6 rounded-t-lg">
+                  <DialogTitle className="text-white text-xl font-bold flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-fundry-orange to-orange-600 rounded-xl">
+                      <CreditCard className="h-5 w-5 text-white" />
+                    </div>
+                    Request Withdrawal
+                  </DialogTitle>
+                </DialogHeader>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    withdrawalMutation.mutate(withdrawalData);
+                  }}
+                  className="space-y-4 p-6"
+                >
+                  <div className="bg-gradient-to-r from-emerald-50 to-green-100 border-2 border-emerald-200 rounded-xl p-4">
+                    <Label htmlFor="amount" className="text-sm font-semibold text-emerald-700">Withdrawal Amount</Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      step="0.01"
+                      min="1"
+                      max={withdrawalInfo?.availableBalance || 0}
+                      value={withdrawalData.amount}
+                      onChange={(e) => setWithdrawalData(prev => ({ ...prev, amount: e.target.value }))}
+                      placeholder="0.00"
+                      required
+                      className="mt-2 border-emerald-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                    <p className="text-xs text-emerald-600 mt-2 font-medium">
+                      Available: ${withdrawalInfo?.availableBalance || "0.00"}
+                    </p>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-4">
+                    <Label htmlFor="country" className="text-sm font-semibold text-blue-700">Country</Label>
+                    <Select
+                      value={withdrawalData.country}
+                      onValueChange={(value) => {
+                        setWithdrawalData(prev => ({ 
+                          ...prev, 
+                          country: value,
+                          bankAccount: "",
+                          routingNumber: "",
+                          swiftCode: "",
+                          iban: "",
+                          sortCode: "",
+                          bsb: "",
+                          transitNumber: "",
+                          bankName: "",
+                          bankAddress: ""
+                        }));
+                        setShowCustomBankInput(false);
+                        setCustomBankName("");
+                      }}
+                    >
+                      <SelectTrigger className="mt-2">
+                        <SelectValue placeholder="Select your country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRIES_AND_STATES.map((country) => (
+                          <SelectItem key={country.name} value={country.name}>
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {withdrawalData.country && (
+                    <div className="bg-gradient-to-r from-purple-50 to-violet-100 border-2 border-purple-200 rounded-xl p-4">
+                      <Label htmlFor="bankName" className="text-sm font-semibold text-purple-700">Bank Name</Label>
+                      <Select
+                        value={showCustomBankInput ? "custom" : withdrawalData.bankName}
+                        onValueChange={(value) => {
+                          if (value === "custom") {
+                            setShowCustomBankInput(true);
+                            setWithdrawalData(prev => ({ ...prev, bankName: customBankName }));
+                          } else {
+                            setShowCustomBankInput(false);
+                            setWithdrawalData(prev => ({ ...prev, bankName: value }));
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="mt-2">
+                          <SelectValue placeholder="Select your bank" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {BANKS_BY_COUNTRY[withdrawalData.country]?.map((bank) => (
+                            <SelectItem key={bank} value={bank}>
+                              {bank}
+                            </SelectItem>
+                          )) || null}
+                          <SelectItem value="custom">Other (Enter manually)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {showCustomBankInput && (
+                    <div className="bg-gradient-to-r from-amber-50 to-yellow-100 border-2 border-amber-200 rounded-xl p-4">
+                      <Label htmlFor="customBankName" className="text-sm font-semibold text-amber-700">Enter Bank Name</Label>
+                      <Input
+                        id="customBankName"
+                        value={customBankName}
+                        onChange={(e) => {
+                          setCustomBankName(e.target.value);
+                          setWithdrawalData(prev => ({ ...prev, bankName: e.target.value }));
+                        }}
+                        placeholder="Enter your bank name"
+                        required
+                        className="mt-2 border-amber-300 focus:border-amber-500 focus:ring-amber-500"
+                      />
+                    </div>
+                  )}
+
+                  {withdrawalData.country && (() => {
+                    const bankingConfig = getBankingFieldsForCountry(withdrawalData.country);
+                    return bankingConfig.fields.filter(field => field !== 'bankName').map((field) => {
+                      const fieldKey = field as keyof typeof withdrawalData;
+                      return (
+                        <div key={field} className="bg-gradient-to-r from-slate-50 to-gray-100 border-2 border-slate-200 rounded-xl p-4">
+                          <Label htmlFor={field} className="text-sm font-semibold text-slate-700">{bankingConfig.labels[field]}</Label>
+                          <Input
+                            id={field}
+                            value={withdrawalData[fieldKey] as string}
+                            onChange={(e) => setWithdrawalData(prev => ({ ...prev, [field]: e.target.value }))}
+                            placeholder={bankingConfig.labels[field]}
+                            required
+                            className="mt-2 border-slate-300 focus:border-slate-500 focus:ring-slate-500"
+                          />
+                        </div>
+                      );
+                    });
+                  })()}
+
+                  <div className="bg-gradient-to-r from-pink-50 to-rose-100 border-2 border-pink-200 rounded-xl p-4">
+                    <Label htmlFor="accountType" className="text-sm font-semibold text-pink-700">Account Type</Label>
+                    <Select
+                      value={withdrawalData.accountType}
+                      onValueChange={(value) => setWithdrawalData(prev => ({ ...prev, accountType: value }))}
+                    >
+                      <SelectTrigger className="mt-2">
+                        <SelectValue placeholder="Select account type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="checking">Checking</SelectItem>
+                        <SelectItem value="savings">Savings</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-cyan-50 to-teal-100 border-2 border-cyan-200 rounded-xl p-4">
+                    <Label htmlFor="memo" className="text-sm font-semibold text-cyan-700">Memo (Optional)</Label>
+                    <Input
+                      id="memo"
+                      value={withdrawalData.memo}
+                      onChange={(e) => setWithdrawalData(prev => ({ ...prev, memo: e.target.value }))}
+                      placeholder="Notes about this withdrawal"
+                      className="mt-2 border-cyan-300 focus:border-cyan-500 focus:ring-cyan-500"
+                    />
+                  </div>
+
+                  <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setWithdrawalModalOpen(false)}
+                      className="px-6 py-3 border-2 border-gray-300 hover:border-gray-400 rounded-xl"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      disabled={withdrawalMutation.isPending}
+                      className="bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      {withdrawalMutation.isPending ? "Processing..." : "Submit Request"}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </TabsContent>
 
             {/* Recent Transactions */}
             <Card>

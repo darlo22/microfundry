@@ -6872,5 +6872,141 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Email Analytics API endpoints for Reports tab
+  app.get("/api/admin/email-analytics", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.userType !== 'admin') {
+      return res.status(401).json({ message: "Admin access required" });
+    }
+
+    try {
+      const { period = '7days' } = req.query;
+      let dateFilter = new Date();
+      
+      switch (period) {
+        case 'today':
+          dateFilter.setHours(0, 0, 0, 0);
+          break;
+        case '7days':
+          dateFilter.setDate(dateFilter.getDate() - 7);
+          break;
+        case '1month':
+          dateFilter.setMonth(dateFilter.getMonth() - 1);
+          break;
+        case '3months':
+          dateFilter.setMonth(dateFilter.getMonth() - 3);
+          break;
+        case '6months':
+          dateFilter.setMonth(dateFilter.getMonth() - 6);
+          break;
+        case '1year':
+          dateFilter.setFullYear(dateFilter.getFullYear() - 1);
+          break;
+        case 'all':
+          dateFilter = new Date('2020-01-01');
+          break;
+      }
+
+      // Mock analytics data (to be replaced with actual email tracking)
+      const emailAnalytics = {
+        totalEmailsSent: 1247,
+        totalEmailsOpened: 523,
+        openRate: 42,
+        uniqueRecipients: 891,
+        responseRate: 8.5,
+        emailGrowthRate: 15,
+        avgOpenRate: 38.2,
+        avgResponseTime: 24,
+        activeInvestors: 156,
+        conversionRate: 3.2
+      };
+
+      res.json(emailAnalytics);
+    } catch (error) {
+      console.error('Error fetching email analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch email analytics' });
+    }
+  });
+
+  app.get("/api/admin/founder-activity", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.userType !== 'admin') {
+      return res.status(401).json({ message: "Admin access required" });
+    }
+
+    try {
+      const { period = '7days' } = req.query;
+      
+      // Get founders with active campaigns
+      const campaigns = await db.select({
+        id: campaignsTable.id,
+        companyName: campaignsTable.companyName,
+        founderId: campaignsTable.founderId
+      }).from(campaignsTable);
+
+      const founders = await db.select({
+        id: usersTable.id,
+        firstName: usersTable.firstName,
+        lastName: usersTable.lastName
+      }).from(usersTable)
+      .where(eq(usersTable.userType, 'founder'));
+
+      // Mock founder activity data
+      const founderActivity = campaigns.slice(0, 5).map((campaign, index) => {
+        const founder = founders.find(f => f.id === campaign.founderId);
+        return {
+          founderName: founder ? `${founder.firstName} ${founder.lastName}` : 'Unknown Founder',
+          campaignTitle: campaign.companyName,
+          emailsSent: Math.floor(Math.random() * 200) + 50,
+          openRate: Math.floor(Math.random() * 50) + 25
+        };
+      });
+
+      res.json(founderActivity);
+    } catch (error) {
+      console.error('Error fetching founder activity:', error);
+      res.status(500).json({ message: 'Failed to fetch founder activity' });
+    }
+  });
+
+  app.get("/api/admin/top-campaigns", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.userType !== 'admin') {
+      return res.status(401).json({ message: "Admin access required" });
+    }
+
+    try {
+      const { period = '7days' } = req.query;
+      
+      // Get campaigns with founder info
+      const campaigns = await db.select({
+        id: campaignsTable.id,
+        companyName: campaignsTable.companyName,
+        founderId: campaignsTable.founderId
+      }).from(campaignsTable)
+      .limit(10);
+
+      const founders = await db.select({
+        id: usersTable.id,
+        firstName: usersTable.firstName,
+        lastName: usersTable.lastName
+      }).from(usersTable)
+      .where(eq(usersTable.userType, 'founder'));
+
+      // Mock campaign performance data
+      const topCampaigns = campaigns.map((campaign, index) => {
+        const founder = founders.find(f => f.id === campaign.founderId);
+        return {
+          campaignTitle: campaign.companyName,
+          founderName: founder ? `${founder.firstName} ${founder.lastName}` : 'Unknown Founder',
+          emailsSent: Math.floor(Math.random() * 300) + 100,
+          openRate: Math.floor(Math.random() * 60) + 20
+        };
+      }).sort((a, b) => b.openRate - a.openRate).slice(0, 5);
+
+      res.json(topCampaigns);
+    } catch (error) {
+      console.error('Error fetching top campaigns:', error);
+      res.status(500).json({ message: 'Failed to fetch top campaigns' });
+    }
+  });
+
   return httpServer;
 }

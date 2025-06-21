@@ -174,6 +174,12 @@ export default function AdminDashboard() {
   const [platformSettings, setPlatformSettings] = useState<any>({});
   const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
 
+  // Reports and analytics state
+  const [selectedPeriod, setSelectedPeriod] = useState('7days');
+  const [emailAnalytics, setEmailAnalytics] = useState<any>({});
+  const [founderActivity, setFounderActivity] = useState<any[]>([]);
+  const [topCampaigns, setTopCampaigns] = useState<any[]>([]);
+
   // Withdrawal management state
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
   const [transactionStats, setTransactionStats] = useState<any>({});
@@ -186,6 +192,60 @@ export default function AdminDashboard() {
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Reports export function
+  const handleExportReport = (reportType: string) => {
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `fundry-${reportType}-${selectedPeriod}-${timestamp}.json`;
+    
+    let reportData = {};
+    
+    switch (reportType) {
+      case 'email-summary':
+        reportData = {
+          period: selectedPeriod,
+          analytics: emailAnalytics,
+          generatedAt: new Date().toISOString()
+        };
+        break;
+      case 'founder-activity':
+        reportData = {
+          period: selectedPeriod,
+          founderActivity: founderActivity,
+          generatedAt: new Date().toISOString()
+        };
+        break;
+      case 'campaign-performance':
+        reportData = {
+          period: selectedPeriod,
+          topCampaigns: topCampaigns,
+          generatedAt: new Date().toISOString()
+        };
+        break;
+      case 'investor-engagement':
+        reportData = {
+          period: selectedPeriod,
+          engagement: emailAnalytics,
+          generatedAt: new Date().toISOString()
+        };
+        break;
+    }
+
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Report Downloaded",
+      description: `${reportType} report has been downloaded successfully.`,
+    });
+  };
 
   // User management mutations
   const updateUserMutation = useMutation({
@@ -690,6 +750,41 @@ export default function AdminDashboard() {
       });
     }
   }, [withdrawalSettingsData]);
+
+  // Reports tab data fetching
+  const { data: emailAnalyticsData, isLoading: isLoadingEmailAnalytics } = useQuery({
+    queryKey: ['/api/admin/email-analytics', selectedPeriod],
+    enabled: !!adminUser && activeTab === "reports",
+  });
+
+  const { data: founderActivityData, isLoading: isLoadingFounderActivity } = useQuery({
+    queryKey: ['/api/admin/founder-activity', selectedPeriod],
+    enabled: !!adminUser && activeTab === "reports",
+  });
+
+  const { data: topCampaignsData, isLoading: isLoadingTopCampaigns } = useQuery({
+    queryKey: ['/api/admin/top-campaigns', selectedPeriod],
+    enabled: !!adminUser && activeTab === "reports",
+  });
+
+  // Update local state when data changes
+  useEffect(() => {
+    if (emailAnalyticsData) {
+      setEmailAnalytics(emailAnalyticsData);
+    }
+  }, [emailAnalyticsData]);
+
+  useEffect(() => {
+    if (founderActivityData) {
+      setFounderActivity(founderActivityData);
+    }
+  }, [founderActivityData]);
+
+  useEffect(() => {
+    if (topCampaignsData) {
+      setTopCampaigns(topCampaignsData);
+    }
+  }, [topCampaignsData]);
 
   const filteredUsers = useMemo(() => {
     if (!users || !userSearchQuery) return [];

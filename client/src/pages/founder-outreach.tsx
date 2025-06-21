@@ -112,6 +112,7 @@ export default function FounderOutreach() {
     displayName: "",
     signature: ""
   });
+  const [isEmailSettingsSaved, setIsEmailSettingsSaved] = useState(false);
 
   // Fetch email settings
   const { data: currentEmailSettings } = useQuery({
@@ -176,7 +177,7 @@ export default function FounderOutreach() {
         description: "Email settings have been updated successfully.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/founder/email-settings"] });
-      setIsSettingsOpen(false);
+      setIsEmailSettingsSaved(true);
     },
     onError: (error: any) => {
       toast({
@@ -566,13 +567,40 @@ Founder, {companyName}`
                         rows={3}
                       />
                     </div>
-                    <Button 
-                      onClick={() => saveEmailSettingsMutation.mutate(emailSettings)}
-                      disabled={saveEmailSettingsMutation.isPending}
-                      className="w-full"
-                    >
-                      {saveEmailSettingsMutation.isPending ? "Saving..." : "Save Settings"}
-                    </Button>
+                    {!isEmailSettingsSaved ? (
+                      <Button 
+                        onClick={() => saveEmailSettingsMutation.mutate(emailSettings)}
+                        disabled={saveEmailSettingsMutation.isPending}
+                        className="w-full"
+                      >
+                        {saveEmailSettingsMutation.isPending ? "Saving..." : "Save Settings"}
+                      </Button>
+                    ) : (
+                      <div className="space-y-3">
+                        <Button 
+                          disabled
+                          className="w-full bg-green-600 hover:bg-green-600 cursor-default"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Email Verified
+                        </Button>
+                        <Button 
+                          onClick={() => {
+                            setIsEmailSettingsSaved(false);
+                            setEmailSettings({
+                              verifiedEmail: "",
+                              displayName: "",
+                              signature: ""
+                            });
+                          }}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Another Email
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </DialogContent>
               </Dialog>

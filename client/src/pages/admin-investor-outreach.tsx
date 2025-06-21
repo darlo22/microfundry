@@ -68,7 +68,16 @@ export default function AdminInvestorOutreach() {
   // Fetch investor directory
   const { data: investors = [], isLoading } = useQuery({
     queryKey: ['/api/admin/investor-directory'],
-    queryFn: () => fetch('/api/admin/investor-directory').then(res => res.json())
+    queryFn: async () => {
+      const response = await fetch('/api/admin/investor-directory', {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch investors');
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    }
   });
 
   // Delete investor mutation
@@ -164,10 +173,15 @@ export default function AdminInvestorOutreach() {
     formData.append('preview', 'true');
 
     try {
-      const response = await apiRequest('/api/admin/investor-directory/preview', {
+      const response = await fetch('/api/admin/investor-directory/preview', {
         method: 'POST',
         body: formData,
+        credentials: 'include'
       });
+      
+      if (!response.ok) {
+        throw new Error('Preview failed');
+      }
       
       const data = await response.json();
       setPreviewData(data.preview || []);

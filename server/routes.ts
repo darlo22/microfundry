@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { setupAuth, requireAuth, hashPassword, comparePasswords } from "./auth";
 
 import { isAuthenticated } from "./replitAuth";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { 
   insertBusinessProfileSchema,
   insertCampaignSchema,
@@ -6134,56 +6134,53 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       }
 
       const { source = 'all', search, tags, limit = 50 } = req.query;
+      const searchTerm = search ? (search as string).toLowerCase() : '';
 
       let investors = [];
 
-      // Get admin-curated investors
+      // Use raw SQL to avoid Drizzle ORM issues
       if (source === 'all' || source === 'directory') {
-        const directoryInvestors = await db
-          .select()
-          .from(investorDirectory)
-          .where(eq(investorDirectory.isActive, true))
-          .limit(parseInt(limit as string) / 2);
-
-        investors.push(...directoryInvestors.map(inv => ({
-          ...inv,
-          source: 'directory'
-        })));
+        try {
+          const directoryQuery = `
+            SELECT id, name, email, company, location, bio, 'directory' as source
+            FROM investor_directory 
+            WHERE is_active = true
+            ${searchTerm ? `AND (LOWER(name) LIKE '%${searchTerm}%' OR LOWER(email) LIKE '%${searchTerm}%' OR LOWER(company) LIKE '%${searchTerm}%')` : ''}
+            LIMIT ${Math.floor(parseInt(limit as string) / 2)}
+          `;
+          
+          const directoryResult = await pool.query(directoryQuery);
+          investors.push(...directoryResult.rows);
+        } catch (dirError) {
+          console.error('Error fetching directory investors:', dirError);
+        }
       }
 
-      // Get platform-registered investors
       if (source === 'all' || source === 'platform') {
-        const platformInvestors = await db
-          .select({
-            id: users.id,
-            firstName: users.firstName,
-            lastName: users.lastName,
-            email: users.email,
-            company: users.company,
-            city: users.city,
-            country: users.country,
-            bio: users.bio,
-          })
-          .from(users)
-          .where(eq(users.userType, 'investor'))
-          .limit(parseInt(limit as string) / 2);
-
-        investors.push(...platformInvestors.map(inv => ({
-          ...inv,
-          name: `${inv.firstName || ''} ${inv.lastName || ''}`.trim() || inv.email,
-          location: [inv.city, inv.country].filter(Boolean).join(', '),
-          source: 'platform'
-        })));
-      }
-
-      // Apply search filter
-      if (search) {
-        const searchTerm = (search as string).toLowerCase();
-        investors = investors.filter(inv => 
-          inv.name?.toLowerCase().includes(searchTerm) ||
-          inv.email?.toLowerCase().includes(searchTerm) ||
-          inv.company?.toLowerCase().includes(searchTerm)
-        );
+        try {
+          const platformQuery = `
+            SELECT 
+              id, 
+              CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as name,
+              email,
+              company,
+              CONCAT(COALESCE(city, ''), CASE WHEN city IS NOT NULL AND country IS NOT NULL THEN ', ' ELSE '' END, COALESCE(country, '')) as location,
+              bio,
+              'platform' as source
+            FROM users 
+            WHERE user_type = 'investor'
+            ${searchTerm ? `AND (LOWER(email) LIKE '%${searchTerm}%' OR LOWER(company) LIKE '%${searchTerm}%' OR LOWER(first_name) LIKE '%${searchTerm}%' OR LOWER(last_name) LIKE '%${searchTerm}%')` : ''}
+            LIMIT ${Math.floor(parseInt(limit as string) / 2)}
+          `;
+          
+          const platformResult = await pool.query(platformQuery);
+          investors.push(...platformResult.rows.map(inv => ({
+            ...inv,
+            name: inv.name.trim() || inv.email
+          })));
+        } catch (platError) {
+          console.error('Error fetching platform investors:', platError);
+        }
       }
 
       res.json(investors);

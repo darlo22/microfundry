@@ -170,7 +170,7 @@ export default function FounderDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <Card className="mb-6 sm:mb-8 bg-slate-800 border-slate-700 shadow-xl">
+        <Card className="mb-6 sm:mb-8 bg-fundry-navy border-fundry-navy shadow-xl">
           <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20 rounded-t-lg">
             <CardTitle className="text-lg sm:text-xl font-bold text-white flex items-center">
               <TrendingUp className="mr-2 text-fundry-orange" size={24} />
@@ -181,7 +181,7 @@ export default function FounderDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Button
                 variant="outline"
-                className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-slate-700 border-2 border-slate-600 hover:border-fundry-orange hover:shadow-lg group transition-all duration-300 hover:scale-105"
+                className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-fundry-navy border-2 border-fundry-navy hover:border-fundry-orange hover:shadow-lg group transition-all duration-300 hover:scale-105"
                 onClick={() => setShowCampaignModal(true)}
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 shadow-md">
@@ -195,7 +195,7 @@ export default function FounderDashboard() {
 
               <Button
                 variant="outline"
-                className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-slate-700 border-2 border-slate-600 hover:border-fundry-navy hover:shadow-lg group transition-all duration-300 hover:scale-105"
+                className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-fundry-navy border-2 border-fundry-navy hover:border-fundry-navy hover:shadow-lg group transition-all duration-300 hover:scale-105"
                 onClick={() => setShowShareModal(true)}
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-fundry-navy to-blue-700 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 shadow-md">
@@ -241,7 +241,7 @@ export default function FounderDashboard() {
         </Card>
 
         {/* Active Campaigns */}
-        <Card className="bg-slate-800 border-slate-700 shadow-xl">
+        <Card className="bg-fundry-navy border-fundry-navy shadow-xl">
           <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20 rounded-t-lg flex flex-row items-center justify-between">
             <CardTitle className="text-lg sm:text-xl font-bold text-white flex items-center">
               <Rocket className="mr-2 text-fundry-orange" size={24} />

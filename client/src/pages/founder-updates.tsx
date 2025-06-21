@@ -73,7 +73,7 @@ export default function FounderUpdates() {
     activeCampaigns: number;
     avgViews: number;
   }>({
-    queryKey: ["/api/founder", user?.id, "update-stats"],
+    queryKey: [`/api/founder/${user?.id}/update-stats`],
     enabled: !!user?.id,
   });
 

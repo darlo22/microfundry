@@ -111,8 +111,6 @@ export default function AdminOutreachReport() {
                   Back to Admin
                 </Button>
               </Link>
-              <Separator orientation="vertical" className="h-6" />
-              <FundryLogo />
             </div>
             
             <div className="flex items-center space-x-2">

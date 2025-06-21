@@ -1,5 +1,5 @@
-const { Pool } = require('@neondatabase/serverless');
-const ws = require('ws');
+import { Pool } from '@neondatabase/serverless';
+import ws from 'ws';
 
 const neonConfig = { webSocketConstructor: ws };
 

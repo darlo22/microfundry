@@ -5243,8 +5243,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           title: notifications.title,
           message: notifications.message,
           type: notifications.type,
-          priority: notifications.priority,
-          category: notifications.category,
+          priority: sql`'medium'`.as('priority'),
+          category: sql`'general'`.as('category'),
           isRead: notifications.isRead,
           createdAt: notifications.createdAt,
         })
@@ -5254,9 +5254,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             eq(notifications.userId, founderId),
             or(
               eq(notifications.type, 'admin'),
-              eq(notifications.category, 'admin'),
-              eq(notifications.category, 'security'),
-              eq(notifications.category, 'update')
+              eq(notifications.type, 'security'),
+              eq(notifications.type, 'update')
             )
           )
         )

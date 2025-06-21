@@ -1196,19 +1196,112 @@ export default function InvestorDashboard() {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                // Generate and download SAFE agreement
+                                // Generate comprehensive SAFE agreement
                                 const safeContent = `
-SAFE AGREEMENT
+SIMPLE AGREEMENT FOR FUTURE EQUITY (SAFE)
 
-Investment Details:
-- Investor: ${user.firstName} ${user.lastName}
-- Company: ${investment.campaign?.companyName}
-- Investment Amount: $${investment.amount?.toLocaleString()}
-- Date: ${new Date(investment.createdAt).toLocaleDateString()}
-- Discount Rate: ${investment.campaign?.discountRate || 20}%
-- Valuation Cap: $${investment.campaign?.valuationCap?.toLocaleString() || 'N/A'}
+THIS CERTIFIES THAT in exchange for the payment by ${user.firstName} ${user.lastName} (the "Investor") of $${investment.amount?.toLocaleString()} (the "Purchase Amount") on or about ${new Date(investment.createdAt).toLocaleDateString()}, ${investment.campaign?.title || investment.campaign?.companyName || 'Company'}, a corporation incorporated in Delaware (the "Company"), hereby issues to the Investor this Simple Agreement for Future Equity ("SAFE").
 
-This SAFE Agreement has been digitally signed and executed.
+PARTY INFORMATION:
+
+INVESTOR:
+Name: ${user.firstName} ${user.lastName}
+Email: ${user.email}
+Investment Date: ${new Date(investment.createdAt).toLocaleDateString()}
+Investment Amount: $${investment.amount?.toLocaleString()}
+
+COMPANY:
+Name: ${investment.campaign?.title || investment.campaign?.companyName || 'Company'}
+Business Type: ${investment.campaign?.businessType || 'Corporation'}
+Location: ${investment.campaign?.country || 'United States'}
+
+INVESTMENT TERMS:
+Purchase Amount: $${investment.amount?.toLocaleString()}
+Discount Rate: ${investment.campaign?.discountRate || 20}%
+Valuation Cap: $${(investment.campaign?.valuationCap || 10000000)?.toLocaleString()}
+Date: ${new Date(investment.createdAt).toLocaleDateString()}
+
+ARTICLE 1. DEFINITIONS
+
+1.1 "Company Capitalization" means the sum, as of immediately prior to the Equity Financing, of: (1) all shares of Capital Stock (on an as-converted basis) issued and outstanding, assuming exercise or conversion of all outstanding vested and unvested options, warrants and other convertible securities, but excluding this SAFE and all other SAFEs; and (2) all shares of Capital Stock reserved and available for future grant under any equity incentive or similar plan.
+
+1.2 "Dissolution Event" means (i) a voluntary termination of operations, (ii) a general assignment for the benefit of the Company's creditors or (iii) any other liquidation, dissolution or winding up of the Company (excluding a Liquidity Event), whether voluntary or involuntary.
+
+1.3 "Equity Financing" means a bona fide transaction or series of transactions with the principal purpose of raising capital, pursuant to which the Company issues and sells Preferred Stock at a fixed pre-money valuation.
+
+1.4 "Liquidity Event" means a Change of Control or an Initial Public Offering.
+
+1.5 "SAFE" means an instrument containing a future right to shares of Capital Stock, similar in form and content to this instrument, purchased by investors for the purpose of funding the Company's business operations.
+
+ARTICLE 2. EVENTS
+
+2.1 Equity Financing. If there is an Equity Financing before the expiration or termination of this SAFE, the Company will automatically issue to the Investor a number of shares of the Stock sold in the Equity Financing equal to the Purchase Amount divided by either: (1) the Discount Price, or (2) the Conversion Price, whichever calculation results in a greater number of shares of Stock.
+
+2.2 Liquidity Event. If there is a Liquidity Event before the expiration or termination of this SAFE, the Investor will, at the Investor's option, either (i) receive a cash payment, or (ii) automatically receive from the Company a number of shares of Common Stock equal to the Purchase Amount divided by the Liquidity Price.
+
+2.3 Dissolution Event. If there is a Dissolution Event before this SAFE expires or terminates, the Investor will receive an amount equal to the Purchase Amount, due and payable to the Investor immediately prior to, or concurrent with, the consummation of the Dissolution Event.
+
+ARTICLE 3. COMPANY REPRESENTATIONS
+
+3.1 The Company is a corporation duly organized, validly existing and in good standing under the laws of its state of incorporation.
+
+3.2 The execution, delivery and performance by the Company of this SAFE is within the power of the Company and has been duly authorized.
+
+3.3 It has been duly executed by the Company and is a legal, valid and binding obligation of the Company.
+
+ARTICLE 4. INVESTOR REPRESENTATIONS
+
+4.1 The Investor has full legal capacity, power and authority to execute and deliver this SAFE and to perform its obligations hereunder.
+
+4.2 This SAFE constitutes valid and binding obligation of the Investor, enforceable in accordance with its terms.
+
+4.3 The Investor is an accredited investor as such term is defined in Rule 501 of Regulation D under the Securities Act.
+
+4.4 The Investor has been advised that this SAFE and the underlying securities have not been registered under the Securities Act, or any state securities laws.
+
+ARTICLE 5. MISCELLANEOUS
+
+5.1 Any provision of this SAFE may be amended, waived or modified only upon the written consent of the Company and the Investor.
+
+5.2 Any notice required or permitted by this SAFE will be deemed sufficient when delivered personally or by overnight courier or sent by email.
+
+5.3 The Investor is not entitled, as a holder of this SAFE, to vote or receive dividends or be deemed the holder of Capital Stock for any purpose.
+
+5.4 Neither this SAFE nor the rights contained herein may be assigned, by operation of law or otherwise, by either party without the prior written consent of the other.
+
+5.5 This SAFE and all rights and obligations hereunder are governed by the laws of the State of Delaware, without regard to conflict of law principles.
+
+ARTICLE 6. RISK DISCLOSURES
+
+THE INVESTOR ACKNOWLEDGES THAT:
+• This investment involves a high degree of risk
+• The Company may never achieve profitability or provide returns
+• There is no guarantee of liquidity events or equity conversions
+• Investment may result in total loss of capital
+• No regulatory approval has been sought or obtained
+• Past performance does not guarantee future results
+
+SIGNATURES:
+
+COMPANY: ${investment.campaign?.title || investment.campaign?.companyName || 'Company'}
+
+By: _________________________________
+Name: [Founder Name]
+Title: Chief Executive Officer
+Date: ${new Date(investment.createdAt).toLocaleDateString()}
+
+INVESTOR: ${user.firstName} ${user.lastName}
+
+By: _________________________________
+Name: ${user.firstName} ${user.lastName}
+Email: ${user.email}
+Date: ${new Date(investment.createdAt).toLocaleDateString()}
+
+This SAFE Agreement has been digitally executed and is legally binding.
+
+Fundry Platform Reference: Investment ID ${investment.id}
+Platform: https://fundry.com
+Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
                                 `.trim();
                                 
                                 const blob = new Blob([safeContent], { type: 'text/plain' });
@@ -1225,17 +1318,263 @@ This SAFE Agreement has been digitally signed and executed.
                               <Download className="h-4 w-4 mr-2" />
                               Download
                             </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                // View SAFE agreement in modal
-                                alert(`SAFE Agreement for ${investment.campaign?.companyName}\nAmount: $${investment.amount?.toLocaleString()}\nDate: ${new Date(investment.createdAt).toLocaleDateString()}`);
-                              }}
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View
-                            </Button>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50 border-2 border-orange-200/30 shadow-xl">
+                                <DialogHeader className="border-b border-orange-200/50 pb-4 mb-6">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-blue-600 rounded-full flex items-center justify-center">
+                                      <FileText className="h-5 w-5 text-white" />
+                                    </div>
+                                    <div>
+                                      <DialogTitle className="text-xl font-bold text-gray-900">
+                                        SAFE Agreement
+                                      </DialogTitle>
+                                      <DialogDescription className="text-gray-600">
+                                        Simple Agreement for Future Equity - Investment Document
+                                      </DialogDescription>
+                                    </div>
+                                  </div>
+                                </DialogHeader>
+                                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                                  <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono leading-relaxed">
+{`SIMPLE AGREEMENT FOR FUTURE EQUITY (SAFE)
+
+THIS CERTIFIES THAT in exchange for the payment by ${user.firstName} ${user.lastName} (the "Investor") of $${investment.amount?.toLocaleString()} (the "Purchase Amount") on or about ${new Date(investment.createdAt).toLocaleDateString()}, ${investment.campaign?.title || investment.campaign?.companyName || 'Company'}, a corporation incorporated in Delaware (the "Company"), hereby issues to the Investor this Simple Agreement for Future Equity ("SAFE").
+
+PARTY INFORMATION:
+
+INVESTOR:
+Name: ${user.firstName} ${user.lastName}
+Email: ${user.email}
+Investment Date: ${new Date(investment.createdAt).toLocaleDateString()}
+Investment Amount: $${investment.amount?.toLocaleString()}
+
+COMPANY:
+Name: ${investment.campaign?.title || investment.campaign?.companyName || 'Company'}
+Business Type: ${investment.campaign?.businessType || 'Corporation'}
+Location: ${investment.campaign?.country || 'United States'}
+
+INVESTMENT TERMS:
+Purchase Amount: $${investment.amount?.toLocaleString()}
+Discount Rate: ${investment.campaign?.discountRate || 20}%
+Valuation Cap: $${(investment.campaign?.valuationCap || 10000000)?.toLocaleString()}
+Date: ${new Date(investment.createdAt).toLocaleDateString()}
+
+ARTICLE 1. DEFINITIONS
+
+1.1 "Company Capitalization" means the sum, as of immediately prior to the Equity Financing, of: (1) all shares of Capital Stock (on an as-converted basis) issued and outstanding, assuming exercise or conversion of all outstanding vested and unvested options, warrants and other convertible securities, but excluding this SAFE and all other SAFEs; and (2) all shares of Capital Stock reserved and available for future grant under any equity incentive or similar plan.
+
+1.2 "Dissolution Event" means (i) a voluntary termination of operations, (ii) a general assignment for the benefit of the Company's creditors or (iii) any other liquidation, dissolution or winding up of the Company (excluding a Liquidity Event), whether voluntary or involuntary.
+
+1.3 "Equity Financing" means a bona fide transaction or series of transactions with the principal purpose of raising capital, pursuant to which the Company issues and sells Preferred Stock at a fixed pre-money valuation.
+
+1.4 "Liquidity Event" means a Change of Control or an Initial Public Offering.
+
+1.5 "SAFE" means an instrument containing a future right to shares of Capital Stock, similar in form and content to this instrument, purchased by investors for the purpose of funding the Company's business operations.
+
+ARTICLE 2. EVENTS
+
+2.1 Equity Financing. If there is an Equity Financing before the expiration or termination of this SAFE, the Company will automatically issue to the Investor a number of shares of the Stock sold in the Equity Financing equal to the Purchase Amount divided by either: (1) the Discount Price, or (2) the Conversion Price, whichever calculation results in a greater number of shares of Stock.
+
+2.2 Liquidity Event. If there is a Liquidity Event before the expiration or termination of this SAFE, the Investor will, at the Investor's option, either (i) receive a cash payment, or (ii) automatically receive from the Company a number of shares of Common Stock equal to the Purchase Amount divided by the Liquidity Price.
+
+2.3 Dissolution Event. If there is a Dissolution Event before this SAFE expires or terminates, the Investor will receive an amount equal to the Purchase Amount, due and payable to the Investor immediately prior to, or concurrent with, the consummation of the Dissolution Event.
+
+ARTICLE 3. COMPANY REPRESENTATIONS
+
+3.1 The Company is a corporation duly organized, validly existing and in good standing under the laws of its state of incorporation.
+
+3.2 The execution, delivery and performance by the Company of this SAFE is within the power of the Company and has been duly authorized.
+
+3.3 It has been duly executed by the Company and is a legal, valid and binding obligation of the Company.
+
+ARTICLE 4. INVESTOR REPRESENTATIONS
+
+4.1 The Investor has full legal capacity, power and authority to execute and deliver this SAFE and to perform its obligations hereunder.
+
+4.2 This SAFE constitutes valid and binding obligation of the Investor, enforceable in accordance with its terms.
+
+4.3 The Investor is an accredited investor as such term is defined in Rule 501 of Regulation D under the Securities Act.
+
+4.4 The Investor has been advised that this SAFE and the underlying securities have not been registered under the Securities Act, or any state securities laws.
+
+ARTICLE 5. MISCELLANEOUS
+
+5.1 Any provision of this SAFE may be amended, waived or modified only upon the written consent of the Company and the Investor.
+
+5.2 Any notice required or permitted by this SAFE will be deemed sufficient when delivered personally or by overnight courier or sent by email.
+
+5.3 The Investor is not entitled, as a holder of this SAFE, to vote or receive dividends or be deemed the holder of Capital Stock for any purpose.
+
+5.4 Neither this SAFE nor the rights contained herein may be assigned, by operation of law or otherwise, by either party without the prior written consent of the other.
+
+5.5 This SAFE and all rights and obligations hereunder are governed by the laws of the State of Delaware, without regard to conflict of law principles.
+
+ARTICLE 6. RISK DISCLOSURES
+
+THE INVESTOR ACKNOWLEDGES THAT:
+• This investment involves a high degree of risk
+• The Company may never achieve profitability or provide returns
+• There is no guarantee of liquidity events or equity conversions
+• Investment may result in total loss of capital
+• No regulatory approval has been sought or obtained
+• Past performance does not guarantee future results
+
+SIGNATURES:
+
+COMPANY: ${investment.campaign?.title || investment.campaign?.companyName || 'Company'}
+
+By: _________________________________
+Name: [Founder Name]
+Title: Chief Executive Officer
+Date: ${new Date(investment.createdAt).toLocaleDateString()}
+
+INVESTOR: ${user.firstName} ${user.lastName}
+
+By: _________________________________
+Name: ${user.firstName} ${user.lastName}
+Email: ${user.email}
+Date: ${new Date(investment.createdAt).toLocaleDateString()}
+
+This SAFE Agreement has been digitally executed and is legally binding.
+
+Fundry Platform Reference: Investment ID ${investment.id}
+Platform: https://fundry.com
+Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`}
+                                  </pre>
+                                </div>
+                                <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                      const safeContent = `SIMPLE AGREEMENT FOR FUTURE EQUITY (SAFE)
+
+THIS CERTIFIES THAT in exchange for the payment by ${user.firstName} ${user.lastName} (the "Investor") of $${investment.amount?.toLocaleString()} (the "Purchase Amount") on or about ${new Date(investment.createdAt).toLocaleDateString()}, ${investment.campaign?.title || investment.campaign?.companyName || 'Company'}, a corporation incorporated in Delaware (the "Company"), hereby issues to the Investor this Simple Agreement for Future Equity ("SAFE").
+
+PARTY INFORMATION:
+
+INVESTOR:
+Name: ${user.firstName} ${user.lastName}
+Email: ${user.email}
+Investment Date: ${new Date(investment.createdAt).toLocaleDateString()}
+Investment Amount: $${investment.amount?.toLocaleString()}
+
+COMPANY:
+Name: ${investment.campaign?.title || investment.campaign?.companyName || 'Company'}
+Business Type: ${investment.campaign?.businessType || 'Corporation'}
+Location: ${investment.campaign?.country || 'United States'}
+
+INVESTMENT TERMS:
+Purchase Amount: $${investment.amount?.toLocaleString()}
+Discount Rate: ${investment.campaign?.discountRate || 20}%
+Valuation Cap: $${(investment.campaign?.valuationCap || 10000000)?.toLocaleString()}
+Date: ${new Date(investment.createdAt).toLocaleDateString()}
+
+ARTICLE 1. DEFINITIONS
+
+1.1 "Company Capitalization" means the sum, as of immediately prior to the Equity Financing, of: (1) all shares of Capital Stock (on an as-converted basis) issued and outstanding, assuming exercise or conversion of all outstanding vested and unvested options, warrants and other convertible securities, but excluding this SAFE and all other SAFEs; and (2) all shares of Capital Stock reserved and available for future grant under any equity incentive or similar plan.
+
+1.2 "Dissolution Event" means (i) a voluntary termination of operations, (ii) a general assignment for the benefit of the Company's creditors or (iii) any other liquidation, dissolution or winding up of the Company (excluding a Liquidity Event), whether voluntary or involuntary.
+
+1.3 "Equity Financing" means a bona fide transaction or series of transactions with the principal purpose of raising capital, pursuant to which the Company issues and sells Preferred Stock at a fixed pre-money valuation.
+
+1.4 "Liquidity Event" means a Change of Control or an Initial Public Offering.
+
+1.5 "SAFE" means an instrument containing a future right to shares of Capital Stock, similar in form and content to this instrument, purchased by investors for the purpose of funding the Company's business operations.
+
+ARTICLE 2. EVENTS
+
+2.1 Equity Financing. If there is an Equity Financing before the expiration or termination of this SAFE, the Company will automatically issue to the Investor a number of shares of the Stock sold in the Equity Financing equal to the Purchase Amount divided by either: (1) the Discount Price, or (2) the Conversion Price, whichever calculation results in a greater number of shares of Stock.
+
+2.2 Liquidity Event. If there is a Liquidity Event before the expiration or termination of this SAFE, the Investor will, at the Investor's option, either (i) receive a cash payment, or (ii) automatically receive from the Company a number of shares of Common Stock equal to the Purchase Amount divided by the Liquidity Price.
+
+2.3 Dissolution Event. If there is a Dissolution Event before this SAFE expires or terminates, the Investor will receive an amount equal to the Purchase Amount, due and payable to the Investor immediately prior to, or concurrent with, the consummation of the Dissolution Event.
+
+ARTICLE 3. COMPANY REPRESENTATIONS
+
+3.1 The Company is a corporation duly organized, validly existing and in good standing under the laws of its state of incorporation.
+
+3.2 The execution, delivery and performance by the Company of this SAFE is within the power of the Company and has been duly authorized.
+
+3.3 It has been duly executed by the Company and is a legal, valid and binding obligation of the Company.
+
+ARTICLE 4. INVESTOR REPRESENTATIONS
+
+4.1 The Investor has full legal capacity, power and authority to execute and deliver this SAFE and to perform its obligations hereunder.
+
+4.2 This SAFE constitutes valid and binding obligation of the Investor, enforceable in accordance with its terms.
+
+4.3 The Investor is an accredited investor as such term is defined in Rule 501 of Regulation D under the Securities Act.
+
+4.4 The Investor has been advised that this SAFE and the underlying securities have not been registered under the Securities Act, or any state securities laws.
+
+ARTICLE 5. MISCELLANEOUS
+
+5.1 Any provision of this SAFE may be amended, waived or modified only upon the written consent of the Company and the Investor.
+
+5.2 Any notice required or permitted by this SAFE will be deemed sufficient when delivered personally or by overnight courier or sent by email.
+
+5.3 The Investor is not entitled, as a holder of this SAFE, to vote or receive dividends or be deemed the holder of Capital Stock for any purpose.
+
+5.4 Neither this SAFE nor the rights contained herein may be assigned, by operation of law or otherwise, by either party without the prior written consent of the other.
+
+5.5 This SAFE and all rights and obligations hereunder are governed by the laws of the State of Delaware, without regard to conflict of law principles.
+
+ARTICLE 6. RISK DISCLOSURES
+
+THE INVESTOR ACKNOWLEDGES THAT:
+• This investment involves a high degree of risk
+• The Company may never achieve profitability or provide returns
+• There is no guarantee of liquidity events or equity conversions
+• Investment may result in total loss of capital
+• No regulatory approval has been sought or obtained
+• Past performance does not guarantee future results
+
+SIGNATURES:
+
+COMPANY: ${investment.campaign?.title || investment.campaign?.companyName || 'Company'}
+
+By: _________________________________
+Name: [Founder Name]
+Title: Chief Executive Officer
+Date: ${new Date(investment.createdAt).toLocaleDateString()}
+
+INVESTOR: ${user.firstName} ${user.lastName}
+
+By: _________________________________
+Name: ${user.firstName} ${user.lastName}
+Email: ${user.email}
+Date: ${new Date(investment.createdAt).toLocaleDateString()}
+
+This SAFE Agreement has been digitally executed and is legally binding.
+
+Fundry Platform Reference: Investment ID ${investment.id}
+Platform: https://fundry.com
+Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+                                      
+                                      const blob = new Blob([safeContent], { type: 'text/plain' });
+                                      const url = URL.createObjectURL(blob);
+                                      const a = document.createElement('a');
+                                      a.href = url;
+                                      a.download = `SAFE_${investment.campaign?.title || investment.campaign?.companyName || 'Company'}_${investment.id}.txt`;
+                                      document.body.appendChild(a);
+                                      a.click();
+                                      document.body.removeChild(a);
+                                      URL.revokeObjectURL(url);
+                                    }}
+                                  >
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Download PDF
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
                           </div>
                         </div>
                       </div>

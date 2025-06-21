@@ -66,6 +66,51 @@ interface AuthFormData {
   confirmPassword: string;
 }
 
+// Stripe Elements Wrapper Component with error handling
+const StripeElementsWrapper = ({ stripePromise, clientSecret }: { stripePromise: Promise<any>, clientSecret: string }) => {
+  const [stripeError, setStripeError] = useState<string | null>(null);
+  const [stripeInstance, setStripeInstance] = useState<any>(null);
+
+  useEffect(() => {
+    stripePromise
+      .then((stripe) => {
+        if (stripe) {
+          setStripeInstance(stripe);
+        } else {
+          setStripeError("Stripe failed to initialize");
+        }
+      })
+      .catch((error) => {
+        console.error('Stripe loading error:', error);
+        setStripeError("Failed to load payment system");
+      });
+  }, [stripePromise]);
+
+  if (stripeError) {
+    return (
+      <div className="text-center py-4">
+        <p className="text-red-600 mb-2">{stripeError}</p>
+        <p className="text-sm text-gray-500">Please try the Naira payment option instead.</p>
+      </div>
+    );
+  }
+
+  if (!stripeInstance) {
+    return (
+      <div className="text-center py-4">
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+        <p className="text-gray-600">Loading payment system...</p>
+      </div>
+    );
+  }
+
+  return (
+    <Elements stripe={stripeInstance} options={{ clientSecret }}>
+      <StripePaymentForm />
+    </Elements>
+  );
+};
+
 export default function InvestmentModal({ isOpen, onClose, campaign, initialAmount, onAmountChange }: InvestmentModalProps) {
   const [currentStep, setCurrentStep] = useState<InvestmentStep>('amount');
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
@@ -122,10 +167,13 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     return 0;
   };
 
-  // Initialize Stripe outside component to avoid recreating on every render
+  // Initialize Stripe with proper error handling
   const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
-    ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
-    : null;
+    ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY).catch(error => {
+        console.error('Failed to load Stripe:', error);
+        return null;
+      })
+    : Promise.resolve(null);
 
   // Budpay configuration
   const BUDPAY_PUBLIC_KEY = import.meta.env.VITE_BUDPAY_PUBLIC_KEY || 'pk_test_budpay_public_key';
@@ -1640,15 +1688,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {stripePromise ? (
-                    <Elements stripe={stripePromise} options={{ clientSecret }}>
-                      <StripePaymentForm />
-                    </Elements>
-                  ) : (
-                    <div className="text-center py-4">
-                      <p className="text-red-600">Stripe payment system unavailable</p>
-                    </div>
-                  )}
+                  <StripeElementsWrapper stripePromise={stripePromise} clientSecret={clientSecret} />
                 </CardContent>
               </Card>
             )}

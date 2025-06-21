@@ -268,83 +268,83 @@ export default function FounderOutreach() {
 
   const emailTemplateVariations = [
     {
-      subject: `Investment Opportunity: {companyName} - {title}`,
+      subject: `Business Partnership Inquiry: {companyName} - {title}`,
       message: `Hi {name},
 
 I hope this email finds you well.
 
-I'm excited to share an investment opportunity with you for {companyName}, a {businessSector} startup that's revolutionizing the industry.
+I'm writing to discuss a potential business partnership with {companyName}, a {businessSector} company developing innovative solutions in our industry.
 
-🚀 **Campaign Overview:**
+📋 **Company Overview:**
 • Company: {companyName}
-• Funding Goal: {fundingGoal}
-• Minimum Investment: {minimumInvestment}
+• Funding Target: {fundingGoal}
+• Minimum Partnership: {minimumInvestment}
 • Business Focus: {businessSector}
 
-💡 **Why This Matters:**
+💡 **Our Approach:**
 {description}
 
-🔗 **View Full Campaign:** {campaignUrl}
+🔗 **View Full Documentation:** {campaignUrl}
 
-We're offering SAFE agreements with attractive terms for early investors. This is a limited-time opportunity to get in on the ground floor of what we believe will be a game-changing company.
+We're structuring partnerships through SAFE agreements with favorable terms for early participants. This represents a strategic collaboration opportunity with a company positioned for sustainable growth.
 
-I'd love to discuss this opportunity with you further. Would you be available for a brief call this week?
+I'd appreciate the opportunity to discuss this business partnership further. Would you be available for a brief call this week?
 
 Best regards,
 {signature}
 
-P.S. Feel free to review all the details, including our business plan, financials, and team information at the campaign link above.`
+P.S. Feel free to review all business details, including our operational plan, financial projections, and team information at the link above.`
     },
     {
-      subject: `Exclusive Early Investment - {companyName} Funding Round`,
+      subject: `Strategic Business Partnership - {companyName} Growth Round`,
       message: `Dear {name},
 
-I'm reaching out with an exclusive opportunity to join {companyName}'s early funding round.
+I'm reaching out to discuss a strategic business partnership with {companyName}'s current growth initiative.
 
 **About {companyName}:**
-{companyName} is disrupting the {businessSector} space with innovative solutions that address real market needs.
+{companyName} is developing innovative solutions in the {businessSector} space, addressing real market needs with proven technology.
 
-**Investment Highlights:**
-✅ Target Raise: {fundingGoal}
-✅ Minimum Entry: {minimumInvestment}
-✅ Secured via SAFE Agreement
-✅ Early Investor Benefits Available
+**Partnership Highlights:**
+✅ Target Capital: {fundingGoal}
+✅ Entry Level: {minimumInvestment}
+✅ Structured via SAFE Agreement
+✅ Strategic Collaboration Opportunities
 
-**What Sets Us Apart:**
+**Our Approach:**
 {description}
 
 **Ready to Learn More?**
-Review our complete pitch: {campaignUrl}
+Review our complete business documentation: {campaignUrl}
 
-This round is moving quickly, and we're prioritizing investors who align with our vision and can add strategic value beyond capital.
+We're moving forward with qualified partners who align with our business vision and can add strategic value beyond capital participation.
 
-Would you be interested in a 15-minute conversation to explore this opportunity?
+Would you be interested in a 15-minute conversation to explore this partnership?
 
 Best,
 {signature}`
     },
     {
-      subject: `{companyName} Seeks Strategic Investors - {businessSector} Innovation`,
+      subject: `{companyName} Seeks Strategic Partners - {businessSector} Innovation`,
       message: `Hello {name},
 
-I hope you're doing well. I'm writing to introduce {companyName} and our current funding initiative.
+I hope you're doing well. I'm writing to introduce {companyName} and our current business partnership initiative.
 
-**The Opportunity:**
-{companyName} is transforming {businessSector} through {description}
+**The Partnership:**
+{companyName} is developing solutions in {businessSector} through {description}
 
 **Key Details:**
-• Raising: {fundingGoal}
-• Investment Starting At: {minimumInvestment}
+• Target Capital: {fundingGoal}
+• Entry Level: {minimumInvestment}
 • Structure: SAFE Agreement
-• Stage: Early Growth Phase
+• Stage: Growth Phase
 
-**Why Now?**
+**Why Partner With Us?**
 The {businessSector} market is experiencing significant growth, and we're positioned to capture substantial market share with our differentiated approach.
 
 **Next Steps:**
-I invite you to review our full campaign materials at: {campaignUrl}
+I invite you to review our full business documentation at: {campaignUrl}
 
-If this aligns with your investment thesis, I'd welcome the opportunity to discuss how you could participate in our growth story.
+If this aligns with your business interests, I'd welcome the opportunity to discuss how you could participate in our growth story.
 
 Looking forward to your thoughts.
 
@@ -358,14 +358,14 @@ Regards,
       subject: `Partner with {companyName} - Transforming {businessSector}`,
       message: `Hi {name},
 
-I'm excited to connect with you about {companyName}, where we're building the next generation of {businessSector} solutions.
+I'm writing to connect with you about {companyName}, where we're building the next generation of {businessSector} solutions.
 
 **Our Mission:**
 {description}
 
-**Investment Overview:**
-💰 Funding Goal: {fundingGoal}
-🎯 Minimum Investment: {minimumInvestment}
+**Partnership Overview:**
+💰 Funding Target: {fundingGoal}
+🎯 Minimum Partnership: {minimumInvestment}
 📋 Terms: SAFE Agreement
 🚀 Use of Funds: Accelerating growth & market expansion
 
@@ -376,25 +376,25 @@ I'm excited to connect with you about {companyName}, where we're building the ne
 • Clear path to profitability
 
 **Take a Deeper Look:**
-Complete campaign details: {campaignUrl}
+Complete business documentation: {campaignUrl}
 
-I believe {companyName} represents a compelling investment opportunity, and I'd value your perspective on our approach.
+I believe {companyName} represents a compelling partnership opportunity, and I'd value your perspective on our approach.
 
 Are you available for a brief discussion this week?
 
 Best regards,
 {signature}
 
-P.S. Early investors receive additional benefits and preferred access to future rounds.`
+P.S. Early partners receive additional benefits and preferred access to future rounds.`
     },
     {
-      subject: `Investment Alert: {companyName} ({businessSector}) Now Accepting Investors`,
+      subject: `Business Partnership Alert: {companyName} ({businessSector}) Now Accepting Partners`,
       message: `{name},
 
-Quick introduction - I'm the founder of {companyName}, and we're currently raising our seed round.
+Quick introduction - I'm the founder of {companyName}, and we're currently raising our growth round.
 
 **The Bottom Line:**
-We're solving critical problems in {businessSector} and need strategic investors to scale our solution.
+We're solving critical problems in {businessSector} and need strategic partners to scale our solution.
 
 **Fast Facts:**
 → Target: {fundingGoal}
@@ -406,13 +406,13 @@ We're solving critical problems in {businessSector} and need strategic investors
 {description}
 
 **Why This Matters to You:**
-The {businessSector} market is ripe for disruption, and first-mover advantage is critical.
+The {businessSector} market is experiencing growth, and strategic positioning is critical.
 
 **Full Details Here:** {campaignUrl}
 
-I respect your time, so I'll be direct: we're looking for investors who see the potential in {businessSector} innovation and want to be part of building something significant.
+I respect your time, so I'll be direct: we're looking for partners who see the potential in {businessSector} innovation and want to be part of building something significant.
 
-Interested in a 10-minute call to explore fit?
+Interested in a 10-minute call to explore business fit?
 
 {signature}
 Founder, {companyName}`
@@ -443,7 +443,7 @@ Founder, {companyName}`
       .replace(/{fundingGoal}/g, fundingGoal)
       .replace(/{minimumInvestment}/g, minimumInvestment)
       .replace(/{campaignUrl}/g, campaignUrl)
-      .replace(/{description}/g, campaign.description ? campaign.description.substring(0, 200) + '...' : 'This innovative company is positioned for significant growth and offers an exciting opportunity for early investors.');
+      .replace(/{description}/g, campaign.description ? campaign.description.substring(0, 200) + '...' : 'This innovative company is positioned for significant growth and offers strategic partnership opportunities for business partners.');
 
     setEmailSubject(subject);
     setEmailMessage(message);

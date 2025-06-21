@@ -102,7 +102,7 @@ export default function FounderUpdates() {
   // Create update mutation
   const createUpdateMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest("/api/campaign-updates", "POST", data);
+      return apiRequest("POST", "/api/campaign-updates", data);
     },
     onSuccess: () => {
       toast({

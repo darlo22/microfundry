@@ -110,41 +110,51 @@ export default function FounderOutreach() {
   // Fetch email settings
   const { data: currentEmailSettings } = useQuery({
     queryKey: ["/api/founder/email-settings"],
-    queryFn: () => apiRequest("/api/founder/email-settings"),
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/founder/email-settings");
+      return response.json();
+    },
   });
 
   // Fetch investor directory
   const { data: investors = [], isLoading: loadingInvestors } = useQuery({
     queryKey: ["/api/founder/investor-directory", sourceFilter, searchTerm],
-    queryFn: () => apiRequest("/api/founder/investor-directory", {
-      params: { source: sourceFilter, search: searchTerm }
-    }),
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/founder/investor-directory?source=${sourceFilter}&search=${searchTerm}`);
+      return response.json();
+    },
   });
 
   // Fetch email templates
   const { data: templates = [] } = useQuery({
     queryKey: ["/api/founder/email-templates"],
-    queryFn: () => apiRequest("/api/founder/email-templates"),
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/founder/email-templates");
+      return response.json();
+    },
   });
 
   // Fetch rate limit
   const { data: rateLimit } = useQuery({
     queryKey: ["/api/founder/email-rate-limit"],
-    queryFn: () => apiRequest("/api/founder/email-rate-limit"),
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/founder/email-rate-limit");
+      return response.json();
+    },
   });
 
   // Fetch email campaigns
   const { data: campaigns = [] } = useQuery({
     queryKey: ["/api/founder/email-campaigns"],
-    queryFn: () => apiRequest("/api/founder/email-campaigns"),
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/founder/email-campaigns");
+      return response.json();
+    },
   });
 
   // Save email settings mutation
   const saveEmailSettingsMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/founder/email-settings", {
-      method: "POST",
-      body: data,
-    }),
+    mutationFn: (data: any) => apiRequest("POST", "/api/founder/email-settings", data),
     onSuccess: () => {
       toast({
         title: "Settings Saved",

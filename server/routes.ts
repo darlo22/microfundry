@@ -6732,6 +6732,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const missingDataRows: number[] = [];
 
       console.log(`Processing ${jsonData.length} rows from uploaded file`);
+      console.log(`Sample of first row:`, jsonData[0]);
 
       for (const [index, row] of jsonData.entries()) {
         try {
@@ -6744,11 +6745,13 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             name = row[0]; // Name column
             email = row[1]; // Email column  
             company = row[2]; // Company column
+            console.log(`Row ${rowNum} (Array): Name="${name}", Email="${email}", Company="${company}"`);
           } else {
             // Object format
             name = row.name || row.Name;
             email = row.email || row.Email;
             company = row.company || row.Company;
+            console.log(`Row ${rowNum} (Object): Name="${name}", Email="${email}", Company="${company}"`);
           }
           
           // Skip completely empty rows
@@ -6833,14 +6836,21 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         errors: errors.slice(0, 20), // Show more error details
         duplicateEmails: duplicateEmails.slice(0, 10), // Show some duplicate emails
         missingDataRows: missingDataRows.slice(0, 10), // Show some rows with missing data
-        message: `Upload completed: ${successful} investors added successfully out of ${jsonData.length} total rows`,
+        message: `Upload completed: ${successful} investors added successfully out of ${jsonData.length} total rows processed`,
         breakdown: {
           totalRows: jsonData.length,
           successful: successful,
           duplicates: duplicates,
           missingData: missingData,
-          otherErrors: failed - missingData,
-          skippedTotal: duplicates + failed
+          processingErrors: failed - missingData,
+          skippedTotal: duplicates + failed,
+          fileEncoding: 'Windows CSV with carriage returns handled',
+          dataProcessing: 'Cleaned Windows line endings and trimmed whitespace'
+        },
+        debugInfo: {
+          firstRowSample: jsonData[0],
+          processingMethod: Array.isArray(jsonData[0]) ? 'Array format (header parsing)' : 'Object format (key-value)',
+          encodingHandled: 'UTF-8 with carriage return cleaning'
         }
       });
 

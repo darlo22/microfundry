@@ -13,7 +13,7 @@ import { ShareCampaignSelectorModal } from "@/components/modals/share-campaign-s
 import { SafeTemplatesModal } from "@/components/modals/safe-templates-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Share, FileText, DollarSign, Rocket, Users, BarChart, TrendingUp, Settings, MessageSquare } from "lucide-react";
+import { Plus, Share, FileText, DollarSign, Rocket, Users, BarChart, TrendingUp, Settings, MessageSquare, Mail } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import type { CampaignWithStats, UserStats } from "@/lib/types";
 

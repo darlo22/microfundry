@@ -34,6 +34,175 @@ import { useLocation } from "wouter";
 import fundryLogoNew from "@assets/ChatGPT Image Jun 18, 2025, 07_16_52 AM_1750230510254.png";
 import { COUNTRIES_AND_STATES } from "@/data/countries-states";
 
+// Bank data by country
+const BANKS_BY_COUNTRY: Record<string, string[]> = {
+  "United States": [
+    "JPMorgan Chase Bank",
+    "Bank of America",
+    "Wells Fargo Bank",
+    "Citibank",
+    "U.S. Bank",
+    "PNC Bank",
+    "Goldman Sachs Bank",
+    "Truist Bank",
+    "Capital One Bank",
+    "TD Bank",
+    "Bank of New York Mellon",
+    "HSBC Bank USA",
+    "American Express Bank",
+    "Morgan Stanley Bank"
+  ],
+  "United Kingdom": [
+    "Barclays Bank",
+    "HSBC UK Bank",
+    "Lloyds Bank",
+    "NatWest Bank",
+    "Santander UK",
+    "Royal Bank of Scotland",
+    "TSB Bank",
+    "Nationwide Building Society",
+    "Metro Bank",
+    "Starling Bank",
+    "Monzo Bank",
+    "Revolut",
+    "First Direct",
+    "Halifax"
+  ],
+  "Canada": [
+    "Royal Bank of Canada (RBC)",
+    "Toronto-Dominion Bank (TD)",
+    "Bank of Nova Scotia (Scotiabank)",
+    "Bank of Montreal (BMO)",
+    "Canadian Imperial Bank of Commerce (CIBC)",
+    "National Bank of Canada",
+    "Desjardins Group",
+    "HSBC Bank Canada",
+    "Laurentian Bank",
+    "Canadian Western Bank",
+    "Tangerine Bank",
+    "President's Choice Financial"
+  ],
+  "Nigeria": [
+    "Access Bank",
+    "Zenith Bank",
+    "Guaranty Trust Bank (GTBank)",
+    "United Bank for Africa (UBA)",
+    "First Bank of Nigeria",
+    "Fidelity Bank",
+    "Ecobank Nigeria",
+    "Stanbic IBTC Bank",
+    "Sterling Bank",
+    "Union Bank of Nigeria",
+    "Wema Bank",
+    "FCMB (First City Monument Bank)",
+    "Polaris Bank",
+    "Keystone Bank",
+    "Unity Bank",
+    "Jaiz Bank",
+    "Providus Bank",
+    "Kuda Bank",
+    "Opay",
+    "PalmPay"
+  ],
+  "Australia": [
+    "Commonwealth Bank of Australia",
+    "Westpac Banking Corporation",
+    "Australia and New Zealand Banking Group (ANZ)",
+    "National Australia Bank (NAB)",
+    "Macquarie Bank",
+    "ING Bank Australia",
+    "HSBC Bank Australia",
+    "Citigroup Australia",
+    "Bank of Queensland",
+    "Bendigo and Adelaide Bank",
+    "Suncorp Bank",
+    "AMP Bank"
+  ],
+  "Germany": [
+    "Deutsche Bank",
+    "Commerzbank",
+    "DZ Bank",
+    "KfW",
+    "Landesbank Baden-Württemberg",
+    "Bayerische Landesbank",
+    "Norddeutsche Landesbank",
+    "ING-DiBa",
+    "Santander Consumer Bank",
+    "Targobank",
+    "Postbank",
+    "Comdirect Bank",
+    "Consorsbank",
+    "N26",
+    "Deutsche Kreditbank"
+  ],
+  "France": [
+    "BNP Paribas",
+    "Crédit Agricole",
+    "Société Générale",
+    "Banque Populaire",
+    "Caisse d'Épargne",
+    "Crédit Mutuel",
+    "La Banque Postale",
+    "HSBC France",
+    "ING Direct France",
+    "Boursorama Banque",
+    "Hello bank!",
+    "Crédit du Nord",
+    "LCL",
+    "Banque Palatine"
+  ],
+  "India": [
+    "State Bank of India",
+    "HDFC Bank",
+    "ICICI Bank",
+    "Punjab National Bank",
+    "Bank of Baroda",
+    "Canara Bank",
+    "Union Bank of India",
+    "Bank of India",
+    "Indian Bank",
+    "Central Bank of India",
+    "Axis Bank",
+    "Kotak Mahindra Bank",
+    "IndusInd Bank",
+    "Yes Bank",
+    "IDFC First Bank",
+    "Federal Bank",
+    "South Indian Bank",
+    "Karur Vysya Bank"
+  ],
+  "South Africa": [
+    "Standard Bank",
+    "FirstRand Bank",
+    "ABSA Bank",
+    "Nedbank",
+    "Investec Bank",
+    "Capitec Bank",
+    "African Bank",
+    "Bidvest Bank",
+    "Discovery Bank",
+    "TymeBank",
+    "Bank Zero",
+    "Ubank"
+  ],
+  "Brazil": [
+    "Banco do Brasil",
+    "Itaú Unibanco",
+    "Bradesco",
+    "Caixa Econômica Federal",
+    "Santander Brasil",
+    "BTG Pactual",
+    "Banco Safra",
+    "Banco Votorantim",
+    "Banco Original",
+    "Inter Bank",
+    "C6 Bank",
+    "Nubank",
+    "Next",
+    "Neon"
+  ]
+};
+
 // Helper function to get banking fields based on country
 const getBankingFieldsForCountry = (country: string) => {
   const countryConfig: Record<string, { fields: string[]; labels: Record<string, string> }> = {
@@ -155,6 +324,10 @@ export default function PaymentWithdrawal() {
     accountType: "checking",
     memo: "",
   });
+
+  // Bank selection state
+  const [customBankName, setCustomBankName] = useState("");
+  const [showCustomBankInput, setShowCustomBankInput] = useState(false);
 
   // KYC form state
   const [kycData, setKycData] = useState({

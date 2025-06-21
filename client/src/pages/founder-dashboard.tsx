@@ -75,7 +75,7 @@ export default function FounderDashboard() {
     retry: false,
   });
 
-  if (isLoading || !user) {
+  if (initialLoad || isLoading || !user) {
     return (
       <div className="min-h-screen bg-slate-900">
         <Navbar />

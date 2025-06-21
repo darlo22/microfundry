@@ -1345,40 +1345,41 @@ This agreement represents a binding legal contract. Both parties should seek ind
                     </div>
                   </div>
 
-                  <div className="border-t pt-6 mt-8">
-                    <h2 className="text-xl font-semibold mb-4 text-fundry-navy">SIGNATURES</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="space-y-4">
-                        <p><strong>Company:</strong> {selectedSafeAgreement.companyName}</p>
-                        <div className="border-b border-gray-300 h-8"></div>
-                        <p>Name: [Founder Name]</p>
-                        <p>Title: Chief Executive Officer</p>
-                        <p>Date: {new Date(selectedSafeAgreement.agreementDate).toLocaleDateString()}</p>
+                  <div className="border-t pt-4 sm:pt-6 mt-6 sm:mt-8">
+                    <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-fundry-navy">SIGNATURES</h2>
+                    <div className="grid grid-cols-1 gap-6 sm:gap-8">
+                      <div className="space-y-3 sm:space-y-4">
+                        <p className="text-sm sm:text-base"><strong>Company:</strong> {selectedSafeAgreement.companyName}</p>
+                        <div className="border-b border-gray-300 h-6 sm:h-8"></div>
+                        <p className="text-sm sm:text-base">Name: [Founder Name]</p>
+                        <p className="text-sm sm:text-base">Title: Chief Executive Officer</p>
+                        <p className="text-sm sm:text-base">Date: {new Date(selectedSafeAgreement.agreementDate).toLocaleDateString()}</p>
                       </div>
-                      <div className="space-y-4">
-                        <p><strong>Investor:</strong> {selectedSafeAgreement.investorName}</p>
-                        <div className="border-b border-gray-300 h-8"></div>
-                        <p>Date: {new Date(selectedSafeAgreement.agreementDate).toLocaleDateString()}</p>
+                      <div className="space-y-3 sm:space-y-4">
+                        <p className="text-sm sm:text-base"><strong>Investor:</strong> {selectedSafeAgreement.investorName}</p>
+                        <div className="border-b border-gray-300 h-6 sm:h-8"></div>
+                        <p className="text-sm sm:text-base">Date: {new Date(selectedSafeAgreement.agreementDate).toLocaleDateString()}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
-                    <p className="text-yellow-800 text-sm">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 mt-4 sm:mt-6">
+                    <p className="text-yellow-800 text-xs sm:text-sm">
                       <strong>Important:</strong> This agreement represents a binding legal contract. Both parties should seek independent legal counsel before signing.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t">
                   <Button
                     variant="outline"
                     onClick={() => setViewSafeModalOpen(false)}
+                    className="w-full sm:w-auto"
                   >
                     Close
                   </Button>
                   <Button
-                    className="bg-fundry-orange hover:bg-orange-600"
+                    className="bg-fundry-orange hover:bg-orange-600 w-full sm:w-auto"
                     onClick={() => {
                       // Generate and download complete SAFE agreement
                       const safeContent = `SIMPLE AGREEMENT FOR FUTURE EQUITY

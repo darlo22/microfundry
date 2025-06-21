@@ -6732,27 +6732,38 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const missingDataRows: number[] = [];
 
       console.log(`Processing ${jsonData.length} rows from uploaded file`);
-      console.log(`Sample of first row:`, jsonData[0]);
-
-      for (const [index, row] of jsonData.entries()) {
-        try {
-          const rowNum = index + 2; // Account for header row
-          
-          // Handle both object format and array format from CSV parsing
-          let name, email, company;
-          if (Array.isArray(row)) {
-            // Array format from header: 1 parsing
-            name = row[0]; // Name column
-            email = row[1]; // Email column  
-            company = row[2]; // Company column
-            console.log(`Row ${rowNum} (Array): Name="${name}", Email="${email}", Company="${company}"`);
-          } else {
-            // Object format
-            name = row.name || row.Name;
-            email = row.email || row.Email;
-            company = row.company || row.Company;
-            console.log(`Row ${rowNum} (Object): Name="${name}", Email="${email}", Company="${company}"`);
-          }
+      
+      // Process in larger batches with minimal logging
+      const BATCH_SIZE = 100;
+      const totalBatches = Math.ceil(jsonData.length / BATCH_SIZE);
+      
+      for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+        const start = batchIndex * BATCH_SIZE;
+        const end = Math.min(start + BATCH_SIZE, jsonData.length);
+        const batch = jsonData.slice(start, end);
+        
+        // Only log every 5th batch to reduce console spam
+        if (batchIndex % 5 === 0) {
+          console.log(`Processing batch ${batchIndex + 1}/${totalBatches} (${Math.round((batchIndex / totalBatches) * 100)}% complete)`);
+        }
+        
+        for (const [index, row] of batch.entries()) {
+          try {
+            const rowNum = start + index + 2; // Account for header row and batch offset
+            
+            // Handle both object format and array format from CSV parsing
+            let name, email, company;
+            if (Array.isArray(row)) {
+              // Array format from header: 1 parsing
+              name = row[0]; // Name column
+              email = row[1]; // Email column  
+              company = row[2]; // Company column
+            } else {
+              // Object format
+              name = row.name || row.Name;
+              email = row.email || row.Email;
+              company = row.company || row.Company;
+            }
           
           // Skip completely empty rows
           if (Array.isArray(row) && row.every(cell => !cell || cell.toString().trim() === '')) {

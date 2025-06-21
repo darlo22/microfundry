@@ -175,7 +175,7 @@ export default function FounderDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Button
                 variant="outline"
                 className="flex items-center p-4 sm:p-6 h-auto bg-slate-700 border-2 border-slate-600 hover:border-fundry-orange hover:shadow-lg group transition-all duration-300 hover:scale-105"
@@ -204,7 +204,22 @@ export default function FounderDashboard() {
                 </div>
               </Button>
 
-              <Link href="/payment-withdrawal" className="sm:col-span-2 lg:col-span-1">
+              <Link href="/founder/outreach">
+                <Button
+                  variant="outline"
+                  className="flex items-center p-4 sm:p-6 h-auto bg-gradient-to-br from-purple-50 to-violet-100 border-2 border-purple-200 hover:border-purple-500 hover:shadow-lg group w-full transition-all duration-300 hover:scale-105"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                    <Mail className="text-white" size={24} />
+                  </div>
+                  <div className="text-left flex-1">
+                    <div className="font-bold text-gray-900 group-hover:text-purple-600 transition-colors duration-300 text-sm sm:text-base">Investor Outreach</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Send personalized emails to investors</div>
+                  </div>
+                </Button>
+              </Link>
+
+              <Link href="/payment-withdrawal">
                 <Button
                   variant="outline"
                   className="flex items-center p-4 sm:p-6 h-auto bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-200 hover:border-green-500 hover:shadow-lg group w-full transition-all duration-300 hover:scale-105"

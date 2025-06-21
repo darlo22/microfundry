@@ -72,7 +72,7 @@ export default function AdminOutreachReport() {
       if (!response.ok) throw new Error('Failed to fetch analytics');
       return response.json();
     },
-    enabled: selectedPeriod !== 'custom' || (customStartDate && customEndDate),
+    enabled: selectedPeriod !== 'custom' || Boolean(customStartDate && customEndDate),
   });
 
   // Fetch campaign outreach data
@@ -83,7 +83,7 @@ export default function AdminOutreachReport() {
       if (!response.ok) throw new Error('Failed to fetch campaign data');
       return response.json();
     },
-    enabled: selectedPeriod !== 'custom' || (customStartDate && customEndDate),
+    enabled: selectedPeriod !== 'custom' || Boolean(customStartDate && customEndDate),
   });
 
   const handleExportReport = () => {

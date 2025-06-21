@@ -195,7 +195,7 @@ export default function FounderDashboard() {
 
               <Button
                 variant="outline"
-                className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-fundry-navy border-2 border-fundry-navy hover:border-fundry-navy hover:shadow-lg group transition-all duration-300 hover:scale-105"
+                className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-fundry-navy border-2 border-white hover:border-white hover:shadow-lg group transition-all duration-300 hover:scale-105"
                 onClick={() => setShowShareModal(true)}
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-fundry-navy to-blue-700 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 shadow-md">

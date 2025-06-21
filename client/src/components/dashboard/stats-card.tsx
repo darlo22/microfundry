@@ -24,7 +24,7 @@ export default function StatsCard({
   subtitle,
 }: StatsCardProps) {
   return (
-    <Card className="bg-slate-800 border-slate-700 hover:shadow-xl transition-all duration-300 shadow-lg group hover:scale-105">
+    <Card className="bg-fundry-navy border-fundry-navy hover:shadow-xl transition-all duration-300 shadow-lg group hover:scale-105">
       <CardContent className="p-4 sm:p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">

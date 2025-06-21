@@ -431,8 +431,8 @@ Founder, {companyName}`
   };
 
   const regenerateEmail = () => {
-    if (selectedCampaignId) {
-      const campaign = campaigns?.find((c: any) => c.id === selectedCampaignId);
+    if (selectedCampaignId && selectedCampaignId !== "none") {
+      const campaign = founderCampaigns.find((c: any) => c.id.toString() === selectedCampaignId);
       if (campaign) {
         const nextIndex = (currentTemplateIndex + 1) % emailTemplateVariations.length;
         generateCampaignEmail(campaign, nextIndex);
@@ -734,8 +734,7 @@ Founder, {companyName}`
                       {emailSubject && selectedCampaignId && selectedCampaignId !== "none" && (
                         <p className="text-xs text-orange-200 mt-1 flex items-center">
                           <span className="mr-1">✨</span>
-                          AI-generated draft {currentTemplateIndex + 1} of {emailTemplateVariations.length}. 
-                          Click "Regenerate Draft" for alternative versions.
+                          AI-generated campaign email draft. Click "Regenerate Draft" for alternative versions.
                         </p>
                       )}
                     </div>

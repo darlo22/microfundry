@@ -51,7 +51,7 @@ export default function FounderAnalytics() {
   });
 
   const campaignPerformance = Array.isArray(campaigns) ? (campaigns as any[]).map((campaign: any) => ({
-    name: campaign.title,
+    name: campaign.title || campaign.companyName,
     raised: parseFloat(campaign.totalRaised || "0"),
     goal: parseFloat(campaign.fundingGoal || "0"),
     investors: campaign.investorCount || 0,

@@ -259,12 +259,49 @@ export class DatabaseStorage implements IStorage {
     return campaign;
   }
 
-  async getCampaignsByFounder(founderId: string): Promise<Campaign[]> {
-    return await db
-      .select()
-      .from(campaigns)
-      .where(eq(campaigns.founderId, founderId))
-      .orderBy(desc(campaigns.createdAt));
+  async getCampaignsByFounder(founderId: string): Promise<any[]> {
+    return safeDbOperation(async () => {
+      const campaignData = await db
+        .select({
+          id: campaigns.id,
+          founderId: campaigns.founderId,
+          title: campaigns.title,
+          companyName: campaigns.companyName,
+          shortPitch: campaigns.shortPitch,
+          fundingGoal: campaigns.fundingGoal,
+          logoUrl: campaigns.logoUrl,
+          status: campaigns.status,
+          createdAt: campaigns.createdAt,
+          // Calculate investment statistics
+          totalRaised: sql<string>`COALESCE(
+            (SELECT SUM(CAST(amount AS NUMERIC)) 
+             FROM investments 
+             WHERE campaign_id = campaigns.id 
+             AND payment_status = 'completed'), 0
+          )`,
+          investorCount: sql<number>`COALESCE(
+            (SELECT COUNT(DISTINCT investor_id) 
+             FROM investments 
+             WHERE campaign_id = campaigns.id 
+             AND payment_status = 'completed'), 0
+          )`,
+          progressPercent: sql<number>`CASE 
+            WHEN campaigns.funding_goal > 0 THEN 
+              ROUND((COALESCE(
+                (SELECT SUM(CAST(amount AS NUMERIC)) 
+                 FROM investments 
+                 WHERE campaign_id = campaigns.id 
+                 AND payment_status = 'completed'), 0
+              ) / CAST(campaigns.funding_goal AS NUMERIC)) * 100, 1)
+            ELSE 0 
+          END`
+        })
+        .from(campaigns)
+        .where(eq(campaigns.founderId, founderId))
+        .orderBy(desc(campaigns.createdAt));
+
+      return campaignData;
+    }) as Promise<any[]>;
   }
 
   async getAllActiveCampaigns(): Promise<Campaign[]> {

@@ -28,6 +28,7 @@ import {
   notifications,
   campaignComments,
   campaignQuestions,
+  platformSettings,
   adminMessages,
   kycVerifications,
   withdrawalRequests,
@@ -5003,10 +5004,14 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       // Log admin activity
       await logAdminActivity(req.user.id, 'Withdrawal Management', 'Accessed withdrawal requests');
       
-      // Get withdrawal settings
+      // Get current platform settings from database
+      const settingsQuery = await db.select()
+        .from(platformSettings)
+        .where(sql`setting_key IN ('minimumWithdrawal', 'minimumGoalPercentage')`);
+      
       const withdrawalSettings = {
-        minimumWithdrawal: 25,
-        minimumGoalPercentage: 0.5, // Using lowered threshold
+        minimumWithdrawal: parseFloat(settingsQuery.find(s => s.settingKey === 'minimumWithdrawal')?.settingValue || '25'),
+        minimumGoalPercentage: parseFloat(settingsQuery.find(s => s.settingKey === 'minimumGoalPercentage')?.settingValue || '20'),
         maxWithdrawalPercentage: 80
       };
       
@@ -5178,10 +5183,14 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Get/update platform withdrawal settings
   app.get('/api/admin/withdrawal-settings', requireAdmin, async (req: any, res) => {
     try {
-      // Get current platform settings (using in-memory for now)
+      // Get current platform settings from database
+      const settingsQuery = await db.select()
+        .from(platformSettings)
+        .where(sql`setting_key IN ('minimumWithdrawal', 'minimumGoalPercentage')`);
+      
       const settings = {
-        minimumWithdrawal: 25,
-        minimumGoalPercentage: 0.5, // Temporarily lowered to allow the existing withdrawal request
+        minimumWithdrawal: parseFloat(settingsQuery.find(s => s.settingKey === 'minimumWithdrawal')?.settingValue || '25'),
+        minimumGoalPercentage: parseFloat(settingsQuery.find(s => s.settingKey === 'minimumGoalPercentage')?.settingValue || '20'),
         maxWithdrawalPercentage: 80,
         withdrawalProcessingTime: '3-5 business days'
       };

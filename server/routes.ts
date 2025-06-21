@@ -6851,22 +6851,6 @@ To unsubscribe: unsubscribe@microfundry.com
 
 © 2025 Fundry. All rights reserved.
               `
-                        ${emailSettings[0].displayName}<br>
-                        ${emailSettings[0].signature || ''}
-                      </p>
-                    </div>
-                    <div style="margin-top: 20px; text-align: center;">
-                      <img src="${process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS}` : 'http://localhost:5000'}/api/email-tracking/open/${email.trackingId}/pixel.png" 
-                           width="1" height="1" style="display: block;" />
-                    </div>
-                  </div>
-                </div>
-              `,
-              headers: {
-                'X-Campaign-ID': newCampaign.id.toString(),
-                'X-Email-ID': email.id.toString(),
-                'X-Tracking-ID': email.trackingId
-              }
             });
 
             if (emailSent) {

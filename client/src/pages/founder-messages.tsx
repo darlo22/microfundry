@@ -192,17 +192,19 @@ export default function FounderMessages() {
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">
             <Link href="/founder-dashboard">
-              <Button variant="outline" size="sm" className="text-slate-300 border-slate-600 hover:bg-slate-800">
+              <Button variant="outline" size="sm" className="text-slate-900 border-slate-600 hover:bg-slate-800 hover:text-white">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard
               </Button>
             </Link>
             <div className="flex items-center gap-2">
-              <img 
-                src="/attached_assets/WhatsApp Image 2025-06-20 at 12.22.18_1750418617903.jpeg" 
-                alt="Fundry" 
-                className="h-12 w-auto"
-              />
+              <Link href="/landing">
+                <img 
+                  src="/attached_assets/WhatsApp Image 2025-06-20 at 12.22.18_1750418617903.jpeg" 
+                  alt="Fundry" 
+                  className="h-12 w-auto cursor-pointer"
+                />
+              </Link>
             </div>
           </div>
           

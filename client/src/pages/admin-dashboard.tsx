@@ -148,6 +148,12 @@ export default function AdminDashboard() {
     state: ""
   });
 
+  // Withdrawal settings state
+  const [withdrawalSettings, setWithdrawalSettings] = useState({
+    minimumWithdrawal: 25,
+    minimumGoalPercentage: 20
+  });
+
   // Message center state
   const [messageForm, setMessageForm] = useState({
     recipientType: "all",
@@ -662,6 +668,27 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/message-stats'],
     enabled: !!adminUser && activeTab === "message-center"
   });
+
+  // Withdrawal settings query
+  const { data: withdrawalSettingsData, isLoading: withdrawalSettingsLoading } = useQuery<{
+    minimumWithdrawal: number;
+    minimumGoalPercentage: number;
+    maxWithdrawalPercentage: number;
+    withdrawalProcessingTime: string;
+  }>({
+    queryKey: ['/api/admin/withdrawal-settings'],
+    enabled: !!adminUser && activeTab === "withdrawals"
+  });
+
+  // Update withdrawal settings state when data changes
+  useEffect(() => {
+    if (withdrawalSettingsData) {
+      setWithdrawalSettings({
+        minimumWithdrawal: withdrawalSettingsData.minimumWithdrawal,
+        minimumGoalPercentage: withdrawalSettingsData.minimumGoalPercentage
+      });
+    }
+  }, [withdrawalSettingsData]);
 
   const filteredUsers = useMemo(() => {
     if (!users || !userSearchQuery) return [];
@@ -1663,53 +1690,91 @@ export default function AdminDashboard() {
 
 
               {/* Withdrawal Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Settings className="w-5 h-5 mr-2 text-blue-600" />
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
                     Withdrawal Settings
                   </CardTitle>
-                  <CardDescription>Configure minimum withdrawal amounts and campaign requirements</CardDescription>
+                  <CardDescription className="text-blue-100">
+                    Configure minimum withdrawal amounts and campaign requirements
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="min-withdrawal-amount">Minimum Withdrawal Amount ($)</Label>
-                        <Input
-                          id="min-withdrawal-amount"
-                          type="number"
-                          step="1"
-                          min="1"
-                          max="1000"
-                          defaultValue={25}
-                          className="mt-1"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Minimum amount founders can withdraw</p>
-                      </div>
+                <CardContent className="space-y-4 p-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="min-withdrawal">Minimum Withdrawal Amount ($)</Label>
+                      <Input
+                        id="min-withdrawal"
+                        type="number"
+                        step="1"
+                        min="1"
+                        max="1000"
+                        value={withdrawalSettings?.minimumWithdrawal || 25}
+                        onChange={(e) => setWithdrawalSettings({
+                          ...withdrawalSettings,
+                          minimumWithdrawal: parseFloat(e.target.value)
+                        })}
+                      />
+                      <p className="text-xs text-gray-600 mt-1">Minimum amount founders can withdraw</p>
                     </div>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="min-goal-percentage">Minimum Goal Achievement (%)</Label>
-                        <Input
-                          id="min-goal-percentage"
-                          type="number"
-                          step="1"
-                          min="0"
-                          max="100"
-                          defaultValue={20}
-                          className="mt-1"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Required % of funding goal to enable withdrawals</p>
-                      </div>
+                    <div>
+                      <Label htmlFor="min-goal-percentage">Minimum Goal Achievement (%)</Label>
+                      <Input
+                        id="min-goal-percentage"
+                        type="number"
+                        step="1"
+                        min="0"
+                        max="100"
+                        value={withdrawalSettings?.minimumGoalPercentage || 20}
+                        onChange={(e) => setWithdrawalSettings({
+                          ...withdrawalSettings,
+                          minimumGoalPercentage: parseFloat(e.target.value)
+                        })}
+                      />
+                      <p className="text-xs text-gray-600 mt-1">Required % of funding goal to enable withdrawals</p>
                     </div>
                   </div>
-                  <div className="mt-6">
-                    <Button className="bg-blue-600 hover:bg-blue-700">
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Withdrawal Settings
-                    </Button>
-                  </div>
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        setIsUpdatingSettings(true);
+                        const response = await fetch('/api/admin/withdrawal-settings', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            minimumWithdrawal: withdrawalSettings?.minimumWithdrawal || 25,
+                            minimumGoalPercentage: withdrawalSettings?.minimumGoalPercentage || 20
+                          }),
+                        });
+                        
+                        if (response.ok) {
+                          toast({
+                            title: "Settings Saved",
+                            description: "Withdrawal settings have been updated successfully.",
+                          });
+                          queryClient.invalidateQueries({ queryKey: ['/api/admin/investments'] });
+                        } else {
+                          throw new Error('Failed to save settings');
+                        }
+                      } catch (error) {
+                        toast({
+                          title: "Error",
+                          description: "Failed to save withdrawal settings. Please try again.",
+                          variant: "destructive",
+                        });
+                      } finally {
+                        setIsUpdatingSettings(false);
+                      }
+                    }}
+                    disabled={isUpdatingSettings}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {isUpdatingSettings ? 'Saving...' : 'Save Withdrawal Settings'}
+                  </Button>
                 </CardContent>
               </Card>
 

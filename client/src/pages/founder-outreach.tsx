@@ -34,6 +34,7 @@ import {
   ArrowLeft,
   Plus,
   Edit,
+  Target,
   Trash2,
   Filter
 } from "lucide-react";
@@ -101,7 +102,7 @@ export default function FounderOutreach() {
   const [sourceFilter, setSourceFilter] = useState("all");
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string>("none");
   const [emailSettings, setEmailSettings] = useState({
     verifiedEmail: "",
     displayName: "",
@@ -528,7 +529,7 @@ P.S. Feel free to review all the details, including our business plan, financial
                           <SelectValue placeholder="Choose a campaign to auto-generate email content" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No Campaign Selected</SelectItem>
+                          <SelectItem value="none">No Campaign Selected</SelectItem>
                           {founderCampaigns.map((campaign: any) => (
                             <SelectItem key={campaign.id} value={campaign.id.toString()}>
                               {campaign.companyName} - {campaign.title}
@@ -536,7 +537,7 @@ P.S. Feel free to review all the details, including our business plan, financial
                           ))}
                         </SelectContent>
                       </Select>
-                      {selectedCampaignId && (
+                      {selectedCampaignId && selectedCampaignId !== "none" && (
                         <Button
                           onClick={() => {
                             const campaign = founderCampaigns.find((c: any) => c.id.toString() === selectedCampaignId);
@@ -633,6 +634,48 @@ P.S. Feel free to review all the details, including our business plan, financial
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Campaign-Specific Templates */}
+                {founderCampaigns.length > 0 && (
+                  <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                    <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                      <CardTitle className="flex items-center text-white">
+                        <Target className="h-5 w-5 mr-2 text-fundry-orange" />
+                        Campaign-Specific Templates
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-white">
+                      <div className="space-y-3">
+                        {founderCampaigns.map((campaign: any) => (
+                          <div
+                            key={campaign.id}
+                            className="border border-white/20 rounded-lg p-3 cursor-pointer hover:bg-white/20 hover:border-fundry-orange/50 transition-all duration-300"
+                            onClick={() => generateCampaignEmail(campaign)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium text-sm text-white">{campaign.companyName}</h4>
+                                <p className="text-xs text-orange-200">{campaign.title}</p>
+                                <p className="text-xs text-orange-100 mt-1">
+                                  Auto-generates investment opportunity email with campaign link
+                                </p>
+                              </div>
+                              <Badge className="bg-fundry-orange/20 text-fundry-orange border border-fundry-orange/30">
+                                Campaign
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-4 p-3 bg-fundry-orange/10 border border-fundry-orange/30 rounded-lg">
+                        <p className="text-xs text-orange-200">
+                          💡 <strong>Pro Tip:</strong> Campaign templates automatically include your campaign link, 
+                          funding details, and compelling investment messaging tailored to your specific startup.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </div>
           </TabsContent>

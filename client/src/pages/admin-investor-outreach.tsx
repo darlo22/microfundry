@@ -68,15 +68,13 @@ export default function AdminInvestorOutreach() {
   // Fetch investor directory
   const { data: investors = [], isLoading } = useQuery({
     queryKey: ['/api/admin/investor-directory'],
-    queryFn: () => apiRequest('/api/admin/investor-directory').then(res => res.json())
+    queryFn: () => fetch('/api/admin/investor-directory').then(res => res.json())
   });
 
   // Delete investor mutation
   const deleteInvestorMutation = useMutation({
     mutationFn: (investorId: number) =>
-      apiRequest(`/api/admin/investor-directory/${investorId}`, {
-        method: 'DELETE',
-      }),
+      apiRequest('DELETE', `/api/admin/investor-directory/${investorId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/investor-directory'] });
       toast({
@@ -96,7 +94,7 @@ export default function AdminInvestorOutreach() {
   // Upload investors mutation
   const uploadInvestorsMutation = useMutation({
     mutationFn: (formData: FormData) =>
-      apiRequest('/api/admin/investor-directory/upload', {
+      fetch('/api/admin/investor-directory/upload', {
         method: 'POST',
         body: formData,
       }).then(res => res.json()),

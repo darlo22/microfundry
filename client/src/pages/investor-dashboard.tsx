@@ -105,7 +105,16 @@ const StripeWrapper = ({ children, stripePromise }: { children: React.ReactNode;
 
 export default function InvestorDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [initialLoad, setInitialLoad] = useState(true);
   const { toast } = useToast();
+
+  // Always show skeleton for first 300ms to ensure immediate display
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setInitialLoad(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("portfolio");
@@ -643,8 +652,8 @@ export default function InvestorDashboard() {
   const totalPendingCommitments = pendingInvestments.length;
   const totalPaidInvestments = paidInvestments.length;
 
-  // Show immediate skeleton loading instead of waiting
-  if (isLoading) {
+  // Show skeleton loading during initial load or auth loading
+  if (initialLoad || isLoading || !user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
         <Navbar />

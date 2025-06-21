@@ -19,7 +19,16 @@ import type { CampaignWithStats, UserStats } from "@/lib/types";
 
 export default function FounderDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [initialLoad, setInitialLoad] = useState(true);
   const { toast } = useToast();
+
+  // Always show skeleton for first 300ms to ensure immediate display
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setInitialLoad(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
   const [, setLocation] = useLocation();
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -66,7 +75,7 @@ export default function FounderDashboard() {
     retry: false,
   });
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-slate-900">
         <Navbar />

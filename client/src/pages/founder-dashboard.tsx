@@ -216,8 +216,8 @@ export default function FounderDashboard() {
                     <Mail className="text-white" size={20} />
                   </div>
                   <div className="text-center">
-                    <div className="font-bold text-gray-900 group-hover:text-purple-600 transition-colors duration-300 text-xs sm:text-sm mb-1">Investor Outreach</div>
-                    <div className="text-xs text-gray-600 leading-tight">Send personalized emails to investors</div>
+                    <div className="font-bold text-fundry-navy group-hover:text-purple-600 transition-colors duration-300 text-xs sm:text-sm mb-1">Investor Outreach</div>
+                    <div className="text-xs text-fundry-navy leading-tight">Send personalized emails to investors</div>
                   </div>
                 </Button>
               </Link>

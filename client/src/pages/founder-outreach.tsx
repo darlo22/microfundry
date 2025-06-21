@@ -238,30 +238,25 @@ export default function FounderOutreach() {
     setEmailMessage(template.content);
   };
 
-  const generateCampaignEmail = (campaign: any) => {
-    const campaignUrl = `${window.location.origin}/campaign/${campaign.id}`;
-    const fundingGoal = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(campaign.fundingGoal);
-    
-    const subject = `Investment Opportunity: ${campaign.companyName} - ${campaign.title}`;
-    const message = `Hi {name},
+  const emailTemplateVariations = [
+    {
+      subject: `Investment Opportunity: {companyName} - {title}`,
+      message: `Hi {name},
 
 I hope this email finds you well.
 
-I'm excited to share an investment opportunity with you for ${campaign.companyName}, a ${campaign.businessSector} startup that's revolutionizing the industry.
+I'm excited to share an investment opportunity with you for {companyName}, a {businessSector} startup that's revolutionizing the industry.
 
 🚀 **Campaign Overview:**
-• Company: ${campaign.companyName}
-• Funding Goal: ${fundingGoal}
-• Minimum Investment: $${campaign.minimumInvestment}
-• Business Focus: ${campaign.businessSector}
+• Company: {companyName}
+• Funding Goal: {fundingGoal}
+• Minimum Investment: {minimumInvestment}
+• Business Focus: {businessSector}
 
 💡 **Why This Matters:**
-${campaign.description ? campaign.description.substring(0, 200) + '...' : 'This innovative company is positioned for significant growth and offers an exciting opportunity for early investors.'}
+{description}
 
-🔗 **View Full Campaign:** ${campaignUrl}
+🔗 **View Full Campaign:** {campaignUrl}
 
 We're offering SAFE agreements with attractive terms for early investors. This is a limited-time opportunity to get in on the ground floor of what we believe will be a game-changing company.
 
@@ -270,15 +265,179 @@ I'd love to discuss this opportunity with you further. Would you be available fo
 Best regards,
 {signature}
 
-P.S. Feel free to review all the details, including our business plan, financials, and team information at the campaign link above.`;
+P.S. Feel free to review all the details, including our business plan, financials, and team information at the campaign link above.`
+    },
+    {
+      subject: `Exclusive Early Investment - {companyName} Funding Round`,
+      message: `Dear {name},
+
+I'm reaching out with an exclusive opportunity to join {companyName}'s early funding round.
+
+**About {companyName}:**
+{companyName} is disrupting the {businessSector} space with innovative solutions that address real market needs.
+
+**Investment Highlights:**
+✅ Target Raise: {fundingGoal}
+✅ Minimum Entry: {minimumInvestment}
+✅ Secured via SAFE Agreement
+✅ Early Investor Benefits Available
+
+**What Sets Us Apart:**
+{description}
+
+**Ready to Learn More?**
+Review our complete pitch: {campaignUrl}
+
+This round is moving quickly, and we're prioritizing investors who align with our vision and can add strategic value beyond capital.
+
+Would you be interested in a 15-minute conversation to explore this opportunity?
+
+Best,
+{signature}`
+    },
+    {
+      subject: `{companyName} Seeks Strategic Investors - {businessSector} Innovation`,
+      message: `Hello {name},
+
+I hope you're doing well. I'm writing to introduce {companyName} and our current funding initiative.
+
+**The Opportunity:**
+{companyName} is transforming {businessSector} through {description}
+
+**Key Details:**
+• Raising: {fundingGoal}
+• Investment Starting At: {minimumInvestment}
+• Structure: SAFE Agreement
+• Stage: Early Growth Phase
+
+**Why Now?**
+The {businessSector} market is experiencing significant growth, and we're positioned to capture substantial market share with our differentiated approach.
+
+**Next Steps:**
+I invite you to review our full campaign materials at: {campaignUrl}
+
+If this aligns with your investment thesis, I'd welcome the opportunity to discuss how you could participate in our growth story.
+
+Looking forward to your thoughts.
+
+Regards,
+{signature}
+
+---
+{companyName} | Building the Future of {businessSector}`
+    },
+    {
+      subject: `Partner with {companyName} - Transforming {businessSector}`,
+      message: `Hi {name},
+
+I'm excited to connect with you about {companyName}, where we're building the next generation of {businessSector} solutions.
+
+**Our Mission:**
+{description}
+
+**Investment Overview:**
+💰 Funding Goal: {fundingGoal}
+🎯 Minimum Investment: {minimumInvestment}
+📋 Terms: SAFE Agreement
+🚀 Use of Funds: Accelerating growth & market expansion
+
+**Why {companyName}?**
+• Experienced founding team
+• Proven market demand
+• Scalable business model
+• Clear path to profitability
+
+**Take a Deeper Look:**
+Complete campaign details: {campaignUrl}
+
+I believe {companyName} represents a compelling investment opportunity, and I'd value your perspective on our approach.
+
+Are you available for a brief discussion this week?
+
+Best regards,
+{signature}
+
+P.S. Early investors receive additional benefits and preferred access to future rounds.`
+    },
+    {
+      subject: `Investment Alert: {companyName} ({businessSector}) Now Accepting Investors`,
+      message: `{name},
+
+Quick introduction - I'm the founder of {companyName}, and we're currently raising our seed round.
+
+**The Bottom Line:**
+We're solving critical problems in {businessSector} and need strategic investors to scale our solution.
+
+**Fast Facts:**
+→ Target: {fundingGoal}
+→ Minimum: {minimumInvestment}
+→ Structure: SAFE
+→ Traction: [Insert key metric]
+
+**The Problem We're Solving:**
+{description}
+
+**Why This Matters to You:**
+The {businessSector} market is ripe for disruption, and first-mover advantage is critical.
+
+**Full Details Here:** {campaignUrl}
+
+I respect your time, so I'll be direct: we're looking for investors who see the potential in {businessSector} innovation and want to be part of building something significant.
+
+Interested in a 10-minute call to explore fit?
+
+{signature}
+Founder, {companyName}`
+    }
+  ];
+
+  const [currentTemplateIndex, setCurrentTemplateIndex] = useState(0);
+
+  const generateCampaignEmail = (campaign: any, templateIndex: number = 0) => {
+    const campaignUrl = `${window.location.origin}/campaign/${campaign.id}`;
+    const fundingGoal = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(campaign.fundingGoal);
+    
+    const minimumInvestment = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(campaign.minimumInvestment || 25);
+    
+    const template = emailTemplateVariations[templateIndex];
+    const subject = template.subject
+      .replace('{companyName}', campaign.companyName)
+      .replace('{title}', campaign.title)
+      .replace('{businessSector}', campaign.businessSector);
+    
+    const message = template.message
+      .replace(/{companyName}/g, campaign.companyName)
+      .replace(/{businessSector}/g, campaign.businessSector)
+      .replace(/{fundingGoal}/g, fundingGoal)
+      .replace(/{minimumInvestment}/g, minimumInvestment)
+      .replace(/{campaignUrl}/g, campaignUrl)
+      .replace(/{description}/g, campaign.description ? campaign.description.substring(0, 200) + '...' : 'This innovative company is positioned for significant growth and offers an exciting opportunity for early investors.');
 
     setEmailSubject(subject);
     setEmailMessage(message);
     setSelectedCampaignId(campaign.id);
+    setCurrentTemplateIndex(templateIndex);
+    
     toast({
       title: "Campaign Email Generated",
-      description: `Email template created for ${campaign.companyName}`,
+      description: `Email template ${templateIndex + 1} created for ${campaign.companyName}`,
     });
+  };
+
+  const regenerateEmail = () => {
+    if (selectedCampaignId) {
+      const campaign = campaigns?.find((c: any) => c.id === selectedCampaignId);
+      if (campaign) {
+        const nextIndex = (currentTemplateIndex + 1) % emailTemplateVariations.length;
+        generateCampaignEmail(campaign, nextIndex);
+      }
+    }
   };
 
   const handleSendEmails = () => {
@@ -551,7 +710,20 @@ P.S. Feel free to review all the details, including our business plan, financial
                       )}
                     </div>
                     <div>
-                      <Label htmlFor="subject" className="text-white">Subject Line</Label>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="subject" className="text-white">Subject Line</Label>
+                        {emailSubject && selectedCampaignId && selectedCampaignId !== "none" && (
+                          <Button
+                            onClick={regenerateEmail}
+                            variant="outline"
+                            size="sm"
+                            className="bg-fundry-navy/20 hover:bg-fundry-navy/30 text-white border border-fundry-navy/40 text-xs"
+                          >
+                            <RefreshCw className="h-3 w-3 mr-1" />
+                            Regenerate Draft
+                          </Button>
+                        )}
+                      </div>
                       <Input
                         id="subject"
                         value={emailSubject}
@@ -559,6 +731,13 @@ P.S. Feel free to review all the details, including our business plan, financial
                         placeholder="Partnership opportunity with {name}"
                         className="bg-white/10 border-white/20 text-white placeholder:text-orange-200"
                       />
+                      {emailSubject && selectedCampaignId && selectedCampaignId !== "none" && (
+                        <p className="text-xs text-orange-200 mt-1 flex items-center">
+                          <span className="mr-1">✨</span>
+                          AI-generated draft {currentTemplateIndex + 1} of {emailTemplateVariations.length}. 
+                          Click "Regenerate Draft" for alternative versions.
+                        </p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="message" className="text-white">Message</Label>

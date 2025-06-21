@@ -66,6 +66,8 @@ interface AuthFormData {
   confirmPassword: string;
 }
 
+
+
 // Stripe Elements Wrapper Component with error handling
 const StripeElementsWrapper = ({ stripePromise, clientSecret }: { stripePromise: Promise<any>, clientSecret: string }) => {
   const [stripeError, setStripeError] = useState<string | null>(null);
@@ -106,7 +108,100 @@ const StripeElementsWrapper = ({ stripePromise, clientSecret }: { stripePromise:
 
   return (
     <Elements stripe={stripeInstance} options={{ clientSecret }}>
-      <StripePaymentForm />
+      <div className="space-y-6">
+        {/* Back Button */}
+        <Button
+          variant="outline"
+          onClick={() => {
+            setShowStripeForm(false);
+            setClientSecret('');
+            setCardholderName('');
+          }}
+          className="mb-4"
+        >
+          ← Back to Payment Options
+        </Button>
+
+        {/* Cardholder Name Input */}
+        <div>
+          <Label htmlFor="cardholder-name">Cardholder Name</Label>
+          <Input
+            id="cardholder-name"
+            value={cardholderName}
+            onChange={(e) => setCardholderName(e.target.value)}
+            placeholder="Full name as it appears on card"
+            autoComplete="cc-name"
+          />
+        </div>
+
+        {/* Stripe Card Element */}
+        <div>
+          <Label>Card Details</Label>
+          <div className="mt-2 p-3 border border-gray-300 rounded-md">
+            <CardElement
+              options={{
+                style: {
+                  base: {
+                    fontSize: '16px',
+                    color: '#424770',
+                    '::placeholder': {
+                      color: '#aab7c4',
+                    },
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Payment Button */}
+        <Button
+          onClick={async () => {
+            if (!stripeInstance) return;
+            
+            const elements = stripeInstance.elements ? stripeInstance.elements() : null;
+            if (!elements) return;
+
+            const cardElement = elements.getElement(CardElement);
+            if (!cardElement) return;
+
+            try {
+              const { error, paymentIntent } = await stripeInstance.confirmCardPayment(clientSecret, {
+                payment_method: {
+                  card: cardElement,
+                  billing_details: {
+                    name: cardholderName,
+                  },
+                },
+              });
+
+              if (error) {
+                toast({
+                  title: "Payment Failed",
+                  description: error.message,
+                  variant: "destructive",
+                });
+              } else if (paymentIntent?.status === 'succeeded') {
+                toast({
+                  title: "Payment Successful!",
+                  description: `You have successfully invested $${selectedAmount} in ${campaign.title}`,
+                });
+                setCurrentStep('confirmation');
+              }
+            } catch (error: any) {
+              toast({
+                title: "Payment Error",
+                description: error.message,
+                variant: "destructive",
+              });
+            }
+          }}
+          disabled={!cardholderName.trim()}
+          className="w-full bg-blue-600 hover:bg-blue-700"
+        >
+          Pay ${selectedAmount}
+        </Button>
+      </div>
     </Elements>
   );
 };
@@ -205,105 +300,14 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     }
   });
 
-  // Stripe Payment Form Component
-  const StripePaymentForm = () => {
-    const stripe = useStripe();
-    const elements = useElements();
-    const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
-
-    const handlePayment = async () => {
-      if (!stripe || !elements) {
-        toast({
-          title: "Payment Error",
-          description: "Payment system is not ready. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Validate cardholder name
-      if (!cardholderName.trim()) {
-        toast({
-          title: "Missing Information",
-          description: "Please enter the cardholder name",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setIsPaymentProcessing(true);
-
-      try {
-        const cardElement = elements.getElement(CardElement);
-        if (!cardElement) {
-          throw new Error('Card element not found');
-        }
-
-        // Create payment method with Stripe Elements
-        const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
-          type: 'card',
-          card: cardElement,
-          billing_details: {
-            name: cardholderName,
-            email: user?.email,
-          },
-        });
-
-        if (paymentMethodError) {
-          throw new Error(paymentMethodError.message);
-        }
-
-        // Confirm payment intent with the payment method
-        const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-          payment_method: paymentMethod.id,
-        });
-
-        if (confirmError) {
-          console.error('Stripe payment error:', confirmError);
-          throw new Error(confirmError.message);
-        }
-
-        if (paymentIntent && paymentIntent.status === 'succeeded') {
-          // Update investment status to 'paid' on backend
-          await apiRequest('PUT', `/api/investments/${createdInvestment?.id}/status`, {
-            status: 'paid'
-          });
-
-          toast({
-            title: "Payment Successful!",
-            description: `You have successfully invested $${selectedAmount} in ${campaign.title}`,
-          });
-          
-          // Invalidate queries to refresh data
-          queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-          
-          setCurrentStep('confirmation');
-        } else {
-          throw new Error('Payment not completed');
-        }
-
-      } catch (error: any) {
-        console.error('Payment error:', error);
-        toast({
-          title: "Payment Error",
-          description: error.message || "Payment failed. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsPaymentProcessing(false);
-      }
-    };
-
-    return (
-      <div className="space-y-6">
-        <div className="bg-gradient-to-r from-orange-50 to-blue-50 p-6 rounded-lg border">
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="cardholder-name" className="text-sm font-medium text-gray-700">
-                Cardholder Name
-              </Label>
-              <Input
+  // Reset modal to payment selection function
+  const resetModalToPaymentSelection = () => {
+    setShowStripeForm(false);
+    setIsProcessing(false);
+    setIsProcessingNaira(false);
+    setCardholderName('');
+    setClientSecret('');
+  };
                 id="cardholder-name"
                 value={cardholderName}
                 onChange={(e) => setCardholderName(e.target.value)}

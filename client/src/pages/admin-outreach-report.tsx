@@ -322,19 +322,19 @@ export default function AdminOutreachReport() {
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm font-medium">Average Response Time</span>
                   <Badge variant="secondary" className="bg-fundry-navy text-white">
-                    {outreachAnalytics?.avgResponseTime || 0}h
+                    {(outreachAnalytics as any)?.avgResponseTime || 0}h
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm font-medium">Conversion to Investment</span>
                   <Badge variant="secondary" className="bg-fundry-orange text-white">
-                    {outreachAnalytics?.conversionRate || 0}%
+                    {(outreachAnalytics as any)?.conversionRate || 0}%
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm font-medium">Avg Emails per Founder</span>
                   <Badge variant="outline" className="border-fundry-navy text-fundry-navy">
-                    {outreachAnalytics?.avgEmailsPerFounder || 0}
+                    {(outreachAnalytics as any)?.avgEmailsPerFounder || 0}
                   </Badge>
                 </div>
               </div>
@@ -416,28 +416,28 @@ export default function AdminOutreachReport() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
                 <div className="text-2xl font-bold text-blue-900 mb-2">
-                  {formatNumber(outreachAnalytics?.totalEmailsSent || 0)}
+                  {formatNumber((outreachAnalytics as any)?.totalEmailsSent || 0)}
                 </div>
                 <p className="text-sm text-blue-700">Total Emails Sent</p>
               </div>
               
               <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
                 <div className="text-2xl font-bold text-green-900 mb-2">
-                  {outreachAnalytics?.openRate || 0}%
+                  {(outreachAnalytics as any)?.openRate || 0}%
                 </div>
                 <p className="text-sm text-green-700">Overall Open Rate</p>
               </div>
               
               <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
                 <div className="text-2xl font-bold text-purple-900 mb-2">
-                  {formatNumber(outreachAnalytics?.investorsReached || 0)}
+                  {formatNumber((outreachAnalytics as any)?.investorsReached || 0)}
                 </div>
                 <p className="text-sm text-purple-700">Unique Investors</p>
               </div>
               
               <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
                 <div className="text-2xl font-bold text-orange-900 mb-2">
-                  {outreachAnalytics?.responseRate || 0}%
+                  {(outreachAnalytics as any)?.responseRate || 0}%
                 </div>
                 <p className="text-sm text-orange-700">Response Rate</p>
               </div>

@@ -11,14 +11,14 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 const defaultTemplates = [
   {
-    name: "Initial Investment Inquiry",
+    name: "Initial Business Partnership Inquiry",
     category: "introduction",
-    subject: "Partnership Opportunity with {name} - {company}",
+    subject: "Partnership Discussion with {name} - {company}",
     content: `Hi {name},
 
 I hope this email finds you well. My name is [Your Name], and I'm the founder of [Your Company Name].
 
-I came across your profile and was impressed by your investment focus and experience in [relevant sector]. I believe our startup would be a great fit for your portfolio.
+I came across your profile and was impressed by your business focus and experience in [relevant sector]. I believe our company would be a great fit for strategic partnership.
 
 We're currently raising [funding amount] to [brief description of what the funding will achieve]. Here's what makes us unique:
 
@@ -26,12 +26,12 @@ We're currently raising [funding amount] to [brief description of what the fundi
 • [Key differentiator 2]  
 • [Key differentiator 3]
 
-Our traction so far:
+Our progress so far:
 - [Key metric 1]
 - [Key metric 2]
 - [Key metric 3]
 
-I'd love to share more details about our opportunity and learn about your investment criteria. Would you be open to a brief 15-minute call this week?
+I'd love to share more details about our business partnership and learn about your collaboration criteria. Would you be open to a brief 15-minute call this week?
 
 Thank you for your time and consideration.
 

@@ -106,6 +106,7 @@ export default function FounderOutreach() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>("none");
   const [currentTemplateIndex, setCurrentTemplateIndex] = useState(0);
+  const [showInvestorList, setShowInvestorList] = useState(true);
   const [emailSettings, setEmailSettings] = useState({
     verifiedEmail: "",
     displayName: "",
@@ -200,6 +201,7 @@ export default function FounderOutreach() {
       setEmailSubject("");
       setEmailMessage("");
       setEmailRecipients("");
+      setShowInvestorList(true);
       setIsComposeOpen(false);
     },
     onError: (error: any) => {
@@ -586,6 +588,7 @@ Founder, {companyName}`
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Investor Selection */}
               <div className="lg:col-span-2 space-y-6">
+                {showInvestorList && (
                 <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
                   <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
                     <CardTitle className="flex items-center text-white">
@@ -679,6 +682,7 @@ Founder, {companyName}`
                     </div>
                   </CardContent>
                 </Card>
+                )}
 
                 {/* Email Composition */}
                 <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
@@ -727,6 +731,7 @@ Founder, {companyName}`
                           onClick={() => {
                             const emails = selectedInvestors.map(inv => inv.email).join(', ');
                             setEmailRecipients(emails);
+                            setShowInvestorList(false);
                           }}
                           disabled={selectedInvestors.length === 0}
                           variant="outline"

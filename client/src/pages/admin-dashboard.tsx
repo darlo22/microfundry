@@ -3967,9 +3967,18 @@ export default function AdminDashboard() {
 
           {activeTab === "reports" && (
             <div className="space-y-6">
-              <div>
-                <h2 className="text-3xl font-bold text-fundry-navy">Reports & Analytics</h2>
-                <p className="text-gray-600">Comprehensive email outreach and campaign performance analytics</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold text-fundry-navy">Reports & Analytics</h2>
+                  <p className="text-gray-600">Comprehensive email outreach and campaign performance analytics</p>
+                </div>
+                <Button 
+                  onClick={() => window.location.href = '/admin/outreach-report'}
+                  className="bg-fundry-orange hover:bg-orange-600 text-white"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  View Detailed Outreach Report
+                </Button>
               </div>
 
               {/* Time Period Selector */}

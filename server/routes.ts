@@ -5198,8 +5198,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const { minimumWithdrawal, minimumGoalPercentage, maxWithdrawalPercentage } = req.body;
 
       // Validate settings
-      if (minimumWithdrawal < 1 || minimumWithdrawal > 1000) {
-        return res.status(400).json({ message: 'Minimum withdrawal must be between $1 and $1,000' });
+      if (minimumWithdrawal < 0 || minimumWithdrawal > 1000) {
+        return res.status(400).json({ message: 'Minimum withdrawal must be between $0 and $1,000' });
       }
 
       if (minimumGoalPercentage < 0 || minimumGoalPercentage > 100) {

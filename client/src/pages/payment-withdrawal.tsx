@@ -377,6 +377,15 @@ export default function PaymentWithdrawal() {
     enabled: !!user?.id,
   });
 
+  // Fetch platform settings to display withdrawal requirements
+  const { data: platformSettings } = useQuery({
+    queryKey: ["/api/admin/platform-settings"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/platform-settings");
+      return response.json();
+    },
+  });
+
   // Mutations
   const withdrawalMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -509,6 +518,32 @@ export default function PaymentWithdrawal() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Payment Withdrawal</h1>
           <p className="text-gray-600 mt-2">Manage your withdrawals, KYC verification, and SAFE agreements</p>
+        </div>
+
+        {/* Withdrawal Requirements Banner */}
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-blue-900 mb-2">Withdrawal Requirements</h3>
+              <div className="text-sm text-blue-800 space-y-1">
+                <p>
+                  <span className="font-medium">KYC Status:</span> {kycStatus?.status === "verified" ? "✅ Verified" : "❌ Verification Required"}
+                </p>
+                <p>
+                  <span className="font-medium">Minimum Withdrawal Amount:</span> ${platformSettings?.minWithdrawalAmount || "25.00"}
+                </p>
+                <p>
+                  <span className="font-medium">Campaign Goal Completion:</span> Minimum {platformSettings?.minCampaignGoalPercentage || "20"}% required
+                </p>
+                {kycStatus?.status !== "verified" && (
+                  <p className="text-xs mt-2 text-blue-700">
+                    Complete KYC verification below to unlock withdrawal functionality.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         <Tabs defaultValue="withdrawal" className="space-y-6">

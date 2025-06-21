@@ -5997,6 +5997,34 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Get public withdrawal settings (for banner display)
+  app.get('/api/withdrawal-settings', async (req: any, res) => {
+    try {
+      const settings = await db
+        .select({
+          minWithdrawalAmount: platformSettings.minWithdrawalAmount,
+          minCampaignGoalPercentage: platformSettings.minCampaignGoalPercentage,
+        })
+        .from(platformSettings)
+        .limit(1);
+
+      if (settings.length === 0) {
+        return res.json({
+          minWithdrawalAmount: "25.00",
+          minCampaignGoalPercentage: "20"
+        });
+      }
+
+      res.json(settings[0]);
+    } catch (error) {
+      console.error('Error fetching withdrawal settings:', error);
+      res.json({
+        minWithdrawalAmount: "25.00",
+        minCampaignGoalPercentage: "20"
+      });
+    }
+  });
+
   // ========================
   // INVESTOR OUTREACH SYSTEM
   // ========================

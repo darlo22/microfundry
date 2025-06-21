@@ -55,7 +55,12 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
   // Reset state and fetch exchange rate when modal opens
   useEffect(() => {
     if (isOpen) {
-      console.log('Payment modal opened - resetting all state');
+      console.log('Payment modal opened - debugging investment object:');
+      console.log('Investment:', investment);
+      console.log('Investment amount:', investment.amount);
+      console.log('Investment amount type:', typeof investment.amount);
+      console.log('Number conversion:', Number(investment.amount));
+      
       // Reset all state when modal opens
       setIsProcessingNaira(false);
       setIsProcessingStripe(false);
@@ -65,22 +70,27 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
       setClientSecret('');
       
       setIsLoadingRate(true);
-      convertUsdToNgn(Number(investment.amount))
+      const amountNumber = Number(investment.amount);
+      console.log('Converting amount to NGN:', amountNumber);
+      
+      convertUsdToNgn(amountNumber)
         .then(({ ngn, rate }) => {
           setNgnAmount(ngn);
           setExchangeRate(rate);
           console.log('Exchange rate loaded:', rate);
+          console.log('NGN amount set:', ngn);
         })
         .catch((error) => {
           console.warn('Failed to fetch exchange rate:', error);
           // Use fallback rate
-          const fallbackNgn = Number(investment.amount) * 1650;
+          const fallbackNgn = amountNumber * 1650;
           setNgnAmount(fallbackNgn);
           setExchangeRate({
             usdToNgn: 1650,
             source: 'Fallback',
             lastUpdated: new Date()
           });
+          console.log('Using fallback NGN amount:', fallbackNgn);
         })
         .finally(() => {
           setIsLoadingRate(false);
@@ -369,7 +379,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
           </DialogTitle>
           <div className="mt-3 space-y-1">
             <p className="text-gray-600">
-              Investment Amount: <span className="font-bold text-lg">${investment.amount}</span>
+              Investment Amount: <span className="font-bold text-lg">${investment.amount || '0'}</span>
             </p>
             {isLoadingRate ? (
               <p className="text-sm text-gray-500">
@@ -397,7 +407,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>Investment Amount:</span>
-                  <span className="font-medium">${investment.amount}</span>
+                  <span className="font-medium">${investment.amount || '0'}</span>
                 </div>
                 {ngnAmount && (
                   <div className="flex justify-between">
@@ -433,7 +443,9 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-base sm:text-lg">${investment.amount}</span>
+                  <span className="font-bold text-base sm:text-lg">
+                    ${investment.amount || '0'}
+                  </span>
                 </div>
               </Button>
 
@@ -514,7 +526,7 @@ export default function PaymentModal({ isOpen, onClose, investment }: PaymentMod
                     ) : (
                       <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                     )}
-                    {isProcessingStripe ? 'Processing...' : `Pay $${investment.amount}`}
+                    {isProcessingStripe ? 'Processing...' : `Pay $${investment.amount || '0'}`}
                   </Button>
                 </div>
               </div>

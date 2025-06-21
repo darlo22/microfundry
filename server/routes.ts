@@ -5222,7 +5222,33 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         `Updated withdrawal settings: Min: $${minimumWithdrawal}, Goal: ${minimumGoalPercentage}%`
       );
 
-      // Store settings (using in-memory for now - in production would use database)
+      // Save settings to database
+      await db.insert(platformSettings).values([
+        {
+          settingKey: 'minimumWithdrawal',
+          settingValue: minimumWithdrawal.toString(),
+          settingType: 'number',
+          description: 'Minimum amount founders can withdraw',
+          category: 'withdrawal',
+          updatedBy: req.user.id
+        },
+        {
+          settingKey: 'minimumGoalPercentage',
+          settingValue: minimumGoalPercentage.toString(),
+          settingType: 'number',
+          description: 'Required percentage of funding goal to enable withdrawals',
+          category: 'withdrawal',
+          updatedBy: req.user.id
+        }
+      ]).onConflictDoUpdate({
+        target: platformSettings.settingKey,
+        set: {
+          settingValue: sql`excluded.setting_value`,
+          updatedBy: sql`excluded.updated_by`,
+          updatedAt: sql`NOW()`
+        }
+      });
+
       res.json({
         message: 'Withdrawal settings updated successfully',
         settings: {

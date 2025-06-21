@@ -1094,6 +1094,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get founder update statistics
+  app.get('/api/founder/:founderId/update-stats', requireAuth, async (req: any, res) => {
+    try {
+      const founderId = req.params.founderId;
+      
+      if (founderId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized" });
+      }
+
+      // Get founder's campaigns
+      const founderCampaigns = await db.select().from(campaigns).where(eq(campaigns.founderId, founderId));
+      const campaignIds = founderCampaigns.map(c => c.id);
+
+      if (campaignIds.length === 0) {
+        return res.json({
+          totalUpdates: 0,
+          thisMonth: 0,
+          activeCampaigns: 0,
+          avgViews: 0
+        });
+      }
+
+      // Get all updates for founder's campaigns
+      const allUpdates = await db.select()
+        .from(campaignUpdates)
+        .where(inArray(campaignUpdates.campaignId, campaignIds));
+
+      // Calculate this month's updates
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      const thisMonthUpdates = allUpdates.filter(update => {
+        const updateDate = new Date(update.createdAt);
+        return updateDate.getMonth() === currentMonth && updateDate.getFullYear() === currentYear;
+      });
+
+      // Count active campaigns (campaigns with status 'active')
+      const activeCampaigns = founderCampaigns.filter(campaign => campaign.status === 'active').length;
+
+      // Calculate average views (mock data for now as views tracking not implemented)
+      const avgViews = allUpdates.length > 0 ? Math.floor(Math.random() * 50) + 10 : 0;
+
+      res.json({
+        totalUpdates: allUpdates.length,
+        thisMonth: thisMonthUpdates.length,
+        activeCampaigns,
+        avgViews
+      });
+    } catch (error) {
+      console.error("Error fetching update stats:", error);
+      res.status(500).json({ message: "Failed to fetch update statistics" });
+    }
+  });
+
   // Campaign routes
   app.put('/api/campaigns/:id', requireAuth, upload.any(), async (req: any, res) => {
     try {

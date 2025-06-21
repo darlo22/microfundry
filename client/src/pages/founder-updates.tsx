@@ -66,6 +66,17 @@ export default function FounderUpdates() {
     enabled: !!user?.id,
   });
 
+  // Fetch update statistics
+  const { data: updateStats = {}, isLoading: statsLoading } = useQuery<{
+    totalUpdates: number;
+    thisMonth: number; 
+    activeCampaigns: number;
+    avgViews: number;
+  }>({
+    queryKey: ["/api/founder", user?.id, "update-stats"],
+    enabled: !!user?.id,
+  });
+
   // Fetch interactions for each update
   const { data: interactions = {} } = useQuery<Record<number, any>>({
     queryKey: ["/api/campaign-updates/interactions", updates.map(u => u.id)],

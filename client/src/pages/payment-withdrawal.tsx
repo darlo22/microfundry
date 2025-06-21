@@ -28,6 +28,9 @@ import {
   Phone,
   MapPin,
   Upload,
+  Wallet,
+  Clock,
+  TrendingUp,
   Eye
 } from "lucide-react";
 import { useLocation } from "wouter";
@@ -377,13 +380,9 @@ export default function PaymentWithdrawal() {
     enabled: !!user?.id,
   });
 
-  // Fetch platform settings to display withdrawal requirements
-  const { data: platformSettings } = useQuery({
-    queryKey: ["/api/admin/platform-settings"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/admin/platform-settings");
-      return response.json();
-    },
+  // Fetch withdrawal settings for banner display
+  const { data: withdrawalSettings } = useQuery({
+    queryKey: ["/api/withdrawal-settings"],
   });
 
   // Mutations
@@ -492,94 +491,148 @@ export default function PaymentWithdrawal() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
+      {/* Modern Header */}
+      <div className="bg-gradient-to-r from-white via-orange-50/50 to-blue-50/30 shadow-lg border-b border-orange-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between h-16 sm:h-20">
+            <div className="flex items-center gap-3 sm:gap-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setLocation("/founder-dashboard")}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 sm:gap-2 text-fundry-navy hover:text-fundry-orange transition-colors duration-300 p-2 sm:p-3 rounded-xl hover:bg-orange-50"
               >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Dashboard
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">Back to Dashboard</span>
+                <span className="sm:hidden">Back</span>
               </Button>
-              <Separator orientation="vertical" className="h-6" />
-              <img src={fundryLogoNew} alt="Fundry" className="h-12" />
+              <Separator orientation="vertical" className="h-6 sm:h-8 bg-orange-200" />
+              <div className="cursor-pointer" onClick={() => setLocation("/landing")}>
+                <img src={fundryLogoNew} alt="Fundry" className="h-8 sm:h-12 hover:scale-105 transition-transform duration-300" />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Payment Withdrawal</h1>
-          <p className="text-gray-600 mt-2">Manage your withdrawals, KYC verification, and SAFE agreements</p>
-        </div>
-
-        {/* Withdrawal Requirements Banner */}
-        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
-          <div className="flex items-start space-x-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-blue-900 mb-2">Withdrawal Requirements</h3>
-              <div className="text-sm text-blue-800 space-y-1">
-                <p>
-                  <span className="font-medium">KYC Status:</span> {kycStatus?.status === "verified" ? "✅ Verified" : "❌ Verification Required"}
-                </p>
-                <p>
-                  <span className="font-medium">Minimum Withdrawal Amount:</span> ${platformSettings?.minWithdrawalAmount || "25.00"}
-                </p>
-                <p>
-                  <span className="font-medium">Campaign Goal Completion:</span> Minimum {platformSettings?.minCampaignGoalPercentage || "20"}% required
-                </p>
-                {kycStatus?.status !== "verified" && (
-                  <p className="text-xs mt-2 text-blue-700">
-                    Complete KYC verification below to unlock withdrawal functionality.
-                  </p>
-                )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Modern Page Title Section */}
+        <div className="mb-6 sm:mb-8">
+          <div className="bg-gradient-to-r from-fundry-navy via-blue-800 to-fundry-navy p-6 sm:p-8 rounded-2xl shadow-xl border border-blue-200/20">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="p-3 bg-gradient-to-r from-fundry-orange to-orange-600 rounded-xl shadow-lg">
+                <CreditCard className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Payment Withdrawal</h1>
+                <p className="text-blue-100 mt-1 text-sm sm:text-base">Manage your earnings, KYC verification, and investment documents</p>
               </div>
             </div>
           </div>
         </div>
 
-        <Tabs defaultValue="withdrawal" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="withdrawal">Withdrawal</TabsTrigger>
-            <TabsTrigger value="kyc">KYC Verification</TabsTrigger>
-            <TabsTrigger value="safe">SAFE Agreements</TabsTrigger>
+        {/* Enhanced Withdrawal Requirements Banner */}
+        <div className="mb-6 sm:mb-8">
+          <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 border-2 border-orange-200 rounded-2xl shadow-lg overflow-hidden">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-start space-x-3 sm:space-x-4">
+                <div className="p-2 bg-gradient-to-r from-fundry-orange to-orange-600 rounded-xl shadow-md">
+                  <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base sm:text-lg font-bold text-fundry-navy mb-3">Withdrawal Requirements</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="bg-white/70 p-3 sm:p-4 rounded-xl border border-orange-200/50">
+                      <p className="text-sm font-semibold text-fundry-navy mb-1">KYC Status</p>
+                      <p className="text-xs sm:text-sm text-gray-700">
+                        {kycStatus?.status === "verified" ? "✅ Verified" : "❌ Verification Required"}
+                      </p>
+                    </div>
+                    <div className="bg-white/70 p-3 sm:p-4 rounded-xl border border-orange-200/50">
+                      <p className="text-sm font-semibold text-fundry-navy mb-1">Minimum Amount</p>
+                      <p className="text-xs sm:text-sm text-gray-700">${withdrawalSettings?.minWithdrawalAmount || "25.00"}</p>
+                    </div>
+                    <div className="bg-white/70 p-3 sm:p-4 rounded-xl border border-orange-200/50 sm:col-span-2 lg:col-span-1">
+                      <p className="text-sm font-semibold text-fundry-navy mb-1">Campaign Goal</p>
+                      <p className="text-xs sm:text-sm text-gray-700">Min {withdrawalSettings?.minCampaignGoalPercentage || "20"}% completion</p>
+                    </div>
+                  </div>
+                  {kycStatus?.status !== "verified" && (
+                    <div className="mt-4 p-3 bg-amber-100 border border-amber-300 rounded-xl">
+                      <p className="text-xs sm:text-sm text-amber-800 font-medium">
+                        📋 Complete KYC verification below to unlock withdrawal functionality
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Tabs defaultValue="withdrawal" className="space-y-6 sm:space-y-8">
+          <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-orange-100 via-amber-100 to-orange-100 border-2 border-orange-200 rounded-2xl p-1">
+            <TabsTrigger value="withdrawal" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-600 data-[state=active]:text-white text-fundry-navy font-semibold rounded-xl transition-all duration-300">
+              Withdrawal
+            </TabsTrigger>
+            <TabsTrigger value="kyc" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-600 data-[state=active]:text-white text-fundry-navy font-semibold rounded-xl transition-all duration-300">
+              KYC Verification
+            </TabsTrigger>
+            <TabsTrigger value="safe" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fundry-orange data-[state=active]:to-orange-600 data-[state=active]:text-white text-fundry-navy font-semibold rounded-xl transition-all duration-300">
+              SAFE Agreements
+            </TabsTrigger>
           </TabsList>
 
           {/* Withdrawal Tab */}
-          <TabsContent value="withdrawal" className="space-y-6">
-            {/* Account Balance */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
-                  Account Balance
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Available Balance</p>
-                    <p className="text-2xl font-bold text-green-600">
+          <TabsContent value="withdrawal" className="space-y-6 sm:space-y-8">
+            {/* Modern Account Balance */}
+            <div className="bg-gradient-to-r from-white via-blue-50/30 to-orange-50/20 border-2 border-blue-200 rounded-2xl shadow-lg overflow-hidden">
+              <div className="bg-gradient-to-r from-fundry-navy via-blue-800 to-fundry-navy p-4 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-fundry-orange to-orange-600 rounded-xl shadow-lg">
+                    <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Account Balance</h2>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {/* Available Balance */}
+                  <div className="bg-gradient-to-br from-emerald-50 to-green-100 border-2 border-emerald-200 rounded-2xl p-4 sm:p-6 text-center shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div className="flex justify-center mb-3">
+                      <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl">
+                        <Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                      </div>
+                    </div>
+                    <p className="text-xs sm:text-sm font-semibold text-emerald-700 mb-2">Available Balance</p>
+                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-emerald-600">
                       ${withdrawalInfo?.availableBalance || "0.00"}
                     </p>
                   </div>
-                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Pending Withdrawals</p>
-                    <p className="text-2xl font-bold text-yellow-600">
+
+                  {/* Pending Withdrawals */}
+                  <div className="bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-200 rounded-2xl p-4 sm:p-6 text-center shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div className="flex justify-center mb-3">
+                      <div className="p-2 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-xl">
+                        <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                      </div>
+                    </div>
+                    <p className="text-xs sm:text-sm font-semibold text-amber-700 mb-2">Pending Withdrawals</p>
+                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-amber-600">
                       ${withdrawalInfo?.pendingWithdrawals || "0.00"}
                     </p>
                   </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Total Earnings</p>
-                    <p className="text-2xl font-bold text-blue-600">
+
+                  {/* Total Earnings */}
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-4 sm:p-6 text-center shadow-md hover:shadow-lg transition-shadow duration-300 sm:col-span-2 lg:col-span-1">
+                    <div className="flex justify-center mb-3">
+                      <div className="p-2 bg-gradient-to-r from-fundry-navy to-blue-700 rounded-xl">
+                        <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                      </div>
+                    </div>
+                    <p className="text-xs sm:text-sm font-semibold text-blue-700 mb-2">Total Earnings</p>
+                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600">
                       ${withdrawalInfo?.totalEarnings || "0.00"}
                     </p>
                   </div>

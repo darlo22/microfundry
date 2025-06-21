@@ -155,6 +155,57 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     }
   });
 
+  // Handle creating investment commitment and redirecting to dashboard
+  const handleCreateInvestment = async () => {
+    try {
+      const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
+
+      if (actualAmount < campaign.minimumInvestment) {
+        toast({
+          title: "Invalid Amount",
+          description: `Minimum investment is $${campaign.minimumInvestment}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const investmentData = {
+        campaignId: campaign.id,
+        amount: actualAmount,
+        status: 'committed',
+        paymentStatus: 'pending',
+        investorDetails: {
+          ...investorDetails,
+          signature: signatureData,
+          agreedToTerms,
+          investmentDate: new Date().toISOString()
+        }
+      };
+
+      const result = await createInvestmentMutation.mutateAsync(investmentData);
+
+      toast({
+        title: "Investment Committed!",
+        description: "Redirecting to your dashboard to complete payment...",
+      });
+
+      // Close modal and redirect to dashboard
+      onClose();
+      setLocation('/investor-dashboard');
+
+      // Clear investment context
+      localStorage.removeItem('investmentContext');
+
+    } catch (error: any) {
+      console.error('Investment creation error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create investment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Stripe Payment Form Component
   const StripePaymentForm = () => {
     const stripe = useStripe();
@@ -1570,93 +1621,36 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
               </CardContent>
             </Card>
 
-            {/* Payment Method Selection */}
+            {/* Dashboard Redirect Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-bold">💳</div>
-                Choose Payment Method
+                Complete Payment
               </h3>
               
-              {/* USD Payment Button */}
-              <Button
-                onClick={handleUSDPayment}
-                disabled={isProcessingPayment || isProcessingNaira}
-                className="w-full p-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold">$</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-base">Pay with USD</div>
-                    <div className="text-sm opacity-90">Powered by Stripe</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {isProcessingPayment ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span className="font-bold text-lg">${selectedAmount}</span>
-                  )}
-                </div>
-              </Button>
-
-              {/* NGN Payment Button */}
-              <Button
-                onClick={handleNairaPayment}
-                disabled={isProcessingPayment || isProcessingNaira || !ngnAmount}
-                className="w-full p-4 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-between rounded-lg h-auto disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold">₦</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-base">Pay with Naira</div>
-                    <div className="text-sm opacity-90">Powered by Budpay</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {isProcessingNaira ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span className="font-bold text-lg">
-                      {ngnAmount ? `₦${ngnAmount.toLocaleString('en-NG')}` : '...'}
-                    </span>
-                  )}
-                </div>
-              </Button>
-            </div>
-
-            {/* Security Notice */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-blue-900 mb-1">Secure Payment</h4>
-                  <p className="text-sm text-blue-700">
-                    Your payment information is encrypted and secure. Card details will be handled directly by the selected payment processor.
-                  </p>
-                </div>
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <p className="text-blue-800 text-sm mb-3">
+                  Your investment commitment has been created. Complete your payment from your dashboard where you can choose between USD (Stripe) or NGN (Budpay) payment options.
+                </p>
               </div>
+              
+              {/* Dashboard Redirect Button */}
+              <Button
+                onClick={() => {
+                  // Create the investment commitment first
+                  handleCreateInvestment();
+                }}
+                className="w-full p-4 bg-fundry-orange hover:bg-orange-600 text-white text-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center justify-center gap-3 rounded-lg h-auto"
+              >
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-lg">📊</span>
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-base">Proceed to Dashboard to Complete Payment</div>
+                  <div className="text-sm opacity-90">Access your pending investments</div>
+                </div>
+              </Button>
             </div>
-
-            {/* Stripe Elements form - shows when USD payment is selected */}
-            {showStripeForm && clientSecret && (
-              <Card className="border-2 border-blue-100 bg-white/90">
-                <CardHeader>
-                  <CardTitle className="text-lg text-blue-800 flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
-                    Complete USD Payment
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Elements stripe={stripePromise} options={{ clientSecret }}>
-                    <StripePaymentForm />
-                  </Elements>
-                </CardContent>
-              </Card>
-            )}
           </div>
         );
 

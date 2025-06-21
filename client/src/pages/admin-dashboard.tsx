@@ -1141,70 +1141,70 @@ export default function AdminDashboard() {
           {activeTab === "founders" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Founder Management</h2>
+                <h2 className="text-3xl font-bold text-fundry-navy">Founder Management</h2>
                 <p className="text-gray-600">Manage all founder accounts, KYC status, and campaigns</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <Card>
+                <Card className="border-l-4 border-l-fundry-orange">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Founders</CardTitle>
-                    <User className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-fundry-navy">Total Founders</CardTitle>
+                    <User className="h-4 w-4 text-fundry-orange" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats?.totalFounders || 0}</div>
-                    <p className="text-xs text-muted-foreground">
+                    <div className="text-2xl font-bold text-fundry-navy">{stats?.totalFounders || 0}</div>
+                    <p className="text-xs text-gray-600">
                       Registered founder accounts
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-l-4 border-l-fundry-navy">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-fundry-navy">Active Campaigns</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-fundry-orange" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-green-600">{stats?.activeCampaigns || 0}</div>
-                    <p className="text-xs text-muted-foreground">
+                    <div className="text-2xl font-bold text-fundry-navy">{stats?.activeCampaigns || 0}</div>
+                    <p className="text-xs text-gray-600">
                       Currently fundraising
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-l-4 border-l-fundry-orange">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">KYC Verified</CardTitle>
-                    <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-fundry-navy">KYC Verified</CardTitle>
+                    <CheckCircle className="h-4 w-4 text-fundry-orange" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-2xl font-bold text-fundry-navy">
                       {users?.filter(user => user.userType === 'founder').length || 0}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-600">
                       Verified founders
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-l-4 border-l-fundry-navy">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
-                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium text-fundry-navy">Pending Approvals</CardTitle>
+                    <AlertTriangle className="h-4 w-4 text-fundry-orange" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-orange-600">0</div>
-                    <p className="text-xs text-muted-foreground">
+                    <div className="text-2xl font-bold text-fundry-navy">0</div>
+                    <p className="text-xs text-gray-600">
                       Awaiting review
                     </p>
                   </CardContent>
                 </Card>
               </div>
 
-              <Card>
+              <Card className="border-l-4 border-l-fundry-orange">
                 <CardHeader>
-                  <CardTitle>All Founders</CardTitle>
-                  <CardDescription>Manage founder accounts and their startups</CardDescription>
+                  <CardTitle className="text-fundry-navy">All Founders</CardTitle>
+                  <CardDescription className="text-gray-600">Manage founder accounts and their startups</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {usersLoading ? (
@@ -1236,7 +1236,7 @@ export default function AdminDashboard() {
                                   Location: {user.country}
                                 </span>
                               )}
-                              <span className="text-sm font-medium text-blue-600">
+                              <span className="text-sm font-medium text-fundry-navy">
                                 Campaigns: {campaigns?.filter(c => c.id && user.id).length || 0}
                               </span>
                             </div>

@@ -162,7 +162,7 @@ export default function AdminKYCManagement() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Link href="/admin-dashboard">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="text-fundry-navy hover:bg-fundry-navy/10">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Admin Dashboard
               </Button>
@@ -171,7 +171,7 @@ export default function AdminKYCManagement() {
             <div className="flex items-center space-x-3">
               <Shield className="w-8 h-8 text-fundry-orange" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">KYC Management</h1>
+                <h1 className="text-2xl font-bold text-fundry-navy">KYC Management</h1>
                 <p className="text-sm text-gray-600">Review and approve identity verification requests</p>
               </div>
             </div>

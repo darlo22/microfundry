@@ -1242,57 +1242,55 @@ This agreement represents a binding legal contract. Both parties should seek ind
 
         {/* SAFE Agreement Viewer Modal */}
         <Dialog open={viewSafeModalOpen} onOpenChange={setViewSafeModalOpen}>
-          <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50">
-            <DialogHeader className="text-center pb-6">
-              <div className="mx-auto w-16 h-16 bg-fundry-orange rounded-full flex items-center justify-center mb-4">
-                <FileText className="h-8 w-8 text-white" />
+          <DialogContent className="w-[95vw] sm:max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white via-orange-50/70 to-blue-50/50">
+            <DialogHeader className="text-center pb-4 sm:pb-6">
+              <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-fundry-orange rounded-full flex items-center justify-center mb-3 sm:mb-4">
+                <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
               </div>
-              <DialogTitle className="text-2xl font-bold text-fundry-navy">
+              <DialogTitle className="text-xl sm:text-2xl font-bold text-fundry-navy">
                 SAFE Agreement
               </DialogTitle>
               {selectedSafeAgreement && (
-                <p className="text-gray-600 mt-2">
+                <p className="text-gray-600 mt-2 text-sm sm:text-base">
                   {selectedSafeAgreement.companyName} • ${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()} Investment
                 </p>
               )}
             </DialogHeader>
             
             {selectedSafeAgreement && (
-              <div className="bg-white rounded-lg p-8 shadow-sm font-serif">
-                <div className="text-center mb-8">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              <div className="bg-white rounded-lg p-4 sm:p-8 shadow-sm font-serif">
+                <div className="text-center mb-6 sm:mb-8">
+                  <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-4">
                     SIMPLE AGREEMENT FOR FUTURE EQUITY
                   </h1>
-                  <p className="text-lg text-gray-700">
+                  <p className="text-base sm:text-lg text-gray-700">
                     <strong>{selectedSafeAgreement.companyName}</strong>
                   </p>
                 </div>
 
-                <div className="space-y-6 text-gray-800 leading-relaxed">
+                <div className="space-y-4 sm:space-y-6 text-gray-800 leading-relaxed text-sm sm:text-base">
                   <div>
                     <p className="mb-4">
                       This Simple Agreement for Future Equity ("SAFE") is entered into on{" "}
                       <strong>{new Date(selectedSafeAgreement.agreementDate).toLocaleDateString()}</strong> between:
                     </p>
                     
-                    <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p><strong>COMPANY:</strong> {selectedSafeAgreement.companyName}</p>
-                          <p><strong>INVESTOR:</strong> {selectedSafeAgreement.investorName}</p>
-                        </div>
-                        <div>
-                          <p><strong>INVESTMENT AMOUNT:</strong> ${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()}</p>
-                          <p><strong>VALUATION CAP:</strong> ${selectedSafeAgreement.valuationCap.toLocaleString()}</p>
-                          <p><strong>DISCOUNT RATE:</strong> {selectedSafeAgreement.discountRate}%</p>
+                    <div className="bg-gray-50 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6">
+                      <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                        <div className="space-y-2">
+                          <p className="text-sm sm:text-base"><strong>COMPANY:</strong> {selectedSafeAgreement.companyName}</p>
+                          <p className="text-sm sm:text-base"><strong>INVESTOR:</strong> {selectedSafeAgreement.investorName}</p>
+                          <p className="text-sm sm:text-base"><strong>INVESTMENT AMOUNT:</strong> ${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()}</p>
+                          <p className="text-sm sm:text-base"><strong>VALUATION CAP:</strong> ${selectedSafeAgreement.valuationCap.toLocaleString()}</p>
+                          <p className="text-sm sm:text-base"><strong>DISCOUNT RATE:</strong> {selectedSafeAgreement.discountRate}%</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 1: DEFINITIONS</h2>
-                    <div className="space-y-2 ml-4">
+                    <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-fundry-navy">ARTICLE 1: DEFINITIONS</h2>
+                    <div className="space-y-1 sm:space-y-2 ml-2 sm:ml-4">
                       <p>1.1 "Company" means {selectedSafeAgreement.companyName}, a company incorporated under applicable laws.</p>
                       <p>1.2 "Investor" means {selectedSafeAgreement.investorName}.</p>
                       <p>1.3 "Purchase Amount" means ${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()}.</p>
@@ -1302,8 +1300,8 @@ This agreement represents a binding legal contract. Both parties should seek ind
                   </div>
 
                   <div>
-                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 2: INVESTMENT TERMS</h2>
-                    <div className="space-y-2 ml-4">
+                    <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-fundry-navy">ARTICLE 2: INVESTMENT TERMS</h2>
+                    <div className="space-y-1 sm:space-y-2 ml-2 sm:ml-4">
                       <p>2.1 Investment: The Investor agrees to invest ${parseFloat(selectedSafeAgreement.investmentAmount).toLocaleString()} in the Company.</p>
                       <p>2.2 Future Equity: This investment will convert to equity shares upon a qualifying financing round.</p>
                       <p>2.3 Conversion Price: The lower of (a) the Valuation Cap divided by the Company's fully-diluted shares, or (b) the Discount Rate applied to the price per share in the qualifying financing.</p>
@@ -1311,8 +1309,8 @@ This agreement represents a binding legal contract. Both parties should seek ind
                   </div>
 
                   <div>
-                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 3: CONVERSION EVENTS</h2>
-                    <div className="space-y-2 ml-4">
+                    <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-fundry-navy">ARTICLE 3: CONVERSION EVENTS</h2>
+                    <div className="space-y-1 sm:space-y-2 ml-2 sm:ml-4">
                       <p>3.1 Equity Financing: Upon a qualifying equity financing round of at least $1,000,000, this SAFE will automatically convert to the same class of shares sold in such financing.</p>
                       <p>3.2 Liquidity Event: Upon a sale, merger, or IPO, the Investor will receive the greater of (a) the Purchase Amount, or (b) the proceeds from the converted shares.</p>
                       <p>3.3 Dissolution: Upon dissolution, the Investor receives the Purchase Amount before any distributions to common shareholders.</p>
@@ -1320,8 +1318,8 @@ This agreement represents a binding legal contract. Both parties should seek ind
                   </div>
 
                   <div>
-                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 4: INVESTOR RIGHTS</h2>
-                    <div className="space-y-2 ml-4">
+                    <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-fundry-navy">ARTICLE 4: INVESTOR RIGHTS</h2>
+                    <div className="space-y-1 sm:space-y-2 ml-2 sm:ml-4">
                       <p>4.1 Information Rights: The Company will provide quarterly financial statements and annual reports.</p>
                       <p>4.2 Inspection Rights: The Investor may inspect Company books and records upon reasonable notice.</p>
                       <p>4.3 Pro Rata Rights: The Investor has the right to participate in future financing rounds pro rata to their ownership percentage.</p>
@@ -1329,8 +1327,8 @@ This agreement represents a binding legal contract. Both parties should seek ind
                   </div>
 
                   <div>
-                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 5: COMPANY REPRESENTATIONS</h2>
-                    <div className="space-y-2 ml-4">
+                    <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-fundry-navy">ARTICLE 5: COMPANY REPRESENTATIONS</h2>
+                    <div className="space-y-1 sm:space-y-2 ml-2 sm:ml-4">
                       <p>5.1 The Company is duly incorporated and in good standing.</p>
                       <p>5.2 The Company has the authority to enter into this agreement.</p>
                       <p>5.3 All material information provided to the Investor is accurate and complete.</p>
@@ -1339,8 +1337,8 @@ This agreement represents a binding legal contract. Both parties should seek ind
                   </div>
 
                   <div>
-                    <h2 className="text-xl font-semibold mb-3 text-fundry-navy">ARTICLE 6: MISCELLANEOUS</h2>
-                    <div className="space-y-2 ml-4">
+                    <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-fundry-navy">ARTICLE 6: MISCELLANEOUS</h2>
+                    <div className="space-y-1 sm:space-y-2 ml-2 sm:ml-4">
                       <p>6.1 Governing Law: This agreement is governed by the laws of the jurisdiction where the Company is incorporated.</p>
                       <p>6.2 Amendment: This agreement may only be amended in writing signed by both parties.</p>
                       <p>6.3 Severability: If any provision is invalid, the remainder of the agreement remains in effect.</p>

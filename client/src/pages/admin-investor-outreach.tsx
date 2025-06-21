@@ -359,7 +359,7 @@ export default function AdminInvestorOutreach() {
                         <p className="text-sm text-orange-200">Duplicates</p>
                       </div>
                     </div>
-                    {uploadResult.errors.length > 0 && (
+                    {uploadResult.errors && uploadResult.errors.length > 0 && (
                       <div>
                         <p className="text-sm font-medium text-red-400 mb-2">Errors:</p>
                         <ul className="text-xs text-orange-200 space-y-1">

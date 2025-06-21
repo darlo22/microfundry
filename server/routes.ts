@@ -6597,8 +6597,33 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Configure multer for Excel/CSV uploads (memory storage for buffer access)
+  const csvUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = [
+        'text/csv',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      ];
+      
+      const isValidExtension = file.originalname.endsWith('.csv') || 
+                               file.originalname.endsWith('.xlsx') || 
+                               file.originalname.endsWith('.xls');
+                               
+      if (allowedTypes.includes(file.mimetype) || isValidExtension) {
+        cb(null, true);
+      } else {
+        cb(new Error('Invalid file type. Please upload CSV or Excel files only.') as any, false);
+      }
+    }
+  });
+
   // Admin: Preview uploaded investor file
-  app.post('/api/admin/investor-directory/preview', requireAdmin, upload.single('file'), async (req: any, res) => {
+  app.post('/api/admin/investor-directory/preview', requireAdmin, csvUpload.single('file'), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
@@ -6647,7 +6672,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   // Admin: Upload investor directory from CSV/Excel
-  app.post('/api/admin/investor-directory/upload', requireAdmin, upload.single('file'), async (req: any, res) => {
+  app.post('/api/admin/investor-directory/upload', requireAdmin, csvUpload.single('file'), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });

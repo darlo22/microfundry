@@ -44,6 +44,11 @@ import {
   founderInvestorLists,
   emailRateLimiting
 } from "@shared/schema";
+
+// Create table aliases for easier reference
+const usersTable = users;
+const campaignsTable = campaigns;
+const investmentsTable = investments;
 import Stripe from "stripe";
 import fs from "fs";
 import { exec } from "child_process";

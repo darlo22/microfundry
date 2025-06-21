@@ -6608,7 +6608,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         )
         .limit(1);
 
-      const dailyLimit = 20;
+      const dailyLimit = 30;
       const used = rateLimit.length > 0 ? rateLimit[0].emailsSent : 0;
 
       res.json({
@@ -6654,9 +6654,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         .limit(1);
 
       const currentUsage = rateLimit.length > 0 ? rateLimit[0].emailsSent : 0;
-      if (currentUsage + recipients.length > 20) {
+      if (currentUsage + recipients.length > 30) {
         return res.status(400).json({ 
-          message: `Daily limit exceeded. You can send ${20 - currentUsage} more emails today.` 
+          message: `Daily limit exceeded. You can send ${30 - currentUsage} more emails today.` 
         });
       }
 

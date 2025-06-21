@@ -6047,7 +6047,79 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // EMAIL TRACKING SYSTEM
   // ========================
 
-  // Track email opens
+  // Track email opens (both POST and GET for pixel tracking)
+  app.get('/api/email-tracking/open/:trackingId/pixel.png', async (req, res) => {
+    try {
+      const { trackingId } = req.params;
+      
+      // Find the email by tracking ID
+      const email = await db
+        .select()
+        .from(outreachEmails)
+        .where(eq(outreachEmails.trackingId, trackingId))
+        .limit(1);
+
+      if (email.length > 0 && !email[0].openedAt) {
+        // Mark email as opened
+        await db
+          .update(outreachEmails)
+          .set({ 
+            openedAt: new Date(),
+            status: 'opened'
+          })
+          .where(eq(outreachEmails.id, email[0].id));
+
+        // Update campaign statistics
+        const campaignId = email[0].emailCampaignId;
+        const openedCount = await db
+          .select({ count: sql`count(*)` })
+          .from(outreachEmails)
+          .where(
+            and(
+              eq(outreachEmails.emailCampaignId, campaignId),
+              sql`opened_at IS NOT NULL`
+            )
+          );
+
+        await db
+          .update(emailCampaigns)
+          .set({ 
+            openedCount: parseInt(openedCount[0].count as string)
+          })
+          .where(eq(emailCampaigns.id, campaignId));
+      }
+
+      // Return 1x1 transparent pixel
+      const pixel = Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
+        'base64'
+      );
+      
+      res.set({
+        'Content-Type': 'image/png',
+        'Content-Length': pixel.length,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
+      res.send(pixel);
+    } catch (error) {
+      console.error('Error tracking email open:', error);
+      // Always return pixel even on error
+      const pixel = Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
+        'base64'
+      );
+      res.set({
+        'Content-Type': 'image/png',
+        'Content-Length': pixel.length
+      });
+      res.send(pixel);
+    }
+  });
+
+  // Legacy POST endpoint for email opens
   app.post('/api/email-tracking/open/:trackingId', async (req, res) => {
     try {
       const { trackingId } = req.params;
@@ -6617,9 +6689,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                       </p>
                     </div>
                     <div style="margin-top: 20px; text-align: center;">
-                      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==" 
-                           width="1" height="1" style="display: block;" 
-                           onload="fetch('${process.env.REPLIT_DOMAINS || 'http://localhost:5000'}/api/email-tracking/open/${email.trackingId}', { method: 'POST' }).catch(() => {})" />
+                      <img src="${process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS}` : 'http://localhost:5000'}/api/email-tracking/open/${email.trackingId}/pixel.png" 
+                           width="1" height="1" style="display: block;" />
                     </div>
                   </div>
                 </div>

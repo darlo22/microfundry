@@ -47,7 +47,7 @@ const updateTypeColors = {
 export function CampaignUpdatesModal({ isOpen, onClose, campaignId, campaignTitle }: CampaignUpdatesModalProps) {
   // Fetch campaign updates
   const { data: updates = [], isLoading } = useQuery<CampaignUpdate[]>({
-    queryKey: [`/api/campaign-updates/${campaignId}`],
+    queryKey: [`/api/campaign-updates/campaign/${campaignId}`],
     enabled: isOpen && !!campaignId,
   });
 

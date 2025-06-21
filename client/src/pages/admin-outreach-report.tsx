@@ -226,10 +226,10 @@ export default function AdminOutreachReport() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-900">
-                {analyticsLoading ? "..." : formatNumber(outreachAnalytics?.totalEmailsSent || 0)}
+                {analyticsLoading ? "..." : formatNumber((outreachAnalytics as any)?.totalEmailsSent || 0)}
               </div>
               <p className="text-xs text-blue-700 mt-1">
-                +{outreachAnalytics?.emailGrowthRate || 0}% from last period
+                +{(outreachAnalytics as any)?.emailGrowthRate || 0}% from last period
               </p>
             </CardContent>
           </Card>
@@ -241,10 +241,10 @@ export default function AdminOutreachReport() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-900">
-                {analyticsLoading ? "..." : formatNumber(outreachAnalytics?.totalEmailsOpened || 0)}
+                {analyticsLoading ? "..." : formatNumber((outreachAnalytics as any)?.totalEmailsOpened || 0)}
               </div>
               <p className="text-xs text-green-700 mt-1">
-                {outreachAnalytics?.openRate || 0}% open rate
+                {(outreachAnalytics as any)?.openRate || 0}% open rate
               </p>
             </CardContent>
           </Card>
@@ -256,7 +256,7 @@ export default function AdminOutreachReport() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-purple-900">
-                {analyticsLoading ? "..." : formatNumber(outreachAnalytics?.foundersCount || 0)}
+                {analyticsLoading ? "..." : formatNumber((outreachAnalytics as any)?.foundersCount || 0)}
               </div>
               <p className="text-xs text-purple-700 mt-1">
                 Sending outreach emails
@@ -271,7 +271,7 @@ export default function AdminOutreachReport() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-orange-900">
-                {analyticsLoading ? "..." : formatNumber(outreachAnalytics?.investorsReached || 0)}
+                {analyticsLoading ? "..." : formatNumber((outreachAnalytics as any)?.investorsReached || 0)}
               </div>
               <p className="text-xs text-orange-700 mt-1">
                 Unique investor contacts
@@ -286,7 +286,7 @@ export default function AdminOutreachReport() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-amber-900">
-                {analyticsLoading ? "..." : formatNumber(outreachAnalytics?.campaignsInvolved || 0)}
+                {analyticsLoading ? "..." : formatNumber((outreachAnalytics as any)?.campaignsInvolved || 0)}
               </div>
               <p className="text-xs text-amber-700 mt-1">
                 Active campaigns
@@ -301,7 +301,7 @@ export default function AdminOutreachReport() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-rose-900">
-                {analyticsLoading ? "..." : `${outreachAnalytics?.responseRate || 0}%`}
+                {analyticsLoading ? "..." : `${(outreachAnalytics as any)?.responseRate || 0}%`}
               </div>
               <p className="text-xs text-rose-700 mt-1">
                 Investor engagement

@@ -111,6 +111,9 @@ export default function FounderDashboard() {
               <Link href="/payment-withdrawal" className="text-slate-200 hover:text-white hover:bg-slate-700 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
                 Payments
               </Link>
+              <Link href="/founder/messages" className="text-slate-200 hover:text-white hover:bg-slate-700 rounded-lg px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-all duration-200 flex-1 sm:flex-initial text-center whitespace-nowrap">
+                Messages
+              </Link>
             </nav>
           </div>
         </div>

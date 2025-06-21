@@ -5121,5 +5121,359 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Message Centre API Endpoints
+  
+  // Get campaign comments for founder's campaigns
+  app.get('/api/founder/:founderId/comments', async (req: any, res) => {
+    try {
+      const { founderId } = req.params;
+      
+      if (!req.isAuthenticated() || req.user.id !== founderId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const comments = await db
+        .select({
+          id: campaignComments.id,
+          campaignId: campaignComments.campaignId,
+          userId: campaignComments.userId,
+          content: campaignComments.content,
+          isLeadInvestor: campaignComments.isLeadInvestor,
+          createdAt: campaignComments.createdAt,
+          user: {
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+          },
+          campaign: {
+            title: campaigns.title,
+            companyName: campaigns.companyName,
+          },
+        })
+        .from(campaignComments)
+        .innerJoin(campaigns, eq(campaignComments.campaignId, campaigns.id))
+        .innerJoin(users, eq(campaignComments.userId, users.id))
+        .where(eq(campaigns.founderId, founderId))
+        .orderBy(desc(campaignComments.createdAt));
+
+      res.json(comments);
+    } catch (error) {
+      console.error('Error fetching campaign comments:', error);
+      res.status(500).json({ message: 'Failed to fetch comments' });
+    }
+  });
+
+  // Get campaign questions for founder's campaigns
+  app.get('/api/founder/:founderId/questions', async (req: any, res) => {
+    try {
+      const { founderId } = req.params;
+      
+      if (!req.isAuthenticated() || req.user.id !== founderId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const questions = await db
+        .select({
+          id: campaignQuestions.id,
+          campaignId: campaignQuestions.campaignId,
+          userId: campaignQuestions.userId,
+          question: campaignQuestions.question,
+          answer: campaignQuestions.answer,
+          answeredBy: campaignQuestions.answeredBy,
+          answeredAt: campaignQuestions.answeredAt,
+          isPublic: campaignQuestions.isPublic,
+          createdAt: campaignQuestions.createdAt,
+          user: {
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+          },
+          campaign: {
+            title: campaigns.title,
+            companyName: campaigns.companyName,
+          },
+        })
+        .from(campaignQuestions)
+        .innerJoin(campaigns, eq(campaignQuestions.campaignId, campaigns.id))
+        .innerJoin(users, eq(campaignQuestions.userId, users.id))
+        .where(eq(campaigns.founderId, founderId))
+        .orderBy(desc(campaignQuestions.createdAt));
+
+      // Add answered by user details if available
+      const questionsWithAnswers = await Promise.all(
+        questions.map(async (question) => {
+          if (question.answeredBy) {
+            const answeredByUser = await db
+              .select({
+                firstName: users.firstName,
+                lastName: users.lastName,
+              })
+              .from(users)
+              .where(eq(users.id, question.answeredBy))
+              .limit(1);
+            
+            return {
+              ...question,
+              answeredByUser: answeredByUser[0] || null,
+            };
+          }
+          return question;
+        })
+      );
+
+      res.json(questionsWithAnswers);
+    } catch (error) {
+      console.error('Error fetching campaign questions:', error);
+      res.status(500).json({ message: 'Failed to fetch questions' });
+    }
+  });
+
+  // Get admin notifications for founder
+  app.get('/api/founder/:founderId/admin-notifications', async (req: any, res) => {
+    try {
+      const { founderId } = req.params;
+      
+      if (!req.isAuthenticated() || req.user.id !== founderId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const adminNotifications = await db
+        .select({
+          id: notifications.id,
+          title: notifications.title,
+          message: notifications.message,
+          type: notifications.type,
+          priority: notifications.priority,
+          category: notifications.category,
+          isRead: notifications.isRead,
+          createdAt: notifications.createdAt,
+        })
+        .from(notifications)
+        .where(
+          and(
+            eq(notifications.userId, founderId),
+            or(
+              eq(notifications.type, 'admin'),
+              eq(notifications.category, 'admin'),
+              eq(notifications.category, 'security'),
+              eq(notifications.category, 'update')
+            )
+          )
+        )
+        .orderBy(desc(notifications.createdAt));
+
+      res.json(adminNotifications);
+    } catch (error) {
+      console.error('Error fetching admin notifications:', error);
+      res.status(500).json({ message: 'Failed to fetch notifications' });
+    }
+  });
+
+  // Answer a campaign question
+  app.put('/api/questions/:questionId/answer', async (req: any, res) => {
+    try {
+      const { questionId } = req.params;
+      const { answer } = req.body;
+      
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      if (!answer || answer.trim().length === 0) {
+        return res.status(400).json({ message: 'Answer is required' });
+      }
+
+      // Verify the question belongs to a campaign owned by the authenticated user
+      const question = await db
+        .select({
+          id: campaignQuestions.id,
+          campaignId: campaignQuestions.campaignId,
+          founderId: campaigns.founderId,
+        })
+        .from(campaignQuestions)
+        .innerJoin(campaigns, eq(campaignQuestions.campaignId, campaigns.id))
+        .where(eq(campaignQuestions.id, parseInt(questionId)))
+        .limit(1);
+
+      if (question.length === 0) {
+        return res.status(404).json({ message: 'Question not found' });
+      }
+
+      if (question[0].founderId !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized to answer this question' });
+      }
+
+      // Update the question with the answer
+      await db
+        .update(campaignQuestions)
+        .set({
+          answer: answer.trim(),
+          answeredBy: req.user.id,
+          answeredAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(campaignQuestions.id, parseInt(questionId)));
+
+      // Create notification for the question asker
+      const questionDetails = await db
+        .select({
+          userId: campaignQuestions.userId,
+          question: campaignQuestions.question,
+          companyName: campaigns.companyName,
+        })
+        .from(campaignQuestions)
+        .innerJoin(campaigns, eq(campaignQuestions.campaignId, campaigns.id))
+        .where(eq(campaignQuestions.id, parseInt(questionId)))
+        .limit(1);
+
+      if (questionDetails.length > 0) {
+        await db.insert(notifications).values({
+          userId: questionDetails[0].userId,
+          type: 'update',
+          title: 'Question Answered',
+          message: `Your question about ${questionDetails[0].companyName} has been answered by the founder.`,
+          category: 'general',
+          priority: 'medium',
+          isRead: false,
+          createdAt: new Date(),
+        });
+      }
+
+      res.json({ message: 'Answer submitted successfully' });
+    } catch (error) {
+      console.error('Error answering question:', error);
+      res.status(500).json({ message: 'Failed to submit answer' });
+    }
+  });
+
+  // Post a comment on a campaign (for investors)
+  app.post('/api/campaigns/:campaignId/comments', async (req: any, res) => {
+    try {
+      const { campaignId } = req.params;
+      const { content } = req.body;
+      
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      if (!content || content.trim().length === 0) {
+        return res.status(400).json({ message: 'Comment content is required' });
+      }
+
+      // Check if campaign exists
+      const campaign = await db
+        .select({ id: campaigns.id, founderId: campaigns.founderId })
+        .from(campaigns)
+        .where(eq(campaigns.id, parseInt(campaignId)))
+        .limit(1);
+
+      if (campaign.length === 0) {
+        return res.status(404).json({ message: 'Campaign not found' });
+      }
+
+      // Check if user has invested in this campaign (optional - you may want to allow all users to comment)
+      const userInvestment = await db
+        .select({ id: investments.id })
+        .from(investments)
+        .where(
+          and(
+            eq(investments.campaignId, parseInt(campaignId)),
+            eq(investments.investorId, req.user.id),
+            ne(investments.status, 'pending')
+          )
+        )
+        .limit(1);
+
+      const isLeadInvestor = userInvestment.length > 0;
+
+      // Insert the comment
+      const [newComment] = await db
+        .insert(campaignComments)
+        .values({
+          campaignId: parseInt(campaignId),
+          userId: req.user.id,
+          content: content.trim(),
+          isLeadInvestor,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+
+      // Notify the founder
+      await db.insert(notifications).values({
+        userId: campaign[0].founderId,
+        type: 'comment',
+        title: 'New Campaign Comment',
+        message: `${req.user.firstName} ${req.user.lastName} commented on your campaign.`,
+        category: 'general',
+        priority: 'medium',
+        isRead: false,
+        createdAt: new Date(),
+      });
+
+      res.json({ message: 'Comment posted successfully', commentId: newComment.id });
+    } catch (error) {
+      console.error('Error posting comment:', error);
+      res.status(500).json({ message: 'Failed to post comment' });
+    }
+  });
+
+  // Ask a question about a campaign (for investors)
+  app.post('/api/campaigns/:campaignId/questions', async (req: any, res) => {
+    try {
+      const { campaignId } = req.params;
+      const { question, isPublic = true } = req.body;
+      
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      if (!question || question.trim().length === 0) {
+        return res.status(400).json({ message: 'Question is required' });
+      }
+
+      // Check if campaign exists
+      const campaign = await db
+        .select({ id: campaigns.id, founderId: campaigns.founderId, companyName: campaigns.companyName })
+        .from(campaigns)
+        .where(eq(campaigns.id, parseInt(campaignId)))
+        .limit(1);
+
+      if (campaign.length === 0) {
+        return res.status(404).json({ message: 'Campaign not found' });
+      }
+
+      // Insert the question
+      const [newQuestion] = await db
+        .insert(campaignQuestions)
+        .values({
+          campaignId: parseInt(campaignId),
+          userId: req.user.id,
+          question: question.trim(),
+          isPublic,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+
+      // Notify the founder
+      await db.insert(notifications).values({
+        userId: campaign[0].founderId,
+        type: 'question',
+        title: 'New Question Asked',
+        message: `${req.user.firstName} ${req.user.lastName} asked a question about ${campaign[0].companyName}.`,
+        category: 'general',
+        priority: 'high',
+        isRead: false,
+        createdAt: new Date(),
+      });
+
+      res.json({ message: 'Question submitted successfully', questionId: newQuestion.id });
+    } catch (error) {
+      console.error('Error submitting question:', error);
+      res.status(500).json({ message: 'Failed to submit question' });
+    }
+  });
+
   return httpServer;
 }

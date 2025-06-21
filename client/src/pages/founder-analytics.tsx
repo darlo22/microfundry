@@ -87,7 +87,7 @@ export default function FounderAnalytics() {
   const conversionRate = (founderStats as any)?.conversionRate || 0;
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-fundry-navy">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

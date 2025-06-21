@@ -1708,8 +1708,7 @@ export default function AdminDashboard() {
                         id="min-withdrawal"
                         type="number"
                         step="1"
-                        min="1"
-                        max="1000"
+                        min="0"
                         value={withdrawalSettings?.minimumWithdrawal || 25}
                         onChange={(e) => setWithdrawalSettings({
                           ...withdrawalSettings,
@@ -2439,8 +2438,7 @@ export default function AdminDashboard() {
                         id="min-withdrawal"
                         type="number"
                         step="1"
-                        min="1"
-                        max="1000"
+                        min="0"
                         value={platformSettings.minimumWithdrawal || 25}
                         onChange={(e) => setPlatformSettings({
                           ...platformSettings,

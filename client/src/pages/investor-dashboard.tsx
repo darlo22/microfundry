@@ -440,7 +440,7 @@ export default function InvestorDashboard() {
   // Edit investment mutation
   const editInvestmentMutation = useMutation({
     mutationFn: async ({ id, amount, notes }: { id: number; amount: number; notes?: string }) => {
-      return apiRequest("PATCH", `/api/investments/${id}`, { amount, notes });
+      return apiRequest("PUT", `/api/investments/${id}`, { amount, notes });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/investments/user"] });

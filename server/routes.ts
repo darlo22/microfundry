@@ -2976,7 +2976,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   app.put('/api/investments/:id', requireAuth, async (req: any, res) => {
     try {
       const investmentId = parseInt(req.params.id);
-      const { amount } = req.body;
+      const { amount, notes } = req.body;
       
       // Validate amount
       if (!amount || parseFloat(amount) < 25) {
@@ -2996,9 +2996,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       // No platform fees applied - remove fee calculations
       const newAmount = parseFloat(amount);
 
-      // Update investment
+      // Update investment with amount and notes
       const updatedInvestment = await storage.updateInvestment(investmentId, {
         amount: newAmount.toString(),
+        notes: notes || null,
       });
 
       res.json(updatedInvestment);

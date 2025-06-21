@@ -364,6 +364,7 @@ export class DatabaseStorage implements IStorage {
         agreementSigned: investments.agreementSigned,
         signedAt: investments.signedAt,
         ipAddress: investments.ipAddress,
+        notes: investments.notes,
         createdAt: investments.createdAt,
         updatedAt: investments.updatedAt,
         investor: {

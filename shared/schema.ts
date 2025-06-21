@@ -170,6 +170,7 @@ export const investments = pgTable("investments", {
   agreementSigned: boolean("agreement_signed").notNull().default(false),
   signedAt: timestamp("signed_at"),
   ipAddress: varchar("ip_address"),
+  notes: text("notes"), // Investment notes/comments
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

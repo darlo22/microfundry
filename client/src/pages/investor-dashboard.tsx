@@ -176,6 +176,15 @@ export default function InvestorDashboard() {
     },
   });
 
+  // Initialize edit investment form
+  const editInvestmentForm = useForm<EditInvestmentFormData>({
+    resolver: zodResolver(editInvestmentSchema),
+    defaultValues: {
+      amount: 0,
+      notes: "",
+    },
+  });
+
   // Update form when user data changes
   useEffect(() => {
     if (user) {
@@ -507,10 +516,28 @@ export default function InvestorDashboard() {
     deactivateAccountMutation.mutate(deactivationReason);
   };
 
-  // Handle edit investment
-  const handleEditInvestment = (id: number, amount: number) => {
-    editInvestmentMutation.mutate({ id, amount });
-    setEditInvestmentModal({ isOpen: false, investment: null, amount: 0 });
+  // Handle opening edit investment modal
+  const handleOpenEditInvestment = (investment: InvestmentWithCampaign) => {
+    setEditInvestmentModal({ 
+      isOpen: true, 
+      investment, 
+      amount: parseFloat(investment.amount) 
+    });
+    editInvestmentForm.reset({
+      amount: parseFloat(investment.amount),
+      notes: investment.notes || "",
+    });
+  };
+
+  // Handle edit investment form submission
+  const handleEditInvestmentSubmit = (data: EditInvestmentFormData) => {
+    if (editInvestmentModal.investment) {
+      editInvestmentMutation.mutate({
+        id: editInvestmentModal.investment.id,
+        amount: data.amount,
+        notes: data.notes,
+      });
+    }
   };
 
   // Filter campaigns based on search and category
@@ -751,7 +778,7 @@ export default function InvestorDashboard() {
                             <InvestmentCard
                               investment={investment}
                               onPayNow={handlePayNow}
-                              onEdit={(id: number, amount: number) => editInvestmentMutation.mutate({ id, amount })}
+                              onEdit={(id: number, amount: number) => handleOpenEditInvestment(investment)}
                               onDelete={(id: number) => deleteInvestmentMutation.mutate(id)}
                             />
                           </div>

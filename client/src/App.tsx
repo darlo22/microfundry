@@ -34,6 +34,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import AdminLogin from "@/pages/admin-login";
 import AdminKYCManagement from "@/pages/admin-kyc-management";
 import AdminInvestorOutreach from "@/pages/admin-investor-outreach";
+import AdminOutreachReport from "@/pages/admin-outreach-report";
 import CampaignView from "@/pages/campaign-view";
 import EmailVerification from "@/pages/email-verification";
 import InvestmentSuccess from "@/pages/investment-success";
@@ -75,6 +76,7 @@ function Router() {
       <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/admin-kyc-management" component={AdminKYCManagement} />
       <Route path="/admin/investor-outreach" component={AdminInvestorOutreach} />
+      <Route path="/admin/outreach-report" component={AdminOutreachReport} />
       
       {/* Authenticated routes */}
       {isAuthenticated && (

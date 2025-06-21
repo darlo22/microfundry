@@ -40,7 +40,8 @@ import {
   Star,
   Save,
   AlertCircle,
-  Upload
+  Upload,
+  FileDown
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
@@ -853,6 +854,14 @@ export default function AdminDashboard() {
             >
               <Bell className="w-4 h-4 mr-2" />
               Content & Announcements
+            </Button>
+            <Button 
+              variant={activeTab === "reports" ? "default" : "ghost"} 
+              className="w-full justify-start"
+              onClick={() => setActiveTab("reports")}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Reports & Analytics
             </Button>
             <Button 
               variant={activeTab === "settings" ? "default" : "ghost"} 
@@ -3837,6 +3846,275 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          )}
+
+          {activeTab === "reports" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-fundry-navy">Reports & Analytics</h2>
+                <p className="text-gray-600">Comprehensive email outreach and campaign performance analytics</p>
+              </div>
+
+              {/* Time Period Selector */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-fundry-navy">Analytics Time Period</CardTitle>
+                  <CardDescription>Select the time range for your analytics reports</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+                    {[
+                      { key: 'today', label: 'Today' },
+                      { key: '7days', label: '7 Days' },
+                      { key: '1month', label: '1 Month' },
+                      { key: '3months', label: 'Quarter' },
+                      { key: '6months', label: '6 Months' },
+                      { key: '1year', label: '1 Year' },
+                      { key: 'all', label: 'All Time' },
+                      { key: 'custom', label: 'Custom' }
+                    ].map((period) => (
+                      <Button
+                        key={period.key}
+                        variant={selectedPeriod === period.key ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedPeriod(period.key)}
+                        className={selectedPeriod === period.key ? "bg-fundry-navy text-white" : ""}
+                      >
+                        {period.label}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {selectedPeriod === 'custom' && (
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Start Date</Label>
+                        <Input type="date" />
+                      </div>
+                      <div>
+                        <Label>End Date</Label>
+                        <Input type="date" />
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Email Analytics Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-fundry-navy">Total Emails Sent</CardTitle>
+                    <Send className="h-4 w-4 text-fundry-orange" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-fundry-navy">
+                      {emailAnalytics?.totalEmailsSent || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      +{emailAnalytics?.emailGrowthRate || 0}% from last period
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-fundry-navy">Emails Opened</CardTitle>
+                    <Mail className="h-4 w-4 text-fundry-orange" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-fundry-navy">
+                      {emailAnalytics?.totalEmailsOpened || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {emailAnalytics?.openRate || 0}% open rate
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-fundry-navy">Campaign Reach</CardTitle>
+                    <Users className="h-4 w-4 text-fundry-orange" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-fundry-navy">
+                      {emailAnalytics?.uniqueRecipients || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Unique investors reached
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-fundry-navy">Response Rate</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-fundry-orange" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-fundry-navy">
+                      {emailAnalytics?.responseRate || 0}%
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Investor engagement rate
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Founder Activity Analytics */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-fundry-navy">Founder Outreach Activity</CardTitle>
+                  <CardDescription>Email campaigns initiated by founders</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {founderActivity?.map((founder, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 rounded-full bg-fundry-orange/10 flex items-center justify-center">
+                            <User className="w-5 h-5 text-fundry-orange" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-fundry-navy">{founder.founderName}</p>
+                            <p className="text-sm text-gray-600">{founder.campaignTitle}</p>
+                          </div>
+                        </div>
+                        <div className="text-right space-y-1">
+                          <p className="text-sm font-medium">{founder.emailsSent} emails sent</p>
+                          <p className="text-xs text-gray-500">{founder.openRate}% open rate</p>
+                        </div>
+                      </div>
+                    )) || (
+                      <div className="text-center py-8 text-gray-500">
+                        <Send className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p>No founder email activity in this time period</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Campaign Performance Analytics */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-fundry-navy">Top Performing Campaigns</CardTitle>
+                    <CardDescription>Campaigns with highest email engagement</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {topCampaigns?.map((campaign, index) => (
+                        <div key={index} className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-sm">{campaign.campaignTitle}</p>
+                            <p className="text-xs text-gray-500">{campaign.founderName}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-fundry-navy">{campaign.openRate}%</p>
+                            <p className="text-xs text-gray-500">{campaign.emailsSent} sent</p>
+                          </div>
+                        </div>
+                      )) || (
+                        <div className="text-center py-4 text-gray-500">
+                          <p className="text-sm">No campaign data available</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-fundry-navy">Investor Engagement Metrics</CardTitle>
+                    <CardDescription>How investors are responding to outreach</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Average Open Rate</span>
+                        <span className="font-medium text-fundry-navy">{emailAnalytics?.avgOpenRate || 0}%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Average Response Time</span>
+                        <span className="font-medium text-fundry-navy">{emailAnalytics?.avgResponseTime || 0}h</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Most Active Investors</span>
+                        <span className="font-medium text-fundry-navy">{emailAnalytics?.activeInvestors || 0}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Conversion to Investment</span>
+                        <span className="font-medium text-fundry-navy">{emailAnalytics?.conversionRate || 0}%</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Email Performance Trends Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-fundry-navy">Email Performance Trends</CardTitle>
+                  <CardDescription>Track email metrics over time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
+                    <div className="text-center">
+                      <TrendingUp className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p className="text-gray-500">Email performance chart will be displayed here</p>
+                      <p className="text-sm text-gray-400 mt-2">Integration with charting library required</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Export and Download Options */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-fundry-navy">Export Reports</CardTitle>
+                  <CardDescription>Download detailed analytics reports</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-4">
+                    <Button 
+                      variant="outline" 
+                      className="border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white"
+                      onClick={() => handleExportReport('email-summary')}
+                    >
+                      <FileDown className="w-4 h-4 mr-2" />
+                      Email Summary Report
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white"
+                      onClick={() => handleExportReport('founder-activity')}
+                    >
+                      <FileDown className="w-4 h-4 mr-2" />
+                      Founder Activity Report
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white"
+                      onClick={() => handleExportReport('campaign-performance')}
+                    >
+                      <FileDown className="w-4 h-4 mr-2" />
+                      Campaign Performance Report
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="border-fundry-navy text-fundry-navy hover:bg-fundry-navy hover:text-white"
+                      onClick={() => handleExportReport('investor-engagement')}
+                    >
+                      <FileDown className="w-4 h-4 mr-2" />
+                      Investor Engagement Report
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 

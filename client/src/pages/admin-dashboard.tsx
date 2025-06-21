@@ -38,7 +38,9 @@ import {
   X,
   Clock,
   Star,
-  Save
+  Save,
+  AlertCircle,
+  Upload
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
@@ -2446,10 +2448,185 @@ export default function AdminDashboard() {
           {activeTab === "withdrawals" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Withdrawal Management</h2>
-                <p className="text-gray-600">Review and approve founder withdrawal requests</p>
+                <h2 className="text-3xl font-bold text-gray-900">Transactions & Withdrawals</h2>
+                <p className="text-gray-600">Configure withdrawal settings and manage transactions</p>
               </div>
 
+              {/* Withdrawal Settings */}
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Withdrawal Settings
+                  </CardTitle>
+                  <CardDescription className="text-blue-100">
+                    Configure minimum withdrawal amounts and campaign requirements
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 p-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="min-withdrawal">Minimum Withdrawal Amount ($)</Label>
+                      <Input
+                        id="min-withdrawal"
+                        type="number"
+                        step="1"
+                        min="1"
+                        max="1000"
+                        value={platformSettings.minimumWithdrawal || 25}
+                        onChange={(e) => setPlatformSettings({
+                          ...platformSettings,
+                          minimumWithdrawal: parseFloat(e.target.value)
+                        })}
+                      />
+                      <p className="text-xs text-gray-600 mt-1">Minimum amount founders can withdraw</p>
+                    </div>
+                    <div>
+                      <Label htmlFor="min-goal-percentage">Minimum Goal Achievement (%)</Label>
+                      <Input
+                        id="min-goal-percentage"
+                        type="number"
+                        step="1"
+                        min="0"
+                        max="100"
+                        value={platformSettings.minimumGoalPercentage || 20}
+                        onChange={(e) => setPlatformSettings({
+                          ...platformSettings,
+                          minimumGoalPercentage: parseFloat(e.target.value)
+                        })}
+                      />
+                      <p className="text-xs text-gray-600 mt-1">Required % of funding goal to enable withdrawals</p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={async () => {
+                      // Save minimum withdrawal amount
+                      await updatePlatformSettingMutation.mutateAsync({
+                        settingKey: 'minimumWithdrawal',
+                        settingValue: String(platformSettings.minimumWithdrawal || 25)
+                      });
+                      
+                      // Save minimum goal percentage
+                      await updatePlatformSettingMutation.mutateAsync({
+                        settingKey: 'minimumGoalPercentage',
+                        settingValue: String(platformSettings.minimumGoalPercentage || 20)
+                      });
+                    }}
+                    disabled={updatePlatformSettingMutation.isPending}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {updatePlatformSettingMutation.isPending ? 'Saving...' : 'Save Withdrawal Settings'}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Recent Transactions and Withdrawal Requests */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Recent Transactions */}
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                  <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
+                    <CardTitle className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5" />
+                      Recent Transactions
+                    </CardTitle>
+                    <CardDescription className="text-green-100">
+                      Latest completed investment transactions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    {investmentsLoading ? (
+                      <div className="animate-pulse space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="h-16 bg-green-200 rounded"></div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {investments?.filter((inv: Investment) => inv.paymentStatus === 'completed').slice(0, 5).map((investment: Investment) => (
+                          <div key={investment.id} className="bg-white rounded-lg p-4 border border-green-200">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium text-green-800">{investment.campaign?.title || 'Unknown Campaign'}</p>
+                                <p className="text-sm text-green-600">Campaign #{investment.campaignId}</p>
+                                <p className="text-xs text-gray-500">
+                                  {new Date(investment.createdAt).toLocaleDateString()} at {new Date(investment.createdAt).toLocaleTimeString()}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold text-green-700">${investment.amount}</p>
+                                <Badge className="bg-green-600 text-white text-xs">completed</Badge>
+                              </div>
+                            </div>
+                          </div>
+                        )) || <p className="text-green-600 text-center py-8">No completed transactions yet</p>}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Withdrawal Requests */}
+                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-t-lg">
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5" />
+                      Withdrawal Requests
+                    </CardTitle>
+                    <CardDescription className="text-orange-100">
+                      Pending founder withdrawal requests
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    {withdrawalsLoading ? (
+                      <div className="animate-pulse space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="h-16 bg-orange-200 rounded"></div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {withdrawals && withdrawals.filter((w: any) => w.status === 'pending').length > 0 ? (
+                          withdrawals.filter((w: any) => w.status === 'pending').map((withdrawal: any) => (
+                            <div key={withdrawal.id} className="bg-white rounded-lg p-4 border border-orange-200">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium text-orange-800">{withdrawal.founderName}</p>
+                                  <p className="text-sm text-orange-600">
+                                    Requested: {formatCurrency(withdrawal.amount)}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {new Date(withdrawal.requestedAt).toLocaleString()}
+                                  </p>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <Button size="sm" variant="default">
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    Approve
+                                  </Button>
+                                  <Button size="sm" variant="destructive">
+                                    <XCircle className="w-4 h-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-8">
+                            <div className="w-16 h-16 bg-orange-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Upload className="h-8 w-8 text-orange-400" />
+                            </div>
+                            <p className="text-orange-600 font-medium">No withdrawal requests found</p>
+                            <p className="text-orange-500 text-sm">All withdrawal requests are up to date</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Pending Transactions */}
               <Card>
                 <CardHeader>
                   <CardTitle>Withdrawal Requests</CardTitle>
@@ -2697,48 +2874,6 @@ export default function AdminDashboard() {
                   </CardHeader>
                   <CardContent className="space-y-4 p-6">
                     <div className="space-y-4">
-                      {/* Withdrawal Settings */}
-                      <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                        <div className="mb-3">
-                          <label className="font-medium text-blue-800">Withdrawal Requirements</label>
-                          <p className="text-sm text-blue-700">Configure minimum withdrawal amounts and campaign requirements</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="min-withdrawal">Minimum Withdrawal Amount ($)</Label>
-                            <Input
-                              id="min-withdrawal"
-                              type="number"
-                              step="1"
-                              min="1"
-                              max="1000"
-                              value={platformSettings.minimumWithdrawal || 25}
-                              onChange={(e) => setPlatformSettings({
-                                ...platformSettings,
-                                minimumWithdrawal: parseFloat(e.target.value)
-                              })}
-                            />
-                            <p className="text-xs text-blue-600 mt-1">Minimum amount founders can withdraw</p>
-                          </div>
-                          <div>
-                            <Label htmlFor="min-goal-percentage">Minimum Goal Achievement (%)</Label>
-                            <Input
-                              id="min-goal-percentage"
-                              type="number"
-                              step="1"
-                              min="0"
-                              max="100"
-                              value={platformSettings.minimumGoalPercentage || 20}
-                              onChange={(e) => setPlatformSettings({
-                                ...platformSettings,
-                                minimumGoalPercentage: parseFloat(e.target.value)
-                              })}
-                            />
-                            <p className="text-xs text-blue-600 mt-1">Required % of funding goal to enable withdrawals</p>
-                          </div>
-                        </div>
-                      </div>
-
                       {/* Fee Tier 1: Below $1,000 */}
                       <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
                         <div className="flex justify-between items-center mb-3">

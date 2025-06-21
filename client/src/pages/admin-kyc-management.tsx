@@ -182,58 +182,58 @@ export default function AdminKYCManagement() {
       <div className="p-6">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200">
+          <Card className="border-l-4 border-l-fundry-orange">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-yellow-700">Pending Review</p>
-                  <p className="text-2xl font-bold text-yellow-900">
+                  <p className="text-sm font-medium text-fundry-navy">Pending Review</p>
+                  <p className="text-2xl font-bold text-fundry-navy">
                     {kycRequests.filter((req: KYCRequest) => req.status === 'pending' || req.status === 'under_review').length}
                   </p>
                 </div>
-                <Clock className="w-8 h-8 text-yellow-600" />
+                <Clock className="w-8 h-8 text-fundry-orange" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <Card className="border-l-4 border-l-fundry-navy">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-700">Approved</p>
-                  <p className="text-2xl font-bold text-green-900">
+                  <p className="text-sm font-medium text-fundry-navy">Approved</p>
+                  <p className="text-2xl font-bold text-fundry-navy">
                     {kycRequests.filter((req: KYCRequest) => req.status === 'approved').length}
                   </p>
                 </div>
-                <CheckCircle className="w-8 h-8 text-green-600" />
+                <CheckCircle className="w-8 h-8 text-fundry-orange" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-red-50 to-pink-50 border-red-200">
+          <Card className="border-l-4 border-l-fundry-orange">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-red-700">Rejected</p>
-                  <p className="text-2xl font-bold text-red-900">
+                  <p className="text-sm font-medium text-fundry-navy">Rejected</p>
+                  <p className="text-2xl font-bold text-fundry-navy">
                     {kycRequests.filter((req: KYCRequest) => req.status === 'rejected').length}
                   </p>
                 </div>
-                <XCircle className="w-8 h-8 text-red-600" />
+                <XCircle className="w-8 h-8 text-fundry-orange" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <Card className="border-l-4 border-l-fundry-navy">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-700">Total Requests</p>
-                  <p className="text-2xl font-bold text-blue-900">
+                  <p className="text-sm font-medium text-fundry-navy">Total Requests</p>
+                  <p className="text-2xl font-bold text-fundry-navy">
                     {kycRequests.length}
                   </p>
                 </div>
-                <FileText className="w-8 h-8 text-blue-600" />
+                <FileText className="w-8 h-8 text-fundry-orange" />
               </div>
             </CardContent>
           </Card>
@@ -242,7 +242,7 @@ export default function AdminKYCManagement() {
         {/* Filter Controls */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Filter Requests</CardTitle>
+            <CardTitle className="text-fundry-navy">Filter Requests</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex space-x-2">
@@ -250,6 +250,7 @@ export default function AdminKYCManagement() {
                 variant={filterStatus === 'all' ? 'default' : 'outline'}
                 onClick={() => setFilterStatus('all')}
                 size="sm"
+                className={filterStatus === 'all' ? 'bg-fundry-orange hover:bg-fundry-orange/90' : 'border-fundry-navy/30 text-fundry-navy hover:bg-fundry-navy/10'}
               >
                 All Requests
               </Button>
@@ -257,6 +258,7 @@ export default function AdminKYCManagement() {
                 variant={filterStatus === 'pending' ? 'default' : 'outline'}
                 onClick={() => setFilterStatus('pending')}
                 size="sm"
+                className={filterStatus === 'pending' ? 'bg-fundry-orange hover:bg-fundry-orange/90' : 'border-fundry-navy/30 text-fundry-navy hover:bg-fundry-navy/10'}
               >
                 Pending
               </Button>
@@ -264,6 +266,7 @@ export default function AdminKYCManagement() {
                 variant={filterStatus === 'under_review' ? 'default' : 'outline'}
                 onClick={() => setFilterStatus('under_review')}
                 size="sm"
+                className={filterStatus === 'under_review' ? 'bg-fundry-orange hover:bg-fundry-orange/90' : 'border-fundry-navy/30 text-fundry-navy hover:bg-fundry-navy/10'}
               >
                 Under Review
               </Button>
@@ -271,6 +274,7 @@ export default function AdminKYCManagement() {
                 variant={filterStatus === 'approved' ? 'default' : 'outline'}
                 onClick={() => setFilterStatus('approved')}
                 size="sm"
+                className={filterStatus === 'approved' ? 'bg-fundry-orange hover:bg-fundry-orange/90' : 'border-fundry-navy/30 text-fundry-navy hover:bg-fundry-navy/10'}
               >
                 Approved
               </Button>
@@ -278,6 +282,7 @@ export default function AdminKYCManagement() {
                 variant={filterStatus === 'rejected' ? 'default' : 'outline'}
                 onClick={() => setFilterStatus('rejected')}
                 size="sm"
+                className={filterStatus === 'rejected' ? 'bg-fundry-orange hover:bg-fundry-orange/90' : 'border-fundry-navy/30 text-fundry-navy hover:bg-fundry-navy/10'}
               >
                 Rejected
               </Button>

@@ -244,14 +244,14 @@ export default function AdminInvestorOutreach() {
   };
 
   return (
-    <div className="min-h-screen bg-fundry-navy">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <Link href="/admin-dashboard">
-                <Button variant="ghost" size="sm" className="text-fundry-navy hover:bg-blue-50">
+                <Button variant="ghost" size="sm" className="text-fundry-navy hover:bg-fundry-navy/10">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Admin Dashboard
                 </Button>
@@ -270,14 +270,14 @@ export default function AdminInvestorOutreach() {
           {/* Upload Section */}
           <div className="lg:col-span-2 space-y-6">
             {/* File Upload Card */}
-            <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
-              <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
-                <CardTitle className="text-white flex items-center">
+            <Card className="border-l-4 border-l-fundry-orange">
+              <CardHeader>
+                <CardTitle className="text-fundry-navy flex items-center">
                   <Upload className="h-5 w-5 mr-2 text-fundry-orange" />
                   Upload Investor Data
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6 text-white">
+              <CardContent className="space-y-6">
                 <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center">
                   <FileSpreadsheet className="h-12 w-12 text-fundry-orange mx-auto mb-4" />
                   <div className="space-y-2">

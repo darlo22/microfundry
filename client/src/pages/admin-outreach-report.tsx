@@ -119,7 +119,7 @@ export default function AdminOutreachReport() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -219,91 +219,91 @@ export default function AdminOutreachReport() {
 
         {/* Key Metrics Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <Card className="border-l-4 border-l-fundry-orange">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-800">Emails Sent</CardTitle>
-              <Send className="h-6 w-6 text-blue-600" />
+              <CardTitle className="text-sm font-medium text-fundry-navy">Emails Sent</CardTitle>
+              <Send className="h-6 w-6 text-fundry-orange" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-900">
+              <div className="text-3xl font-bold text-fundry-navy">
                 {analyticsLoading ? "..." : formatNumber((outreachAnalytics as any)?.totalEmailsSent || 0)}
               </div>
-              <p className="text-xs text-blue-700 mt-1">
+              <p className="text-xs text-gray-600 mt-1">
                 +{(outreachAnalytics as any)?.emailGrowthRate || 0}% from last period
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <Card className="border-l-4 border-l-fundry-navy">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-green-800">Emails Opened</CardTitle>
-              <Mail className="h-6 w-6 text-green-600" />
+              <CardTitle className="text-sm font-medium text-fundry-navy">Emails Opened</CardTitle>
+              <Mail className="h-6 w-6 text-fundry-orange" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-900">
+              <div className="text-3xl font-bold text-fundry-navy">
                 {analyticsLoading ? "..." : formatNumber((outreachAnalytics as any)?.totalEmailsOpened || 0)}
               </div>
-              <p className="text-xs text-green-700 mt-1">
+              <p className="text-xs text-gray-600 mt-1">
                 {(outreachAnalytics as any)?.openRate || 0}% open rate
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <Card className="border-l-4 border-l-fundry-orange">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-purple-800">Active Founders</CardTitle>
-              <Users className="h-6 w-6 text-purple-600" />
+              <CardTitle className="text-sm font-medium text-fundry-navy">Active Founders</CardTitle>
+              <Users className="h-6 w-6 text-fundry-orange" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-900">
+              <div className="text-3xl font-bold text-fundry-navy">
                 {analyticsLoading ? "..." : formatNumber((outreachAnalytics as any)?.foundersCount || 0)}
               </div>
-              <p className="text-xs text-purple-700 mt-1">
+              <p className="text-xs text-gray-600 mt-1">
                 Sending outreach emails
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+          <Card className="border-l-4 border-l-fundry-navy">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-orange-800">Investors Reached</CardTitle>
-              <Target className="h-6 w-6 text-orange-600" />
+              <CardTitle className="text-sm font-medium text-fundry-navy">Investors Reached</CardTitle>
+              <Target className="h-6 w-6 text-fundry-orange" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-orange-900">
+              <div className="text-3xl font-bold text-fundry-navy">
                 {analyticsLoading ? "..." : formatNumber((outreachAnalytics as any)?.investorsReached || 0)}
               </div>
-              <p className="text-xs text-orange-700 mt-1">
+              <p className="text-xs text-gray-600 mt-1">
                 Unique investor contacts
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
+          <Card className="border-l-4 border-l-fundry-orange">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-amber-800">Campaigns Involved</CardTitle>
-              <Building className="h-6 w-6 text-amber-600" />
+              <CardTitle className="text-sm font-medium text-fundry-navy">Campaigns Involved</CardTitle>
+              <Building className="h-6 w-6 text-fundry-orange" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-amber-900">
+              <div className="text-3xl font-bold text-fundry-navy">
                 {analyticsLoading ? "..." : formatNumber((outreachAnalytics as any)?.campaignsInvolved || 0)}
               </div>
-              <p className="text-xs text-amber-700 mt-1">
+              <p className="text-xs text-gray-600 mt-1">
                 Active campaigns
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-rose-50 to-rose-100 border-rose-200">
+          <Card className="border-l-4 border-l-fundry-navy">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-rose-800">Response Rate</CardTitle>
-              <TrendingUp className="h-6 w-6 text-rose-600" />
+              <CardTitle className="text-sm font-medium text-fundry-navy">Response Rate</CardTitle>
+              <TrendingUp className="h-6 w-6 text-fundry-orange" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-rose-900">
+              <div className="text-3xl font-bold text-fundry-navy">
                 {analyticsLoading ? "..." : `${(outreachAnalytics as any)?.responseRate || 0}%`}
               </div>
-              <p className="text-xs text-rose-700 mt-1">
+              <p className="text-xs text-gray-600 mt-1">
                 Investor engagement
               </p>
             </CardContent>

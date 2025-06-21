@@ -36,7 +36,8 @@ import {
   Edit,
   Target,
   Trash2,
-  Filter
+  Filter,
+  RefreshCw
 } from "lucide-react";
 
 interface InvestorDirectory {
@@ -103,6 +104,7 @@ export default function FounderOutreach() {
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>("none");
+  const [currentTemplateIndex, setCurrentTemplateIndex] = useState(0);
   const [emailSettings, setEmailSettings] = useState({
     verifiedEmail: "",
     displayName: "",
@@ -390,8 +392,6 @@ Interested in a 10-minute call to explore fit?
 Founder, {companyName}`
     }
   ];
-
-  const [currentTemplateIndex, setCurrentTemplateIndex] = useState(0);
 
   const generateCampaignEmail = (campaign: any, templateIndex: number = 0) => {
     const campaignUrl = `${window.location.origin}/campaign/${campaign.id}`;

@@ -81,11 +81,11 @@ export default function FounderDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Welcome Section */}
         <div className="mb-6 sm:mb-8">
-          <div className="bg-gradient-to-r from-fundry-orange to-fundry-navy p-6 sm:p-8 rounded-2xl text-white shadow-xl">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
+          <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-fundry-navy">
               Welcome back, {user?.firstName || "Founder"}!
             </h1>
-            <p className="text-orange-100 mt-2 text-sm sm:text-base">Here's an overview of your fundraising activities.</p>
+            <p className="text-fundry-orange mt-2 text-sm sm:text-base font-medium">Here's an overview of your fundraising activities.</p>
           </div>
         </div>
 

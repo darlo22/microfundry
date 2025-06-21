@@ -15,6 +15,7 @@ import {
 import { nanoid } from "nanoid";
 import multer from "multer";
 import path from "path";
+import * as XLSX from 'xlsx';
 import { TwoFactorService } from "./twoFactorService";
 import { emailService } from "./services/email";
 import { eq, and, gt, sql, desc, or, ne, inArray, gte, lt } from "drizzle-orm";
@@ -6565,6 +6566,182 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     } catch (error) {
       console.error('Error adding investor to directory:', error);
       res.status(500).json({ message: 'Failed to add investor to directory' });
+    }
+  });
+
+  // Admin: Delete investor from directory
+  app.delete('/api/admin/investor-directory/:id', requireAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      const deleted = await db
+        .delete(investorDirectory)
+        .where(eq(investorDirectory.id, parseInt(id)))
+        .returning();
+
+      if (deleted.length === 0) {
+        return res.status(404).json({ message: 'Investor not found' });
+      }
+
+      // Log admin activity
+      await logAdminActivity(
+        req.user.id,
+        'Investor Directory',
+        `Deleted investor: ${deleted[0].name} (${deleted[0].email})`
+      );
+
+      res.json({ message: 'Investor deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting investor:', error);
+      res.status(500).json({ message: 'Failed to delete investor' });
+    }
+  });
+
+  // Admin: Preview uploaded investor file
+  app.post('/api/admin/investor-directory/preview', requireAdmin, upload.single('file'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const fileBuffer = req.file.buffer;
+      let workbook;
+
+      // Parse file based on type
+      if (req.file.mimetype === 'text/csv' || req.file.originalname.endsWith('.csv')) {
+        workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+      } else if (req.file.mimetype.includes('sheet') || req.file.originalname.endsWith('.xlsx') || req.file.originalname.endsWith('.xls')) {
+        workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+      } else {
+        return res.status(400).json({ message: 'Invalid file format. Please upload Excel or CSV file.' });
+      }
+
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      // Validate and preview first 10 rows
+      const preview = jsonData.slice(0, 10).map((row: any) => ({
+        name: row.name || row.Name || '',
+        email: row.email || row.Email || '',
+        company: row.company || row.Company || '',
+        title: row.title || row.Title || '',
+        location: row.location || row.Location || '',
+        bio: row.bio || row.Bio || '',
+        linkedinUrl: row.linkedinUrl || row.LinkedinUrl || row.linkedin_url || '',
+        investmentFocus: row.investmentFocus || row.InvestmentFocus || row.investment_focus || '',
+        minimumInvestment: row.minimumInvestment || row.MinimumInvestment || row.minimum_investment || null,
+        maximumInvestment: row.maximumInvestment || row.MaximumInvestment || row.maximum_investment || null,
+        tags: row.tags || row.Tags || ''
+      }));
+
+      res.json({ 
+        preview,
+        totalRows: jsonData.length,
+        validRows: preview.filter(row => row.name && row.email).length
+      });
+    } catch (error) {
+      console.error('Error previewing file:', error);
+      res.status(500).json({ message: 'Failed to preview file' });
+    }
+  });
+
+  // Admin: Upload investor directory from CSV/Excel
+  app.post('/api/admin/investor-directory/upload', requireAdmin, upload.single('file'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const fileBuffer = req.file.buffer;
+      let workbook;
+
+      // Parse file based on type
+      if (req.file.mimetype === 'text/csv' || req.file.originalname.endsWith('.csv')) {
+        workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+      } else if (req.file.mimetype.includes('sheet') || req.file.originalname.endsWith('.xlsx') || req.file.originalname.endsWith('.xls')) {
+        workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+      } else {
+        return res.status(400).json({ message: 'Invalid file format. Please upload Excel or CSV file.' });
+      }
+
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      let successful = 0;
+      let failed = 0;
+      let duplicates = 0;
+      const errors: string[] = [];
+
+      for (const [index, row] of jsonData.entries()) {
+        try {
+          const rowNum = index + 2; // Account for header row
+          const investorData: any = {
+            name: row.name || row.Name,
+            email: row.email || row.Email,
+            company: row.company || row.Company || null,
+            title: row.title || row.Title || null,
+            location: row.location || row.Location || null,
+            bio: row.bio || row.Bio || null,
+            linkedinUrl: row.linkedinUrl || row.LinkedinUrl || row.linkedin_url || null,
+            investmentFocus: row.investmentFocus || row.InvestmentFocus || row.investment_focus || null,
+            minimumInvestment: row.minimumInvestment || row.MinimumInvestment || row.minimum_investment || null,
+            maximumInvestment: row.maximumInvestment || row.MaximumInvestment || row.maximum_investment || null,
+            tags: row.tags || row.Tags ? (row.tags || row.Tags).split(',').map((tag: string) => tag.trim()) : null,
+            source: 'directory',
+            addedBy: req.user.id,
+            isActive: true
+          };
+
+          // Validate required fields
+          if (!investorData.name || !investorData.email) {
+            errors.push(`Row ${rowNum}: Missing name or email`);
+            failed++;
+            continue;
+          }
+
+          // Check for duplicates
+          const existing = await db
+            .select()
+            .from(investorDirectory)
+            .where(eq(investorDirectory.email, investorData.email))
+            .limit(1);
+
+          if (existing.length > 0) {
+            duplicates++;
+            continue;
+          }
+
+          // Insert investor
+          await db.insert(investorDirectory).values(investorData);
+          successful++;
+
+        } catch (error) {
+          console.error(`Error processing row ${index + 2}:`, error);
+          errors.push(`Row ${index + 2}: ${error.message}`);
+          failed++;
+        }
+      }
+
+      // Log admin activity
+      await logAdminActivity(
+        req.user.id,
+        'Investor Directory',
+        `Bulk upload: ${successful} added, ${failed} failed, ${duplicates} duplicates`
+      );
+
+      res.json({
+        successful,
+        failed,
+        duplicates,
+        errors: errors.slice(0, 10), // Limit error messages
+        message: `Upload completed: ${successful} investors added successfully`
+      });
+
+    } catch (error) {
+      console.error('Error uploading investor file:', error);
+      res.status(500).json({ message: 'Failed to upload investor file' });
     }
   });
 

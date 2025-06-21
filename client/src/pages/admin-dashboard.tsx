@@ -796,6 +796,15 @@ export default function AdminDashboard() {
               <Users className="w-4 h-4 mr-2" />
               Investor Management
             </Button>
+            <Link href="/admin/investor-outreach">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Investor Outreach
+              </Button>
+            </Link>
             <Button 
               variant={activeTab === "campaigns" ? "default" : "ghost"} 
               className="w-full justify-start"

@@ -56,7 +56,7 @@ export default function FounderUpdates() {
 
   // Fetch founder's campaigns
   const { data: campaigns = [], isLoading: campaignsLoading } = useQuery<any[]>({
-    queryKey: ["/api/campaigns/founder", user?.id],
+    queryKey: [`/api/campaigns/founder/${user?.id}`],
     enabled: !!user?.id,
   });
 

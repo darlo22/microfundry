@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,9 +22,18 @@ import {
   CheckCircle, 
   Download,
   LogIn,
-  UserPlus
+  UserPlus,
+  Eye,
+  EyeOff,
+  ArrowLeft
 } from "lucide-react";
-import type { CampaignWithStats } from "@/lib/types";
+import type { Campaign } from "@shared/schema";
+
+interface CampaignWithStats extends Campaign {
+  totalRaised: string;
+  investorCount: number;
+  progressPercent: number;
+}
 import FundryLogo from "@/components/ui/fundry-logo";
 import { SafeDocumentViewer } from "./safe-document-viewer";
 import { loadStripe } from "@stripe/stripe-js";
@@ -69,123 +80,6 @@ interface AuthFormData {
   confirmPassword: string;
 }
 
-// Stripe Payment Form Component
-const StripePaymentForm = ({ 
-  clientSecret, 
-  cardholderName, 
-  setCardholderName, 
-  onBack,
-  onSuccess,
-  selectedAmount 
-}: {
-  clientSecret: string;
-  cardholderName: string;
-  setCardholderName: (name: string) => void;
-  onBack: () => void;
-  onSuccess: () => void;
-  selectedAmount: number;
-}) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const { toast } = useToast();
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleSubmit = async () => {
-    if (!stripe || !elements) return;
-
-    setIsProcessing(true);
-    
-    try {
-      const cardElement = elements.getElement(CardElement);
-      if (!cardElement) return;
-
-      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardElement,
-          billing_details: {
-            name: cardholderName,
-          },
-        },
-      });
-
-      if (error) {
-        toast({
-          title: "Payment Failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else if (paymentIntent?.status === 'succeeded') {
-        toast({
-          title: "Payment Successful",
-          description: `Investment of $${selectedAmount} confirmed`,
-        });
-        onSuccess();
-      }
-    } catch (error) {
-      toast({
-        title: "Payment Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      <Button
-        variant="outline"
-        onClick={onBack}
-        className="mb-4"
-      >
-        ← Back to Payment Options
-      </Button>
-
-      <div>
-        <Label htmlFor="cardholder-name">Cardholder Name</Label>
-        <Input
-          id="cardholder-name"
-          value={cardholderName}
-          onChange={(e) => setCardholderName(e.target.value)}
-          placeholder="Enter name as it appears on card"
-        />
-      </div>
-
-      <div>
-        <Label>Card Information</Label>
-        <div className="mt-2 p-4 border border-gray-200 rounded-lg">
-          <CardElement
-            options={{
-              style: {
-                base: {
-                  fontSize: '16px',
-                  color: '#374151',
-                  fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-                  '::placeholder': {
-                    color: '#9CA3AF',
-                  },
-                },
-                invalid: {
-                  color: '#EF4444',
-                },
-              },
-            }}
-          />
-        </div>
-      </div>
-
-      <Button
-        onClick={handleSubmit}
-        disabled={!cardholderName || !stripe || isProcessing}
-        className="w-full bg-blue-600 hover:bg-blue-700"
-      >
-        {isProcessing ? "Processing..." : `Pay $${selectedAmount}`}
-      </Button>
-    </div>
-  );
-};
-
 export default function InvestmentModal({ isOpen, onClose, campaign, initialAmount, onAmountChange }: InvestmentModalProps) {
   const [currentStep, setCurrentStep] = useState<InvestmentStep>('amount');
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
@@ -222,6 +116,8 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate | null>(null);
   const [isLoadingRate, setIsLoadingRate] = useState(false);
   const [createdInvestment, setCreatedInvestment] = useState<any>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
@@ -240,14 +136,45 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     }
   });
 
+  // Authentication mutation
+  const authMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const endpoint = authMode === 'signin' ? '/api/auth/login' : '/api/auth/register';
+      const response = await apiRequest('POST', endpoint, data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.user) {
+        toast({
+          title: "Authentication Successful",
+          description: `Welcome${data.user.firstName ? `, ${data.user.firstName}` : ''}!`,
+        });
+        
+        // Clear investment context and proceed
+        localStorage.removeItem('investmentContext');
+        setCurrentStep('safe-review');
+        
+        // Reload auth state
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Authentication Failed",
+        description: error.message || "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Exchange rate fetching
   useEffect(() => {
     if (selectedAmount > 0) {
       setIsLoadingRate(true);
       convertUsdToNgn(selectedAmount)
         .then((result) => {
-          setNgnAmount(result.ngnAmount);
-          setExchangeRate(result.exchangeRate);
+          setNgnAmount(result.ngn);
+          setExchangeRate(result.rate);
         })
         .catch((error) => {
           console.error('Failed to fetch exchange rate:', error);
@@ -285,12 +212,6 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     }
   }, [isOpen, initialAmount, campaign.id]);
 
-  // Handle authentication success
-  const handleAuthSuccess = () => {
-    localStorage.removeItem('investmentContext');
-    setCurrentStep('safe-review');
-  };
-
   // Reset modal state on close
   const handleClose = () => {
     setCurrentStep('amount');
@@ -299,12 +220,15 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     setShowStripeForm(false);
     setClientSecret('');
     setCardholderName('');
+    setSignatureData('');
+    setAgreedToTerms(false);
     onClose();
   };
 
   // Handle amount selection
   const handleAmountSelect = (amount: number) => {
     setSelectedAmount(amount);
+    setCustomAmount(amount.toString());
     if (onAmountChange) {
       onAmountChange(amount.toString());
     }
@@ -319,6 +243,36 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       if (onAmountChange) {
         onAmountChange(value);
       }
+    }
+  };
+
+  // Handle authentication form submission
+  const handleAuthSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (authMode === 'signup') {
+      if (authData.password !== authData.confirmPassword) {
+        toast({
+          title: "Password Mismatch",
+          description: "Passwords do not match. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      authMutation.mutate({
+        email: authData.email,
+        password: authData.password,
+        firstName: authData.firstName,
+        lastName: authData.lastName,
+        userType: 'investor'
+      });
+    } else {
+      authMutation.mutate({
+        email: authData.email,
+        password: authData.password,
+        userType: 'investor'
+      });
     }
   };
 
@@ -346,9 +300,40 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     } else if (currentStep === 'safe-review') {
       setCurrentStep('terms');
     } else if (currentStep === 'terms') {
+      if (!agreedToTerms) {
+        toast({
+          title: "Terms Required",
+          description: "Please agree to the terms and conditions to continue.",
+          variant: "destructive",
+        });
+        return;
+      }
       setCurrentStep('signature');
     } else if (currentStep === 'signature') {
+      if (!signatureData.trim()) {
+        toast({
+          title: "Signature Required",
+          description: "Please provide your digital signature to continue.",
+          variant: "destructive",
+        });
+        return;
+      }
       setCurrentStep('payment');
+    }
+  };
+
+  // Handle back navigation
+  const handlePreviousStep = () => {
+    if (currentStep === 'auth' && isAuthenticated) {
+      setCurrentStep('amount');
+    } else if (currentStep === 'safe-review') {
+      setCurrentStep(isAuthenticated ? 'amount' : 'auth');
+    } else if (currentStep === 'terms') {
+      setCurrentStep('safe-review');
+    } else if (currentStep === 'signature') {
+      setCurrentStep('terms');
+    } else if (currentStep === 'payment') {
+      setCurrentStep('signature');
     }
   };
 
@@ -359,7 +344,13 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       createInvestmentMutation.mutate({
         campaignId: campaign.id,
         amount: selectedAmount,
-        status: 'committed'
+        status: 'committed',
+        investorDetails: {
+          ...investorDetails,
+          signature: signatureData,
+          agreedToTerms,
+          investmentDate: new Date().toISOString()
+        }
       });
     }
 
@@ -391,6 +382,21 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         variant: "destructive",
       });
       return;
+    }
+
+    if (!createdInvestment) {
+      // Create investment first
+      createInvestmentMutation.mutate({
+        campaignId: campaign.id,
+        amount: selectedAmount,
+        status: 'committed',
+        investorDetails: {
+          ...investorDetails,
+          signature: signatureData,
+          agreedToTerms,
+          investmentDate: new Date().toISOString()
+        }
+      });
     }
 
     setIsProcessingNaira(true);
@@ -437,6 +443,23 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
     setShowStripeForm(false);
     setClientSecret('');
     setCardholderName('');
+  };
+
+  // Generate SAFE Agreement content
+  const generateSafeAgreement = (campaign: CampaignWithStats, amount: number) => {
+    const discount = campaign.discountRate || 20;
+    const valuationCap = campaign.valuationCap || 1000000;
+    
+    return `SAFE AGREEMENT
+
+Investment Amount: $${amount.toLocaleString()}
+Discount Rate: ${discount}%
+Valuation Cap: $${valuationCap.toLocaleString()}
+
+Company: ${campaign.title}
+Investor: ${user?.firstName} ${user?.lastName}
+
+This SAFE Agreement represents the terms of investment in ${campaign.title}.`;
   };
 
   // Generate step icons and titles
@@ -498,6 +521,19 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         </DialogHeader>
 
         <div className="py-6">
+          {/* Back Button */}
+          {currentStep !== 'amount' && currentStep !== 'confirmation' && (
+            <Button
+              variant="outline"
+              onClick={handlePreviousStep}
+              className="mb-6"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+          )}
+
+          {/* Step 1: Investment Amount */}
           {currentStep === 'amount' && (
             <div className="space-y-6">
               <div className="text-center">
@@ -563,6 +599,318 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
             </div>
           )}
 
+          {/* Step 2: Authentication */}
+          {currentStep === 'auth' && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Sign in or create an account to continue
+                </h3>
+                <p className="text-gray-600">
+                  Secure your investment with account verification
+                </p>
+              </div>
+
+              <div className="flex justify-center space-x-2 mb-6">
+                <Button
+                  variant={authMode === 'signin' ? 'default' : 'outline'}
+                  onClick={() => setAuthMode('signin')}
+                  className="flex-1 max-w-xs"
+                >
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+                <Button
+                  variant={authMode === 'signup' ? 'default' : 'outline'}
+                  onClick={() => setAuthMode('signup')}
+                  className="flex-1 max-w-xs"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Sign Up
+                </Button>
+              </div>
+
+              <form onSubmit={handleAuthSubmit} className="space-y-4">
+                {authMode === 'signup' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        value={authData.firstName}
+                        onChange={(e) => setAuthData({...authData, firstName: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        value={authData.lastName}
+                        onChange={(e) => setAuthData({...authData, lastName: e.target.value})}
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={authData.email}
+                    onChange={(e) => setAuthData({...authData, email: e.target.value})}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={authData.password}
+                      onChange={(e) => setAuthData({...authData, password: e.target.value})}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {authMode === 'signup' && (
+                  <div>
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={authData.confirmPassword}
+                        onChange={(e) => setAuthData({...authData, confirmPassword: e.target.value})}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={authMutation.isPending}
+                  className="w-full bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3"
+                >
+                  {authMutation.isPending ? 'Processing...' : (authMode === 'signin' ? 'Sign In' : 'Create Account')}
+                </Button>
+              </form>
+            </div>
+          )}
+
+          {/* Step 3: SAFE Agreement Review */}
+          {currentStep === 'safe-review' && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Review Your SAFE Agreement
+                </h3>
+                <p className="text-gray-600">
+                  Please review the terms of your investment
+                </p>
+              </div>
+
+              <Card className="bg-gradient-to-r from-blue-50 to-orange-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-center">Investment Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium">Investment Amount:</span>
+                      <div className="text-xl font-bold text-orange-600">${selectedAmount.toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <span className="font-medium">Company:</span>
+                      <div className="font-semibold">{campaign.title}</div>
+                    </div>
+                    <div>
+                      <span className="font-medium">Discount Rate:</span>
+                      <div className="font-semibold">{campaign.discountRate || 20}%</div>
+                    </div>
+                    <div>
+                      <span className="font-medium">Valuation Cap:</span>
+                      <div className="font-semibold">${(campaign.valuationCap || 1000000).toLocaleString()}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="space-y-4">
+                <Button
+                  onClick={() => setShowSafeViewer(true)}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  View Full SAFE Agreement
+                </Button>
+
+                <Button
+                  onClick={handleNextStep}
+                  className="w-full bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3"
+                >
+                  Continue to Terms & Conditions
+                </Button>
+              </div>
+
+              {/* SAFE Document Viewer */}
+              {showSafeViewer && (
+                <SafeDocumentViewer
+                  isOpen={showSafeViewer}
+                  onClose={() => setShowSafeViewer(false)}
+                  safeData={{
+                    companyName: campaign.title,
+                    investorName: `${user?.firstName} ${user?.lastName}`,
+                    investorEmail: user?.email || '',
+                    investmentAmount: selectedAmount,
+                    discountRate: campaign.discountRate || 20,
+                    valuationCap: campaign.valuationCap || 1000000,
+                    date: new Date().toLocaleDateString(),
+                    agreementId: `${campaign.id}_${Date.now()}`
+                  }}
+                />
+              )}
+            </div>
+          )}
+
+          {/* Step 4: Terms & Conditions */}
+          {currentStep === 'terms' && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Terms & Conditions
+                </h3>
+                <p className="text-gray-600">
+                  Please read and agree to the terms and conditions
+                </p>
+              </div>
+
+              <Card className="border-gray-200">
+                <CardContent className="pt-6">
+                  <div className="max-h-64 overflow-y-auto text-sm space-y-4">
+                    <div>
+                      <h4 className="font-semibold mb-2">Investment Terms</h4>
+                      <p>By investing in {campaign.title}, you agree to the terms outlined in the SAFE Agreement. This investment represents a potential future equity stake in the company.</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold mb-2">Risk Disclosure</h4>
+                      <p>Investment in early-stage companies involves significant risk. You may lose your entire investment. Please only invest amounts you can afford to lose.</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold mb-2">Investor Accreditation</h4>
+                      <p>By proceeding, you represent that you meet the investor qualifications and understand the risks associated with this investment.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="agree-terms"
+                  checked={agreedToTerms}
+                  onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+                />
+                <Label htmlFor="agree-terms" className="text-sm">
+                  I have read and agree to the terms and conditions, and I understand the risks associated with this investment.
+                </Label>
+              </div>
+
+              <Button
+                onClick={handleNextStep}
+                disabled={!agreedToTerms}
+                className="w-full bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3"
+              >
+                Continue to Digital Signature
+              </Button>
+            </div>
+          )}
+
+          {/* Step 5: Digital Signature */}
+          {currentStep === 'signature' && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Digital Signature
+                </h3>
+                <p className="text-gray-600">
+                  Provide your digital signature to confirm your investment
+                </p>
+              </div>
+
+              <Card className="border-gray-200">
+                <CardContent className="pt-6 space-y-4">
+                  <div>
+                    <Label htmlFor="signature">Full Legal Name (Digital Signature)</Label>
+                    <Input
+                      id="signature"
+                      placeholder="Enter your full legal name"
+                      value={signatureData}
+                      onChange={(e) => setSignatureData(e.target.value)}
+                      className="text-lg"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      By typing your name above, you are providing a legally binding digital signature.
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg text-sm">
+                    <h4 className="font-semibold mb-2">Investment Summary</h4>
+                    <div className="space-y-1">
+                      <div>Investment Amount: <span className="font-semibold">${selectedAmount.toLocaleString()}</span></div>
+                      <div>Company: <span className="font-semibold">{campaign.title}</span></div>
+                      <div>Investor: <span className="font-semibold">{user?.firstName} {user?.lastName}</span></div>
+                      <div>Date: <span className="font-semibold">{new Date().toLocaleDateString()}</span></div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Button
+                onClick={handleNextStep}
+                disabled={!signatureData.trim()}
+                className="w-full bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3"
+              >
+                Continue to Payment
+              </Button>
+            </div>
+          )}
+
+          {/* Step 6: Payment */}
           {currentStep === 'payment' && (
             <div className="space-y-6">
               {!showStripeForm ? (
@@ -634,6 +982,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
             </div>
           )}
 
+          {/* Step 7: Confirmation */}
           {currentStep === 'confirmation' && (
             <div className="text-center space-y-6">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
@@ -664,22 +1013,164 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
                       <span>Status:</span>
                       <span className="font-semibold text-green-600">Confirmed</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span>Date:</span>
+                      <span className="font-semibold">{new Date().toLocaleDateString()}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Button
-                onClick={handleClose}
-                className="w-full bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3"
-              >
-                Return to Campaign
-              </Button>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => {
+                    const safeContent = generateSafeAgreement(campaign, selectedAmount);
+                    const blob = new Blob([safeContent], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `SAFE_Agreement_${campaign.title}_${selectedAmount}.txt`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download SAFE Agreement
+                </Button>
+
+                <Button
+                  onClick={handleClose}
+                  className="w-full bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3"
+                >
+                  Return to Campaign
+                </Button>
+              </div>
             </div>
           )}
-
-          {/* Add other step content here as needed */}
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
+// Stripe Payment Form Component
+const StripePaymentForm = ({ 
+  clientSecret, 
+  cardholderName, 
+  setCardholderName, 
+  onBack,
+  onSuccess,
+  selectedAmount 
+}: {
+  clientSecret: string;
+  cardholderName: string;
+  setCardholderName: (name: string) => void;
+  onBack: () => void;
+  onSuccess: () => void;
+  selectedAmount: number;
+}) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!stripe || !elements) return;
+
+    setIsProcessing(true);
+    
+    try {
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) return;
+
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            name: cardholderName,
+          },
+        },
+      });
+
+      if (error) {
+        toast({
+          title: "Payment Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        onBack(); // Return to payment selection
+      } else if (paymentIntent?.status === 'succeeded') {
+        toast({
+          title: "Payment Successful",
+          description: `Investment of $${selectedAmount} confirmed`,
+        });
+        onSuccess();
+      }
+    } catch (error) {
+      toast({
+        title: "Payment Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+      onBack(); // Return to payment selection
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Button
+        variant="outline"
+        onClick={onBack}
+        className="mb-4"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Payment Options
+      </Button>
+
+      <div>
+        <Label htmlFor="cardholder-name">Cardholder Name</Label>
+        <Input
+          id="cardholder-name"
+          value={cardholderName}
+          onChange={(e) => setCardholderName(e.target.value)}
+          placeholder="Enter name as it appears on card"
+        />
+      </div>
+
+      <div>
+        <Label>Card Information</Label>
+        <div className="mt-2 p-4 border border-gray-200 rounded-lg">
+          <CardElement
+            options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#374151',
+                  fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+                  '::placeholder': {
+                    color: '#9CA3AF',
+                  },
+                },
+                invalid: {
+                  color: '#EF4444',
+                },
+              },
+            }}
+          />
+        </div>
+      </div>
+
+      <Button
+        onClick={handleSubmit}
+        disabled={!cardholderName || !stripe || isProcessing}
+        className="w-full bg-blue-600 hover:bg-blue-700"
+      >
+        {isProcessing ? "Processing..." : `Pay $${selectedAmount}`}
+      </Button>
+    </div>
+  );
+};

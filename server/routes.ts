@@ -892,24 +892,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/transactions/:userId', requireAuth, async (req: any, res) => {
+  app.get('/api/transactions', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.params.userId;
+      const userId = req.user.id;
       
-      // Ensure user can only access their own transactions
-      if (userId !== req.user.id) {
-        return res.status(403).json({ message: "Not authorized to access this information" });
-      }
+      console.log(`DEBUG: Fetching transactions for user ${userId}`);
 
       // Get user's investments and create transaction history
       const investments = await storage.getInvestmentsByInvestor(userId);
       const campaigns = await storage.getCampaignsByFounder(userId);
       
+      console.log(`DEBUG: Found ${investments.length} investments and ${campaigns.length} campaigns`);
+      
       const transactions = [];
 
-      // Add investment transactions
+      // Add investment transactions (when user is an investor)
       for (const investment of investments) {
-        if (investment.status === 'committed' || investment.status === 'paid') {
+        if (investment.paymentStatus === 'completed') {
           transactions.push({
             type: 'investment',
             description: `Investment in Campaign #${investment.campaignId}`,
@@ -920,23 +919,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Add funding received transactions for founders
+      // Add funding received transactions for founders (individual investments received)
       for (const campaign of campaigns) {
         const campaignInvestments = await storage.getInvestmentsByCampaign(campaign.id);
-        const totalRaised = campaignInvestments
-          .filter(inv => inv.status === 'committed' || inv.status === 'paid')
-          .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+        console.log(`DEBUG: Campaign ${campaign.id} has ${campaignInvestments.length} investments`);
         
-        if (totalRaised > 0) {
-          transactions.push({
-            type: 'funding',
-            description: `Funding received for ${campaign.title}`,
-            amount: totalRaised.toFixed(2),
-            date: campaign.createdAt,
-            status: 'completed'
-          });
+        // Add each completed investment as a separate transaction
+        for (const investment of campaignInvestments) {
+          if (investment.paymentStatus === 'completed') {
+            console.log(`DEBUG: Adding funding transaction: $${investment.amount} for campaign ${campaign.title}`);
+            transactions.push({
+              type: 'funding',
+              description: `Investment received for ${campaign.title}`,
+              amount: investment.amount,
+              date: investment.createdAt,
+              status: 'completed'
+            });
+          }
         }
       }
+
+      console.log(`DEBUG: Total transactions found: ${transactions.length}`);
 
       // Sort by date (most recent first)
       transactions.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());

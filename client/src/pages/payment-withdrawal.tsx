@@ -193,7 +193,7 @@ export default function PaymentWithdrawal() {
   });
 
   const { data: transactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ["/api/transactions", user?.id],
+    queryKey: ["/api/transactions"],
     enabled: !!user?.id,
   });
 

@@ -6598,7 +6598,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           try {
             const emailSent = await emailService.sendEmail({
               to: email.recipientEmail,
-              from: `${emailSettings[0].displayName} <${emailSettings[0].verifiedEmail}>`,
+              from: `${emailSettings[0].displayName} <support@microfundry.com>`,
+              replyTo: emailSettings[0].verifiedEmail,
               subject: email.personalizedSubject,
               html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -6648,7 +6649,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
                 .set({ 
                   status: 'failed', 
                   sentAt: new Date(),
-                  failureReason: 'Email delivery failed'
+                  failureReason: 'Domain not verified with email service'
                 })
                 .where(eq(outreachEmails.id, email.id));
               

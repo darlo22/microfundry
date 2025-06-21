@@ -11,6 +11,7 @@ interface EmailParams {
   subject: string;
   html: string;
   from?: string;
+  replyTo?: string;
   headers?: Record<string, string>;
 }
 
@@ -25,6 +26,7 @@ export class EmailService {
         subject: params.subject,
         html: params.html,
         text: this.extractTextFromHtml(params.html),
+        reply_to: params.replyTo,
         headers: {
           'X-Mailer': 'Fundry Platform v1.0',
           'List-Unsubscribe': '<mailto:unsubscribe@microfundry.com?subject=unsubscribe>',
@@ -53,6 +55,13 @@ export class EmailService {
 
       const result = await resend.emails.send(emailData);
       console.log('Email sent successfully:', result);
+      
+      // Check if Resend returned an error
+      if (result.error) {
+        console.error('Resend API error:', result.error);
+        return false;
+      }
+      
       return true;
     } catch (error) {
       console.error('Failed to send email:', error);

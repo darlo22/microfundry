@@ -6134,50 +6134,74 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       }
 
       const { source = 'all', search, tags, limit = 50 } = req.query;
+      const limitNum = parseInt(limit as string) || 50;
       const searchTerm = search ? (search as string).toLowerCase() : '';
 
       let investors = [];
 
-      // Use raw SQL to avoid Drizzle ORM issues
+      // Get directory investors with safer approach
       if (source === 'all' || source === 'directory') {
         try {
-          const directoryQuery = `
-            SELECT id, name, email, company, location, bio, 'directory' as source
-            FROM investor_directory 
-            WHERE is_active = true
-            ${searchTerm ? `AND (LOWER(name) LIKE '%${searchTerm}%' OR LOWER(email) LIKE '%${searchTerm}%' OR LOWER(company) LIKE '%${searchTerm}%')` : ''}
-            LIMIT ${Math.floor(parseInt(limit as string) / 2)}
-          `;
-          
-          const directoryResult = await pool.query(directoryQuery);
-          investors.push(...directoryResult.rows);
+          const client = await pool.connect();
+          try {
+            let directoryQuery = `
+              SELECT id, name, email, company, location, bio, 'directory' as source
+              FROM investor_directory 
+              WHERE is_active = true
+            `;
+            
+            const queryParams = [];
+            if (searchTerm) {
+              directoryQuery += ` AND (LOWER(name) LIKE $1 OR LOWER(email) LIKE $1 OR LOWER(company) LIKE $1)`;
+              queryParams.push(`%${searchTerm}%`);
+            }
+            
+            directoryQuery += ` LIMIT ${Math.floor(limitNum / 2)}`;
+            
+            const directoryResult = await client.query(directoryQuery, queryParams);
+            investors.push(...directoryResult.rows);
+          } finally {
+            client.release();
+          }
         } catch (dirError) {
           console.error('Error fetching directory investors:', dirError);
         }
       }
 
+      // Get platform investors with safer approach
       if (source === 'all' || source === 'platform') {
         try {
-          const platformQuery = `
-            SELECT 
-              id, 
-              CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as name,
-              email,
-              company,
-              CONCAT(COALESCE(city, ''), CASE WHEN city IS NOT NULL AND country IS NOT NULL THEN ', ' ELSE '' END, COALESCE(country, '')) as location,
-              bio,
-              'platform' as source
-            FROM users 
-            WHERE user_type = 'investor'
-            ${searchTerm ? `AND (LOWER(email) LIKE '%${searchTerm}%' OR LOWER(company) LIKE '%${searchTerm}%' OR LOWER(first_name) LIKE '%${searchTerm}%' OR LOWER(last_name) LIKE '%${searchTerm}%')` : ''}
-            LIMIT ${Math.floor(parseInt(limit as string) / 2)}
-          `;
-          
-          const platformResult = await pool.query(platformQuery);
-          investors.push(...platformResult.rows.map(inv => ({
-            ...inv,
-            name: inv.name.trim() || inv.email
-          })));
+          const client = await pool.connect();
+          try {
+            let platformQuery = `
+              SELECT 
+                id, 
+                CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as name,
+                email,
+                company,
+                CONCAT(COALESCE(city, ''), CASE WHEN city IS NOT NULL AND country IS NOT NULL THEN ', ' ELSE '' END, COALESCE(country, '')) as location,
+                bio,
+                'platform' as source
+              FROM users 
+              WHERE user_type = 'investor'
+            `;
+            
+            const queryParams = [];
+            if (searchTerm) {
+              platformQuery += ` AND (LOWER(email) LIKE $1 OR LOWER(company) LIKE $1 OR LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1)`;
+              queryParams.push(`%${searchTerm}%`);
+            }
+            
+            platformQuery += ` LIMIT ${Math.floor(limitNum / 2)}`;
+            
+            const platformResult = await client.query(platformQuery, queryParams);
+            investors.push(...platformResult.rows.map(inv => ({
+              ...inv,
+              name: inv.name.trim() || inv.email
+            })));
+          } finally {
+            client.release();
+          }
         } catch (platError) {
           console.error('Error fetching platform investors:', platError);
         }

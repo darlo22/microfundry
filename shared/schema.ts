@@ -881,6 +881,38 @@ export type InsertFounderInvestorList = typeof founderInvestorLists.$inferInsert
 export type EmailRateLimit = typeof emailRateLimiting.$inferSelect;
 export type InsertEmailRateLimit = typeof emailRateLimiting.$inferInsert;
 
+// Email Replies Table for tracking investor responses
+export const emailReplies = pgTable("email_replies", {
+  id: serial("id").primaryKey(),
+  originalEmailId: integer("original_email_id").references(() => outreachEmails.id, { onDelete: "cascade" }),
+  founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  senderEmail: varchar("sender_email").notNull(),
+  senderName: varchar("sender_name"),
+  subject: varchar("subject").notNull(),
+  content: text("content").notNull(),
+  isRead: boolean("is_read").default(false),
+  replyType: varchar("reply_type", { enum: ["interested", "not_interested", "request_info", "question", "other"] }).default("other"),
+  tags: text("tags").array(),
+  receivedAt: timestamp("received_at").defaultNow(),
+  readAt: timestamp("read_at"),
+  archivedAt: timestamp("archived_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const emailRepliesRelations = relations(emailReplies, ({ one }) => ({
+  originalEmail: one(outreachEmails, {
+    fields: [emailReplies.originalEmailId],
+    references: [outreachEmails.id],
+  }),
+  founder: one(users, {
+    fields: [emailReplies.founderId],
+    references: [users.id],
+  }),
+}));
+
+export type EmailReply = typeof emailReplies.$inferSelect;
+export type InsertEmailReply = typeof emailReplies.$inferInsert;
+
 // Schema validation for forms
 export const insertInvestorDirectorySchema = createInsertSchema(investorDirectory).omit({
   id: true,

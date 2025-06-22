@@ -18,7 +18,7 @@ import path from "path";
 import * as XLSX from 'xlsx';
 import { TwoFactorService } from "./twoFactorService";
 import { emailService } from "./services/email";
-import { eq, and, gt, sql, desc, or, ne, inArray, gte, lt, lte } from "drizzle-orm";
+import { eq, and, gt, sql, desc, or, ne, inArray, gte, lt, lte, isNull, isNotNull } from "drizzle-orm";
 import { 
   emailVerificationTokens, 
   passwordResetTokens,
@@ -42,7 +42,8 @@ import {
   outreachEmails,
   emailTemplates,
   founderInvestorLists,
-  emailRateLimiting
+  emailRateLimiting,
+  emailReplies
 } from "@shared/schema";
 
 // Create table aliases for easier reference
@@ -6949,6 +6950,294 @@ ${emailSettings[0].signature || ''}`
     } catch (error) {
       console.error('Error fetching campaign analytics:', error);
       res.status(500).json({ message: 'Failed to fetch campaign analytics' });
+    }
+  });
+
+  // Email Reply Management Routes
+  
+  // Get all email replies for a founder
+  app.get('/api/founder/email-replies', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { status, replyType, page = 1, limit = 20 } = req.query;
+      const offset = (parseInt(page) - 1) * parseInt(limit);
+
+      let query = db
+        .select({
+          id: emailReplies.id,
+          originalEmailId: emailReplies.originalEmailId,
+          senderEmail: emailReplies.senderEmail,
+          senderName: emailReplies.senderName,
+          subject: emailReplies.subject,
+          content: emailReplies.content,
+          isRead: emailReplies.isRead,
+          replyType: emailReplies.replyType,
+          tags: emailReplies.tags,
+          receivedAt: emailReplies.receivedAt,
+          readAt: emailReplies.readAt,
+          archivedAt: emailReplies.archivedAt,
+          originalSubject: outreachEmails.subject,
+          originalRecipient: outreachEmails.recipientEmail,
+          campaignName: campaigns.companyName,
+        })
+        .from(emailReplies)
+        .leftJoin(outreachEmails, eq(emailReplies.originalEmailId, outreachEmails.id))
+        .leftJoin(emailCampaigns, eq(outreachEmails.emailCampaignId, emailCampaigns.id))
+        .leftJoin(campaigns, eq(emailCampaigns.campaignId, campaigns.id))
+        .where(eq(emailReplies.founderId, req.user.id));
+
+      if (status === 'unread') {
+        query = query.where(eq(emailReplies.isRead, false));
+      } else if (status === 'archived') {
+        query = query.where(isNotNull(emailReplies.archivedAt));
+      } else if (status === 'active') {
+        query = query.where(isNull(emailReplies.archivedAt));
+      }
+
+      if (replyType && replyType !== 'all') {
+        query = query.where(eq(emailReplies.replyType, replyType));
+      }
+
+      const replies = await query
+        .orderBy(emailReplies.receivedAt)
+        .limit(parseInt(limit))
+        .offset(offset);
+
+      // Get total count for pagination
+      const totalQuery = db
+        .select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, req.user.id));
+
+      if (status === 'unread') {
+        totalQuery.where(eq(emailReplies.isRead, false));
+      } else if (status === 'archived') {
+        totalQuery.where(isNotNull(emailReplies.archivedAt));
+      } else if (status === 'active') {
+        totalQuery.where(isNull(emailReplies.archivedAt));
+      }
+
+      if (replyType && replyType !== 'all') {
+        totalQuery.where(eq(emailReplies.replyType, replyType));
+      }
+
+      const [{ count }] = await totalQuery;
+
+      res.json({
+        replies,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: parseInt(count),
+          pages: Math.ceil(parseInt(count) / parseInt(limit))
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching email replies:', error);
+      res.status(500).json({ message: 'Failed to fetch email replies' });
+    }
+  });
+
+  // Mark email reply as read
+  app.patch('/api/founder/email-replies/:id/read', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { id } = req.params;
+
+      // Verify the reply belongs to the founder
+      const reply = await db
+        .select()
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.id, parseInt(id)),
+          eq(emailReplies.founderId, req.user.id)
+        ))
+        .limit(1);
+
+      if (reply.length === 0) {
+        return res.status(404).json({ message: 'Email reply not found' });
+      }
+
+      const [updatedReply] = await db
+        .update(emailReplies)
+        .set({ 
+          isRead: true, 
+          readAt: new Date() 
+        })
+        .where(eq(emailReplies.id, parseInt(id)))
+        .returning();
+
+      res.json(updatedReply);
+    } catch (error) {
+      console.error('Error marking reply as read:', error);
+      res.status(500).json({ message: 'Failed to mark reply as read' });
+    }
+  });
+
+  // Archive/unarchive email reply
+  app.patch('/api/founder/email-replies/:id/archive', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { id } = req.params;
+      const { archived } = req.body;
+
+      // Verify the reply belongs to the founder
+      const reply = await db
+        .select()
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.id, parseInt(id)),
+          eq(emailReplies.founderId, req.user.id)
+        ))
+        .limit(1);
+
+      if (reply.length === 0) {
+        return res.status(404).json({ message: 'Email reply not found' });
+      }
+
+      const [updatedReply] = await db
+        .update(emailReplies)
+        .set({ 
+          archivedAt: archived ? new Date() : null
+        })
+        .where(eq(emailReplies.id, parseInt(id)))
+        .returning();
+
+      res.json(updatedReply);
+    } catch (error) {
+      console.error('Error archiving reply:', error);
+      res.status(500).json({ message: 'Failed to archive reply' });
+    }
+  });
+
+  // Update reply type and tags
+  app.patch('/api/founder/email-replies/:id', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { id } = req.params;
+      const { replyType, tags } = req.body;
+
+      // Verify the reply belongs to the founder
+      const reply = await db
+        .select()
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.id, parseInt(id)),
+          eq(emailReplies.founderId, req.user.id)
+        ))
+        .limit(1);
+
+      if (reply.length === 0) {
+        return res.status(404).json({ message: 'Email reply not found' });
+      }
+
+      const updateData = {};
+      if (replyType) updateData.replyType = replyType;
+      if (tags) updateData.tags = tags;
+
+      const [updatedReply] = await db
+        .update(emailReplies)
+        .set(updateData)
+        .where(eq(emailReplies.id, parseInt(id)))
+        .returning();
+
+      res.json(updatedReply);
+    } catch (error) {
+      console.error('Error updating reply:', error);
+      res.status(500).json({ message: 'Failed to update reply' });
+    }
+  });
+
+  // Get reply statistics for founder dashboard
+  app.get('/api/founder/email-replies/stats', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const stats = await db
+        .select({
+          total: sql`count(*)`,
+          unread: sql`count(*) filter (where is_read = false)`,
+          interested: sql`count(*) filter (where reply_type = 'interested')`,
+          notInterested: sql`count(*) filter (where reply_type = 'not_interested')`,
+          requestInfo: sql`count(*) filter (where reply_type = 'request_info')`,
+          questions: sql`count(*) filter (where reply_type = 'question')`,
+          archived: sql`count(*) filter (where archived_at is not null)`,
+        })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, req.user.id));
+
+      res.json(stats[0]);
+    } catch (error) {
+      console.error('Error fetching reply stats:', error);
+      res.status(500).json({ message: 'Failed to fetch reply stats' });
+    }
+  });
+
+  // Simulate receiving an email reply (for testing purposes)
+  app.post('/api/founder/email-replies/simulate', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { originalEmailId, senderEmail, senderName, subject, content, replyType } = req.body;
+
+      // Verify the original email belongs to the founder
+      const originalEmail = await db
+        .select()
+        .from(outreachEmails)
+        .leftJoin(emailCampaigns, eq(outreachEmails.emailCampaignId, emailCampaigns.id))
+        .where(and(
+          eq(outreachEmails.id, originalEmailId),
+          eq(emailCampaigns.founderId, req.user.id)
+        ))
+        .limit(1);
+
+      if (originalEmail.length === 0) {
+        return res.status(404).json({ message: 'Original email not found' });
+      }
+
+      const [newReply] = await db
+        .insert(emailReplies)
+        .values({
+          originalEmailId,
+          founderId: req.user.id,
+          senderEmail,
+          senderName,
+          subject,
+          content,
+          replyType: replyType || 'other',
+          receivedAt: new Date(),
+        })
+        .returning();
+
+      // Create notification for the founder
+      await db.insert(notifications).values({
+        userId: req.user.id,
+        type: 'email_reply',
+        title: 'New Email Reply',
+        message: `You received a reply from ${senderName || senderEmail}`,
+        metadata: JSON.stringify({ replyId: newReply.id }),
+      });
+
+      res.json(newReply);
+    } catch (error) {
+      console.error('Error simulating email reply:', error);
+      res.status(500).json({ message: 'Failed to simulate email reply' });
     }
   });
 

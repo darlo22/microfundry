@@ -19,7 +19,7 @@ export default function Landing() {
   const [showInvestorModal, setShowInvestorModal] = useState(false);
   const [defaultUserType, setDefaultUserType] = useState<"founder" | "investor" | undefined>(undefined);
 
-  console.log('Landing component rendering', { user, isAuthenticated });
+
 
   // Check URL parameters to auto-open investor onboarding
   useEffect(() => {

@@ -6718,10 +6718,16 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         let deliveredCount = 0;
         
         // Send emails using actual email service
-        for (const email of emails) {
+        for (let i = 0; i < emails.length; i++) {
+          const email = emails[i];
           try {
+            // Validate email address format
+            if (!email.recipientEmail || !email.recipientEmail.includes('@')) {
+              throw new Error('Invalid email address format');
+            }
+
             const emailSent = await emailService.sendEmail({
-              to: email.recipientEmail,
+              to: email.recipientEmail.trim(),
               from: `${emailSettings[0].displayName} <support@microfundry.com>`,
               replyTo: emailSettings[0].verifiedEmail,
               subject: email.personalizedSubject,

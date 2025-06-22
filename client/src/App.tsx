@@ -4,9 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { ErrorBoundary } from "@/components/error-boundary";
 import Landing from "@/pages/landing";
-import SimpleLanding from "@/components/simple-landing";
 import Home from "@/pages/home";
 import About from "@/pages/about";
 import Pricing from "@/pages/pricing";
@@ -45,11 +43,7 @@ import ResetPassword from "@/pages/reset-password";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  console.log('Router component starting');
-  
   const { isAuthenticated, isLoading, user } = useAuth();
-  
-  console.log('Router auth state:', { isAuthenticated, isLoading, user: user?.id });
 
   // Render content immediately, don't wait for auth check
   // This prevents infinite loading on public pages
@@ -57,7 +51,7 @@ function Router() {
   return (
     <Switch>
       {/* Public routes always accessible */}
-      <Route path="/landing" component={SimpleLanding} />
+      <Route path="/landing" component={Landing} />
       <Route path="/about" component={About} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/browse-campaigns" component={BrowseCampaigns} />
@@ -108,35 +102,25 @@ function Router() {
       
       {/* Root path handling */}
       <Route path="/">
-        <SimpleLanding />
+        <Landing />
       </Route>
       
       {/* Catch all routes */}
       <Route>
-        {!isAuthenticated ? <SimpleLanding /> : <NotFound />}
+        {!isAuthenticated ? <Landing /> : <NotFound />}
       </Route>
     </Switch>
   );
 }
 
 function App() {
-  console.log('App component starting to render');
-  
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <ErrorBoundary>
-          <TooltipProvider>
-            <ErrorBoundary>
-              <Toaster />
-              <ErrorBoundary>
-                <Router />
-              </ErrorBoundary>
-            </ErrorBoundary>
-          </TooltipProvider>
-        </ErrorBoundary>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 

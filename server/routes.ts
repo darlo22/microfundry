@@ -6989,27 +6989,8 @@ ${emailSettings[0].signature || ''}`
       const offset = (parseInt(page) - 1) * parseInt(limit);
 
       let query = db
-        .select({
-          id: emailReplies.id,
-          originalEmailId: emailReplies.originalEmailId,
-          senderEmail: emailReplies.senderEmail,
-          senderName: emailReplies.senderName,
-          subject: emailReplies.subject,
-          content: emailReplies.content,
-          isRead: emailReplies.isRead,
-          replyType: emailReplies.replyType,
-          tags: emailReplies.tags,
-          receivedAt: emailReplies.receivedAt,
-          readAt: emailReplies.readAt,
-          archivedAt: emailReplies.archivedAt,
-          originalSubject: outreachEmails.subject,
-          originalRecipient: outreachEmails.recipientEmail,
-          campaignName: campaigns.companyName,
-        })
+        .select()
         .from(emailReplies)
-        .leftJoin(outreachEmails, eq(emailReplies.originalEmailId, outreachEmails.id))
-        .leftJoin(emailCampaigns, eq(outreachEmails.emailCampaignId, emailCampaigns.id))
-        .leftJoin(campaigns, eq(emailCampaigns.campaignId, campaigns.id))
         .where(eq(emailReplies.founderId, req.user.id));
 
       if (status === 'unread') {
@@ -7028,6 +7009,25 @@ ${emailSettings[0].signature || ''}`
         .orderBy(emailReplies.receivedAt)
         .limit(parseInt(limit))
         .offset(offset);
+
+      // Transform replies to include required fields for frontend compatibility
+      const transformedReplies = replies.map(reply => ({
+        id: reply.id,
+        originalEmailId: reply.originalEmailId,
+        senderEmail: reply.senderEmail || reply.replyEmail,
+        senderName: reply.senderName || reply.replyName,
+        subject: reply.subject,
+        content: reply.content,
+        isRead: reply.isRead,
+        replyType: reply.replyType,
+        tags: reply.tags || [],
+        receivedAt: reply.receivedAt,
+        readAt: reply.readAt,
+        archivedAt: reply.archivedAt,
+        originalSubject: reply.subject, // Use reply subject as fallback
+        originalRecipient: reply.senderEmail || reply.replyEmail,
+        campaignName: reply.campaignName || 'Unknown Campaign'
+      }));
 
       // Get total count for pagination
       const totalQuery = db
@@ -7050,7 +7050,7 @@ ${emailSettings[0].signature || ''}`
       const [{ count }] = await totalQuery;
 
       res.json({
-        replies,
+        replies: transformedReplies,
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),
@@ -7241,6 +7241,8 @@ ${emailSettings[0].signature || ''}`
           founderId: req.user.id,
           replyEmail: senderEmail,
           replyName: senderName,
+          senderEmail: senderEmail,
+          senderName: senderName,
           subject,
           content,
           replyType: replyType || 'other',

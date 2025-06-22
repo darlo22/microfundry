@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/landing";
+import MinimalTest from "@/components/minimal-test";
 import Home from "@/pages/home";
 import About from "@/pages/about";
 import Pricing from "@/pages/pricing";
@@ -43,7 +44,10 @@ import ResetPassword from "@/pages/reset-password";
 import NotFound from "@/pages/not-found";
 
 function Router() {
+  console.log('Router component initializing');
+  
   const { isAuthenticated, isLoading, user } = useAuth();
+  console.log('Auth hook called successfully:', { isAuthenticated, isLoading, user: user?.id });
 
   // Render content immediately, don't wait for auth check
   // This prevents infinite loading on public pages
@@ -102,18 +106,20 @@ function Router() {
       
       {/* Root path handling */}
       <Route path="/">
-        <Landing />
+        <MinimalTest />
       </Route>
       
       {/* Catch all routes */}
       <Route>
-        {!isAuthenticated ? <Landing /> : <NotFound />}
+        {!isAuthenticated ? <MinimalTest /> : <NotFound />}
       </Route>
     </Switch>
   );
 }
 
 function App() {
+  console.log('App component initializing');
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

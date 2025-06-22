@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
+import { setupProduction } from "./production";
 
 // Add process-level error handlers to prevent crashes
 process.on('uncaughtException', (error) => {
@@ -104,24 +105,8 @@ process.on('unhandledRejection', (reason, promise) => {
     
     if (isProduction) {
       // Production: Serve built static files
-      const distPath = path.resolve(process.cwd(), 'dist');
-      const clientPath = path.resolve(distPath, 'client');
-      
-      // Serve static files from dist/client
-      if (fs.existsSync(clientPath)) {
-        app.use(express.static(clientPath));
-        console.log('✅ Serving production build from dist/client');
-        
-        // Fallback route for client-side routing
-        app.get('*', (req, res) => {
-          const indexPath = path.join(clientPath, 'index.html');
-          if (fs.existsSync(indexPath)) {
-            res.sendFile(indexPath);
-          } else {
-            res.status(404).send('Application not built. Please run npm run build first.');
-          }
-        });
-      } else {
+      const productionReady = setupProduction(app);
+      if (!productionReady) {
         console.log('⚠️ Production build not found, falling back to development mode');
         // Setup Vite development server as fallback
         await setupVite(app, server);

@@ -4,33 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
     <title>Fundry - Micro Investment Platform</title>
-    <script>
-      // Force clear any cached content and ensure React app loads
-      if (document.body && document.body.innerHTML.includes('Production Test')) {
-        document.body.innerHTML = '<div id="root"></div>';
-      }
-      // Clear localStorage cache that might affect the application
-      if (typeof Storage !== "undefined") {
-        localStorage.removeItem('fundry-cache');
-        sessionStorage.clear();
-      }
-    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Additional safety check after page load
-      window.addEventListener('DOMContentLoaded', function() {
-        if (!document.querySelector('#root div')) {
-          console.log('React app not loaded, forcing reload');
-          location.reload();
-        }
-      });
-    </script>
   </body>
 </html>

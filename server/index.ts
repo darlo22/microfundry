@@ -22,6 +22,15 @@ app.set('env', 'development');
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Mount static files before any other middleware
+app.use('/uploads', express.static('uploads', {
+  setHeaders: (res, path, stat) => {
+    if (stat.size > 1024 * 1024) {
+      res.setHeader('Content-Type', 'video/mp4');
+    }
+  },
+}));
+
 // Serve static files from uploads directory with proper MIME types
 app.use('/uploads', express.static('uploads', {
   setHeaders: (res, path, stat) => {

@@ -57,7 +57,7 @@ function Router() {
   return (
     <Switch>
       {/* Public routes always accessible */}
-      <Route path="/landing" component={Landing} />
+      <Route path="/landing" component={SimpleLanding} />
       <Route path="/about" component={About} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/browse-campaigns" component={BrowseCampaigns} />
@@ -108,12 +108,12 @@ function Router() {
       
       {/* Root path handling */}
       <Route path="/">
-        <Landing />
+        <SimpleLanding />
       </Route>
       
       {/* Catch all routes */}
       <Route>
-        {!isAuthenticated ? <Landing /> : <NotFound />}
+        {!isAuthenticated ? <SimpleLanding /> : <NotFound />}
       </Route>
     </Switch>
   );

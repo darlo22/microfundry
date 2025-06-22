@@ -632,7 +632,7 @@ Founder, {companyName}`
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs defaultValue="compose" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 bg-white/10 backdrop-blur-sm border-orange-200">
             <TabsTrigger value="compose" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Compose Campaign</TabsTrigger>
             <TabsTrigger value="directory" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Investor Directory</TabsTrigger>

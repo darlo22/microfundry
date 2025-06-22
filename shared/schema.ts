@@ -888,6 +888,8 @@ export const emailReplies = pgTable("email_replies", {
   founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   replyEmail: varchar("reply_email").notNull(),
   replyName: varchar("reply_name"),
+  senderEmail: varchar("sender_email").notNull(),
+  senderName: varchar("sender_name"),
   subject: varchar("subject").notNull(),
   content: text("content").notNull(),
   isRead: boolean("is_read").default(false),
@@ -895,6 +897,8 @@ export const emailReplies = pgTable("email_replies", {
   tags: text("tags").array(),
   campaignName: varchar("campaign_name"),
   receivedAt: timestamp("received_at").defaultNow(),
+  readAt: timestamp("read_at"),
+  archivedAt: timestamp("archived_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

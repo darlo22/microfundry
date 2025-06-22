@@ -109,6 +109,31 @@ process.on('unhandledRejection', (reason, promise) => {
     // Always use Vite development server for Replit deployment
     await setupVite(app, server);
     console.log('✅ Running in development mode with Vite server');
+    
+    // Override any remaining routing issues with a comprehensive catch-all
+    app.get('*', (req, res, next) => {
+      // Skip API routes and uploads
+      if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
+        return next();
+      }
+      
+      // For root and client routes, send the basic HTML structure
+      res.status(200).send(`
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Fundry - Micro Investment Platform</title>
+          </head>
+          <body>
+            <div id="root"></div>
+            <script type="module" src="/src/main.tsx"></script>
+          </body>
+        </html>
+      `);
+    });
 
     // ALWAYS serve the app on port 5000
     // this serves both the API and the client.

@@ -18,7 +18,7 @@ import path from "path";
 import * as XLSX from 'xlsx';
 import { TwoFactorService } from "./twoFactorService";
 import { emailService } from "./services/email";
-import { eq, and, gt, sql, desc, or, ne, inArray, gte, lt, lte } from "drizzle-orm";
+import { eq, and, gt, sql, desc, or, ne, inArray, gte, lt, lte, count, ilike, isNotNull } from "drizzle-orm";
 import { 
   emailVerificationTokens, 
   passwordResetTokens,
@@ -42,7 +42,10 @@ import {
   outreachEmails,
   emailTemplates,
   founderInvestorLists,
-  emailRateLimiting
+  emailRateLimiting,
+  emailReplies,
+  emailResponses,
+  contactManagement
 } from "@shared/schema";
 
 // Create table aliases for easier reference

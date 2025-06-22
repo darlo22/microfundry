@@ -35,6 +35,7 @@ import AdminLogin from "@/pages/admin-login";
 import AdminKYCManagement from "@/pages/admin-kyc-management";
 import AdminInvestorOutreach from "@/pages/admin-investor-outreach";
 import AdminOutreachReport from "@/pages/admin-outreach-report";
+import EmailReplies from "@/pages/email-replies";
 import CampaignView from "@/pages/campaign-view";
 import EmailVerification from "@/pages/email-verification";
 import InvestmentSuccess from "@/pages/investment-success";
@@ -91,6 +92,8 @@ function Router() {
           <Route path="/founder/messages" component={FounderMessages} />
           <Route path="/founder/outreach" component={FounderOutreach} />
           <Route path="/founder-outreach" component={FounderOutreach} />
+          <Route path="/founder/email-replies" component={EmailReplies} />
+          <Route path="/email-replies" component={EmailReplies} />
           <Route path="/payment-withdrawal" component={PaymentWithdrawal} />
           <Route path="/investor-dashboard" component={InvestorDashboard} />
           <Route path="/investor/dashboard" component={InvestorDashboard} />

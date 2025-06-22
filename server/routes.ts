@@ -114,10 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  // Redirect root to landing page for proper React routing
-  app.get('/', (req, res) => {
-    res.redirect('/landing');
-  });
+  // Remove redirect - let React handle all routing
 
   // Enhanced video streaming endpoint with improved buffering
   app.get('/api/stream/:filename', (req: express.Request, res: express.Response) => {

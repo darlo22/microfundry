@@ -7572,5 +7572,412 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Email Replies and Responses Management API endpoints
+  app.get("/api/email-replies", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { status, category, priority, page = 1, limit = 20, search } = req.query;
+      const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+
+      let query = db
+        .select({
+          id: emailReplies.id,
+          outreachEmailId: emailReplies.outreachEmailId,
+          campaignId: emailReplies.campaignId,
+          senderEmail: emailReplies.senderEmail,
+          senderName: emailReplies.senderName,
+          subject: emailReplies.subject,
+          message: emailReplies.message,
+          sentiment: emailReplies.sentiment,
+          category: emailReplies.category,
+          priority: emailReplies.priority,
+          isRead: emailReplies.isRead,
+          isArchived: emailReplies.isArchived,
+          isStarred: emailReplies.isStarred,
+          tags: emailReplies.tags,
+          receivedAt: emailReplies.receivedAt,
+          respondedAt: emailReplies.respondedAt,
+          campaignTitle: campaigns.title,
+        })
+        .from(emailReplies)
+        .leftJoin(campaigns, eq(emailReplies.campaignId, campaigns.id))
+        .where(eq(emailReplies.founderId, req.user.id))
+        .orderBy(desc(emailReplies.receivedAt));
+
+      if (status === 'unread') {
+        query = query.where(and(eq(emailReplies.founderId, req.user.id), eq(emailReplies.isRead, false)));
+      }
+      if (status === 'starred') {
+        query = query.where(and(eq(emailReplies.founderId, req.user.id), eq(emailReplies.isStarred, true)));
+      }
+      if (status === 'archived') {
+        query = query.where(and(eq(emailReplies.founderId, req.user.id), eq(emailReplies.isArchived, true)));
+      }
+      if (category) {
+        query = query.where(and(eq(emailReplies.founderId, req.user.id), eq(emailReplies.category, category as string)));
+      }
+      if (priority) {
+        query = query.where(and(eq(emailReplies.founderId, req.user.id), eq(emailReplies.priority, priority as string)));
+      }
+      if (search) {
+        query = query.where(
+          and(
+            eq(emailReplies.founderId, req.user.id),
+            or(
+              ilike(emailReplies.subject, `%${search}%`),
+              ilike(emailReplies.senderEmail, `%${search}%`),
+              ilike(emailReplies.senderName, `%${search}%`),
+              ilike(emailReplies.message, `%${search}%`)
+            )
+          )
+        );
+      }
+
+      const replies = await query.limit(parseInt(limit as string)).offset(offset);
+
+      // Get total count for pagination
+      const totalCount = await db
+        .select({ count: count() })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, req.user.id));
+
+      res.json({
+        replies,
+        pagination: {
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          total: totalCount[0]?.count || 0,
+          totalPages: Math.ceil((totalCount[0]?.count || 0) / parseInt(limit as string))
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching email replies:', error);
+      res.status(500).json({ message: 'Failed to fetch email replies' });
+    }
+  });
+
+  app.get("/api/email-replies/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { id } = req.params;
+      const [reply] = await db
+        .select({
+          id: emailReplies.id,
+          outreachEmailId: emailReplies.outreachEmailId,
+          campaignId: emailReplies.campaignId,
+          senderEmail: emailReplies.senderEmail,
+          senderName: emailReplies.senderName,
+          subject: emailReplies.subject,
+          message: emailReplies.message,
+          messageId: emailReplies.messageId,
+          inReplyTo: emailReplies.inReplyTo,
+          sentiment: emailReplies.sentiment,
+          category: emailReplies.category,
+          priority: emailReplies.priority,
+          isRead: emailReplies.isRead,
+          isArchived: emailReplies.isArchived,
+          isStarred: emailReplies.isStarred,
+          tags: emailReplies.tags,
+          attachments: emailReplies.attachments,
+          receivedAt: emailReplies.receivedAt,
+          respondedAt: emailReplies.respondedAt,
+          campaignTitle: campaigns.title,
+          originalEmail: {
+            subject: outreachEmails.personalizedSubject,
+            message: outreachEmails.personalizedMessage,
+            sentAt: outreachEmails.sentAt,
+          }
+        })
+        .from(emailReplies)
+        .leftJoin(campaigns, eq(emailReplies.campaignId, campaigns.id))
+        .leftJoin(outreachEmails, eq(emailReplies.outreachEmailId, outreachEmails.id))
+        .where(and(eq(emailReplies.id, parseInt(id)), eq(emailReplies.founderId, req.user.id)));
+
+      if (!reply) {
+        return res.status(404).json({ message: 'Email reply not found' });
+      }
+
+      // Get responses to this reply
+      const responses = await db
+        .select()
+        .from(emailResponses)
+        .where(eq(emailResponses.emailReplyId, parseInt(id)))
+        .orderBy(desc(emailResponses.createdAt));
+
+      res.json({ reply, responses });
+    } catch (error) {
+      console.error('Error fetching email reply:', error);
+      res.status(500).json({ message: 'Failed to fetch email reply' });
+    }
+  });
+
+  app.patch("/api/email-replies/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { id } = req.params;
+      const { isRead, isStarred, isArchived, category, priority, sentiment, tags, notes } = req.body;
+
+      const updateData: any = {};
+      if (typeof isRead !== 'undefined') updateData.isRead = isRead;
+      if (typeof isStarred !== 'undefined') updateData.isStarred = isStarred;
+      if (typeof isArchived !== 'undefined') updateData.isArchived = isArchived;
+      if (category) updateData.category = category;
+      if (priority) updateData.priority = priority;
+      if (sentiment) updateData.sentiment = sentiment;
+      if (tags) updateData.tags = tags;
+      updateData.updatedAt = new Date();
+
+      const [updatedReply] = await db
+        .update(emailReplies)
+        .set(updateData)
+        .where(and(eq(emailReplies.id, parseInt(id)), eq(emailReplies.founderId, req.user.id)))
+        .returning();
+
+      if (!updatedReply) {
+        return res.status(404).json({ message: 'Email reply not found' });
+      }
+
+      res.json(updatedReply);
+    } catch (error) {
+      console.error('Error updating email reply:', error);
+      res.status(500).json({ message: 'Failed to update email reply' });
+    }
+  });
+
+  app.post("/api/email-replies/:id/respond", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { id } = req.params;
+      const { subject, message, scheduledFor } = req.body;
+
+      // Verify the reply belongs to the founder
+      const [reply] = await db
+        .select()
+        .from(emailReplies)
+        .where(and(eq(emailReplies.id, parseInt(id)), eq(emailReplies.founderId, req.user.id)));
+
+      if (!reply) {
+        return res.status(404).json({ message: 'Email reply not found' });
+      }
+
+      // Create the response
+      const [response] = await db
+        .insert(emailResponses)
+        .values({
+          emailReplyId: parseInt(id),
+          founderId: req.user.id,
+          subject,
+          message,
+          scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
+          status: scheduledFor ? 'draft' : 'sent',
+          sentAt: scheduledFor ? null : new Date(),
+        })
+        .returning();
+
+      // Update the reply as responded
+      await db
+        .update(emailReplies)
+        .set({ 
+          respondedAt: new Date(),
+          isRead: true,
+          updatedAt: new Date()
+        })
+        .where(eq(emailReplies.id, parseInt(id)));
+
+      // TODO: Implement actual email sending logic here
+      // For now, we'll mark it as sent if not scheduled
+      if (!scheduledFor) {
+        await db
+          .update(emailResponses)
+          .set({ status: 'sent', sentAt: new Date() })
+          .where(eq(emailResponses.id, response.id));
+      }
+
+      res.json(response);
+    } catch (error) {
+      console.error('Error creating email response:', error);
+      res.status(500).json({ message: 'Failed to create email response' });
+    }
+  });
+
+  app.get("/api/email-replies/stats", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const founderId = req.user.id;
+
+      // Get reply statistics
+      const totalReplies = await db
+        .select({ count: count() })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, founderId));
+
+      const unreadReplies = await db
+        .select({ count: count() })
+        .from(emailReplies)
+        .where(and(eq(emailReplies.founderId, founderId), eq(emailReplies.isRead, false)));
+
+      const starredReplies = await db
+        .select({ count: count() })
+        .from(emailReplies)
+        .where(and(eq(emailReplies.founderId, founderId), eq(emailReplies.isStarred, true)));
+
+      const respondedReplies = await db
+        .select({ count: count() })
+        .from(emailReplies)
+        .where(and(eq(emailReplies.founderId, founderId), isNotNull(emailReplies.respondedAt)));
+
+      // Get replies by category
+      const repliesByCategory = await db
+        .select({ 
+          category: emailReplies.category,
+          count: count()
+        })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, founderId))
+        .groupBy(emailReplies.category);
+
+      // Get replies by sentiment
+      const repliesBySentiment = await db
+        .select({ 
+          sentiment: emailReplies.sentiment,
+          count: count()
+        })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, founderId))
+        .groupBy(emailReplies.sentiment);
+
+      // Get recent reply trend (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const recentReplies = await db
+        .select({ count: count() })
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.founderId, founderId),
+          gte(emailReplies.receivedAt, thirtyDaysAgo)
+        ));
+
+      // Calculate response rate
+      const totalResponses = await db
+        .select({ count: count() })
+        .from(emailResponses)
+        .where(eq(emailResponses.founderId, founderId));
+
+      const responseRate = totalReplies[0]?.count > 0 
+        ? ((totalResponses[0]?.count || 0) / (totalReplies[0]?.count || 1) * 100).toFixed(1)
+        : '0';
+
+      res.json({
+        totalReplies: totalReplies[0]?.count || 0,
+        unreadReplies: unreadReplies[0]?.count || 0,
+        starredReplies: starredReplies[0]?.count || 0,
+        respondedReplies: respondedReplies[0]?.count || 0,
+        recentReplies: recentReplies[0]?.count || 0,
+        responseRate: parseFloat(responseRate),
+        repliesByCategory,
+        repliesBySentiment,
+      });
+    } catch (error) {
+      console.error('Error fetching email reply stats:', error);
+      res.status(500).json({ message: 'Failed to fetch email reply stats' });
+    }
+  });
+
+  // Contact Management API endpoints
+  app.get("/api/contacts", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { relationship, source, page = 1, limit = 20, search } = req.query;
+      const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+
+      let query = db
+        .select()
+        .from(contactManagement)
+        .where(eq(contactManagement.founderId, req.user.id))
+        .orderBy(desc(contactManagement.lastContactedAt));
+
+      if (relationship) {
+        query = query.where(and(eq(contactManagement.founderId, req.user.id), eq(contactManagement.relationship, relationship as string)));
+      }
+      if (source) {
+        query = query.where(and(eq(contactManagement.founderId, req.user.id), eq(contactManagement.source, source as string)));
+      }
+      if (search) {
+        query = query.where(
+          and(
+            eq(contactManagement.founderId, req.user.id),
+            or(
+              ilike(contactManagement.name, `%${search}%`),
+              ilike(contactManagement.email, `%${search}%`),
+              ilike(contactManagement.company, `%${search}%`)
+            )
+          )
+        );
+      }
+
+      const contacts = await query.limit(parseInt(limit as string)).offset(offset);
+
+      const totalCount = await db
+        .select({ count: count() })
+        .from(contactManagement)
+        .where(eq(contactManagement.founderId, req.user.id));
+
+      res.json({
+        contacts,
+        pagination: {
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          total: totalCount[0]?.count || 0,
+          totalPages: Math.ceil((totalCount[0]?.count || 0) / parseInt(limit as string))
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+      res.status(500).json({ message: 'Failed to fetch contacts' });
+    }
+  });
+
+  app.post("/api/contacts", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const contactData = {
+        ...req.body,
+        founderId: req.user.id,
+      };
+
+      const [contact] = await db
+        .insert(contactManagement)
+        .values(contactData)
+        .returning();
+
+      res.json(contact);
+    } catch (error) {
+      console.error('Error creating contact:', error);
+      res.status(500).json({ message: 'Failed to create contact' });
+    }
+  });
+
   return httpServer;
 }

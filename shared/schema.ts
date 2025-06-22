@@ -911,3 +911,170 @@ export const insertFounderInvestorListSchema = createInsertSchema(founderInvesto
   createdAt: true,
   updatedAt: true,
 });
+
+// Email Replies Table - Track responses from investors
+export const emailReplies = pgTable("email_replies", {
+  id: serial("id").primaryKey(),
+  outreachEmailId: integer("outreach_email_id").notNull().references(() => outreachEmails.id, { onDelete: "cascade" }),
+  founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  campaignId: integer("campaign_id").references(() => campaigns.id),
+  senderEmail: varchar("sender_email").notNull(),
+  senderName: varchar("sender_name"),
+  subject: varchar("subject").notNull(),
+  message: text("message").notNull(),
+  messageId: varchar("message_id"), // Email message ID for threading
+  inReplyTo: varchar("in_reply_to"), // Original message ID
+  sentiment: varchar("sentiment", { enum: ["positive", "negative", "neutral", "interested"] }),
+  category: varchar("category", { enum: ["interest", "question", "rejection", "meeting_request", "follow_up", "other"] }),
+  priority: varchar("priority", { enum: ["high", "medium", "low"] }).default("medium"),
+  isRead: boolean("is_read").default(false),
+  isArchived: boolean("is_archived").default(false),
+  isStarred: boolean("is_starred").default(false),
+  tags: text("tags").array(), // Custom tags for organization
+  attachments: jsonb("attachments"), // Array of attachment info
+  receivedAt: timestamp("received_at").notNull(),
+  respondedAt: timestamp("responded_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const emailRepliesRelations = relations(emailReplies, ({ one, many }) => ({
+  outreachEmail: one(outreachEmails, {
+    fields: [emailReplies.outreachEmailId],
+    references: [outreachEmails.id],
+  }),
+  founder: one(users, {
+    fields: [emailReplies.founderId],
+    references: [users.id],
+  }),
+  campaign: one(campaigns, {
+    fields: [emailReplies.campaignId],
+    references: [campaigns.id],
+  }),
+  responses: many(emailResponses),
+}));
+
+// Email Responses Table - Track founder's responses to investor replies
+export const emailResponses = pgTable("email_responses", {
+  id: serial("id").primaryKey(),
+  emailReplyId: integer("email_reply_id").notNull().references(() => emailReplies.id, { onDelete: "cascade" }),
+  founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  subject: varchar("subject").notNull(),
+  message: text("message").notNull(),
+  messageId: varchar("message_id"), // Email message ID
+  threadId: varchar("thread_id"), // Email thread ID
+  status: varchar("status", { enum: ["draft", "sent", "failed"] }).default("draft"),
+  sentAt: timestamp("sent_at"),
+  errorMessage: text("error_message"),
+  attachments: jsonb("attachments"), // Array of attachment info
+  scheduledFor: timestamp("scheduled_for"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const emailResponsesRelations = relations(emailResponses, ({ one }) => ({
+  emailReply: one(emailReplies, {
+    fields: [emailResponses.emailReplyId],
+    references: [emailReplies.id],
+  }),
+  founder: one(users, {
+    fields: [emailResponses.founderId],
+    references: [users.id],
+  }),
+}));
+
+// Email Analytics Table - Track detailed email metrics
+export const emailAnalytics = pgTable("email_analytics", {
+  id: serial("id").primaryKey(),
+  founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  emailCampaignId: integer("email_campaign_id").references(() => emailCampaigns.id),
+  outreachEmailId: integer("outreach_email_id").references(() => outreachEmails.id),
+  eventType: varchar("event_type", { enum: ["sent", "delivered", "opened", "clicked", "replied", "bounced", "unsubscribed"] }).notNull(),
+  eventData: jsonb("event_data"), // Additional event metadata
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  location: varchar("location"),
+  deviceType: varchar("device_type", { enum: ["desktop", "mobile", "tablet", "unknown"] }),
+  timestamp: timestamp("timestamp").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const emailAnalyticsRelations = relations(emailAnalytics, ({ one }) => ({
+  founder: one(users, {
+    fields: [emailAnalytics.founderId],
+    references: [users.id],
+  }),
+  emailCampaign: one(emailCampaigns, {
+    fields: [emailAnalytics.emailCampaignId],
+    references: [emailCampaigns.id],
+  }),
+  outreachEmail: one(outreachEmails, {
+    fields: [emailAnalytics.outreachEmailId],
+    references: [outreachEmails.id],
+  }),
+}));
+
+// Contact Management Table - Track investor contact information and interactions
+export const contactManagement = pgTable("contact_management", {
+  id: serial("id").primaryKey(),
+  founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  email: varchar("email").notNull(),
+  name: varchar("name"),
+  company: varchar("company"),
+  title: varchar("title"),
+  phone: varchar("phone"),
+  linkedinUrl: varchar("linkedin_url"),
+  source: varchar("source", { enum: ["directory", "platform", "manual", "import", "referral"] }).notNull(),
+  relationship: varchar("relationship", { enum: ["prospect", "contacted", "responded", "meeting_scheduled", "invested", "rejected"] }).default("prospect"),
+  investmentInterest: text("investment_interest"),
+  notes: text("notes"),
+  tags: text("tags").array(),
+  lastContactedAt: timestamp("last_contacted_at"),
+  lastResponseAt: timestamp("last_response_at"),
+  totalEmailsSent: integer("total_emails_sent").default(0),
+  totalRepliesReceived: integer("total_replies_received").default(0),
+  averageResponseTime: integer("average_response_time"), // in hours
+  isActive: boolean("is_active").default(true),
+  isBlacklisted: boolean("is_blacklisted").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const contactManagementRelations = relations(contactManagement, ({ one }) => ({
+  founder: one(users, {
+    fields: [contactManagement.founderId],
+    references: [users.id],
+  }),
+}));
+
+// Type exports for new tables
+export type EmailReply = typeof emailReplies.$inferSelect;
+export type InsertEmailReply = typeof emailReplies.$inferInsert;
+
+export type EmailResponse = typeof emailResponses.$inferSelect;
+export type InsertEmailResponse = typeof emailResponses.$inferInsert;
+
+export type EmailAnalytics = typeof emailAnalytics.$inferSelect;
+export type InsertEmailAnalytics = typeof emailAnalytics.$inferInsert;
+
+export type ContactManagement = typeof contactManagement.$inferSelect;
+export type InsertContactManagement = typeof contactManagement.$inferInsert;
+
+// Schema validation for forms
+export const insertEmailReplySchema = createInsertSchema(emailReplies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEmailResponseSchema = createInsertSchema(emailResponses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertContactManagementSchema = createInsertSchema(contactManagement).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});

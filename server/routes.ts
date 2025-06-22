@@ -6633,11 +6633,28 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       const { campaignId, subject, message, recipients, scheduledFor } = req.body;
 
-      if (!subject || !message || !recipients || !Array.isArray(recipients)) {
+      if (!subject || !message || !recipients) {
         return res.status(400).json({ message: 'Subject, message, and recipients are required' });
       }
 
-      if (recipients.length === 0 || recipients.length > 5) {
+      // Parse recipients - handle both array format and comma-separated email strings
+      let parsedRecipients = [];
+      
+      if (Array.isArray(recipients)) {
+        parsedRecipients = recipients;
+      } else if (typeof recipients === 'string') {
+        // Parse comma-separated email list
+        const emailList = recipients.split(',').map(email => email.trim()).filter(email => email.length > 0);
+        parsedRecipients = emailList.map(email => ({
+          email: email,
+          name: email.split('@')[0], // Use part before @ as name fallback
+          source: 'manual'
+        }));
+      } else {
+        return res.status(400).json({ message: 'Recipients must be an array or comma-separated email string' });
+      }
+
+      if (parsedRecipients.length === 0 || parsedRecipients.length > 5) {
         return res.status(400).json({ message: 'Must have 1-5 recipients per campaign' });
       }
 
@@ -6655,7 +6672,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         .limit(1);
 
       const currentUsage = rateLimit.length > 0 ? rateLimit[0].emailsSent : 0;
-      if (currentUsage + recipients.length > 30) {
+      if (currentUsage + parsedRecipients.length > 30) {
         return res.status(400).json({ 
           message: `Daily limit exceeded. You can send ${30 - currentUsage} more emails today.` 
         });
@@ -6680,7 +6697,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           campaignId: campaignId || null,
           subject,
           message,
-          recipientCount: recipients.length,
+          recipientCount: parsedRecipients.length,
           status: scheduledFor ? 'draft' : 'sending',
           scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
         })
@@ -6688,7 +6705,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       // Create individual emails
       const emails = [];
-      for (const recipient of recipients) {
+      for (const recipient of parsedRecipients) {
         const trackingId = nanoid();
         const personalizedSubject = subject.replace(/\{name\}/g, recipient.name || 'there');
         const personalizedMessage = message
@@ -6826,7 +6843,7 @@ ${emailSettings[0].signature || ''}`
           await db
             .update(emailRateLimiting)
             .set({ 
-              emailsSent: currentUsage + recipients.length,
+              emailsSent: currentUsage + parsedRecipients.length,
               lastEmailAt: new Date(),
               updatedAt: new Date()
             })
@@ -6837,13 +6854,13 @@ ${emailSettings[0].signature || ''}`
             .values({
               founderId: req.user.id,
               date: today,
-              emailsSent: recipients.length,
+              emailsSent: parsedRecipients.length,
               lastEmailAt: new Date(),
             });
         }
 
         // Send copies to platform investors' message center
-        for (const recipient of recipients) {
+        for (const recipient of parsedRecipients) {
           if (recipient.source === 'platform') {
             const platformUser = await db
               .select()

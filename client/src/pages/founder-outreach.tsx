@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { 
   Mail, 
   Users, 
@@ -96,13 +96,6 @@ interface RateLimit {
 export default function FounderOutreach() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [location] = useLocation();
-  
-  // Handle tab parameter from URL
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
-  const initialTab = urlParams.get('tab') || 'directory';
-  const [activeTab, setActiveTab] = useState(initialTab);
-  
   const [selectedInvestors, setSelectedInvestors] = useState<InvestorDirectory[]>([]);
   const [emailSubject, setEmailSubject] = useState("");
   const [emailMessage, setEmailMessage] = useState("");
@@ -275,83 +268,83 @@ export default function FounderOutreach() {
 
   const emailTemplateVariations = [
     {
-      subject: `Business Partnership Inquiry: {companyName} - {title}`,
+      subject: `Investment Opportunity: {companyName} - {title}`,
       message: `Hi {name},
 
 I hope this email finds you well.
 
-I'm writing to discuss a potential business partnership with {companyName}, a {businessSector} company developing innovative solutions in our industry.
+I'm excited to share an investment opportunity with you for {companyName}, a {businessSector} startup that's revolutionizing the industry.
 
-📋 **Company Overview:**
+🚀 **Campaign Overview:**
 • Company: {companyName}
-• Funding Target: {fundingGoal}
-• Minimum Partnership: {minimumInvestment}
+• Funding Goal: {fundingGoal}
+• Minimum Investment: {minimumInvestment}
 • Business Focus: {businessSector}
 
-💡 **Our Approach:**
+💡 **Why This Matters:**
 {description}
 
-🔗 **View Full Documentation:** {campaignUrl}
+🔗 **View Full Campaign:** {campaignUrl}
 
-We're structuring partnerships through SAFE agreements with favorable terms for early participants. This represents a strategic collaboration opportunity with a company positioned for sustainable growth.
+We're offering SAFE agreements with attractive terms for early investors. This is a limited-time opportunity to get in on the ground floor of what we believe will be a game-changing company.
 
-I'd appreciate the opportunity to discuss this business partnership further. Would you be available for a brief call this week?
+I'd love to discuss this opportunity with you further. Would you be available for a brief call this week?
 
 Best regards,
 {signature}
 
-P.S. Feel free to review all business details, including our operational plan, financial projections, and team information at the link above.`
+P.S. Feel free to review all the details, including our business plan, financials, and team information at the campaign link above.`
     },
     {
-      subject: `Strategic Business Partnership - {companyName} Growth Round`,
+      subject: `Exclusive Early Investment - {companyName} Funding Round`,
       message: `Dear {name},
 
-I'm reaching out to discuss a strategic business partnership with {companyName}'s current growth initiative.
+I'm reaching out with an exclusive opportunity to join {companyName}'s early funding round.
 
 **About {companyName}:**
-{companyName} is developing innovative solutions in the {businessSector} space, addressing real market needs with proven technology.
+{companyName} is disrupting the {businessSector} space with innovative solutions that address real market needs.
 
-**Partnership Highlights:**
-✅ Target Capital: {fundingGoal}
-✅ Entry Level: {minimumInvestment}
-✅ Structured via SAFE Agreement
-✅ Strategic Collaboration Opportunities
+**Investment Highlights:**
+✅ Target Raise: {fundingGoal}
+✅ Minimum Entry: {minimumInvestment}
+✅ Secured via SAFE Agreement
+✅ Early Investor Benefits Available
 
-**Our Approach:**
+**What Sets Us Apart:**
 {description}
 
 **Ready to Learn More?**
-Review our complete business documentation: {campaignUrl}
+Review our complete pitch: {campaignUrl}
 
-We're moving forward with qualified partners who align with our business vision and can add strategic value beyond capital participation.
+This round is moving quickly, and we're prioritizing investors who align with our vision and can add strategic value beyond capital.
 
-Would you be interested in a 15-minute conversation to explore this partnership?
+Would you be interested in a 15-minute conversation to explore this opportunity?
 
 Best,
 {signature}`
     },
     {
-      subject: `{companyName} Seeks Strategic Partners - {businessSector} Innovation`,
+      subject: `{companyName} Seeks Strategic Investors - {businessSector} Innovation`,
       message: `Hello {name},
 
-I hope you're doing well. I'm writing to introduce {companyName} and our current business partnership initiative.
+I hope you're doing well. I'm writing to introduce {companyName} and our current funding initiative.
 
-**The Partnership:**
-{companyName} is developing solutions in {businessSector} through {description}
+**The Opportunity:**
+{companyName} is transforming {businessSector} through {description}
 
 **Key Details:**
-• Target Capital: {fundingGoal}
-• Entry Level: {minimumInvestment}
+• Raising: {fundingGoal}
+• Investment Starting At: {minimumInvestment}
 • Structure: SAFE Agreement
-• Stage: Growth Phase
+• Stage: Early Growth Phase
 
-**Why Partner With Us?**
+**Why Now?**
 The {businessSector} market is experiencing significant growth, and we're positioned to capture substantial market share with our differentiated approach.
 
 **Next Steps:**
-I invite you to review our full business documentation at: {campaignUrl}
+I invite you to review our full campaign materials at: {campaignUrl}
 
-If this aligns with your business interests, I'd welcome the opportunity to discuss how you could participate in our growth story.
+If this aligns with your investment thesis, I'd welcome the opportunity to discuss how you could participate in our growth story.
 
 Looking forward to your thoughts.
 
@@ -365,14 +358,14 @@ Regards,
       subject: `Partner with {companyName} - Transforming {businessSector}`,
       message: `Hi {name},
 
-I'm writing to connect with you about {companyName}, where we're building the next generation of {businessSector} solutions.
+I'm excited to connect with you about {companyName}, where we're building the next generation of {businessSector} solutions.
 
 **Our Mission:**
 {description}
 
-**Partnership Overview:**
-💰 Funding Target: {fundingGoal}
-🎯 Minimum Partnership: {minimumInvestment}
+**Investment Overview:**
+💰 Funding Goal: {fundingGoal}
+🎯 Minimum Investment: {minimumInvestment}
 📋 Terms: SAFE Agreement
 🚀 Use of Funds: Accelerating growth & market expansion
 
@@ -383,25 +376,25 @@ I'm writing to connect with you about {companyName}, where we're building the ne
 • Clear path to profitability
 
 **Take a Deeper Look:**
-Complete business documentation: {campaignUrl}
+Complete campaign details: {campaignUrl}
 
-I believe {companyName} represents a compelling partnership opportunity, and I'd value your perspective on our approach.
+I believe {companyName} represents a compelling investment opportunity, and I'd value your perspective on our approach.
 
 Are you available for a brief discussion this week?
 
 Best regards,
 {signature}
 
-P.S. Early partners receive additional benefits and preferred access to future rounds.`
+P.S. Early investors receive additional benefits and preferred access to future rounds.`
     },
     {
-      subject: `Business Partnership Alert: {companyName} ({businessSector}) Now Accepting Partners`,
+      subject: `Investment Alert: {companyName} ({businessSector}) Now Accepting Investors`,
       message: `{name},
 
-Quick introduction - I'm the founder of {companyName}, and we're currently raising our growth round.
+Quick introduction - I'm the founder of {companyName}, and we're currently raising our seed round.
 
 **The Bottom Line:**
-We're solving critical problems in {businessSector} and need strategic partners to scale our solution.
+We're solving critical problems in {businessSector} and need strategic investors to scale our solution.
 
 **Fast Facts:**
 → Target: {fundingGoal}
@@ -413,13 +406,13 @@ We're solving critical problems in {businessSector} and need strategic partners 
 {description}
 
 **Why This Matters to You:**
-The {businessSector} market is experiencing growth, and strategic positioning is critical.
+The {businessSector} market is ripe for disruption, and first-mover advantage is critical.
 
 **Full Details Here:** {campaignUrl}
 
-I respect your time, so I'll be direct: we're looking for partners who see the potential in {businessSector} innovation and want to be part of building something significant.
+I respect your time, so I'll be direct: we're looking for investors who see the potential in {businessSector} innovation and want to be part of building something significant.
 
-Interested in a 10-minute call to explore business fit?
+Interested in a 10-minute call to explore fit?
 
 {signature}
 Founder, {companyName}`
@@ -450,7 +443,7 @@ Founder, {companyName}`
       .replace(/{fundingGoal}/g, fundingGoal)
       .replace(/{minimumInvestment}/g, minimumInvestment)
       .replace(/{campaignUrl}/g, campaignUrl)
-      .replace(/{description}/g, campaign.description ? campaign.description.substring(0, 200) + '...' : 'This innovative company is positioned for significant growth and offers strategic partnership opportunities for business partners.');
+      .replace(/{description}/g, campaign.description ? campaign.description.substring(0, 200) + '...' : 'This innovative company is positioned for significant growth and offers an exciting opportunity for early investors.');
 
     setEmailSubject(subject);
     setEmailMessage(message);
@@ -632,11 +625,10 @@ Founder, {companyName}`
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white/10 backdrop-blur-sm border-orange-200">
+        <Tabs defaultValue="compose" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 bg-white/10 backdrop-blur-sm border-orange-200">
             <TabsTrigger value="compose" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Compose Campaign</TabsTrigger>
             <TabsTrigger value="directory" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Investor Directory</TabsTrigger>
-            <TabsTrigger value="responses" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Email Responses</TabsTrigger>
             <TabsTrigger value="analytics" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Campaign Analytics</TabsTrigger>
           </TabsList>
 
@@ -1175,109 +1167,6 @@ Founder, {companyName}`
                 </Card>
               </div>
             </div>
-          </TabsContent>
-
-          {/* Email Responses Tab */}
-          <TabsContent value="responses" className="space-y-6">
-            <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
-              <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
-                <CardTitle className="flex items-center text-white">
-                  <MessageCircle className="h-5 w-5 mr-2 text-fundry-orange" />
-                  Email Responses & Inbox Management
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6 text-white">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Quick Stats */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-fundry-orange">Response Statistics</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-                        <span className="text-orange-200">Total Responses</span>
-                        <span className="font-bold text-white">23</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-                        <span className="text-orange-200">Interested</span>
-                        <span className="font-bold text-green-400">12</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-                        <span className="text-orange-200">Questions</span>
-                        <span className="font-bold text-blue-400">8</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-                        <span className="text-orange-200">Not Interested</span>
-                        <span className="font-bold text-red-400">3</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Quick Actions */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-fundry-orange">Quick Actions</h3>
-                    <div className="space-y-3">
-                      <Link href="/founder/inbox">
-                        <Button className="w-full bg-gradient-to-r from-fundry-orange to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white">
-                          <Mail className="h-4 w-4 mr-2" />
-                          Open Email Inbox
-                        </Button>
-                      </Link>
-                      <Button variant="outline" className="w-full border-white/20 text-fundry-navy bg-white hover:bg-gray-50">
-                        <Filter className="h-4 w-4 mr-2" />
-                        Filter Responses
-                      </Button>
-                      <Button variant="outline" className="w-full border-white/20 text-fundry-navy bg-white hover:bg-gray-50">
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Sync Replies
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Recent Activity */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-fundry-orange">Recent Activity</h3>
-                    <div className="space-y-3 max-h-64 overflow-y-auto">
-                      <div className="p-3 bg-white/5 rounded-lg border-l-4 border-l-green-500">
-                        <p className="text-sm font-medium text-white">New interested response</p>
-                        <p className="text-xs text-orange-200">john@techfund.com • 2 hours ago</p>
-                      </div>
-                      <div className="p-3 bg-white/5 rounded-lg border-l-4 border-l-blue-500">
-                        <p className="text-sm font-medium text-white">Question about terms</p>
-                        <p className="text-xs text-orange-200">sarah@venture.com • 4 hours ago</p>
-                      </div>
-                      <div className="p-3 bg-white/5 rounded-lg border-l-4 border-l-yellow-500">
-                        <p className="text-sm font-medium text-white">Request for more info</p>
-                        <p className="text-xs text-orange-200">mike@capital.com • 1 day ago</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Response Management */}
-                <Separator className="bg-white/20" />
-                
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-fundry-orange">Response Management Features</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-white/5 rounded-lg">
-                      <h4 className="font-medium text-white mb-2">Automated Categorization</h4>
-                      <p className="text-sm text-orange-200">Replies are automatically sorted into categories: Interested, Not Interested, Questions, Request Info, and Other.</p>
-                    </div>
-                    <div className="p-4 bg-white/5 rounded-lg">
-                      <h4 className="font-medium text-white mb-2">Smart Filtering</h4>
-                      <p className="text-sm text-orange-200">Filter responses by type, date, campaign, or read status to quickly find what you need.</p>
-                    </div>
-                    <div className="p-4 bg-white/5 rounded-lg">
-                      <h4 className="font-medium text-white mb-2">Reply Tracking</h4>
-                      <p className="text-sm text-orange-200">Track conversation threads and mark responses as read/unread for better follow-up management.</p>
-                    </div>
-                    <div className="p-4 bg-white/5 rounded-lg">
-                      <h4 className="font-medium text-white mb-2">Analytics Integration</h4>
-                      <p className="text-sm text-orange-200">Response data integrates with your campaign analytics for comprehensive outreach insights.</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
       </div>

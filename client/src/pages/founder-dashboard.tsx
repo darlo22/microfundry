@@ -222,21 +222,6 @@ export default function FounderDashboard() {
                 </Button>
               </Link>
 
-              <Link href="/founder/inbox">
-                <Button
-                  variant="outline"
-                  className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-gradient-to-br from-blue-50 to-sky-100 border-2 border-blue-200 hover:border-blue-500 hover:shadow-lg group w-full transition-all duration-300 hover:scale-105"
-                >
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-sky-600 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 shadow-md">
-                    <Mail className="text-white" size={20} />
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-fundry-navy group-hover:text-blue-600 transition-colors duration-300 text-xs sm:text-sm mb-1">Email Inbox</div>
-                    <div className="text-xs text-fundry-navy leading-tight">View replies from investors</div>
-                  </div>
-                </Button>
-              </Link>
-
               <Link href="/payment-withdrawal">
                 <Button
                   variant="outline"

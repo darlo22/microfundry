@@ -18,7 +18,7 @@ import path from "path";
 import * as XLSX from 'xlsx';
 import { TwoFactorService } from "./twoFactorService";
 import { emailService } from "./services/email";
-import { eq, and, gt, sql, desc, or, ne, inArray, gte, lt, lte, isNull, isNotNull } from "drizzle-orm";
+import { eq, and, gt, sql, desc, or, ne, inArray, gte, lt, lte } from "drizzle-orm";
 import { 
   emailVerificationTokens, 
   passwordResetTokens,
@@ -42,8 +42,7 @@ import {
   outreachEmails,
   emailTemplates,
   founderInvestorLists,
-  emailRateLimiting,
-  emailReplies
+  emailRateLimiting
 } from "@shared/schema";
 
 // Create table aliases for easier reference
@@ -6048,130 +6047,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // EMAIL TRACKING SYSTEM
   // ========================
 
-  // Track email opens (both POST and GET for pixel tracking)
-  app.get('/api/email-tracking/open/:trackingId/pixel.png', async (req, res) => {
-    try {
-      const { trackingId } = req.params;
-      
-      // Find the email by tracking ID
-      const email = await db
-        .select()
-        .from(outreachEmails)
-        .where(eq(outreachEmails.trackingId, trackingId))
-        .limit(1);
-
-      if (email.length > 0 && !email[0].openedAt) {
-        // Mark email as opened
-        await db
-          .update(outreachEmails)
-          .set({ 
-            openedAt: new Date(),
-            status: 'opened'
-          })
-          .where(eq(outreachEmails.id, email[0].id));
-
-        // Update campaign statistics
-        const campaignId = email[0].emailCampaignId;
-        const openedCount = await db
-          .select({ count: sql`count(*)` })
-          .from(outreachEmails)
-          .where(
-            and(
-              eq(outreachEmails.emailCampaignId, campaignId),
-              sql`opened_at IS NOT NULL`
-            )
-          );
-
-        await db
-          .update(emailCampaigns)
-          .set({ 
-            openedCount: parseInt(openedCount[0].count as string)
-          })
-          .where(eq(emailCampaigns.id, campaignId));
-      }
-
-      // Return 1x1 transparent pixel
-      const pixel = Buffer.from(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
-        'base64'
-      );
-      
-      res.set({
-        'Content-Type': 'image/png',
-        'Content-Length': pixel.length,
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      });
-      
-      res.send(pixel);
-    } catch (error) {
-      console.error('Error tracking email open:', error);
-      // Always return pixel even on error
-      const pixel = Buffer.from(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
-        'base64'
-      );
-      res.set({
-        'Content-Type': 'image/png',
-        'Content-Length': pixel.length
-      });
-      res.send(pixel);
-    }
-  });
-
-  // Test email delivery endpoint
-  app.post('/api/test-email-delivery', async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
-
-      const { testEmail } = req.body;
-      if (!testEmail) {
-        return res.status(400).json({ message: 'Test email address required' });
-      }
-
-      console.log('=== EMAIL DELIVERY TEST STARTING ===');
-      console.log('Test email address:', testEmail);
-
-      const emailService = new (await import('./services/email')).EmailService();
-      
-      const testResult = await emailService.sendEmail({
-        to: testEmail,
-        subject: 'Fundry Email Delivery Test',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #f97316;">Email Delivery Test</h2>
-            <p>This is a test email to verify Fundry's email delivery system is working correctly.</p>
-            <p>Test timestamp: ${new Date().toISOString()}</p>
-            <p>If you received this email, the delivery system is functioning properly.</p>
-          </div>
-        `,
-        from: 'Fundry Support <support@microfundry.com>',
-        replyTo: req.user.email
-      });
-
-      console.log('=== EMAIL DELIVERY TEST RESULT ===');
-      console.log('Success:', testResult);
-
-      res.json({ 
-        success: testResult,
-        message: testResult ? 'Test email sent successfully' : 'Test email failed to send',
-        timestamp: new Date().toISOString()
-      });
-
-    } catch (error) {
-      console.error('Email delivery test error:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'Email delivery test failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
-
-  // Legacy POST endpoint for email opens
+  // Track email opens
   app.post('/api/email-tracking/open/:trackingId', async (req, res) => {
     try {
       const { trackingId } = req.params;
@@ -6609,7 +6485,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         )
         .limit(1);
 
-      const dailyLimit = 30;
+      const dailyLimit = 5;
       const used = rateLimit.length > 0 ? rateLimit[0].emailsSent : 0;
 
       res.json({
@@ -6633,28 +6509,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       const { campaignId, subject, message, recipients, scheduledFor } = req.body;
 
-      if (!subject || !message || !recipients) {
+      if (!subject || !message || !recipients || !Array.isArray(recipients)) {
         return res.status(400).json({ message: 'Subject, message, and recipients are required' });
       }
 
-      // Parse recipients - handle both array format and comma-separated email strings
-      let parsedRecipients = [];
-      
-      if (Array.isArray(recipients)) {
-        parsedRecipients = recipients;
-      } else if (typeof recipients === 'string') {
-        // Parse comma-separated email list
-        const emailList = recipients.split(',').map(email => email.trim()).filter(email => email.length > 0);
-        parsedRecipients = emailList.map(email => ({
-          email: email,
-          name: email.split('@')[0], // Use part before @ as name fallback
-          source: 'manual'
-        }));
-      } else {
-        return res.status(400).json({ message: 'Recipients must be an array or comma-separated email string' });
-      }
-
-      if (parsedRecipients.length === 0 || parsedRecipients.length > 5) {
+      if (recipients.length === 0 || recipients.length > 5) {
         return res.status(400).json({ message: 'Must have 1-5 recipients per campaign' });
       }
 
@@ -6672,9 +6531,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         .limit(1);
 
       const currentUsage = rateLimit.length > 0 ? rateLimit[0].emailsSent : 0;
-      if (currentUsage + parsedRecipients.length > 30) {
+      if (currentUsage + recipients.length > 5) {
         return res.status(400).json({ 
-          message: `Daily limit exceeded. You can send ${30 - currentUsage} more emails today.` 
+          message: `Daily limit exceeded. You can send ${5 - currentUsage} more emails today.` 
         });
       }
 
@@ -6697,7 +6556,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           campaignId: campaignId || null,
           subject,
           message,
-          recipientCount: parsedRecipients.length,
+          recipientCount: recipients.length,
           status: scheduledFor ? 'draft' : 'sending',
           scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
         })
@@ -6705,7 +6564,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       // Create individual emails
       const emails = [];
-      for (const recipient of parsedRecipients) {
+      for (const recipient of recipients) {
         const trackingId = nanoid();
         const personalizedSubject = subject.replace(/\{name\}/g, recipient.name || 'there');
         const personalizedMessage = message
@@ -6735,53 +6594,40 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         let deliveredCount = 0;
         
         // Send emails using actual email service
-        for (let i = 0; i < emails.length; i++) {
-          const email = emails[i];
+        for (const email of emails) {
           try {
-            // Validate email address format
-            if (!email.recipientEmail || !email.recipientEmail.includes('@')) {
-              throw new Error('Invalid email address format');
-            }
-
             const emailSent = await emailService.sendEmail({
-              to: email.recipientEmail.trim(),
-              from: `${emailSettings[0].displayName} <support@microfundry.com>`,
-              replyTo: emailSettings[0].verifiedEmail,
+              to: email.recipientEmail,
+              from: `${emailSettings[0].displayName} <${emailSettings[0].verifiedEmail}>`,
               subject: email.personalizedSubject,
-              headers: {
-                'X-Priority': '3',
-                'X-MSMail-Priority': 'Normal',
-                'Importance': 'normal'
-              },
               html: `
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                </head>
-                <body style="margin: 0; padding: 0; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">
-                  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #333333; font-size: 16px; line-height: 1.5;">
-                    
-                    ${email.personalizedMessage.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/✅/g, '✅')}
-                    
-                    <br><br>
-                    
-                    <div style="margin-top: 30px;">
-                      <p style="margin: 0; font-weight: 600;">Best regards,</p>
-                      <p style="margin: 5px 0 0 0; font-weight: 700;">${emailSettings[0].displayName}</p>
-                      ${emailSettings[0].signature ? `<p style="margin: 15px 0 0 0; color: #666666; font-size: 14px;">${emailSettings[0].signature.replace(/\n/g, '<br>')}</p>` : ''}
-                    </div>
-
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <div style="background: linear-gradient(135deg, #f97316 0%, #1e40af 100%); padding: 20px; border-radius: 8px 8px 0 0;">
+                    <h2 style="color: white; margin: 0;">Investment Opportunity</h2>
                   </div>
-                </body>
-                </html>
+                  <div style="background: white; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #e5e7eb;">
+                    ${email.personalizedMessage.replace(/\n/g, '<br>')}
+                    <br><br>
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                      <p style="margin: 0; color: #6b7280; font-size: 14px;">
+                        Best regards,<br>
+                        ${emailSettings[0].displayName}<br>
+                        ${emailSettings[0].signature || ''}
+                      </p>
+                    </div>
+                    <div style="margin-top: 20px; text-align: center;">
+                      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==" 
+                           width="1" height="1" style="display: block;" 
+                           onload="fetch('${process.env.REPLIT_DOMAINS || 'http://localhost:5000'}/api/email-tracking/open/${email.trackingId}', { method: 'POST' }).catch(() => {})" />
+                    </div>
+                  </div>
+                </div>
               `,
-              text: `${email.personalizedMessage}
-
-Best regards,
-${emailSettings[0].displayName}
-${emailSettings[0].signature || ''}`
+              headers: {
+                'X-Campaign-ID': newCampaign.id.toString(),
+                'X-Email-ID': email.id.toString(),
+                'X-Tracking-ID': email.trackingId
+              }
             });
 
             if (emailSent) {
@@ -6802,7 +6648,7 @@ ${emailSettings[0].signature || ''}`
                 .set({ 
                   status: 'failed', 
                   sentAt: new Date(),
-                  failureReason: 'Email service delivery failed - check sender address and content'
+                  failureReason: 'Email delivery failed'
                 })
                 .where(eq(outreachEmails.id, email.id));
               
@@ -6821,11 +6667,6 @@ ${emailSettings[0].signature || ''}`
             
             sentCount++;
           }
-
-          // Add delay between emails to respect Resend's rate limit (2 requests per second)
-          if (i < emails.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 600)); // 600ms delay
-          }
         }
 
         await db
@@ -6843,7 +6684,7 @@ ${emailSettings[0].signature || ''}`
           await db
             .update(emailRateLimiting)
             .set({ 
-              emailsSent: currentUsage + parsedRecipients.length,
+              emailsSent: currentUsage + recipients.length,
               lastEmailAt: new Date(),
               updatedAt: new Date()
             })
@@ -6854,13 +6695,13 @@ ${emailSettings[0].signature || ''}`
             .values({
               founderId: req.user.id,
               date: today,
-              emailsSent: parsedRecipients.length,
+              emailsSent: recipients.length,
               lastEmailAt: new Date(),
             });
         }
 
         // Send copies to platform investors' message center
-        for (const recipient of parsedRecipients) {
+        for (const recipient of recipients) {
           if (recipient.source === 'platform') {
             const platformUser = await db
               .select()
@@ -6973,294 +6814,6 @@ ${emailSettings[0].signature || ''}`
     } catch (error) {
       console.error('Error fetching campaign analytics:', error);
       res.status(500).json({ message: 'Failed to fetch campaign analytics' });
-    }
-  });
-
-  // Email Reply Management Routes
-  
-  // Get all email replies for a founder
-  app.get('/api/founder/email-replies', async (req: any, res) => {
-    try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
-
-      const { status, replyType, page = 1, limit = 20 } = req.query;
-      const offset = (parseInt(page) - 1) * parseInt(limit);
-
-      let query = db
-        .select({
-          id: emailReplies.id,
-          originalEmailId: emailReplies.originalEmailId,
-          senderEmail: emailReplies.senderEmail,
-          senderName: emailReplies.senderName,
-          subject: emailReplies.subject,
-          content: emailReplies.content,
-          isRead: emailReplies.isRead,
-          replyType: emailReplies.replyType,
-          tags: emailReplies.tags,
-          receivedAt: emailReplies.receivedAt,
-          readAt: emailReplies.readAt,
-          archivedAt: emailReplies.archivedAt,
-          originalSubject: outreachEmails.subject,
-          originalRecipient: outreachEmails.recipientEmail,
-          campaignName: campaigns.companyName,
-        })
-        .from(emailReplies)
-        .leftJoin(outreachEmails, eq(emailReplies.originalEmailId, outreachEmails.id))
-        .leftJoin(emailCampaigns, eq(outreachEmails.emailCampaignId, emailCampaigns.id))
-        .leftJoin(campaigns, eq(emailCampaigns.campaignId, campaigns.id))
-        .where(eq(emailReplies.founderId, req.user.id));
-
-      if (status === 'unread') {
-        query = query.where(eq(emailReplies.isRead, false));
-      } else if (status === 'archived') {
-        query = query.where(isNotNull(emailReplies.archivedAt));
-      } else if (status === 'active') {
-        query = query.where(isNull(emailReplies.archivedAt));
-      }
-
-      if (replyType && replyType !== 'all') {
-        query = query.where(eq(emailReplies.replyType, replyType));
-      }
-
-      const replies = await query
-        .orderBy(emailReplies.receivedAt)
-        .limit(parseInt(limit))
-        .offset(offset);
-
-      // Get total count for pagination
-      const totalQuery = db
-        .select({ count: sql`count(*)` })
-        .from(emailReplies)
-        .where(eq(emailReplies.founderId, req.user.id));
-
-      if (status === 'unread') {
-        totalQuery.where(eq(emailReplies.isRead, false));
-      } else if (status === 'archived') {
-        totalQuery.where(isNotNull(emailReplies.archivedAt));
-      } else if (status === 'active') {
-        totalQuery.where(isNull(emailReplies.archivedAt));
-      }
-
-      if (replyType && replyType !== 'all') {
-        totalQuery.where(eq(emailReplies.replyType, replyType));
-      }
-
-      const [{ count }] = await totalQuery;
-
-      res.json({
-        replies,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total: parseInt(count),
-          pages: Math.ceil(parseInt(count) / parseInt(limit))
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching email replies:', error);
-      res.status(500).json({ message: 'Failed to fetch email replies' });
-    }
-  });
-
-  // Mark email reply as read
-  app.patch('/api/founder/email-replies/:id/read', async (req: any, res) => {
-    try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
-
-      const { id } = req.params;
-
-      // Verify the reply belongs to the founder
-      const reply = await db
-        .select()
-        .from(emailReplies)
-        .where(and(
-          eq(emailReplies.id, parseInt(id)),
-          eq(emailReplies.founderId, req.user.id)
-        ))
-        .limit(1);
-
-      if (reply.length === 0) {
-        return res.status(404).json({ message: 'Email reply not found' });
-      }
-
-      const [updatedReply] = await db
-        .update(emailReplies)
-        .set({ 
-          isRead: true, 
-          readAt: new Date() 
-        })
-        .where(eq(emailReplies.id, parseInt(id)))
-        .returning();
-
-      res.json(updatedReply);
-    } catch (error) {
-      console.error('Error marking reply as read:', error);
-      res.status(500).json({ message: 'Failed to mark reply as read' });
-    }
-  });
-
-  // Archive/unarchive email reply
-  app.patch('/api/founder/email-replies/:id/archive', async (req: any, res) => {
-    try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
-
-      const { id } = req.params;
-      const { archived } = req.body;
-
-      // Verify the reply belongs to the founder
-      const reply = await db
-        .select()
-        .from(emailReplies)
-        .where(and(
-          eq(emailReplies.id, parseInt(id)),
-          eq(emailReplies.founderId, req.user.id)
-        ))
-        .limit(1);
-
-      if (reply.length === 0) {
-        return res.status(404).json({ message: 'Email reply not found' });
-      }
-
-      const [updatedReply] = await db
-        .update(emailReplies)
-        .set({ 
-          archivedAt: archived ? new Date() : null
-        })
-        .where(eq(emailReplies.id, parseInt(id)))
-        .returning();
-
-      res.json(updatedReply);
-    } catch (error) {
-      console.error('Error archiving reply:', error);
-      res.status(500).json({ message: 'Failed to archive reply' });
-    }
-  });
-
-  // Update reply type and tags
-  app.patch('/api/founder/email-replies/:id', async (req: any, res) => {
-    try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
-
-      const { id } = req.params;
-      const { replyType, tags } = req.body;
-
-      // Verify the reply belongs to the founder
-      const reply = await db
-        .select()
-        .from(emailReplies)
-        .where(and(
-          eq(emailReplies.id, parseInt(id)),
-          eq(emailReplies.founderId, req.user.id)
-        ))
-        .limit(1);
-
-      if (reply.length === 0) {
-        return res.status(404).json({ message: 'Email reply not found' });
-      }
-
-      const updateData = {};
-      if (replyType) updateData.replyType = replyType;
-      if (tags) updateData.tags = tags;
-
-      const [updatedReply] = await db
-        .update(emailReplies)
-        .set(updateData)
-        .where(eq(emailReplies.id, parseInt(id)))
-        .returning();
-
-      res.json(updatedReply);
-    } catch (error) {
-      console.error('Error updating reply:', error);
-      res.status(500).json({ message: 'Failed to update reply' });
-    }
-  });
-
-  // Get reply statistics for founder dashboard
-  app.get('/api/founder/email-replies/stats', async (req: any, res) => {
-    try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
-
-      const stats = await db
-        .select({
-          total: sql`count(*)`,
-          unread: sql`count(*) filter (where is_read = false)`,
-          interested: sql`count(*) filter (where reply_type = 'interested')`,
-          notInterested: sql`count(*) filter (where reply_type = 'not_interested')`,
-          requestInfo: sql`count(*) filter (where reply_type = 'request_info')`,
-          questions: sql`count(*) filter (where reply_type = 'question')`,
-          archived: sql`count(*) filter (where archived_at is not null)`,
-        })
-        .from(emailReplies)
-        .where(eq(emailReplies.founderId, req.user.id));
-
-      res.json(stats[0]);
-    } catch (error) {
-      console.error('Error fetching reply stats:', error);
-      res.status(500).json({ message: 'Failed to fetch reply stats' });
-    }
-  });
-
-  // Simulate receiving an email reply (for testing purposes)
-  app.post('/api/founder/email-replies/simulate', async (req: any, res) => {
-    try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
-
-      const { originalEmailId, senderEmail, senderName, subject, content, replyType } = req.body;
-
-      // Verify the original email belongs to the founder
-      const originalEmail = await db
-        .select()
-        .from(outreachEmails)
-        .leftJoin(emailCampaigns, eq(outreachEmails.emailCampaignId, emailCampaigns.id))
-        .where(and(
-          eq(outreachEmails.id, originalEmailId),
-          eq(emailCampaigns.founderId, req.user.id)
-        ))
-        .limit(1);
-
-      if (originalEmail.length === 0) {
-        return res.status(404).json({ message: 'Original email not found' });
-      }
-
-      const [newReply] = await db
-        .insert(emailReplies)
-        .values({
-          originalEmailId,
-          founderId: req.user.id,
-          replyEmail: senderEmail,
-          replyName: senderName,
-          subject,
-          content,
-          replyType: replyType || 'other',
-          receivedAt: new Date(),
-        })
-        .returning();
-
-      // Create notification for the founder
-      await db.insert(notifications).values({
-        userId: req.user.id,
-        type: 'email_reply',
-        title: 'New Email Reply',
-        message: `You received a reply from ${senderName || senderEmail}`,
-        metadata: JSON.stringify({ replyId: newReply.id }),
-      });
-
-      res.json(newReply);
-    } catch (error) {
-      console.error('Error simulating email reply:', error);
-      res.status(500).json({ message: 'Failed to simulate email reply' });
     }
   });
 

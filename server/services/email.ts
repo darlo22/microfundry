@@ -11,7 +11,6 @@ interface EmailParams {
   subject: string;
   html: string;
   from?: string;
-  replyTo?: string;
   headers?: Record<string, string>;
 }
 
@@ -26,7 +25,6 @@ export class EmailService {
         subject: params.subject,
         html: params.html,
         text: this.extractTextFromHtml(params.html),
-        reply_to: params.replyTo,
         headers: {
           'X-Mailer': 'Fundry Platform v1.0',
           'List-Unsubscribe': '<mailto:unsubscribe@microfundry.com?subject=unsubscribe>',
@@ -53,36 +51,8 @@ export class EmailService {
         ]
       };
 
-      console.log('Sending email with payload:', {
-        from: emailData.from,
-        to: emailData.to,
-        subject: emailData.subject,
-        hasHtml: !!emailData.html,
-        replyTo: emailData.reply_to
-      });
-
       const result = await resend.emails.send(emailData);
-      
-      console.log('Full Resend API Response:', JSON.stringify(result, null, 2));
-      
-      // Check if Resend returned an error
-      if (result.error) {
-        console.error('RESEND ERROR DETAILS:', {
-          name: result.error.name,
-          message: result.error.message,
-          details: JSON.stringify(result.error, null, 2)
-        });
-        return false;
-      }
-      
-      // Check if we have a valid response with data
-      if (!result.data || !result.data.id) {
-        console.error('Invalid Resend response - no email ID returned');
-        console.error('Full result object:', JSON.stringify(result, null, 2));
-        return false;
-      }
-      
-      console.log('✅ EMAIL SENT SUCCESSFULLY - ID:', result.data.id);
+      console.log('Email sent successfully:', result);
       return true;
     } catch (error) {
       console.error('Failed to send email:', error);

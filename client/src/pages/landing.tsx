@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TrendingUp, Shield, Zap, Users, ArrowRight, DollarSign, BarChart3, Target } from "lucide-react";
-import OnboardingModal from "@/components/OnboardingModal";
+import OnboardingModal from "@/components/modals/onboarding-modal";
 
 export default function Landing() {
   const { user, isAuthenticated } = useAuth();
@@ -320,51 +320,6 @@ export default function Landing() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-            User Session Active
-          </div>
-          <div style={{ fontSize: '14px', color: '#374151' }}>
-            {user.firstName} {user.lastName} ({user.userType}) - {user.email}
-          </div>
-        </div>
-      )}
-      
-      <div style={{
-        textAlign: 'center',
-        fontSize: '16px',
-        color: '#6b7280',
-        fontStyle: 'italic'
-      }}>
-        Your Fundry platform deployment is complete and operational.
-        <br />
-        Generated at: {new Date().toLocaleString()}
-      </div>
-      
-      <button 
-        onClick={() => {
-          console.log('Force refresh initiated');
-          window.location.href = window.location.href + '?t=' + Date.now();
-        }}
-        style={{
-          marginTop: '25px',
-          padding: '12px 24px',
-          background: 'linear-gradient(135deg, #f97316, #ea580c)',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontSize: '16px',
-          fontWeight: '600',
-          boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)',
-          transition: 'transform 0.2s'
-        }}
-        onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-        onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-      >
-        Force Cache Refresh
-      </button>
     </div>
   );
 }

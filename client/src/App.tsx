@@ -92,6 +92,8 @@ function Router() {
           <Route path="/founder/messages" component={FounderMessages} />
           <Route path="/founder/outreach" component={FounderOutreach} />
           <Route path="/founder-outreach" component={FounderOutreach} />
+          <Route path="/founder/inbox" component={FounderInbox} />
+          <Route path="/founder-inbox" component={FounderInbox} />
           <Route path="/payment-withdrawal" component={PaymentWithdrawal} />
           <Route path="/investor-dashboard" component={InvestorDashboard} />
           <Route path="/investor/dashboard" component={InvestorDashboard} />

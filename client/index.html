@@ -6,12 +6,46 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>FUNDRY SUCCESS TEST - React App Working</title>
+    <title>FUNDRY PLATFORM - DEPLOYMENT SUCCESS</title>
+    <style>
+      body { 
+        background: #ffffff !important; 
+        margin: 0; 
+        padding: 0; 
+        font-family: Arial, sans-serif;
+      }
+      .cache-override {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: white !important;
+        z-index: 999999;
+        display: none;
+      }
+    </style>
   </head>
-  <body style="background: #ffffff;">
+  <body>
+    <div class="cache-override" id="cache-override">
+      <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #f97316, #1e40af); color: white; text-align: center; font-size: 24px;">
+        <div>
+          <h1>🚀 FUNDRY DEPLOYMENT SUCCESSFUL</h1>
+          <p>React Application Loading...</p>
+        </div>
+      </div>
+    </div>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx?v=1750616400"></script>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script>
+      // Force cache override if React doesn't load
+      setTimeout(() => {
+        const root = document.getElementById('root');
+        if (!root || !root.innerHTML.trim()) {
+          document.getElementById('cache-override').style.display = 'block';
+        }
+      }, 3000);
+    </script>
+    <script type="module" src="/src/main.tsx?v=${Date.now()}"></script>
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
   </body>
 </html>

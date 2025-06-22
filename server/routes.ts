@@ -2703,21 +2703,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
-  // Catch-all handler for client-side routing
-  app.get('*', (req, res, next) => {
-    // Skip API routes
-    if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
-      return next();
-    }
-    
-    // For all other routes, serve the React app
-    if (process.env.NODE_ENV === 'production') {
-      res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
-    } else {
-      // In development, Vite handles this
-      next();
-    }
-  });
+  // No catch-all route needed - let Vite development server handle all client-side routing
 
   // Security routes
   app.put('/api/user/change-password', requireAuth, async (req: any, res) => {

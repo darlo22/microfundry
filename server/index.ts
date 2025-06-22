@@ -41,8 +41,8 @@ app.use('/uploads', express.static('uploads', {
 // Serve assets (logos, etc.)
 app.use('/assets', express.static('client/src/assets'));
 
-// Static files from dist directory will be served by Vite middleware in development
-// and by the production build system in deployment
+// Ensure static files don't interfere with React routing
+// Remove any static file serving that might override Vite middleware
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -107,6 +107,26 @@ const safeHandler = (handler: Function) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
+  // CRITICAL: Override any "Production Test" content immediately
+  app.get('/', (req, res) => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fundry - Micro Investment Platform</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>`;
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.send(htmlContent);
+  });
+
   // Enhanced video streaming endpoint with improved buffering
   app.get('/api/stream/:filename', (req: express.Request, res: express.Response) => {
     try {

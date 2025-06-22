@@ -114,54 +114,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  // Deployment fix: Serve landing page on root and prevent redirects
+  // Redirect root to landing page for proper React routing
   app.get('/', (req, res) => {
-    const landingPageHTML = `
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fundry - Equity Crowdfunding Platform</title>
-    <style>
-      body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
-      .container { display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #f97316 0%, #1e40af 100%); }
-      .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); text-align: center; max-width: 400px; }
-      .logo { color: #f97316; font-size: 48px; font-weight: bold; margin-bottom: 16px; }
-      .subtitle { color: #64748b; margin-bottom: 24px; }
-      .btn { background: #f97316; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-block; cursor: pointer; transition: background-color 0.2s; }
-      .btn:hover { background: #ea580c; }
-      .features { text-align: left; margin-top: 24px; }
-      .feature { display: flex; align-items: center; margin-bottom: 8px; color: #64748b; font-size: 14px; }
-      .feature-icon { color: #f97316; margin-right: 8px; font-weight: bold; }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="card">
-        <div class="logo">Fundry</div>
-        <p class="subtitle">Equity Crowdfunding Platform</p>
-        <div class="features">
-          <div class="feature">
-            <span class="feature-icon">✓</span>
-            Create fundraising campaigns
-          </div>
-          <div class="feature">
-            <span class="feature-icon">✓</span>
-            Connect with investors
-          </div>
-          <div class="feature">
-            <span class="feature-icon">✓</span>
-            Secure SAFE agreements
-          </div>
-        </div>
-        <a href="/landing" class="btn" style="margin-top: 24px;">Enter Platform</a>
-      </div>
-    </div>
-  </body>
-</html>`;
-    res.set('Content-Type', 'text/html');
-    res.send(landingPageHTML);
+    res.redirect('/landing');
   });
 
   // Enhanced video streaming endpoint with improved buffering

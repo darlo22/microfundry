@@ -255,11 +255,11 @@ export default function EmailReplies() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0">
+          <Card className="bg-white shadow-lg border border-gray-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Replies</p>
+                  <p className="text-sm font-medium text-gray-700">Total Replies</p>
                   <p className="text-2xl font-bold text-gray-900">{stats.totalReplies}</p>
                 </div>
                 <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -269,11 +269,11 @@ export default function EmailReplies() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0">
+          <Card className="bg-white shadow-lg border border-gray-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Unread</p>
+                  <p className="text-sm font-medium text-gray-700">Unread</p>
                   <p className="text-2xl font-bold text-orange-600">{stats.unreadReplies}</p>
                 </div>
                 <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -283,11 +283,11 @@ export default function EmailReplies() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0">
+          <Card className="bg-white shadow-lg border border-gray-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Starred</p>
+                  <p className="text-sm font-medium text-gray-700">Starred</p>
                   <p className="text-2xl font-bold text-yellow-600">{stats.starredReplies}</p>
                 </div>
                 <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -297,11 +297,11 @@ export default function EmailReplies() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0">
+          <Card className="bg-white shadow-lg border border-gray-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Responded</p>
+                  <p className="text-sm font-medium text-gray-700">Responded</p>
                   <p className="text-2xl font-bold text-green-600">{stats.respondedReplies}</p>
                 </div>
                 <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -311,11 +311,11 @@ export default function EmailReplies() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0">
+          <Card className="bg-white shadow-lg border border-gray-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Recent (30d)</p>
+                  <p className="text-sm font-medium text-gray-700">Recent (30d)</p>
                   <p className="text-2xl font-bold text-purple-600">{stats.recentReplies}</p>
                 </div>
                 <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -325,11 +325,11 @@ export default function EmailReplies() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0">
+          <Card className="bg-white shadow-lg border border-gray-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Response Rate</p>
+                  <p className="text-sm font-medium text-gray-700">Response Rate</p>
                   <p className="text-2xl font-bold text-indigo-600">{stats.responseRate}%</p>
                 </div>
                 <div className="h-12 w-12 bg-indigo-100 rounded-lg flex items-center justify-center">
@@ -341,7 +341,7 @@ export default function EmailReplies() {
         </div>
 
         {/* Filters and Search */}
-        <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 mb-6">
+        <Card className="bg-white shadow-lg border border-gray-200 mb-6">
           <CardContent className="p-6">
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
               <div className="flex flex-col sm:flex-row gap-4 flex-1">
@@ -351,7 +351,7 @@ export default function EmailReplies() {
                     placeholder="Search replies..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 text-gray-900"
                   />
                 </div>
                 <Select value={filterCategory} onValueChange={setFilterCategory}>
@@ -400,7 +400,7 @@ export default function EmailReplies() {
                 <p className="text-gray-600">Loading email replies...</p>
               </div>
             ) : replies.length === 0 ? (
-              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0">
+              <Card className="bg-white shadow-lg border border-gray-200">
                 <CardContent className="p-12 text-center">
                   <Mail className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No replies found</h3>
@@ -415,7 +415,7 @@ export default function EmailReplies() {
             ) : (
               <div className="space-y-4">
                 {replies.map((reply) => (
-                  <Card key={reply.id} className={`bg-white/80 backdrop-blur-sm shadow-lg border-0 hover:shadow-xl transition-shadow ${reply.isRead ? '' : 'ring-2 ring-blue-200'}`}>
+                  <Card key={reply.id} className={`bg-white shadow-lg border border-gray-200 hover:shadow-xl transition-shadow ${reply.isRead ? '' : 'ring-2 ring-blue-200'}`}>
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">

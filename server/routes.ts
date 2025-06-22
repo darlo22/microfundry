@@ -6513,8 +6513,8 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(400).json({ message: 'Subject, message, and recipients are required' });
       }
 
-      if (recipients.length === 0 || recipients.length > 5) {
-        return res.status(400).json({ message: 'Must have 1-5 recipients per campaign' });
+      if (recipients.length === 0 || recipients.length > 30) {
+        return res.status(400).json({ message: 'Must have 1-30 recipients per campaign' });
       }
 
       // Check rate limit

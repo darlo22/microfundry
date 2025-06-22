@@ -1,5 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { createServer } from "http";
+import path from "path";
+import fs from "fs";
 import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
 
@@ -15,9 +17,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
-
-// Force development mode for proper routing
-app.set('env', 'development');
+const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -98,16 +98,40 @@ process.on('unhandledRejection', (reason, promise) => {
 
 (async () => {
   try {
-    // Force development mode before any other configuration
-    process.env.NODE_ENV = 'development';
-    
-    // Register API routes FIRST, before Vite middleware
+    // Register API routes FIRST, which creates and returns the HTTP server
     const server = await registerRoutes(app);
     console.log('✅ API routes registered');
     
-    // Setup Vite development server AFTER registering routes
-    await setupVite(app, server);
-    console.log('✅ Running in development mode with Vite server');
+    if (isProduction) {
+      // Production: Serve built static files
+      const distPath = path.resolve(process.cwd(), 'dist');
+      const clientPath = path.resolve(distPath, 'client');
+      
+      // Serve static files from dist/client
+      if (fs.existsSync(clientPath)) {
+        app.use(express.static(clientPath));
+        console.log('✅ Serving production build from dist/client');
+        
+        // Fallback route for client-side routing
+        app.get('*', (req, res) => {
+          const indexPath = path.join(clientPath, 'index.html');
+          if (fs.existsSync(indexPath)) {
+            res.sendFile(indexPath);
+          } else {
+            res.status(404).send('Application not built. Please run npm run build first.');
+          }
+        });
+      } else {
+        console.log('⚠️ Production build not found, falling back to development mode');
+        // Setup Vite development server as fallback
+        await setupVite(app, server);
+        console.log('✅ Running in fallback development mode');
+      }
+    } else {
+      // Development: Setup Vite development server
+      await setupVite(app, server);
+      console.log('✅ Running in development mode with Vite server');
+    }
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;

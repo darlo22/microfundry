@@ -92,13 +92,13 @@ process.on('unhandledRejection', (reason, promise) => {
     // Force development mode before any other configuration
     process.env.NODE_ENV = 'development';
     
-    // Setup Vite development server BEFORE registering routes
-    const server = createServer(app);
+    // Register API routes FIRST, before Vite middleware
+    const server = await registerRoutes(app);
+    console.log('✅ API routes registered');
+    
+    // Setup Vite development server AFTER registering routes
     await setupVite(app, server);
     console.log('✅ Running in development mode with Vite server');
-    
-    // Now register API routes after Vite setup
-    await registerRoutes(app);
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;

@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { 
   Mail, 
   Users, 
@@ -96,6 +96,13 @@ interface RateLimit {
 export default function FounderOutreach() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location] = useLocation();
+  
+  // Handle tab parameter from URL
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const initialTab = urlParams.get('tab') || 'directory';
+  const [activeTab, setActiveTab] = useState(initialTab);
+  
   const [selectedInvestors, setSelectedInvestors] = useState<InvestorDirectory[]>([]);
   const [emailSubject, setEmailSubject] = useState("");
   const [emailMessage, setEmailMessage] = useState("");

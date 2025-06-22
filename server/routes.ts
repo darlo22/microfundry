@@ -7239,8 +7239,8 @@ ${emailSettings[0].signature || ''}`
         .values({
           originalEmailId,
           founderId: req.user.id,
-          senderEmail,
-          senderName,
+          replyEmail: senderEmail,
+          replyName: senderName,
           subject,
           content,
           replyType: replyType || 'other',

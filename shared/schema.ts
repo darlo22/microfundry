@@ -886,17 +886,17 @@ export const emailReplies = pgTable("email_replies", {
   id: serial("id").primaryKey(),
   originalEmailId: integer("original_email_id").references(() => outreachEmails.id, { onDelete: "cascade" }),
   founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  senderEmail: varchar("sender_email").notNull(),
-  senderName: varchar("sender_name"),
+  replyEmail: varchar("reply_email").notNull(),
+  replyName: varchar("reply_name"),
   subject: varchar("subject").notNull(),
   content: text("content").notNull(),
   isRead: boolean("is_read").default(false),
   replyType: varchar("reply_type", { enum: ["interested", "not_interested", "request_info", "question", "other"] }).default("other"),
   tags: text("tags").array(),
+  campaignName: varchar("campaign_name"),
   receivedAt: timestamp("received_at").defaultNow(),
-  readAt: timestamp("read_at"),
-  archivedAt: timestamp("archived_at"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const emailRepliesRelations = relations(emailReplies, ({ one }) => ({

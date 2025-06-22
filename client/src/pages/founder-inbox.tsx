@@ -202,10 +202,10 @@ export default function FounderInbox() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/founder-dashboard">
+              <Link href="/founder-outreach?tab=responses">
                 <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Dashboard
+                  Back to Email Responses
                 </Button>
               </Link>
               <Link href="/">

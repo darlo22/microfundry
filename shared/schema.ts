@@ -915,27 +915,32 @@ export const insertFounderInvestorListSchema = createInsertSchema(founderInvesto
 // Email Replies Table - Track responses from investors
 export const emailReplies = pgTable("email_replies", {
   id: serial("id").primaryKey(),
-  outreachEmailId: integer("outreach_email_id").notNull().references(() => outreachEmails.id, { onDelete: "cascade" }),
+  originalEmailId: integer("original_email_id"),
   founderId: varchar("founder_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  campaignId: integer("campaign_id").references(() => campaigns.id),
+  replyEmail: varchar("reply_email"),
+  replyName: varchar("reply_name"),
+  subject: varchar("subject").notNull(),
+  content: text("content"),
+  replyType: varchar("reply_type"),
+  tags: text("tags").array(),
+  isRead: boolean("is_read").default(false),
+  campaignName: varchar("campaign_name"),
+  receivedAt: timestamp("received_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
   senderEmail: varchar("sender_email").notNull(),
   senderName: varchar("sender_name"),
-  subject: varchar("subject").notNull(),
+  readAt: timestamp("read_at"),
+  archivedAt: timestamp("archived_at"),
+  outreachEmailId: integer("outreach_email_id"),
+  campaignId: integer("campaign_id").references(() => campaigns.id),
   message: text("message").notNull(),
-  messageId: varchar("message_id"), // Email message ID for threading
-  inReplyTo: varchar("in_reply_to"), // Original message ID
   sentiment: varchar("sentiment", { enum: ["positive", "negative", "neutral", "interested"] }),
   category: varchar("category", { enum: ["interest", "question", "rejection", "meeting_request", "follow_up", "other"] }),
   priority: varchar("priority", { enum: ["high", "medium", "low"] }).default("medium"),
-  isRead: boolean("is_read").default(false),
-  isArchived: boolean("is_archived").default(false),
   isStarred: boolean("is_starred").default(false),
-  tags: text("tags").array(), // Custom tags for organization
-  attachments: jsonb("attachments"), // Array of attachment info
-  receivedAt: timestamp("received_at").notNull(),
+  isArchived: boolean("is_archived").default(false),
   respondedAt: timestamp("responded_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const emailRepliesRelations = relations(emailReplies, ({ one, many }) => ({

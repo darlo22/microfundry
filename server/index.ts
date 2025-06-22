@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { createServer } from "http";
 import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
 
@@ -88,7 +89,16 @@ process.on('unhandledRejection', (reason, promise) => {
 
 (async () => {
   try {
-    const server = await registerRoutes(app);
+    // Force development mode before any other configuration
+    process.env.NODE_ENV = 'development';
+    
+    // Setup Vite development server BEFORE registering routes
+    const server = createServer(app);
+    await setupVite(app, server);
+    console.log('✅ Running in development mode with Vite server');
+    
+    // Now register API routes after Vite setup
+    await registerRoutes(app);
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;
@@ -101,38 +111,6 @@ process.on('unhandledRejection', (reason, promise) => {
         res.status(status).json({ message });
       }
       // Don't re-throw the error to prevent crashes
-    });
-
-    // Force development mode - completely override any production routing
-    process.env.NODE_ENV = 'development';
-    
-    // Always use Vite development server for Replit deployment
-    await setupVite(app, server);
-    console.log('✅ Running in development mode with Vite server');
-    
-    // Override any remaining routing issues with a comprehensive catch-all
-    app.get('*', (req, res, next) => {
-      // Skip API routes and uploads
-      if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
-        return next();
-      }
-      
-      // For root and client routes, send the basic HTML structure
-      res.status(200).send(`
-        <!DOCTYPE html>
-        <html lang="en">
-          <head>
-            <meta charset="UTF-8" />
-            <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>Fundry - Micro Investment Platform</title>
-          </head>
-          <body>
-            <div id="root"></div>
-            <script type="module" src="/src/main.tsx"></script>
-          </body>
-        </html>
-      `);
     });
 
     // ALWAYS serve the app on port 5000

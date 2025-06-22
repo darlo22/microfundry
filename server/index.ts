@@ -107,6 +107,16 @@ process.on('unhandledRejection', (reason, promise) => {
     // Always use Vite development server since we don't have a build process in this environment
     await setupVite(app, server);
     console.log('✅ Running in development mode with Vite server');
+    
+    // Add a fallback route handler for any unmatched routes
+    app.use('*', (req, res) => {
+      // Skip API routes
+      if (req.originalUrl.startsWith('/api/') || req.originalUrl.startsWith('/uploads/')) {
+        return res.status(404).json({ message: 'Route not found' });
+      }
+      // For all other routes, return a simple response to prevent 404
+      res.status(200).send('Application is running in development mode');
+    });
 
     // ALWAYS serve the app on port 5000
     // this serves both the API and the client.

@@ -6779,6 +6779,20 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           const actualDeliveredCount = campaignEmails.filter(email => email.status === 'delivered' || email.status === 'opened' || email.status === 'replied').length;
           const actualSentCount = campaignEmails.filter(email => email.status !== 'pending').length;
 
+          console.log(`Campaign ${campaign.id} (${campaign.subject}):`, {
+            totalEmails: campaignEmails.length,
+            actualOpenedCount,
+            actualRepliedCount,
+            storedOpenedCount: campaign.openedCount,
+            storedRepliedCount: campaign.repliedCount,
+            emails: campaignEmails.map(e => ({ 
+              id: e.id, 
+              status: e.status, 
+              openedAt: e.openedAt, 
+              repliedAt: e.repliedAt 
+            }))
+          });
+
           return {
             ...campaign,
             sentCount: actualSentCount,

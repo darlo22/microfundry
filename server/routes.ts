@@ -6765,7 +6765,31 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         .where(eq(emailCampaigns.founderId, req.user.id))
         .orderBy(emailCampaigns.createdAt);
 
-      res.json(emailCampaignResults);
+      // Calculate real-time statistics for each campaign from outreach emails
+      const campaignsWithRealTimeStats = await Promise.all(
+        emailCampaignResults.map(async (campaign) => {
+          const outreachEmails = await db
+            .select()
+            .from(outreachEmails)
+            .where(eq(outreachEmails.emailCampaignId, campaign.id));
+
+          // Calculate real-time counts
+          const actualOpenedCount = outreachEmails.filter(email => email.openedAt !== null).length;
+          const actualRepliedCount = outreachEmails.filter(email => email.repliedAt !== null).length;
+          const actualDeliveredCount = outreachEmails.filter(email => email.status === 'delivered' || email.status === 'opened' || email.status === 'replied').length;
+          const actualSentCount = outreachEmails.filter(email => email.status !== 'pending').length;
+
+          return {
+            ...campaign,
+            sentCount: actualSentCount,
+            deliveredCount: actualDeliveredCount,
+            openedCount: actualOpenedCount,
+            repliedCount: actualRepliedCount,
+          };
+        })
+      );
+
+      res.json(campaignsWithRealTimeStats);
     } catch (error) {
       console.error('Error fetching email campaigns:', error);
       res.status(500).json({ message: 'Failed to fetch email campaigns' });

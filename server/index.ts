@@ -103,19 +103,10 @@ process.on('unhandledRejection', (reason, promise) => {
       // Don't re-throw the error to prevent crashes
     });
 
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
-    if (app.get("env") === "development" || process.env.NODE_ENV === "development") {
-      await setupVite(app, server);
-    } else {
-      try {
-        serveStatic(app);
-      } catch (error) {
-        console.warn('Production build not found, falling back to development mode:', error);
-        await setupVite(app, server);
-      }
-    }
+    // Force development mode for Replit deployment
+    // Always use Vite development server since we don't have a build process in this environment
+    await setupVite(app, server);
+    console.log('✅ Running in development mode with Vite server');
 
     // ALWAYS serve the app on port 5000
     // this serves both the API and the client.

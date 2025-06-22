@@ -41,6 +41,16 @@ app.use('/uploads', express.static('uploads', {
 // Serve assets (logos, etc.)
 app.use('/assets', express.static('client/src/assets'));
 
+// Serve static files from dist directory for deployment
+app.use(express.static('dist', {
+  index: 'index.html',
+  setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    }
+  }
+}));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

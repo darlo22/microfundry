@@ -12,7 +12,11 @@ import { useAuth } from "@/hooks/useAuth";
 import heroImage from "@assets/ChatGPT Image Jun 21, 2025, 09_45_41 AM (1)_1750496219995.png";
 
 export default function Landing() {
+  console.log('Landing component starting to render');
+  
   const { user, isAuthenticated } = useAuth();
+  
+  console.log('Landing auth state:', { user: user?.id, isAuthenticated });
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [showLearnMoreModal, setShowLearnMoreModal] = useState(false);

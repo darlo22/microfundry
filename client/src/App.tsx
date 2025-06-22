@@ -106,12 +106,12 @@ function Router() {
       
       {/* Root path handling */}
       <Route path="/">
-        <MinimalTest />
+        <Landing />
       </Route>
       
       {/* Catch all routes */}
       <Route>
-        {!isAuthenticated ? <MinimalTest /> : <NotFound />}
+        {!isAuthenticated ? <Landing /> : <NotFound />}
       </Route>
     </Switch>
   );

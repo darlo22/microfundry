@@ -109,6 +109,11 @@ const safeHandler = (handler: Function) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
+  // Health check endpoint for deployment
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   // Enhanced video streaming endpoint with improved buffering
   app.get('/api/stream/:filename', (req: express.Request, res: express.Response) => {
     try {

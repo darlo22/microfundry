@@ -206,8 +206,8 @@ export default function Landing() {
                 <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center mb-6">
                   <Smartphone className="text-white" size={20} />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Mobile Optimized</h3>
-                <p className="text-gray-600">Manage campaigns and investments seamlessly across all devices.</p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Investor Reachout</h3>
+                <p className="text-gray-600">Reach out to investors with our comprehensive email outreach system.</p>
               </CardContent>
             </Card>
 

@@ -13,6 +13,7 @@ export default function Landing() {
   const [, navigate] = useLocation();
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isLearnMoreOpen, setIsLearnMoreOpen] = useState(false);
+  const [onboardingMode, setOnboardingMode] = useState<"signin" | "signup">("signup");
 
   useEffect(() => {
     document.title = 'Fundry - Micro Investment Platform';
@@ -285,7 +286,9 @@ export default function Landing() {
       {/* Modals */}
       <OnboardingModal 
         isOpen={isOnboardingOpen} 
-        onClose={() => setIsOnboardingOpen(false)} 
+        onClose={() => setIsOnboardingOpen(false)}
+        mode={onboardingMode}
+        onModeChange={setOnboardingMode}
       />
 
       <Dialog open={isLearnMoreOpen} onOpenChange={setIsLearnMoreOpen}>

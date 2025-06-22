@@ -6746,15 +6746,12 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
+      // Get email campaigns first
       const emailCampaignResults = await db
         .select({
           id: emailCampaigns.id,
           subject: emailCampaigns.subject,
           recipientCount: emailCampaigns.recipientCount,
-          sentCount: emailCampaigns.sentCount,
-          deliveredCount: emailCampaigns.deliveredCount,
-          openedCount: emailCampaigns.openedCount,
-          repliedCount: emailCampaigns.repliedCount,
           status: emailCampaigns.status,
           sentAt: emailCampaigns.sentAt,
           createdAt: emailCampaigns.createdAt,
@@ -6765,40 +6762,37 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         .where(eq(emailCampaigns.founderId, req.user.id))
         .orderBy(emailCampaigns.createdAt);
 
-      // Calculate real-time statistics for each campaign from outreach emails
+      // Calculate real-time statistics by fetching outreach emails for each campaign
       const campaignsWithRealTimeStats = await Promise.all(
         emailCampaignResults.map(async (campaign) => {
-          const campaignEmails = await db
+          const outreachEmailsForCampaign = await db
             .select()
             .from(outreachEmails)
             .where(eq(outreachEmails.emailCampaignId, campaign.id));
 
-          // Calculate real-time counts
-          const actualOpenedCount = campaignEmails.filter(email => email.openedAt !== null).length;
-          const actualRepliedCount = campaignEmails.filter(email => email.repliedAt !== null).length;
-          const actualDeliveredCount = campaignEmails.filter(email => email.status === 'delivered' || email.status === 'opened' || email.status === 'replied').length;
-          const actualSentCount = campaignEmails.filter(email => email.status !== 'pending').length;
+          // Calculate counts based on actual data
+          const sentCount = outreachEmailsForCampaign.filter(email => email.status !== 'pending').length;
+          const deliveredCount = outreachEmailsForCampaign.filter(email => 
+            email.status === 'delivered' || email.status === 'opened' || email.status === 'replied'
+          ).length;
+          const openedCount = outreachEmailsForCampaign.filter(email => email.openedAt !== null).length;
+          const repliedCount = outreachEmailsForCampaign.filter(email => email.repliedAt !== null).length;
 
-          console.log(`Campaign ${campaign.id} (${campaign.subject}):`, {
-            totalEmails: campaignEmails.length,
-            actualOpenedCount,
-            actualRepliedCount,
-            storedOpenedCount: campaign.openedCount,
-            storedRepliedCount: campaign.repliedCount,
-            emails: campaignEmails.map(e => ({ 
-              id: e.id, 
-              status: e.status, 
-              openedAt: e.openedAt, 
-              repliedAt: e.repliedAt 
-            }))
+          console.log(`Campaign ${campaign.id} stats:`, {
+            subject: campaign.subject,
+            totalEmails: outreachEmailsForCampaign.length,
+            sentCount,
+            deliveredCount,
+            openedCount,
+            repliedCount
           });
 
           return {
             ...campaign,
-            sentCount: actualSentCount,
-            deliveredCount: actualDeliveredCount,
-            openedCount: actualOpenedCount,
-            repliedCount: actualRepliedCount,
+            sentCount,
+            deliveredCount,
+            openedCount,
+            repliedCount,
           };
         })
       );

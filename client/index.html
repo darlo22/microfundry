@@ -2,56 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <title>FUNDRY DEPLOYMENT SUCCESSFUL</title>
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fundry - Micro Investment Platform</title>
   </head>
   <body>
-    <!-- IMMEDIATE CACHE OVERRIDE -->
-    <script>
-      // Clear everything immediately
-      document.body.innerHTML = '';
-      document.body.style.cssText = 'background: white !important; margin: 0; padding: 0; overflow: hidden;';
-      
-      // Create immediate success display
-      const successDiv = document.createElement('div');
-      successDiv.innerHTML = `
-        <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 999999999; display: flex; align-items: center; justify-content: center; flex-direction: column; font-family: Arial, sans-serif;">
-          <h1 style="font-size: 48px; background: linear-gradient(135deg, #f97316, #1e40af); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 20px; text-align: center;">
-            🚀 FUNDRY DEPLOYMENT SUCCESSFUL
-          </h1>
-          <p style="font-size: 24px; color: #f97316; margin-bottom: 20px; text-align: center;">React Application Working Perfectly</p>
-          <div style="font-size: 16px; color: #1e40af; text-align: center; line-height: 1.6;">
-            <div>✅ Server Running on Port 5000</div>
-            <div>✅ React App Loaded Successfully</div>
-            <div>✅ API Endpoints Connected</div>
-            <div>✅ Database Active</div>
-            <div>✅ Authentication System Ready</div>
-          </div>
-          <div style="margin-top: 30px; font-size: 14px; color: #666; text-align: center;">
-            <p>Cache issues resolved - Application ready for use</p>
-            <p>Redirecting to React app in 3 seconds...</p>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(successDiv);
-      
-      // Create root div for React
-      const rootDiv = document.createElement('div');
-      rootDiv.id = 'root';
-      rootDiv.style.display = 'none';
-      document.body.appendChild(rootDiv);
-      
-      // Show React app after 3 seconds
-      setTimeout(() => {
-        successDiv.style.display = 'none';
-        rootDiv.style.display = 'block';
-      }, 3000);
-    </script>
-    
-    <script type="module" src="/src/main.tsx?cache-bust=${Date.now()}"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

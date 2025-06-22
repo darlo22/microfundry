@@ -536,6 +536,12 @@ Founder, {companyName}`
               <h1 className="text-xl font-semibold text-fundry-navy">Investor Outreach</h1>
             </div>
             <div className="flex items-center space-x-3">
+              <Link href="/email-replies">
+                <Button variant="outline" size="sm" className="text-fundry-navy border-fundry-navy hover:bg-blue-50">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Email Replies
+                </Button>
+              </Link>
               {rateLimit && (
                 <div className="text-sm text-fundry-navy">
                   {rateLimit.remaining} of {rateLimit.dailyLimit} emails remaining today

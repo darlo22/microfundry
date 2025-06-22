@@ -7982,5 +7982,205 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
+  // Email replies management endpoints
+  app.get("/api/email-replies", safeHandler(async (req: any, res: any) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const { page = 1, limit = 10, filter, search, sentiment, category, priority } = req.query;
+      const offset = (page - 1) * limit;
+
+      let whereConditions = [eq(emailReplies.founderId, req.user.id)];
+
+      if (filter) {
+        if (filter === 'unread') whereConditions.push(eq(emailReplies.isRead, false));
+        if (filter === 'starred') whereConditions.push(eq(emailReplies.isStarred, true));
+        if (filter === 'archived') whereConditions.push(eq(emailReplies.isArchived, true));
+      }
+
+      if (search) {
+        whereConditions.push(
+          or(
+            ilike(emailReplies.senderName, `%${search}%`),
+            ilike(emailReplies.senderEmail, `%${search}%`),
+            ilike(emailReplies.subject, `%${search}%`)
+          )
+        );
+      }
+
+      if (sentiment) whereConditions.push(eq(emailReplies.sentiment, sentiment));
+      if (category) whereConditions.push(eq(emailReplies.category, category));
+      if (priority) whereConditions.push(eq(emailReplies.priority, priority));
+
+      const replies = await db.select()
+        .from(emailReplies)
+        .where(and(...whereConditions))
+        .orderBy(desc(emailReplies.receivedAt))
+        .limit(limit)
+        .offset(offset);
+
+      const totalCount = await db.select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(and(...whereConditions));
+
+      res.json({
+        replies,
+        totalPages: Math.ceil(totalCount[0].count / limit),
+        currentPage: page
+      });
+    } catch (error) {
+      console.error('Error fetching email replies:', error);
+      res.status(500).json({ message: 'Failed to fetch email replies' });
+    }
+  }));
+
+  app.get("/api/email-replies/stats", safeHandler(async (req: any, res: any) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const totalReplies = await db.select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, req.user.id));
+
+      const unreadReplies = await db.select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.founderId, req.user.id),
+          eq(emailReplies.isRead, false)
+        ));
+
+      const starredReplies = await db.select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.founderId, req.user.id),
+          eq(emailReplies.isStarred, true)
+        ));
+
+      const respondedReplies = await db.select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.founderId, req.user.id),
+          isNotNull(emailReplies.respondedAt)
+        ));
+
+      const recentReplies = await db.select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.founderId, req.user.id),
+          gte(emailReplies.receivedAt, sql`NOW() - INTERVAL '7 days'`)
+        ));
+
+      const repliesByCategory = await db.select({
+        category: emailReplies.category,
+        count: sql`count(*)`
+      })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, req.user.id))
+        .groupBy(emailReplies.category);
+
+      const repliesBySentiment = await db.select({
+        sentiment: emailReplies.sentiment,
+        count: sql`count(*)`
+      })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, req.user.id))
+        .groupBy(emailReplies.sentiment);
+
+      const responseRate = totalReplies[0].count > 0 
+        ? Math.round((respondedReplies[0].count / totalReplies[0].count) * 100)
+        : 0;
+
+      res.json({
+        totalReplies: totalReplies[0].count,
+        unreadReplies: unreadReplies[0].count,
+        starredReplies: starredReplies[0].count,
+        respondedReplies: respondedReplies[0].count,
+        recentReplies: recentReplies[0].count,
+        responseRate,
+        repliesByCategory: repliesByCategory.map(r => ({ category: r.category, count: Number(r.count) })),
+        repliesBySentiment: repliesBySentiment.map(r => ({ sentiment: r.sentiment, count: Number(r.count) }))
+      });
+    } catch (error) {
+      console.error('Error fetching reply stats:', error);
+      res.status(500).json({ message: 'Failed to fetch reply stats' });
+    }
+  }));
+
+  app.patch("/api/email-replies/:id", safeHandler(async (req: any, res: any) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+
+      const reply = await db.select()
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.id, id),
+          eq(emailReplies.founderId, req.user.id)
+        ));
+
+      if (!reply.length) {
+        return res.status(404).json({ message: "Reply not found" });
+      }
+
+      await db.update(emailReplies)
+        .set(updates)
+        .where(eq(emailReplies.id, id));
+
+      res.json({ message: "Reply updated successfully" });
+    } catch (error) {
+      console.error('Error updating reply:', error);
+      res.status(500).json({ message: 'Failed to update reply' });
+    }
+  }));
+
+  app.post("/api/email-replies/:id/respond", safeHandler(async (req: any, res: any) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const { id } = req.params;
+      const { subject, message } = req.body;
+
+      const reply = await db.select()
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.id, id),
+          eq(emailReplies.founderId, req.user.id)
+        ));
+
+      if (!reply.length) {
+        return res.status(404).json({ message: "Reply not found" });
+      }
+
+      // Create response record
+      await db.insert(emailResponses).values({
+        emailReplyId: id,
+        founderId: req.user.id,
+        subject,
+        content: message,
+        sentAt: new Date()
+      });
+
+      // Mark original reply as responded
+      await db.update(emailReplies)
+        .set({ respondedAt: new Date() })
+        .where(eq(emailReplies.id, id));
+
+      res.json({ message: "Response sent successfully" });
+    } catch (error) {
+      console.error('Error sending response:', error);
+      res.status(500).json({ message: 'Failed to send response' });
+    }
+  }));
+
   return httpServer;
 }

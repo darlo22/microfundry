@@ -196,156 +196,131 @@ export default function FounderInbox() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
-      {/* Modern Header with Gradient */}
-      <div className="relative bg-gradient-to-r from-fundry-orange via-orange-500 to-fundry-navy text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-black/20"></div>
-        <div className="relative px-4 sm:px-6 lg:px-8 py-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-6">
-                <Link href="/founder-outreach?tab=responses">
-                  <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/10 border-white/20 backdrop-blur-sm">
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Email Responses
-                  </Button>
-                </Link>
-                <Link href="/">
-                  <FundryLogo className="h-10" />
-                </Link>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
-                  onClick={() => simulateReplyMutation.mutate({
-                    originalEmailId: 1,
-                    senderEmail: 'investor@example.com',
-                    senderName: 'Sarah Wilson',
-                    subject: 'Re: Investment Opportunity in TechFlow',
-                    content: 'Hi, I\'m very interested in learning more about your investment opportunity. Could you send me more details about your business model and financials?',
-                    replyType: 'interested'
-                  })}
-                  disabled={simulateReplyMutation.isPending}
-                >
-                  Create Test Reply
-                </Button>
-              </div>
-            </div>
-            
-            {/* Page Header */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/20">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
-                <Mail className="h-12 w-12 text-white" />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold text-white mb-2">Email Inbox</h1>
-                <p className="text-orange-100 text-lg">Manage replies from potential investors</p>
-              </div>
+              <Link href="/founder-outreach?tab=responses">
+                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Email Responses
+                </Button>
+              </Link>
+              <Link href="/">
+                <FundryLogo className="h-8" />
+              </Link>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => simulateReplyMutation.mutate({
+                  originalEmailId: 1,
+                  senderEmail: 'investor@example.com',
+                  senderName: 'Sarah Wilson',
+                  subject: 'Re: Investment Opportunity in TechFlow',
+                  content: 'Hi, I\'m very interested in learning more about your investment opportunity. Could you send me more details about your business model and financials?',
+                  replyType: 'interested'
+                })}
+                disabled={simulateReplyMutation.isPending}
+              >
+                Create Test Reply
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Email Inbox</h1>
+          <p className="text-gray-600">Manage replies from potential investors</p>
+        </div>
 
-        {/* Modern Stats Cards */}
+        {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
-            <Card className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0">
+            <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <Mail className="w-5 h-5" />
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <Mail className="w-5 h-5" />
                   <div>
-                    <p className="text-xs font-medium text-blue-100 uppercase tracking-wide">Total</p>
+                    <p className="text-sm opacity-90">Total</p>
                     <p className="text-2xl font-bold">{stats.total}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="bg-gradient-to-br from-fundry-orange via-orange-500 to-red-500 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0">
+            <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <MailOpen className="w-5 h-5" />
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <MailOpen className="w-5 h-5" />
                   <div>
-                    <p className="text-xs font-medium text-orange-100 uppercase tracking-wide">Unread</p>
+                    <p className="text-sm opacity-90">Unread</p>
                     <p className="text-2xl font-bold">{stats.unread}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0">
+            <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <Heart className="w-5 h-5" />
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <Heart className="w-5 h-5" />
                   <div>
-                    <p className="text-xs font-medium text-green-100 uppercase tracking-wide">Interested</p>
+                    <p className="text-sm opacity-90">Interested</p>
                     <p className="text-2xl font-bold">{stats.interested}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-red-500 via-pink-500 to-rose-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0">
+            <Card className="bg-gradient-to-r from-red-500 to-red-600 text-white">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <TrendingUp className="w-5 h-5" />
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="w-5 h-5" />
                   <div>
-                    <p className="text-xs font-medium text-red-100 uppercase tracking-wide">Not Interested</p>
+                    <p className="text-sm opacity-90">Not Interested</p>
                     <p className="text-2xl font-bold">{stats.notInterested}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-500 via-violet-500 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0">
+            <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <MessageSquare className="w-5 h-5" />
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <MessageSquare className="w-5 h-5" />
                   <div>
-                    <p className="text-xs font-medium text-purple-100 uppercase tracking-wide">Questions</p>
+                    <p className="text-sm opacity-90">Questions</p>
                     <p className="text-2xl font-bold">{stats.questions}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-amber-500 via-yellow-500 to-orange-500 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0">
+            <Card className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <Clock className="w-5 h-5" />
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <Clock className="w-5 h-5" />
                   <div>
-                    <p className="text-xs font-medium text-amber-100 uppercase tracking-wide">Info Requests</p>
+                    <p className="text-sm opacity-90">Info Requests</p>
                     <p className="text-2xl font-bold">{stats.requestInfo}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-slate-500 via-gray-600 to-zinc-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0">
+            <Card className="bg-gradient-to-r from-gray-500 to-gray-600 text-white">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <Archive className="w-5 h-5" />
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <Archive className="w-5 h-5" />
                   <div>
-                    <p className="text-xs font-medium text-slate-100 uppercase tracking-wide">Archived</p>
+                    <p className="text-sm opacity-90">Archived</p>
                     <p className="text-2xl font-bold">{stats.archived}</p>
                   </div>
                 </div>
@@ -355,53 +330,51 @@ export default function FounderInbox() {
         )}
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Modern Sidebar Filters */}
+          {/* Sidebar Filters */}
           <div className="lg:w-80">
-            <Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0 bg-gradient-to-br from-white via-blue-50/30 to-orange-50/20">
-              <CardHeader className="bg-gradient-to-r from-fundry-navy to-blue-700 text-white rounded-t-lg">
-                <CardTitle className="flex items-center space-x-3">
-                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <Filter className="w-5 h-5" />
-                  </div>
-                  <span className="font-semibold">Filters</span>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Filter className="w-5 h-5" />
+                  <span>Filters</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6 p-6">
+              <CardContent className="space-y-4">
                 {/* Search */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-3">Search</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-fundry-orange w-4 h-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
                       type="text"
                       placeholder="Search emails..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 border-2 border-gray-200 focus:border-fundry-orange focus:ring-fundry-orange/20 rounded-lg"
+                      className="pl-10"
                     />
                   </div>
                 </div>
 
                 {/* Status Filter */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-3">Status</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                   <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-                    <TabsList className="grid w-full grid-cols-2 bg-gray-100 rounded-lg p-1">
-                      <TabsTrigger value="all" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white">All</TabsTrigger>
-                      <TabsTrigger value="unread" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white">Unread</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="all">All</TabsTrigger>
+                      <TabsTrigger value="unread">Unread</TabsTrigger>
                     </TabsList>
-                    <TabsList className="grid w-full grid-cols-2 mt-3 bg-gray-100 rounded-lg p-1">
-                      <TabsTrigger value="active" className="data-[state=active]:bg-fundry-navy data-[state=active]:text-white">Active</TabsTrigger>
-                      <TabsTrigger value="archived" className="data-[state=active]:bg-fundry-navy data-[state=active]:text-white">Archived</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 mt-2">
+                      <TabsTrigger value="active">Active</TabsTrigger>
+                      <TabsTrigger value="archived">Archived</TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>
 
                 {/* Reply Type Filter */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-3">Reply Type</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Reply Type</label>
                   <Select value={replyTypeFilter} onValueChange={setReplyTypeFilter}>
-                    <SelectTrigger className="border-2 border-gray-200 focus:border-fundry-orange focus:ring-fundry-orange/20 rounded-lg">
+                    <SelectTrigger>
                       <SelectValue placeholder="All types" />
                     </SelectTrigger>
                     <SelectContent>

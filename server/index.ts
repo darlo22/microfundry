@@ -1,10 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { createServer } from "http";
-import path from "path";
-import fs from "fs";
 import { registerRoutes } from "./routes";
-import { setupVite, log } from "./vite";
-import { setupProduction } from "./production";
+import { setupVite, serveStatic, log } from "./vite";
 
 // Add process-level error handlers to prevent crashes
 process.on('uncaughtException', (error) => {
@@ -18,27 +14,8 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
-const isProduction = false; // Force development mode for proper React app loading
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-// Add cache-busting headers to prevent stale content
-app.use((req, res, next) => {
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
-  next();
-});
-
-// Mount static files before any other middleware
-app.use('/uploads', express.static('uploads', {
-  setHeaders: (res, path, stat) => {
-    if (stat.size > 1024 * 1024) {
-      res.setHeader('Content-Type', 'video/mp4');
-    }
-  },
-}));
 
 // Serve static files from uploads directory with proper MIME types
 app.use('/uploads', express.static('uploads', {
@@ -107,24 +84,7 @@ process.on('unhandledRejection', (reason, promise) => {
 
 (async () => {
   try {
-    // Register API routes FIRST, which creates and returns the HTTP server
     const server = await registerRoutes(app);
-    console.log('✅ API routes registered');
-    
-    if (isProduction) {
-      // Production: Serve built static files
-      const productionReady = setupProduction(app);
-      if (!productionReady) {
-        console.log('⚠️ Production build not found, falling back to development mode');
-        // Setup Vite development server as fallback
-        await setupVite(app, server);
-        console.log('✅ Running in fallback development mode');
-      }
-    } else {
-      // Development: Setup Vite development server
-      await setupVite(app, server);
-      console.log('✅ Running in development mode with Vite server');
-    }
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;
@@ -138,6 +98,15 @@ process.on('unhandledRejection', (reason, promise) => {
       }
       // Don't re-throw the error to prevent crashes
     });
+
+    // importantly only setup vite in development and after
+    // setting up all the other routes so the catch-all route
+    // doesn't interfere with the other routes
+    if (app.get("env") === "development") {
+      await setupVite(app, server);
+    } else {
+      serveStatic(app);
+    }
 
     // ALWAYS serve the app on port 5000
     // this serves both the API and the client.

@@ -107,26 +107,6 @@ const safeHandler = (handler: Function) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
-  // CRITICAL: Override any "Production Test" content immediately
-  app.get('/', (req, res) => {
-    const htmlContent = `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fundry - Micro Investment Platform</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>`;
-    res.setHeader('Content-Type', 'text/html');
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.send(htmlContent);
-  });
-
   // Enhanced video streaming endpoint with improved buffering
   app.get('/api/stream/:filename', (req: express.Request, res: express.Response) => {
     try {
@@ -2723,7 +2703,21 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
   });
 
-  // No catch-all route needed - let Vite development server handle all client-side routing
+  // Catch-all handler for client-side routing
+  app.get('*', (req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
+      return next();
+    }
+    
+    // For all other routes, serve the React app
+    if (process.env.NODE_ENV === 'production') {
+      res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
+    } else {
+      // In development, Vite handles this
+      next();
+    }
+  });
 
   // Security routes
   app.put('/api/user/change-password', requireAuth, async (req: any, res) => {
@@ -6995,8 +6989,27 @@ ${emailSettings[0].signature || ''}`
       const offset = (parseInt(page) - 1) * parseInt(limit);
 
       let query = db
-        .select()
+        .select({
+          id: emailReplies.id,
+          originalEmailId: emailReplies.originalEmailId,
+          senderEmail: emailReplies.senderEmail,
+          senderName: emailReplies.senderName,
+          subject: emailReplies.subject,
+          content: emailReplies.content,
+          isRead: emailReplies.isRead,
+          replyType: emailReplies.replyType,
+          tags: emailReplies.tags,
+          receivedAt: emailReplies.receivedAt,
+          readAt: emailReplies.readAt,
+          archivedAt: emailReplies.archivedAt,
+          originalSubject: outreachEmails.subject,
+          originalRecipient: outreachEmails.recipientEmail,
+          campaignName: campaigns.companyName,
+        })
         .from(emailReplies)
+        .leftJoin(outreachEmails, eq(emailReplies.originalEmailId, outreachEmails.id))
+        .leftJoin(emailCampaigns, eq(outreachEmails.emailCampaignId, emailCampaigns.id))
+        .leftJoin(campaigns, eq(emailCampaigns.campaignId, campaigns.id))
         .where(eq(emailReplies.founderId, req.user.id));
 
       if (status === 'unread') {
@@ -7015,25 +7028,6 @@ ${emailSettings[0].signature || ''}`
         .orderBy(emailReplies.receivedAt)
         .limit(parseInt(limit))
         .offset(offset);
-
-      // Transform replies to include required fields for frontend compatibility
-      const transformedReplies = replies.map(reply => ({
-        id: reply.id,
-        originalEmailId: reply.originalEmailId,
-        senderEmail: reply.senderEmail || reply.replyEmail,
-        senderName: reply.senderName || reply.replyName,
-        subject: reply.subject,
-        content: reply.content,
-        isRead: reply.isRead,
-        replyType: reply.replyType,
-        tags: reply.tags || [],
-        receivedAt: reply.receivedAt,
-        readAt: reply.readAt,
-        archivedAt: reply.archivedAt,
-        originalSubject: reply.subject, // Use reply subject as fallback
-        originalRecipient: reply.senderEmail || reply.replyEmail,
-        campaignName: reply.campaignName || 'Unknown Campaign'
-      }));
 
       // Get total count for pagination
       const totalQuery = db
@@ -7056,7 +7050,7 @@ ${emailSettings[0].signature || ''}`
       const [{ count }] = await totalQuery;
 
       res.json({
-        replies: transformedReplies,
+        replies,
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),
@@ -7247,8 +7241,6 @@ ${emailSettings[0].signature || ''}`
           founderId: req.user.id,
           replyEmail: senderEmail,
           replyName: senderName,
-          senderEmail: senderEmail,
-          senderName: senderName,
           subject,
           content,
           replyType: replyType || 'other',

@@ -2,20 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fundry - Micro Investment Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
   </head>
   <body>
-    <div id="root">Loading...</div>
-    <script>
-      console.log("Basic script test");
-      document.getElementById('root').innerHTML = '<h1>JavaScript Working</h1>';
-    </script>
-    <script type="module">
-      console.log("Module script test");
-      window.__vite_plugin_react_preamble_installed__ = true;
-    </script>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
   </body>
 </html>

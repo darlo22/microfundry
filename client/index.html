@@ -7,11 +7,14 @@
     <title>Fundry - Micro Investment Platform</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">Loading...</div>
+    <script>
+      console.log("Basic script test");
+      document.getElementById('root').innerHTML = '<h1>JavaScript Working</h1>';
+    </script>
     <script type="module">
-      console.log("HTML script executing...");
+      console.log("Module script test");
       window.__vite_plugin_react_preamble_installed__ = true;
-      console.log("Preamble flag set");
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>

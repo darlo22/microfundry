@@ -13,33 +13,24 @@ const defaultTemplates = [
   {
     name: "Initial Investment Inquiry",
     category: "introduction",
-    subject: "Partnership Opportunity with {name} - {company}",
+    subject: "Quick question about {company}",
     content: `Hi {name},
 
-I hope this email finds you well. My name is [Your Name], and I'm the founder of [Your Company Name].
+Hope you're doing well. I'm reaching out because I noticed your work with companies in our space.
 
-I came across your profile and was impressed by your investment focus and experience in [relevant sector]. I believe our startup would be a great fit for your portfolio.
+I'm building something that might interest you - we're working on solving a real problem in [industry]. We've been quietly making progress and thought you might want to take a look.
 
-We're currently raising [funding amount] to [brief description of what the funding will achieve]. Here's what makes us unique:
+A few quick details:
+- We've got some early traction with customers
+- The team has relevant experience
+- We're looking to grow with the right partners
 
-• [Key differentiator 1]
-• [Key differentiator 2]  
-• [Key differentiator 3]
+Would love to hear your thoughts if you have a moment. No pressure at all - just thought it might be worth a conversation.
 
-Our traction so far:
-- [Key metric 1]
-- [Key metric 2]
-- [Key metric 3]
+Thanks for your time.
 
-I'd love to share more details about our opportunity and learn about your investment criteria. Would you be open to a brief 15-minute call this week?
-
-Thank you for your time and consideration.
-
-Best regards,
-[Your Name]
-[Your Title]
-[Your Company]
-[Your Contact Information]`,
+Best,
+[Your Name]`,
     variables: ["name", "company"],
     isPublic: true,
     isDefault: true,
@@ -49,30 +40,23 @@ Best regards,
   {
     name: "Follow-up After Demo",
     category: "followup",
-    subject: "Thank you for your time - Next steps with {company}",
+    subject: "Thanks for the chat - {name}",
     content: `Hi {name},
 
-Thank you for taking the time to review our pitch and ask such insightful questions during our demo session.
+Thanks for taking the time to chat yesterday. Really appreciated your questions about the technical side.
 
-As discussed, I'm attaching the following materials for your review:
-• Updated financial projections
-• Technical roadmap
-• Customer testimonials and case studies
+As promised, I've put together some additional info based on what we discussed:
+- The financial model you asked about
+- Some customer feedback we've received
+- Technical details on the implementation
 
-Key highlights from our conversation:
-- [Point 1 discussed]
-- [Point 2 discussed]
-- [How you addressed their concerns]
+I think the point you raised about scalability was spot on - we've actually been working on exactly that challenge.
 
-Based on your feedback, I wanted to emphasize [specific aspect they showed interest in].
+Happy to jump on another call if it would be helpful, or feel free to reach out if you have any other questions.
 
-I'm happy to arrange a follow-up call with our [CTO/other team member] to dive deeper into [specific technical/business area they inquired about].
+Thanks again for your time.
 
-What would be the best next step from your perspective?
-
-Looking forward to hearing from you.
-
-Best regards,
+Best,
 [Your Name]`,
     variables: ["name", "company"],
     isPublic: true,
@@ -83,34 +67,23 @@ Best regards,
   {
     name: "Milestone Update to Investors",
     category: "update",
-    subject: "Exciting Update: {company} Achieves Major Milestone",
+    subject: "Quick update - {name}",
     content: `Hi {name},
 
-I wanted to share some exciting news about our progress at [Your Company].
+Hope you're well. Wanted to give you a quick update on how things are going.
 
-🎉 We've just achieved a significant milestone: [specific achievement]
+We hit a pretty good milestone last week - managed to get our first paying customers signed up. It's been a long time coming, so feels good to see it happen.
 
-This represents [what this means for the business/growth/validation].
+Few other things worth mentioning:
+- The team is coming together nicely
+- We're starting to see some real traction
+- Learning a lot from early user feedback
 
-Other updates since we last spoke:
-• [Update 1]
-• [Update 2]
-• [Update 3]
+Still plenty of work ahead, but feels like we're moving in the right direction.
 
-Looking ahead:
-- [Next goal/milestone]
-- [Timeline]
-- [How this impacts the investment opportunity]
+Thought you might be interested to hear how things are progressing. Happy to chat more if you'd like to hear the details.
 
-This milestone brings us closer to [long-term vision/goal] and validates our [business model/market approach].
-
-I'd love to catch up and share more details about how this affects our growth trajectory and investment timeline.
-
-Are you available for a quick call next week?
-
-Thank you for your continued interest and support.
-
-Best regards,
+Best,
 [Your Name]`,
     variables: ["name", "company"],
     isPublic: true,
@@ -121,34 +94,25 @@ Best regards,
   {
     name: "Market Validation Story",
     category: "validation",
-    subject: "Market Validation: Why Now is the Perfect Time for {company}",
+    subject: "Thought you'd find this interesting - {name}",
     content: `Hi {name},
 
-I wanted to share why the timing is perfect for investing in [Your Company] and our market opportunity.
+Hope this finds you well. I've been thinking about our conversation and thought you might find this interesting.
 
-Market Context:
-The [your industry] market is experiencing unprecedented growth, with [relevant market statistics/trends]. This creates a unique window of opportunity for early-stage companies like ours.
+We've been talking to a lot of people in our space recently, and the feedback has been pretty consistent - there's definitely a need for what we're building.
 
-Our Validation:
-• Customer Discovery: [number] interviews revealed [key insight]
-• Early Traction: [specific metrics showing demand]
-• Industry Recognition: [awards, partnerships, media coverage]
+A few things that stood out:
+- Most people we spoke with have this exact problem
+- They're currently using workarounds that don't really work
+- Several mentioned they'd pay for a good solution
 
-Why This Matters for Investors:
-1. [Benefit 1 - market timing]
-2. [Benefit 2 - competitive advantage]
-3. [Benefit 3 - scalability potential]
+It's been validating to hear that we're onto something real. We're still early, but the signs are encouraging.
 
-We're positioned to capture [percentage/share] of this growing market through our unique approach of [your solution].
+I remember you mentioning your interest in this space. Would love to share what we've learned if you're curious.
 
-Investment Opportunity:
-We're raising [amount] to accelerate our growth during this optimal market window. Early investors will benefit from [specific advantages].
+No pressure at all - just thought it might be worth a chat.
 
-I'd appreciate the opportunity to share our detailed market analysis and growth projections with you.
-
-Would you be interested in learning more?
-
-Best regards,
+Best,
 [Your Name]`,
     variables: ["name", "company"],
     isPublic: true,
@@ -159,39 +123,25 @@ Best regards,
   {
     name: "Social Proof and Traction",
     category: "traction",
-    subject: "Growing Fast: {company}'s Latest Traction Update",
+    subject: "Some good news to share - {name}",
     content: `Hi {name},
 
-I wanted to share our latest traction numbers and some exciting validation we've received.
+Hope you're having a good week. Wanted to share some positive news from our end.
 
-Recent Growth Metrics:
-• [Metric 1]: [specific number and % growth]
-• [Metric 2]: [specific number and % growth]  
-• [Metric 3]: [specific number and % growth]
+Things have been picking up lately:
+- We've got a few more customers on board
+- The feedback has been really encouraging
+- Some interesting conversations happening with potential partners
 
-Social Proof:
-✓ [Customer testimonial or case study]
-✓ [Industry partnership or recognition]
-✓ [Media coverage or awards]
+One customer told us we solved a problem they'd been dealing with for months. That kind of feedback makes all the late nights worth it.
 
-What Our Customers Are Saying:
-"[Powerful customer quote that demonstrates value]" - [Customer Name, Title, Company]
+Still early days, but it feels like we're building something people actually want.
 
-This traction demonstrates:
-1. Product-market fit in our target segment
-2. Scalable business model with predictable growth
-3. Strong customer satisfaction and retention
+Thought you might be interested to hear how things are developing. Would love to catch up sometime if you're free.
 
-Investment Momentum:
-We're seeing increased interest from investors who recognize our growth potential. Our current round is [percentage] filled, with [notable investors/advisors] already committed.
+Hope all is well with you.
 
-The opportunity to join at this stage won't last long. Our growth trajectory suggests the next funding round will be at a significantly higher valuation.
-
-I'd love to discuss how you could be part of our success story.
-
-Are you available for a brief call this week?
-
-Best regards,
+Best,
 [Your Name]`,
     variables: ["name", "company"],
     isPublic: true,
@@ -205,35 +155,43 @@ async function seedEmailTemplates() {
   try {
     console.log('Connecting to database...');
     
-    // First, check if templates already exist
-    const existingTemplates = await pool.query(
-      'SELECT COUNT(*) as count FROM email_templates WHERE is_default = true'
-    );
-    
-    if (existingTemplates.rows[0].count > 0) {
-      console.log('Default email templates already exist. Skipping seed.');
-      return;
-    }
-
-    console.log('Inserting default email templates...');
+    // Update existing templates with new spam-filter-friendly content
+    console.log('Updating email templates with spam-filter-friendly content...');
     
     for (const template of defaultTemplates) {
-      await pool.query(`
-        INSERT INTO email_templates (
-          name, category, subject, content, variables, 
-          is_public, is_default, created_by_id, usage_count
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      // First try to update existing template
+      const updateResult = await pool.query(`
+        UPDATE email_templates 
+        SET subject = $1, content = $2, updated_at = NOW()
+        WHERE name = $3 AND is_default = true
       `, [
-        template.name,
-        template.category,
         template.subject,
         template.content,
-        JSON.stringify(template.variables),
-        template.isPublic,
-        template.isDefault,
-        template.createdById,
-        template.usage_count
+        template.name
       ]);
+
+      // If no rows were updated, insert new template
+      if (updateResult.rowCount === 0) {
+        await pool.query(`
+          INSERT INTO email_templates (
+            name, category, subject, content, variables, 
+            is_public, is_default, created_by, usage_count
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `, [
+          template.name,
+          template.category,
+          template.subject,
+          template.content,
+          JSON.stringify(template.variables),
+          template.isPublic,
+          template.isDefault,
+          template.createdById,
+          template.usage_count
+        ]);
+        console.log(`Inserted new template: ${template.name}`);
+      } else {
+        console.log(`Updated existing template: ${template.name}`);
+      }
     }
 
     console.log(`Successfully inserted ${defaultTemplates.length} default email templates`);

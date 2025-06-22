@@ -536,12 +536,6 @@ Founder, {companyName}`
               <h1 className="text-xl font-semibold text-fundry-navy">Investor Outreach</h1>
             </div>
             <div className="flex items-center space-x-3">
-              <Link href="/email-replies">
-                <Button variant="outline" size="sm" className="text-fundry-navy border-fundry-navy hover:bg-blue-50">
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Email Replies
-                </Button>
-              </Link>
               {rateLimit && (
                 <div className="text-sm text-fundry-navy">
                   {rateLimit.remaining} of {rateLimit.dailyLimit} emails remaining today
@@ -632,10 +626,11 @@ Founder, {companyName}`
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="compose" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-white/10 backdrop-blur-sm border-orange-200">
+          <TabsList className="grid w-full grid-cols-4 bg-white/10 backdrop-blur-sm border-orange-200">
             <TabsTrigger value="compose" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Compose Campaign</TabsTrigger>
             <TabsTrigger value="directory" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Investor Directory</TabsTrigger>
             <TabsTrigger value="analytics" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Campaign Analytics</TabsTrigger>
+            <TabsTrigger value="responses" className="data-[state=active]:bg-fundry-orange data-[state=active]:text-white text-orange-100 hover:text-white">Email Responses</TabsTrigger>
           </TabsList>
 
           {/* Compose Campaign Tab */}
@@ -1168,6 +1163,158 @@ Founder, {companyName}`
                         </p>
                         <p className="text-sm text-orange-200">Average Open Rate</p>
                       </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Email Responses Tab */}
+          <TabsContent value="responses" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Email Replies Summary */}
+              <div className="lg:col-span-2 space-y-6">
+                <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                    <CardTitle className="flex items-center text-white">
+                      <MessageCircle className="h-5 w-5 mr-2 text-fundry-orange" />
+                      Recent Email Responses
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-white">
+                    <div className="text-center py-8">
+                      <MessageCircle className="h-16 w-16 text-orange-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-white mb-2">Email Response Management</h3>
+                      <p className="text-orange-200 mb-4">
+                        Manage investor responses, track sentiment, and maintain organized communications with your potential investors.
+                      </p>
+                      <Link href="/email-replies">
+                        <Button className="bg-fundry-orange hover:bg-orange-600 text-white">
+                          <Eye className="h-4 w-4 mr-2" />
+                          View All Email Responses
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                    <CardTitle className="text-white">Response Categories</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-white">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div className="text-center p-4 border border-white/20 rounded-lg bg-white/5">
+                        <div className="text-2xl font-bold text-green-400">
+                          <CheckCircle className="h-6 w-6 mx-auto mb-2 text-green-400" />
+                          Interest
+                        </div>
+                        <p className="text-sm text-orange-200">Positive responses showing investment interest</p>
+                      </div>
+                      <div className="text-center p-4 border border-white/20 rounded-lg bg-white/5">
+                        <div className="text-2xl font-bold text-blue-400">
+                          <MessageCircle className="h-6 w-6 mx-auto mb-2 text-blue-400" />
+                          Questions
+                        </div>
+                        <p className="text-sm text-orange-200">Inquiries requiring detailed responses</p>
+                      </div>
+                      <div className="text-center p-4 border border-white/20 rounded-lg bg-white/5">
+                        <div className="text-2xl font-bold text-purple-400">
+                          <Users className="h-6 w-6 mx-auto mb-2 text-purple-400" />
+                          Meetings
+                        </div>
+                        <p className="text-sm text-orange-200">Meeting requests and scheduling</p>
+                      </div>
+                      <div className="text-center p-4 border border-white/20 rounded-lg bg-white/5">
+                        <div className="text-2xl font-bold text-yellow-400">
+                          <RefreshCw className="h-6 w-6 mx-auto mb-2 text-yellow-400" />
+                          Follow-ups
+                        </div>
+                        <p className="text-sm text-orange-200">Continued conversations and updates</p>
+                      </div>
+                      <div className="text-center p-4 border border-white/20 rounded-lg bg-white/5">
+                        <div className="text-2xl font-bold text-amber-400">
+                          <Building className="h-6 w-6 mx-auto mb-2 text-amber-400" />
+                          Partnerships
+                        </div>
+                        <p className="text-sm text-orange-200">Business partnership opportunities</p>
+                      </div>
+                      <div className="text-center p-4 border border-white/20 rounded-lg bg-white/5">
+                        <div className="text-2xl font-bold text-red-400">
+                          <AlertCircle className="h-6 w-6 mx-auto mb-2 text-red-400" />
+                          Rejections
+                        </div>
+                        <p className="text-sm text-orange-200">Polite declines with feedback</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Response Management Tools */}
+              <div className="space-y-6">
+                <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                    <CardTitle className="text-white">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-white">
+                    <Link href="/email-replies">
+                      <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        View All Responses
+                      </Button>
+                    </Link>
+                    <Link href="/email-replies?filter=unread">
+                      <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+                        <Mail className="h-4 w-4 mr-2" />
+                        Unread Messages
+                      </Button>
+                    </Link>
+                    <Link href="/email-replies?filter=starred">
+                      <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+                        <Target className="h-4 w-4 mr-2" />
+                        Starred Responses
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                    <CardTitle className="text-white">Response Analytics</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-white">
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-fundry-orange">5</p>
+                        <p className="text-sm text-orange-200">Total Responses</p>
+                      </div>
+                      <Separator className="bg-white/20" />
+                      <div className="text-center">
+                        <p className="text-xl font-bold text-green-400">2</p>
+                        <p className="text-sm text-orange-200">Interested Investors</p>
+                      </div>
+                      <Separator className="bg-white/20" />
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-blue-400">40%</p>
+                        <p className="text-sm text-orange-200">Response Rate</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/10 backdrop-blur-sm border-orange-200">
+                  <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20">
+                    <CardTitle className="text-white">Response Management Tips</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-white">
+                    <div className="text-sm space-y-2">
+                      <p className="text-orange-200">• Respond to interested investors within 24 hours</p>
+                      <p className="text-orange-200">• Categorize responses for better organization</p>
+                      <p className="text-orange-200">• Star high-priority conversations</p>
+                      <p className="text-orange-200">• Track follow-up requirements</p>
+                      <p className="text-orange-200">• Maintain professional communication tone</p>
                     </div>
                   </CardContent>
                 </Card>

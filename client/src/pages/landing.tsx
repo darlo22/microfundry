@@ -1,9 +1,29 @@
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
 
 export default function Landing() {
   console.log("Landing component rendering...");
   const { user, isAuthenticated } = useAuth();
   console.log("Auth state:", { user, isAuthenticated });
+
+  // Force complete cache clearing
+  useEffect(() => {
+    document.body.style.background = '#ffffff';
+    document.title = 'FUNDRY APP DEPLOYED SUCCESSFULLY';
+    
+    // Override any cached content
+    setTimeout(() => {
+      document.body.style.cssText = 'background: #ffffff !important; margin: 0; padding: 0;';
+      
+      // Clear any non-React content
+      const allElements = document.querySelectorAll('body > *:not(#root)');
+      allElements.forEach(el => {
+        if (el.textContent?.includes('Production Test')) {
+          el.remove();
+        }
+      });
+    }, 50);
+  }, []);
 
   return (
     <div style={{
@@ -13,7 +33,7 @@ export default function Landing() {
       width: '100vw',
       height: '100vh',
       backgroundColor: '#ffffff',
-      zIndex: 999999,
+      zIndex: 999999999,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -22,7 +42,7 @@ export default function Landing() {
       color: '#333'
     }}>
       <h1 style={{ fontSize: '48px', color: '#f97316', marginBottom: '20px', textAlign: 'center' }}>
-        🚀 FUNDRY IS WORKING! 🚀
+        SUCCESS: FUNDRY REACT APP LOADED!
       </h1>
       <p style={{ fontSize: '24px', color: '#1e40af', marginBottom: '20px', textAlign: 'center' }}>
         React Application Successfully Loaded

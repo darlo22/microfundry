@@ -18,7 +18,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = false; // Force development mode for proper React app loading
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

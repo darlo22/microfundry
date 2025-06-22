@@ -69,8 +69,8 @@ interface EmailReplyStats {
 export default function EmailReplies() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
-  const [filterPriority, setFilterPriority] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterPriority, setFilterPriority] = useState("all");
   const [selectedReply, setSelectedReply] = useState<EmailReply | null>(null);
   const [replyModalOpen, setReplyModalOpen] = useState(false);
   const [responseText, setResponseText] = useState("");
@@ -82,8 +82,8 @@ export default function EmailReplies() {
   const { data: repliesData, isLoading: repliesLoading } = useQuery({
     queryKey: ['/api/email-replies', { 
       status: activeTab === 'all' ? undefined : activeTab,
-      category: filterCategory || undefined,
-      priority: filterPriority || undefined,
+      category: filterCategory === 'all' ? undefined : filterCategory,
+      priority: filterPriority === 'all' ? undefined : filterPriority,
       search: searchTerm || undefined
     }],
     enabled: true,
@@ -359,7 +359,7 @@ export default function EmailReplies() {
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     <SelectItem value="interest">Interest</SelectItem>
                     <SelectItem value="question">Question</SelectItem>
                     <SelectItem value="meeting_request">Meeting Request</SelectItem>
@@ -373,7 +373,7 @@ export default function EmailReplies() {
                     <SelectValue placeholder="Priority" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Priorities</SelectItem>
+                    <SelectItem value="all">All Priorities</SelectItem>
                     <SelectItem value="high">High</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>
                     <SelectItem value="low">Low</SelectItem>
@@ -446,7 +446,7 @@ export default function EmailReplies() {
                               {reply.sentiment}
                             </Badge>
                             <Badge className={getCategoryColor(reply.category)}>
-                              {reply.category.replace('_', ' ')}
+                              {reply.category?.replace('_', ' ') || 'uncategorized'}
                             </Badge>
                             <Badge className={getPriorityColor(reply.priority)}>
                               {reply.priority} priority

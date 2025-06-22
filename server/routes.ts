@@ -7678,8 +7678,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
           senderName: emailReplies.senderName,
           subject: emailReplies.subject,
           message: emailReplies.message,
-          messageId: emailReplies.messageId,
-          inReplyTo: emailReplies.inReplyTo,
+
           sentiment: emailReplies.sentiment,
           category: emailReplies.category,
           priority: emailReplies.priority,

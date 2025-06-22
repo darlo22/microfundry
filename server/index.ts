@@ -14,6 +14,10 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
+
+// Force development mode for proper routing
+app.set('env', 'development');
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

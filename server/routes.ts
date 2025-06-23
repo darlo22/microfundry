@@ -8078,67 +8078,75 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
 
     try {
-      const totalReplies = await db.select({ count: sql`count(*)` })
-        .from(emailReplies)
-        .where(eq(emailReplies.founderId, req.user.id));
+      const founderId = req.user.id;
 
-      const unreadReplies = await db.select({ count: sql`count(*)` })
+      const totalReplies = await db.select({ count: sql<number>`COUNT(*)::int` })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, founderId));
+
+      const unreadReplies = await db.select({ count: sql<number>`COUNT(*)::int` })
         .from(emailReplies)
         .where(and(
-          eq(emailReplies.founderId, req.user.id),
+          eq(emailReplies.founderId, founderId),
           eq(emailReplies.isRead, false)
         ));
 
-      const starredReplies = await db.select({ count: sql`count(*)` })
+      const starredReplies = await db.select({ count: sql<number>`COUNT(*)::int` })
         .from(emailReplies)
         .where(and(
-          eq(emailReplies.founderId, req.user.id),
+          eq(emailReplies.founderId, founderId),
           eq(emailReplies.isStarred, true)
         ));
 
-      const respondedReplies = await db.select({ count: sql`count(*)` })
+      const respondedReplies = await db.select({ count: sql<number>`COUNT(*)::int` })
         .from(emailReplies)
         .where(and(
-          eq(emailReplies.founderId, req.user.id),
+          eq(emailReplies.founderId, founderId),
           isNotNull(emailReplies.respondedAt)
         ));
 
-      const recentReplies = await db.select({ count: sql`count(*)` })
+      const recentReplies = await db.select({ count: sql<number>`COUNT(*)::int` })
         .from(emailReplies)
         .where(and(
-          eq(emailReplies.founderId, req.user.id),
-          gte(emailReplies.receivedAt, sql`NOW() - INTERVAL '7 days'`)
+          eq(emailReplies.founderId, founderId),
+          gte(emailReplies.receivedAt, sql`NOW() - INTERVAL '30 days'`)
         ));
 
       const repliesByCategory = await db.select({
         category: emailReplies.category,
-        count: sql`count(*)`
+        count: sql<number>`COUNT(*)::int`
       })
         .from(emailReplies)
-        .where(eq(emailReplies.founderId, req.user.id))
+        .where(eq(emailReplies.founderId, founderId))
         .groupBy(emailReplies.category);
 
       const repliesBySentiment = await db.select({
         sentiment: emailReplies.sentiment,
-        count: sql`count(*)`
+        count: sql<number>`COUNT(*)::int`
       })
         .from(emailReplies)
-        .where(eq(emailReplies.founderId, req.user.id))
+        .where(eq(emailReplies.founderId, founderId))
         .groupBy(emailReplies.sentiment);
 
-      const responseRate = totalReplies[0].count > 0 
-        ? Math.round((respondedReplies[0].count / totalReplies[0].count) * 100)
+      const responseRate = totalReplies[0]?.count > 0 
+        ? Math.round((respondedReplies[0]?.count / totalReplies[0]?.count) * 100)
         : 0;
 
       res.json({
-        totalReplies: totalReplies[0].count,
-        unreadReplies: unreadReplies[0].count,
-        starredReplies: starredReplies[0].count,
-        respondedReplies: respondedReplies[0].count,
-        recentReplies: recentReplies[0].count,
+        totalReplies: totalReplies[0]?.count || 0,
+        unreadReplies: unreadReplies[0]?.count || 0,
+        starredReplies: starredReplies[0]?.count || 0,
+        respondedReplies: respondedReplies[0]?.count || 0,
+        recentReplies: recentReplies[0]?.count || 0,
         responseRate,
-        repliesByCategory: repliesByCategory.map(r => ({ category: r.category, count: Number(r.count) })),
-        repliesBySentiment: repliesBySentiment.map(r => ({ sentiment: r.sentiment, count: Number(r.count) }))
+        repliesByCategory: repliesByCategory.filter(r => r.category).map(r => ({ 
+          category: r.category, 
+          count: r.count 
+        })),
+        repliesBySentiment: repliesBySentiment.filter(r => r.sentiment).map(r => ({ 
+          sentiment: r.sentiment, 
+          count: r.count 
+        }))
       });
     } catch (error) {
       console.error('Error fetching reply stats:', error);

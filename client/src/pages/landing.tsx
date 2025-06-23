@@ -438,17 +438,20 @@ export default function Landing() {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         mode={authMode}
+        onModeChange={setAuthMode}
         defaultUserType={defaultUserType}
       />
       
       <LearnMoreModal 
         isOpen={showLearnMoreModal}
         onClose={() => setShowLearnMoreModal(false)}
+        onGetStarted={handleGetStarted}
       />
       
       <InvestorInfoModal 
         isOpen={showInvestorModal}
         onClose={() => setShowInvestorModal(false)}
+        onGetStarted={handleGetStarted}
       />
     </div>
   );

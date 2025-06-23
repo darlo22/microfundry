@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
-    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build": "cd client && npm install && npm run build && cd .. && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build:client": "cd client && npm install && npm run build",
     "start": "NODE_ENV=production node dist/index.js",
     "start:full": "cd client && npm install && npm run build && cd .. && node server/index.js",
     "check": "tsc",

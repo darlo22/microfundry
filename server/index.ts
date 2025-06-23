@@ -94,26 +94,8 @@ app.use((req, res, next) => {
       // Don't re-throw the error to prevent crashes
     });
 
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
-    if (app.get("env") === "development") {
-      await setupVite(app, server);
-    } else {
-      serveStatic(app);
-    }
-    app.use(
-      express.static(path.join(__dirname, '..', 'client', 'dist'))
-    );
-    // ALWAYS serve the app on port 5000
-    // this serves both the API and the client.
-    // It is the only port that is not firewalled.
-    const port = 5000;
-    
-
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, '..', 'client', 'dist', 'index.html'));
-    });
+    // Setup Vite in development mode to serve the main React application
+    await setupVite(app, server);
     server.listen(5000, '0.0.0.0', () => {
       console.log("Serving on port 5000");
     });

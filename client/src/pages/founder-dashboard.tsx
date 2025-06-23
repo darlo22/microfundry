@@ -170,10 +170,10 @@ export default function FounderDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <Card className="mb-6 sm:mb-8 bg-fundry-navy border-fundry-navy shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-fundry-orange/20 to-fundry-navy/20 rounded-t-lg">
-            <CardTitle className="text-lg sm:text-xl font-bold text-fundry-navy flex items-center">
-              <TrendingUp className="mr-2 text-fundry-orange" size={24} />
+        <Card className="mb-6 sm:mb-8 bg-gradient-to-br from-blue-900 to-slate-800 border-slate-700 shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold text-white flex items-center">
+              <TrendingUp className="mr-2 text-orange-500" size={24} />
               Quick Actions
             </CardTitle>
           </CardHeader>

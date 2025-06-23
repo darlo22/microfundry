@@ -163,6 +163,18 @@ export class DatabaseStorage implements IStorage {
           id: userId,
         })
         .returning();
+
+      // Create welcome notification for new users
+      if (user) {
+        await this.createNotification(
+          user.id,
+          'general',
+          'Welcome to Fundry!',
+          `Welcome ${user.firstName}! Explore investment opportunities, connect with founders, and start your investment journey.`,
+          JSON.stringify({ newUser: true, registrationDate: new Date().toISOString() })
+        );
+      }
+
       return user;
     }) as Promise<User>;
   }
@@ -499,6 +511,36 @@ export class DatabaseStorage implements IStorage {
         attachmentUrls: update.attachmentUrls || null
       })
       .returning();
+
+    // Create notifications for all investors in this campaign
+    if (campaignUpdate && update.campaignId) {
+      const campaignInvestments = await this.getInvestmentsByCampaign(update.campaignId);
+      const campaign = await this.getCampaign(update.campaignId);
+      
+      // Get unique investor IDs (only committed, paid, or completed investments)
+      const uniqueInvestorIds = new Set(
+        campaignInvestments
+          .filter(inv => ['committed', 'paid', 'completed'].includes(inv.status))
+          .map(inv => inv.investorId)
+      );
+
+      // Create notification for each investor
+      const investorIdArray = Array.from(uniqueInvestorIds);
+      for (const investorId of investorIdArray) {
+        await this.createNotification(
+          investorId,
+          'update',
+          `Campaign Update: ${campaign?.title}`,
+          `The founder has posted a new update: ${update.title}`,
+          JSON.stringify({ 
+            campaignId: update.campaignId, 
+            updateId: campaignUpdate.id,
+            updateType: update.type 
+          })
+        );
+      }
+    }
+
     return campaignUpdate;
   }
 

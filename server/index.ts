@@ -1,16 +1,17 @@
-import path from 'path';
-import express from 'express';
-import express from "express";
+import express, { type Request, Response, NextFunction } from "express";
 import { createServer } from "http";
 import path from "path";
 import { fileURLToPath } from "url";
-const server = createServer(app);
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+
+// Setup __dirname and __filename in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Create express app and server
+const app = express();
+const server = createServer(app);
 
 // Add process-level error handlers to prevent crashes
 process.on('uncaughtException', (error) => {

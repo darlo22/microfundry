@@ -8207,11 +8207,12 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       // Create response record
       await db.insert(emailResponses).values({
-        emailReplyId: id,
+        emailReplyId: parseInt(id),
         founderId: req.user.id,
         subject,
-        content: message,
-        sentAt: new Date()
+        message,
+        sentAt: new Date(),
+        status: 'sent'
       });
 
       // Mark original reply as responded

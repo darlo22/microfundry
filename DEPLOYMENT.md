@@ -4,8 +4,9 @@
 
 ✅ **Backend Build**: Completed successfully (226.8kb bundle)
 ✅ **Security Patch**: CVE-2025-30208 resolved with Vite 5.4.15
-✅ **Email System**: Fixed critical API endpoint errors
+✅ **Email System**: Fixed critical API endpoint errors  
 ✅ **Database**: PostgreSQL ready with all schemas
+⚠️ **Frontend Build**: Requires deployment-time build due to large asset size (1000+ Lucide icons)
 
 ## Deployment Configuration
 
@@ -27,9 +28,14 @@ PORT=5000
 # Backend (completed)
 npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --minify
 
-# Frontend (requires manual build due to size)
-vite build --mode production
+# Frontend (will be built during deployment)
+NODE_OPTIONS="--max-old-space-size=8192" vite build --mode production --outDir dist/public
 ```
+
+### Deployment Strategy
+- **Option 1**: Use development mode for immediate deployment (recommended)
+- **Option 2**: Deploy with frontend build (requires higher memory allocation)
+- **Option 3**: Hybrid approach - serve development frontend with production backend
 
 ### Production Structure
 ```

@@ -177,47 +177,47 @@ export default function FounderDashboard() {
               Quick Actions
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-2 gap-4">
               <Button
                 variant="outline"
-                className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-fundry-navy border-2 border-fundry-navy hover:border-blue-800 hover:shadow-lg group transition-all duration-300 hover:scale-105"
+                className="flex flex-col items-center p-6 h-auto bg-slate-800/50 border-slate-600 hover:bg-slate-700/50 hover:border-orange-500/50 group w-full transition-all duration-300"
                 onClick={() => setShowCampaignModal(true)}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 shadow-md">
-                  <Plus className="text-white" size={20} />
+                <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center mb-3 group-hover:bg-orange-500/30 transition-colors">
+                  <Plus className="text-orange-500" size={24} />
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-fundry-orange group-hover:text-orange-400 transition-colors duration-300 text-xs sm:text-sm mb-1">Create Campaign</div>
-                  <div className="text-xs text-fundry-orange leading-tight">Start a new fundraising campaign</div>
+                  <div className="font-bold text-orange-500 text-sm mb-1">Create Campaign</div>
+                  <div className="text-xs text-orange-400">Start a new fundraising campaign</div>
                 </div>
               </Button>
 
               <Button
                 variant="outline"
-                className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-fundry-navy border-2 border-fundry-navy hover:border-blue-800 hover:shadow-lg group transition-all duration-300 hover:scale-105"
+                className="flex flex-col items-center p-6 h-auto bg-slate-800/50 border-slate-600 hover:bg-slate-700/50 hover:border-orange-500/50 group w-full transition-all duration-300"
                 onClick={() => setShowShareModal(true)}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 shadow-md">
-                  <Share className="text-white" size={20} />
+                <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center mb-3 group-hover:bg-orange-500/30 transition-colors">
+                  <Share className="text-orange-500" size={24} />
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-fundry-orange group-hover:text-orange-400 transition-colors duration-300 text-xs sm:text-sm mb-1">Share Campaign</div>
-                  <div className="text-xs text-fundry-orange leading-tight">Get your private campaign link</div>
+                  <div className="font-bold text-orange-500 text-sm mb-1">Share Campaign</div>
+                  <div className="text-xs text-orange-400">Get your private campaign link</div>
                 </div>
               </Button>
 
               <Link href="/founder/outreach">
                 <Button
                   variant="outline"
-                  className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-fundry-navy border-2 border-fundry-navy hover:border-blue-800 hover:shadow-lg group w-full transition-all duration-300 hover:scale-105"
+                  className="flex flex-col items-center p-6 h-auto bg-slate-800/50 border-slate-600 hover:bg-slate-700/50 hover:border-orange-500/50 group w-full transition-all duration-300"
                 >
-                  <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 shadow-md">
-                    <Mail className="text-white" size={20} />
+                  <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center mb-3 group-hover:bg-orange-500/30 transition-colors">
+                    <Mail className="text-orange-500" size={24} />
                   </div>
                   <div className="text-center">
-                    <div className="font-bold text-fundry-orange group-hover:text-orange-400 transition-colors duration-300 text-xs sm:text-sm mb-1">Investor Outreach</div>
-                    <div className="text-xs text-fundry-orange leading-tight">Send personalized emails to investors</div>
+                    <div className="font-bold text-orange-500 text-sm mb-1">Investor Outreach</div>
+                    <div className="text-xs text-orange-400">Send personalized emails to investors</div>
                   </div>
                 </Button>
               </Link>
@@ -225,14 +225,14 @@ export default function FounderDashboard() {
               <Link href="/payment-withdrawal">
                 <Button
                   variant="outline"
-                  className="flex flex-col items-center p-3 sm:p-4 h-auto min-h-[100px] bg-fundry-navy border-2 border-fundry-navy hover:border-blue-800 hover:shadow-lg group w-full transition-all duration-300 hover:scale-105"
+                  className="flex flex-col items-center p-6 h-auto bg-slate-800/50 border-slate-600 hover:bg-slate-700/50 hover:border-orange-500/50 group w-full transition-all duration-300"
                 >
-                  <div className="w-10 h-10 bg-gradient-to-br from-fundry-orange to-orange-600 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300 shadow-md">
-                    <DollarSign className="text-white" size={20} />
+                  <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center mb-3 group-hover:bg-orange-500/30 transition-colors">
+                    <DollarSign className="text-orange-500" size={24} />
                   </div>
                   <div className="text-center">
-                    <div className="font-bold text-fundry-orange group-hover:text-orange-400 transition-colors duration-300 text-xs sm:text-sm mb-1">Payment Withdrawal</div>
-                    <div className="text-xs text-fundry-orange leading-tight">Withdraw earnings and manage KYC</div>
+                    <div className="font-bold text-orange-500 text-sm mb-1">Payment Withdrawal</div>
+                    <div className="text-xs text-orange-400">Withdraw earnings and manage KYC</div>
                   </div>
                 </Button>
               </Link>

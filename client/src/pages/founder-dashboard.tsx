@@ -188,8 +188,8 @@ export default function FounderDashboard() {
                   <Plus className="text-orange-500" size={24} />
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-orange-500 text-sm mb-1">Create Campaign</div>
-                  <div className="text-xs text-orange-400">Start a new fundraising campaign</div>
+                  <div className="font-bold text-white text-sm mb-1">Create Campaign</div>
+                  <div className="text-xs text-white/80">Start a new fundraising campaign</div>
                 </div>
               </Button>
 
@@ -202,8 +202,8 @@ export default function FounderDashboard() {
                   <Share className="text-orange-500" size={24} />
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-orange-500 text-sm mb-1">Share Campaign</div>
-                  <div className="text-xs text-orange-400">Get your private campaign link</div>
+                  <div className="font-bold text-white text-sm mb-1">Share Campaign</div>
+                  <div className="text-xs text-white/80">Get your private campaign link</div>
                 </div>
               </Button>
 
@@ -216,8 +216,8 @@ export default function FounderDashboard() {
                     <Mail className="text-orange-500" size={24} />
                   </div>
                   <div className="text-center">
-                    <div className="font-bold text-orange-500 text-sm mb-1">Investor Outreach</div>
-                    <div className="text-xs text-orange-400">Send personalized emails to investors</div>
+                    <div className="font-bold text-white text-sm mb-1">Investor Outreach</div>
+                    <div className="text-xs text-white/80">Send personalized emails to investors</div>
                   </div>
                 </Button>
               </Link>
@@ -231,8 +231,8 @@ export default function FounderDashboard() {
                     <DollarSign className="text-orange-500" size={24} />
                   </div>
                   <div className="text-center">
-                    <div className="font-bold text-orange-500 text-sm mb-1">Payment Withdrawal</div>
-                    <div className="text-xs text-orange-400">Withdraw earnings and manage KYC</div>
+                    <div className="font-bold text-white text-sm mb-1">Payment Withdrawal</div>
+                    <div className="text-xs text-white/80">Withdraw earnings and manage KYC</div>
                   </div>
                 </Button>
               </Link>

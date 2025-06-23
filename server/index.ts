@@ -1,5 +1,4 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { createServer } from "http";
 import path from "path";
 import { fileURLToPath } from "url";
 import { registerRoutes } from "./routes";
@@ -8,10 +7,6 @@ import { setupVite, serveStatic, log } from "./vite";
 // Setup __dirname and __filename in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Create express app and server
-const app = express();
-const server = createServer(app);
 
 // Add process-level error handlers to prevent crashes
 process.on('uncaughtException', (error) => {
@@ -24,6 +19,7 @@ process.on('unhandledRejection', (reason, promise) => {
   // Don't exit the process, just log the error
 });
 
+const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -79,17 +75,6 @@ app.use((req, res, next) => {
   });
 
   next();
-});
-
-// Add process error handlers to prevent crashes
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
-  // Don't exit the process
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  // Don't exit the process
 });
 
 (async () => {

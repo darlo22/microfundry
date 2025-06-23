@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-
 export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
@@ -61,6 +60,13 @@ export default {
           border: "var(--sidebar-border)",
           ring: "var(--sidebar-ring)",
         },
+        // Add Fundry brand colors
+        "fundry-orange": "#ea580c",
+        "fundry-orange-light": "#fed7aa",
+        "fundry-navy": "#1e3a8a",
+      },
+      backgroundImage: {
+        "fundry-gradient": "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
       },
       keyframes: {
         "accordion-down": {

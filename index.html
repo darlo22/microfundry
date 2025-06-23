@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Fundry - Equity Crowdfunding Platform</title>
+    <style>
+      body { 
+        margin: 0; 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; 
+        background: linear-gradient(135deg, #f97316 0%, #1e40af 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .container { 
+        background: white; 
+        padding: 48px; 
+        border-radius: 16px; 
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
+        text-align: center; 
+        max-width: 500px; 
+        margin: 20px;
+      }
+      .logo { 
+        color: #f97316; 
+        font-size: 56px; 
+        font-weight: bold; 
+        margin-bottom: 20px; 
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .subtitle { 
+        color: #64748b; 
+        margin-bottom: 32px; 
+        font-size: 18px;
+        font-weight: 500;
+      }
+      .btn { 
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: white; 
+        padding: 16px 32px; 
+        border: none; 
+        border-radius: 12px; 
+        font-weight: 600; 
+        text-decoration: none; 
+        display: inline-block; 
+        cursor: pointer; 
+        transition: transform 0.2s, box-shadow 0.2s;
+        font-size: 16px;
+      }
+      .btn:hover { 
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(249, 115, 22, 0.4);
+      }
+      .features { 
+        text-align: left; 
+        margin: 32px 0; 
+        display: grid;
+        gap: 12px;
+      }
+      .feature { 
+        display: flex; 
+        align-items: center; 
+        color: #475569; 
+        font-size: 15px; 
+        font-weight: 500;
+      }
+      .feature-icon { 
+        color: #f97316; 
+        margin-right: 12px; 
+        font-weight: bold; 
+        font-size: 18px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(249, 115, 22, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .notice { 
+        margin-top: 32px; 
+        padding: 20px; 
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border-radius: 12px; 
+        color: #92400e; 
+        font-size: 14px;
+        border: 1px solid #f59e0b;
+      }
+      .notice strong {
+        color: #78350f;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin: 24px 0;
+        text-align: center;
+      }
+      .stat {
+        padding: 16px;
+        border-radius: 8px;
+        background: rgba(249, 115, 22, 0.05);
+        border: 1px solid rgba(249, 115, 22, 0.1);
+      }
+      .stat-number {
+        font-size: 20px;
+        font-weight: bold;
+        color: #f97316;
+      }
+      .stat-label {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo">Fundry</div>
+      <p class="subtitle">Equity Crowdfunding Platform</p>
+      
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-number">29</div>
+          <div class="stat-label">Active Users</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">9</div>
+          <div class="stat-label">Live Campaigns</div>
+        </div>
+      </div>
+      
+      <div class="features">
+        <div class="feature">
+          <span class="feature-icon">✓</span>
+          Create fundraising campaigns with SAFE agreements
+        </div>
+        <div class="feature">
+          <span class="feature-icon">✓</span>
+          Connect with verified investors and founders
+        </div>
+        <div class="feature">
+          <span class="feature-icon">✓</span>
+          Secure payment processing (USD & NGN)
+        </div>
+        <div class="feature">
+          <span class="feature-icon">✓</span>
+          Comprehensive admin oversight and analytics
+        </div>
+      </div>
+      
+      <div class="notice">
+        <strong>Welcome to Fundry!</strong> This is a demonstration landing page for Vercel deployment. The full platform with complete functionality is hosted on Replit.
+      </div>
+      
+      <a href="https://micro-fundry-darlington2.replit.app" class="btn">Access Full Platform</a>
+    </div>
+  </body>
+</html>

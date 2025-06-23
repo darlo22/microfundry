@@ -19,6 +19,17 @@ export default function Landing() {
   const [showInvestorModal, setShowInvestorModal] = useState(false);
   const [defaultUserType, setDefaultUserType] = useState<"founder" | "investor" | undefined>(undefined);
 
+  // Redirect authenticated users to their dashboard
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.userType === 'founder') {
+        window.location.href = '/founder-dashboard';
+      } else if (user.userType === 'investor') {
+        window.location.href = '/investor-dashboard';
+      }
+    }
+  }, [isAuthenticated, user]);
+
   // Check URL parameters to auto-open investor onboarding
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);

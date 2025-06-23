@@ -8,12 +8,8 @@ packages = ["imagemagick", "ghostscript"]
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["sh", "-c", "npm install && npm run build"]
-run = ["node", "--enable-source-maps", "--no-warnings", "dist/index.js"]
-
-[[ports]]
-localPort = 3000
-externalPort = 3000
+build = ["npm", "run", "build"]
+run = ["npm", "run", "start"]
 
 [[ports]]
 localPort = 5000

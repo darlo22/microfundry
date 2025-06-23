@@ -4,9 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { ErrorBoundary } from "react-error-boundary";
 import Landing from "@/pages/landing";
-import MinimalTest from "@/components/minimal-test";
 import Home from "@/pages/home";
 import About from "@/pages/about";
 import Pricing from "@/pages/pricing";
@@ -45,10 +43,7 @@ import ResetPassword from "@/pages/reset-password";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  console.log('Router component initializing');
-  
   const { isAuthenticated, isLoading, user } = useAuth();
-  console.log('Auth hook called successfully:', { isAuthenticated, isLoading, user: user?.id });
 
   // Render content immediately, don't wait for auth check
   // This prevents infinite loading on public pages
@@ -107,156 +102,25 @@ function Router() {
       
       {/* Root path handling */}
       <Route path="/">
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center max-w-4xl mx-auto px-4">
-            <div className="mb-8">
-              <h1 className="text-5xl font-bold text-gray-900 mb-4">
-                <span className="bg-gradient-to-r from-fundry-orange to-fundry-navy bg-clip-text text-transparent">
-                  Fundry
-                </span>
-              </h1>
-              <h2 className="text-3xl font-bold text-gray-800 mb-6">
-                Raise Your First $5,000 From Friends & Family
-              </h2>
-              <p className="text-xl text-gray-600 mb-8">
-                The easiest way for early-stage founders to get their first investors and build momentum for larger funding rounds.
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-8 mb-12">
-              <div className="bg-white p-6 rounded-lg shadow-lg">
-                <div className="text-4xl mb-4">📊</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Real-time Analytics</h3>
-                <p className="text-gray-600">Track campaign performance and investor engagement with detailed insights.</p>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg shadow-lg">
-                <div className="text-4xl mb-4">🚀</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Launch Fast</h3>
-                <p className="text-gray-600">Create campaigns in minutes with our guided setup process.</p>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg shadow-lg">
-                <div className="text-4xl mb-4">🔒</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Bank-Level Security</h3>
-                <p className="text-gray-600">Your data and investments are protected with enterprise-grade security.</p>
-              </div>
-            </div>
-            
-            <div className="space-x-4">
-              <button className="bg-fundry-orange hover:bg-orange-600 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors">
-                Get Started
-              </button>
-              <button className="bg-fundry-navy hover:bg-blue-800 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors">
-                Learn More
-              </button>
-            </div>
-          </div>
-        </div>
+        <Landing />
       </Route>
       
       {/* Catch all routes */}
       <Route>
-        {!isAuthenticated ? (
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Fundry</h1>
-              <p className="text-gray-600">Micro-investment platform for startups</p>
-            </div>
-          </div>
-        ) : <NotFound />}
+        {!isAuthenticated ? <Landing /> : <NotFound />}
       </Route>
     </Switch>
   );
 }
 
-function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
-  console.error('ERROR BOUNDARY CAUGHT:', {
-    message: error.message,
-    stack: error.stack,
-    name: error.name,
-    timestamp: new Date().toISOString()
-  });
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center max-w-4xl mx-auto px-4">
-        <div className="mb-8">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            <span className="bg-gradient-to-r from-fundry-orange to-fundry-navy bg-clip-text text-transparent">
-              Fundry
-            </span>
-          </h1>
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">
-            Raise Your First $5,000 From Friends & Family
-          </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            The easiest way for early-stage founders to get their first investors and build momentum for larger funding rounds.
-          </p>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <div className="text-4xl mb-4">📊</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Real-time Analytics</h3>
-            <p className="text-gray-600">Track campaign performance and investor engagement with detailed insights.</p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <div className="text-4xl mb-4">🚀</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Launch Fast</h3>
-            <p className="text-gray-600">Create campaigns in minutes with our guided setup process.</p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <div className="text-4xl mb-4">🔒</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Bank-Level Security</h3>
-            <p className="text-gray-600">Your data and investments are protected with enterprise-grade security.</p>
-          </div>
-        </div>
-        
-        <div className="space-x-4">
-          <button className="bg-fundry-orange hover:bg-orange-600 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors">
-            Get Started
-          </button>
-          <button className="bg-fundry-navy hover:bg-blue-800 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors">
-            Learn More
-          </button>
-        </div>
-        
-        <div className="mt-8 text-sm text-gray-500">
-          Error: {error.message}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function App() {
-  console.log('App component initializing');
-  
   return (
-    <ErrorBoundary
-      FallbackComponent={ErrorFallback}
-      onError={(error, errorInfo) => {
-        console.error('REACT ERROR BOUNDARY:', {
-          error: {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-          },
-          errorInfo,
-          timestamp: new Date().toISOString()
-        });
-      }}
-    >
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 

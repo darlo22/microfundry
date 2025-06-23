@@ -114,8 +114,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  // Remove redirect - let React handle all routing
-
   // Enhanced video streaming endpoint with improved buffering
   app.get('/api/stream/:filename', (req: express.Request, res: express.Response) => {
     try {

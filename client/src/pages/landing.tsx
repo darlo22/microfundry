@@ -9,7 +9,7 @@ import Footer from "@/components/layout/footer";
 import { FundryLogo } from "@/components/ui/fundry-logo";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-// import heroImage from "@assets/ChatGPT Image Jun 21, 2025, 09_45_41 AM (1)_1750496219995.png";
+import heroImage from "@assets/ChatGPT Image Jun 21, 2025, 09_45_41 AM (1)_1750496219995.png";
 
 export default function Landing() {
   const { user, isAuthenticated } = useAuth();
@@ -18,8 +18,6 @@ export default function Landing() {
   const [showLearnMoreModal, setShowLearnMoreModal] = useState(false);
   const [showInvestorModal, setShowInvestorModal] = useState(false);
   const [defaultUserType, setDefaultUserType] = useState<"founder" | "investor" | undefined>(undefined);
-
-
 
   // Check URL parameters to auto-open investor onboarding
   useEffect(() => {
@@ -143,13 +141,11 @@ export default function Landing() {
 
             <div className="relative">
               <div className="transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="bg-gradient-to-br from-fundry-orange to-fundry-navy rounded-lg shadow-2xl w-full h-80 flex items-center justify-center">
-                  <div className="text-white text-center">
-                    <Rocket size={48} className="mx-auto mb-4" />
-                    <p className="text-xl font-semibold">Your Startup Journey</p>
-                    <p className="text-lg opacity-90">Starts Here</p>
-                  </div>
-                </div>
+                <img 
+                  src={heroImage} 
+                  alt="Entrepreneurs collaborating on startup fundraising" 
+                  className="rounded-lg shadow-2xl w-full h-auto object-cover"
+                />
               </div>
             </div>
           </div>

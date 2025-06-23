@@ -15,16 +15,24 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  max: 5,
-  idleTimeoutMillis: 60000,
-  connectionTimeoutMillis: 10000,
-  maxUses: 1000,
-  allowExitOnIdle: true
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
+  maxUses: 7500,
+  allowExitOnIdle: false
 });
 
 // Add error handling for the pool
 pool.on('error', (err) => {
   console.error('Database pool error:', err);
+});
+
+pool.on('connect', () => {
+  console.log('Database connected');
+});
+
+pool.on('remove', () => {
+  console.log('Database connection removed');
 });
 
 export const db = drizzle({ client: pool, schema });

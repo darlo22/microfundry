@@ -24,7 +24,6 @@ process.on('unhandledRejection', (reason, promise) => {
   // Don't exit the process, just log the error
 });
 
-const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -118,12 +117,14 @@ process.on('unhandledRejection', (reason, promise) => {
     } else {
       serveStatic(app);
     }
-
+    app.use(
+      express.static(path.join(__dirname, '..', 'client', 'dist'))
+    );
     // ALWAYS serve the app on port 5000
     // this serves both the API and the client.
     // It is the only port that is not firewalled.
     const port = 5000;
-    app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
+    
 
     app.get('*', (req, res) => {
       res.sendFile(path.join(__dirname, '..', 'client', 'dist', 'index.html'));

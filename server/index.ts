@@ -99,8 +99,10 @@ process.on('unhandledRejection', (reason, promise) => {
       // Don't re-throw the error to prevent crashes
     });
 
-    // Force production mode to use static files
-    const isDev = false;
+    // importantly only setup vite in development and after
+    // setting up all the other routes so the catch-all route
+    // doesn't interfere with the other routes
+    const isDev = process.env.NODE_ENV !== "production";
     
     if (isDev) {
       await setupVite(app, server);

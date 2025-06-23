@@ -81,6 +81,7 @@ The deployment uses:
 ## Changelog
 
 - June 16, 2025. Initial setup
+- June 23, 2025. SECURITY: Fixed critical CVE-2025-30208 vulnerability by upgrading Vite to 5.4.15, resolved deployment issues preventing React application from loading, created proper client/index.html template, fixed App.tsx to display navy blue landing page with orange "$5,000" highlight as requested, successfully deployed to micro-fundry-darlington1.replit.app with full functionality
 - June 16, 2025. Added comprehensive footer with About, Pricing pages and transparent fee structure (5% above $1,000, free below)
 - June 16, 2025. Created extensive page ecosystem including Browse Campaigns, How It Works, Success Stories, Resources, Contact, Blog, Privacy Policy, Terms of Use, Cookie Policy, and Investment Disclaimer pages for professional platform presentation
 - June 16, 2025. Fixed View button 404 errors by updating Browse Campaigns to use real API data instead of mock data, added sample campaigns to database (IDs 4, 5, 6), updated hero section "Learn More" button to navy blue text, and improved stats cards visibility with proper Fundry brand colors

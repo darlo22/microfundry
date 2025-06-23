@@ -361,6 +361,21 @@ export class DatabaseStorage implements IStorage {
       .insert(investments)
       .values(investment)
       .returning();
+
+    // Create notification for founder when new investment is made
+    if (newInvestment && investment.campaignId) {
+      const campaign = await this.getCampaign(investment.campaignId);
+      if (campaign) {
+        await this.createNotification(
+          campaign.founderId,
+          'investment',
+          'New Investment Received',
+          `You received a new investment of $${investment.amount} for your campaign "${campaign.title}".`,
+          JSON.stringify({ investmentId: newInvestment.id, campaignId: campaign.id, amount: investment.amount })
+        );
+      }
+    }
+
     return newInvestment;
   }
 
@@ -422,6 +437,18 @@ export class DatabaseStorage implements IStorage {
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(investments.id, id))
       .returning();
+
+    // Create notification when payment is completed
+    if (investment && updates.paymentStatus === 'completed' && investment.investorId) {
+      await this.createNotification(
+        investment.investorId,
+        'investment',
+        'Payment Confirmed',
+        `Your investment of $${investment.amount} has been successfully processed.`,
+        JSON.stringify({ investmentId: investment.id, amount: investment.amount })
+      );
+    }
+
     return investment;
   }
 
@@ -693,6 +720,17 @@ export class DatabaseStorage implements IStorage {
           userId,
           ...kycRecord
         });
+      }
+
+      // Create notification for KYC submission
+      if (kycData.status === 'under_review') {
+        await this.createNotification(
+          userId,
+          'security',
+          'KYC Verification Submitted',
+          'Your identity verification documents have been submitted and are under review. You will be notified once the review is complete.',
+          JSON.stringify({ status: kycData.status })
+        );
       }
       
       console.log('KYC status update completed successfully');

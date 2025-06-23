@@ -181,15 +181,15 @@ export default function FounderDashboard() {
             <div className="grid grid-cols-2 gap-4">
               <Button
                 variant="outline"
-                className="flex flex-col items-center p-6 h-auto bg-slate-800/50 border-slate-600 hover:bg-slate-700/50 hover:border-orange-500/50 group w-full transition-all duration-300"
+                className="flex flex-col items-center p-6 h-auto bg-orange-500 border-orange-600 hover:bg-orange-600 hover:border-orange-700 group w-full transition-all duration-300"
                 onClick={() => setShowCampaignModal(true)}
               >
-                <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center mb-3 group-hover:bg-orange-500/30 transition-colors">
-                  <Plus className="text-orange-500" size={24} />
+                <div className="w-12 h-12 bg-fundry-navy/20 rounded-lg flex items-center justify-center mb-3 group-hover:bg-fundry-navy/30 transition-colors">
+                  <Plus className="text-fundry-navy" size={24} />
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-orange-500 text-sm mb-1">Create Campaign</div>
-                  <div className="text-xs text-orange-400">Start a new fundraising campaign</div>
+                  <div className="font-bold text-fundry-navy text-sm mb-1">Create Campaign</div>
+                  <div className="text-xs text-fundry-navy/80">Start a new fundraising campaign</div>
                 </div>
               </Button>
 

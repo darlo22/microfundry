@@ -163,18 +163,6 @@ export class DatabaseStorage implements IStorage {
           id: userId,
         })
         .returning();
-
-      // Create welcome notification for new users
-      if (user) {
-        await this.createNotification(
-          user.id,
-          'general',
-          'Welcome to Fundry!',
-          `Welcome ${user.firstName}! Explore investment opportunities, connect with founders, and start your investment journey.`,
-          JSON.stringify({ newUser: true, registrationDate: new Date().toISOString() })
-        );
-      }
-
       return user;
     }) as Promise<User>;
   }
@@ -373,21 +361,6 @@ export class DatabaseStorage implements IStorage {
       .insert(investments)
       .values(investment)
       .returning();
-
-    // Create notification for founder when new investment is made
-    if (newInvestment && investment.campaignId) {
-      const campaign = await this.getCampaign(investment.campaignId);
-      if (campaign) {
-        await this.createNotification(
-          campaign.founderId,
-          'investment',
-          'New Investment Received',
-          `You received a new investment of $${investment.amount} for your campaign "${campaign.title}".`,
-          JSON.stringify({ investmentId: newInvestment.id, campaignId: campaign.id, amount: investment.amount })
-        );
-      }
-    }
-
     return newInvestment;
   }
 
@@ -449,18 +422,6 @@ export class DatabaseStorage implements IStorage {
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(investments.id, id))
       .returning();
-
-    // Create notification when payment is completed
-    if (investment && updates.paymentStatus === 'completed' && investment.investorId) {
-      await this.createNotification(
-        investment.investorId,
-        'investment',
-        'Payment Confirmed',
-        `Your investment of $${investment.amount} has been successfully processed.`,
-        JSON.stringify({ investmentId: investment.id, amount: investment.amount })
-      );
-    }
-
     return investment;
   }
 
@@ -511,36 +472,6 @@ export class DatabaseStorage implements IStorage {
         attachmentUrls: update.attachmentUrls || null
       })
       .returning();
-
-    // Create notifications for all investors in this campaign
-    if (campaignUpdate && update.campaignId) {
-      const campaignInvestments = await this.getInvestmentsByCampaign(update.campaignId);
-      const campaign = await this.getCampaign(update.campaignId);
-      
-      // Get unique investor IDs (only committed, paid, or completed investments)
-      const uniqueInvestorIds = new Set(
-        campaignInvestments
-          .filter(inv => ['committed', 'paid', 'completed'].includes(inv.status))
-          .map(inv => inv.investorId)
-      );
-
-      // Create notification for each investor
-      const investorIdArray = Array.from(uniqueInvestorIds);
-      for (const investorId of investorIdArray) {
-        await this.createNotification(
-          investorId,
-          'update',
-          `Campaign Update: ${campaign?.title}`,
-          `The founder has posted a new update: ${update.title}`,
-          JSON.stringify({ 
-            campaignId: update.campaignId, 
-            updateId: campaignUpdate.id,
-            updateType: update.type 
-          })
-        );
-      }
-    }
-
     return campaignUpdate;
   }
 
@@ -762,17 +693,6 @@ export class DatabaseStorage implements IStorage {
           userId,
           ...kycRecord
         });
-      }
-
-      // Create notification for KYC submission
-      if (kycData.status === 'under_review') {
-        await this.createNotification(
-          userId,
-          'security',
-          'KYC Verification Submitted',
-          'Your identity verification documents have been submitted and are under review. You will be notified once the review is complete.',
-          JSON.stringify({ status: kycData.status })
-        );
       }
       
       console.log('KYC status update completed successfully');

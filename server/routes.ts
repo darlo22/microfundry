@@ -8078,18 +8078,67 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     }
 
     try {
-      const founderId = req.user.id;
+      const totalReplies = await db.select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, req.user.id));
 
-      // Return hardcoded stats for now to prevent database errors
+      const unreadReplies = await db.select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.founderId, req.user.id),
+          eq(emailReplies.isRead, false)
+        ));
+
+      const starredReplies = await db.select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.founderId, req.user.id),
+          eq(emailReplies.isStarred, true)
+        ));
+
+      const respondedReplies = await db.select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.founderId, req.user.id),
+          isNotNull(emailReplies.respondedAt)
+        ));
+
+      const recentReplies = await db.select({ count: sql`count(*)` })
+        .from(emailReplies)
+        .where(and(
+          eq(emailReplies.founderId, req.user.id),
+          gte(emailReplies.receivedAt, sql`NOW() - INTERVAL '7 days'`)
+        ));
+
+      const repliesByCategory = await db.select({
+        category: emailReplies.category,
+        count: sql`count(*)`
+      })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, req.user.id))
+        .groupBy(emailReplies.category);
+
+      const repliesBySentiment = await db.select({
+        sentiment: emailReplies.sentiment,
+        count: sql`count(*)`
+      })
+        .from(emailReplies)
+        .where(eq(emailReplies.founderId, req.user.id))
+        .groupBy(emailReplies.sentiment);
+
+      const responseRate = totalReplies[0].count > 0 
+        ? Math.round((respondedReplies[0].count / totalReplies[0].count) * 100)
+        : 0;
+
       res.json({
-        totalReplies: 0,
-        unreadReplies: 0,
-        starredReplies: 0,
-        respondedReplies: 0,
-        recentReplies: 0,
-        responseRate: 0,
-        repliesByCategory: [],
-        repliesBySentiment: []
+        totalReplies: totalReplies[0].count,
+        unreadReplies: unreadReplies[0].count,
+        starredReplies: starredReplies[0].count,
+        respondedReplies: respondedReplies[0].count,
+        recentReplies: recentReplies[0].count,
+        responseRate,
+        repliesByCategory: repliesByCategory.map(r => ({ category: r.category, count: Number(r.count) })),
+        repliesBySentiment: repliesBySentiment.map(r => ({ sentiment: r.sentiment, count: Number(r.count) }))
       });
     } catch (error) {
       console.error('Error fetching reply stats:', error);
@@ -8150,12 +8199,11 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       // Create response record
       await db.insert(emailResponses).values({
-        emailReplyId: parseInt(id),
+        emailReplyId: id,
         founderId: req.user.id,
         subject,
-        message,
-        sentAt: new Date(),
-        status: 'sent'
+        content: message,
+        sentAt: new Date()
       });
 
       // Mark original reply as responded

@@ -1,12 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
-import path from "path";
-import { fileURLToPath } from "url";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-
-// Setup __dirname and __filename in ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Add process-level error handlers to prevent crashes
 process.on('uncaughtException', (error) => {
@@ -77,6 +71,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// Add process error handlers to prevent crashes
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // Don't exit the process
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit the process
+});
+
 (async () => {
   try {
     const server = await registerRoutes(app);
@@ -94,11 +99,27 @@ app.use((req, res, next) => {
       // Don't re-throw the error to prevent crashes
     });
 
-    // Setup Vite in development mode to serve the main React application
-    await setupVite(app, server);
-    server.listen(5000, '0.0.0.0', () => {
-      console.log("Serving on port 5000");
+    // importantly only setup vite in development and after
+    // setting up all the other routes so the catch-all route
+    // doesn't interfere with the other routes
+    if (app.get("env") === "development") {
+      await setupVite(app, server);
+    } else {
+      serveStatic(app);
+    }
+
+    // ALWAYS serve the app on port 5000
+    // this serves both the API and the client.
+    // It is the only port that is not firewalled.
+    const port = 5000;
+    server.listen({
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    }, () => {
+      log(`serving on port ${port}`);
     });
+
     // Handle server errors
     server.on('error', (error) => {
       console.error('Server error:', error);

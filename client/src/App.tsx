@@ -1,110 +1,126 @@
+import { Switch, Route } from "wouter";
+import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { useAuth } from "@/hooks/useAuth";
+import Landing from "@/pages/landing";
+import Home from "@/pages/home";
+import About from "@/pages/about";
+import Pricing from "@/pages/pricing";
+import BrowseCampaigns from "@/pages/browse-campaigns";
+import HowItWorks from "@/pages/how-it-works";
+import SuccessStories from "@/pages/success-stories";
+import CaseStudy from "@/pages/case-study";
+import Resources from "@/pages/resources";
+import Contact from "@/pages/contact";
+import Blog from "@/pages/blog";
+import PrivacyPolicy from "@/pages/privacy-policy";
+import TermsOfUse from "@/pages/terms-of-use";
+import CookiePolicy from "@/pages/cookie-policy";
+import InvestmentDisclaimer from "@/pages/investment-disclaimer";
+import SafeAgreementTemplate from "@/pages/safe-agreement-template";
+import InvestorAccreditation from "@/pages/investor-accreditation";
+import FounderDashboard from "@/pages/founder-dashboard";
+import FounderInvestors from "@/pages/founder-investors";
+import FounderAnalytics from "@/pages/founder-analytics";
+import FounderSettings from "@/pages/founder-settings";
+import FounderUpdates from "@/pages/founder-updates";
+import FounderMessages from "@/pages/founder-messages";
+import FounderOutreach from "@/pages/founder-outreach";
+import PaymentWithdrawal from "@/pages/payment-withdrawal";
+import InvestorDashboard from "@/pages/investor-dashboard";
+import AdminDashboard from "@/pages/admin-dashboard";
+import AdminLogin from "@/pages/admin-login";
+import AdminKYCManagement from "@/pages/admin-kyc-management";
+import AdminInvestorOutreach from "@/pages/admin-investor-outreach";
+import AdminOutreachReport from "@/pages/admin-outreach-report";
+import EmailReplies from "@/pages/email-replies";
+import CampaignView from "@/pages/campaign-view";
+import EmailVerification from "@/pages/email-verification";
+import InvestmentSuccess from "@/pages/investment-success";
+import ResetPassword from "@/pages/reset-password";
+import NotFound from "@/pages/not-found";
+
+function Router() {
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  // Render content immediately, don't wait for auth check
+  // This prevents infinite loading on public pages
+
+  return (
+    <Switch>
+      {/* Public routes always accessible */}
+      <Route path="/landing" component={Landing} />
+      <Route path="/about" component={About} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/browse-campaigns" component={BrowseCampaigns} />
+      <Route path="/how-it-works" component={HowItWorks} />
+      <Route path="/success-stories" component={SuccessStories} />
+      <Route path="/case-study/:id" component={CaseStudy} />
+      <Route path="/resources" component={Resources} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/blog" component={Blog} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/terms-of-use" component={TermsOfUse} />
+      <Route path="/cookie-policy" component={CookiePolicy} />
+      <Route path="/investment-disclaimer" component={InvestmentDisclaimer} />
+      <Route path="/safe-agreement-template" component={SafeAgreementTemplate} />
+      <Route path="/investor-accreditation" component={InvestorAccreditation} />
+      <Route path="/verify-email" component={EmailVerification} />
+      <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/investment-success" component={InvestmentSuccess} />
+      <Route path="/campaign/:id" component={CampaignView} />
+      <Route path="/campaigns/:id" component={CampaignView} />
+      <Route path="/c/:privateLink" component={CampaignView} />
+      <Route path="/admin-login" component={AdminLogin} />
+      <Route path="/admin-dashboard" component={AdminDashboard} />
+      <Route path="/admin-kyc-management" component={AdminKYCManagement} />
+      <Route path="/admin/investor-outreach" component={AdminInvestorOutreach} />
+      <Route path="/admin/outreach-report" component={AdminOutreachReport} />
+      
+      {/* Authenticated routes */}
+      {isAuthenticated && (
+        <>
+          <Route path="/founder-dashboard" component={FounderDashboard} />
+          <Route path="/founder/dashboard" component={FounderDashboard} />
+          <Route path="/founder/campaigns" component={FounderDashboard} />
+          <Route path="/founder/investors" component={FounderInvestors} />
+          <Route path="/founder/analytics" component={FounderAnalytics} />
+          <Route path="/founder/settings" component={FounderSettings} />
+          <Route path="/founder/updates" component={FounderUpdates} />
+          <Route path="/founder/messages" component={FounderMessages} />
+          <Route path="/founder/outreach" component={FounderOutreach} />
+          <Route path="/founder-outreach" component={FounderOutreach} />
+          <Route path="/founder/email-replies" component={EmailReplies} />
+          <Route path="/email-replies" component={EmailReplies} />
+          <Route path="/payment-withdrawal" component={PaymentWithdrawal} />
+          <Route path="/investor-dashboard" component={InvestorDashboard} />
+          <Route path="/investor/dashboard" component={InvestorDashboard} />
+        </>
+      )}
+      
+      {/* Root path handling */}
+      <Route path="/">
+        <Landing />
+      </Route>
+      
+      {/* Catch all routes */}
+      <Route>
+        {!isAuthenticated ? <Landing /> : <NotFound />}
+      </Route>
+    </Switch>
+  );
+}
+
 function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-blue-800/90"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Invest in the Future with{' '}
-              <span className="text-orange-400">$5,000</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Support innovative startups through our equity crowdfunding platform. 
-              Minimum investment starts at just $25.
-            </p>
-            <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
-              <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors duration-200">
-                Start Investing
-              </button>
-              <button className="border-2 border-white text-white hover:bg-white hover:text-blue-900 font-bold py-3 px-8 rounded-lg text-lg transition-colors duration-200">
-                Learn More
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Why Choose Fundry?
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Our platform makes equity crowdfunding accessible, transparent, and secure for everyone.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-orange-600 text-2xl font-bold">$</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Low Minimums</h3>
-              <p className="text-gray-600">Start investing with as little as $25</p>
-            </div>
-            
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-blue-600 text-2xl font-bold">🛡️</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Secure Platform</h3>
-              <p className="text-gray-600">Bank-level security for all transactions</p>
-            </div>
-            
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-green-600 text-2xl font-bold">📈</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">High Growth</h3>
-              <p className="text-gray-600">Access to pre-vetted startup opportunities</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Section */}
-      <div className="py-16 bg-blue-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">$2.1M+</div>
-              <div className="text-gray-600">Total Funded</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">150+</div>
-              <div className="text-gray-600">Startups Funded</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">5,000+</div>
-              <div className="text-gray-600">Active Investors</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">23%</div>
-              <div className="text-gray-600">Average Returns</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="py-16 bg-gradient-to-r from-orange-500 to-orange-600">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Start Your Investment Journey?
-          </h2>
-          <p className="text-xl text-orange-100 mb-8">
-            Join thousands of investors supporting the next generation of innovative startups.
-          </p>
-          <button className="bg-white text-orange-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg text-lg transition-colors duration-200">
-            Get Started Today
-          </button>
-        </div>
-      </div>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 

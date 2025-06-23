@@ -104,9 +104,17 @@ process.on('unhandledRejection', (reason, promise) => {
     // doesn't interfere with the other routes
     const isDev = process.env.NODE_ENV !== "production";
     
+    console.log('Environment debug:', {
+      NODE_ENV: process.env.NODE_ENV,
+      isDev,
+      appEnv: app.get("env")
+    });
+    
     if (isDev) {
+      console.log('Setting up Vite development server...');
       await setupVite(app, server);
     } else {
+      console.log('Setting up static file serving...');
       serveStatic(app);
     }
 

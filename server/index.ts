@@ -115,13 +115,18 @@ process.on('unhandledRejection', (reason, promise) => {
     const isDev = process.env.NODE_ENV !== "production";
     
     if (isDev) {
-      const { createServer: createViteServer } = await import('vite');
-      const vite = await createViteServer({
-        server: { middlewareMode: true },
-        appType: 'spa'
-      });
-      app.use(vite.ssrFixStacktrace);
-      app.use(vite.middlewares);
+      try {
+        const { setupVite } = await import('./vite');
+        await setupVite(app, server);
+      } catch (error) {
+        console.log('Vite setup failed, using static files:', error.message);
+        app.use(express.static('.'));
+        app.get('*', (req, res) => {
+          if (!req.path.startsWith('/api')) {
+            res.sendFile(path.join(process.cwd(), 'index.html'));
+          }
+        });
+      }
     } else {
       app.use(express.static(path.join(process.cwd(), 'dist')));
       app.get('*', (req, res) => {

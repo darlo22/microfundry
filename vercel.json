@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "installCommand": "npm install --production",
-  "buildCommand": "echo 'Using pre-built files'",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "functions": {
     "api/index.js": {
-      "runtime": "nodejs20.x"
+      "runtime": "nodejs20"
     }
   },
   "routes": [

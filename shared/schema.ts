@@ -651,6 +651,7 @@ export const insertCampaignSchema = createInsertSchema(campaigns).omit({
   updatedAt: true,
   privateLink: true,
 }).extend({
+  fundingGoal: z.number().min(100, "Funding goal must be at least $100").max(100000, "Funding goal cannot exceed $100,000"),
   directors: z.array(z.object({
     name: z.string().min(1, "Director name is required"),
     title: z.string().min(1, "Director title is required"),

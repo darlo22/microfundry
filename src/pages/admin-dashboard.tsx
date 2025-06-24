@@ -3144,12 +3144,12 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      {/* Fee Tier 2: $1,000 - $50,000 */}
+                      {/* Fee Tier 2: $1,000 - $100,000 */}
                       <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                         <div className="flex justify-between items-center mb-3">
                           <div>
-                            <label className="font-medium text-blue-800">Tier 2: Medium Campaigns</label>
-                            <p className="text-sm text-blue-700">Campaigns $1,000 - $50,000</p>
+                            <label className="font-medium text-blue-800">Tier 2: Medium to Large Campaigns</label>
+                            <p className="text-sm text-blue-700">Campaigns $1,000 - $100,000 (Platform Maximum)</p>
                           </div>
                           <div className="flex items-center space-x-2">
                             <Input
@@ -3176,7 +3176,7 @@ export default function AdminDashboard() {
                             <Input
                               type="number"
                               className="w-24 text-center text-sm border-blue-300"
-                              value={platformSettings?.fee_tier_2_max?.value || '50000'}
+                              value={platformSettings?.fee_tier_2_max?.value || '100000'}
                               onChange={(e) => {
                                 const newSettings = { ...platformSettings };
                                 if (!newSettings.fee_tier_2_max) newSettings.fee_tier_2_max = {};
@@ -3184,39 +3184,25 @@ export default function AdminDashboard() {
                                 setPlatformSettings(newSettings);
                               }}
                               min="1000"
-                              max="75000"
+                              max="100000"
                             />
                           </div>
                         </div>
                       </div>
 
-                      {/* Fee Tier 3: Above $50,000 */}
-                      <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
-                        <div className="flex justify-between items-center mb-3">
-                          <div>
-                            <label className="font-medium text-purple-800">Tier 3: Large Campaigns</label>
-                            <p className="text-sm text-purple-700">Campaigns above $50,000</p>
+                      {/* Maximum Campaign Goal Alert */}
+                      <div className="p-4 bg-gradient-to-r from-red-50 to-red-100 rounded-lg border border-red-200">
+                        <div className="flex items-center mb-3">
+                          <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-3">
+                            <span className="text-white font-bold text-sm">!</span>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              type="number"
-                              className="w-20 text-center border-purple-300"
-                              value={platformSettings?.fee_tier_3_percentage?.value || '5'}
-                              onChange={(e) => {
-                                const newSettings = { ...platformSettings };
-                                if (!newSettings.fee_tier_3_percentage) newSettings.fee_tier_3_percentage = {};
-                                newSettings.fee_tier_3_percentage.value = e.target.value;
-                                setPlatformSettings(newSettings);
-                              }}
-                              min="0"
-                              max="15"
-                              step="0.1"
-                            />
-                            <span className="text-purple-700 font-medium">%</span>
+                          <div>
+                            <label className="font-medium text-red-800">Platform Maximum Enforced</label>
+                            <p className="text-sm text-red-700">No campaigns can exceed $100,000 funding goal</p>
                           </div>
                         </div>
-                        <div className="text-sm text-purple-600">
-                          Applied to all campaigns exceeding Tier 2 maximum
+                        <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                          This limit is enforced across all campaign creation and editing interfaces to maintain platform focus on micro-investment opportunities.
                         </div>
                       </div>
                       
@@ -3261,7 +3247,7 @@ export default function AdminDashboard() {
                               setPlatformSettings(newSettings);
                             }}
                             min="1000"
-                            max="1000000"
+                            max="100000"
                           />
                         </div>
                       </div>
@@ -3285,12 +3271,9 @@ export default function AdminDashboard() {
                           }),
                           updatePlatformSettingMutation.mutateAsync({
                             settingKey: 'fee_tier_2_max',
-                            settingValue: platformSettings?.fee_tier_2_max?.value || '50000'
+                            settingValue: platformSettings?.fee_tier_2_max?.value || '100000'
                           }),
-                          updatePlatformSettingMutation.mutateAsync({
-                            settingKey: 'fee_tier_3_percentage',
-                            settingValue: platformSettings?.fee_tier_3_percentage?.value || '5'
-                          }),
+
                           updatePlatformSettingMutation.mutateAsync({
                             settingKey: 'minimum_investment',
                             settingValue: platformSettings?.minimum_investment?.value || '25'

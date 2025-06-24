@@ -162,17 +162,9 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || errorData.error || 'Invalid credentials');
-      } catch (error: any) {
-        console.error('Payment error:', error);
-        toast({
-          title: "Payment Error",
-          description: error.message || "Payment failed. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsPaymentProcessing(false);
       }
-    };
+    },
+  });
 
     return (
       <div className="space-y-6">
@@ -420,6 +412,8 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         const errorData = await response.json();
         throw new Error(errorData.message || errorData.error || 'Invalid credentials');
       }
+    },
+      }
             } else {
               toast({
                 title: "Payment Incomplete",
@@ -433,69 +427,9 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       } else {
         throw new Error(result.message || 'Failed to create payment link');
       }
-
-    } catch (error: any) {
-      console.error('Direct payment processing error:', error);
-      toast({
-        title: "Payment Error",
-        description: error.message || "Failed to initialize payment",
-        variant: "destructive",
-      });
-      setIsProcessingNaira(false);
-    }
-  };
-
-  // Payment handler functions
-  const handleUSDPayment = async () => {
-    setIsProcessingPayment(true);
-    try {
-      // Create investment first
-      const investmentData = {
-        campaignId: campaign.id,
-        amount: selectedAmount.toString(),
-        status: 'committed',
-        investorDetails: {
-          ...investorDetails,
-          signature: signatureData,
-          agreedToTerms,
-          investmentDate: new Date().toISOString()
-        }
-      };
-
-      const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
-
-      // Process Stripe payment with required fields
-      const response = await apiRequest('POST', '/api/auth/login', {
-        email: authData.email,
-        password: authData.password
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-        toast({
-          title: "Signed In Successfully",
-          description: "Welcome back! Proceeding with your investment.",
-        });
-        setCurrentStep('safe-review');
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || errorData.error || 'Invalid credentials');
+    },
       }
-              } else {
-                throw new Error(result.message || 'Payment verification failed');
-              }
-            } else {
-              throw new Error('Payment was cancelled or failed');
-            }
-          } catch (error: any) {
-            console.error('Payment callback error:', error);
-            toast({
-              title: "Payment Error",
-              description: error.message || "Payment processing failed",
-              variant: "destructive",
-            });
-          } finally {
+
             setIsProcessingNaira(false);
           }
         },
@@ -561,142 +495,6 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         handleDirectBudpayPayment();
       }
 
-    } catch (error: any) {
-      console.error('Budpay payment error:', error);
-      toast({
-        title: "Payment Error",
-        description: error.message || "Payment failed. Please try again.",
-        variant: "destructive",
-      });
-      setIsProcessingNaira(false);
-    }
-  };
-
-  const handleAmountSelection = (amount: number) => {
-    setSelectedAmount(amount);
-    setCustomAmount('');
-  };
-
-  const handleCustomAmountChange = (value: string) => {
-    const numValue = parseFloat(value) || 0;
-    setCustomAmount(value);
-    setSelectedAmount(numValue);
-  };
-
-  const calculateFee = (amount: number) => {
-    return 0; // Platform fees removed
-  };
-
-  const calculateTotal = (amount: number) => {
-    return amount; // No fees applied
-  };
-
-  const handleNextStep = () => {
-    const stepOrder: InvestmentStep[] = ['amount', 'auth', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'];
-    const currentIndex = stepOrder.indexOf(currentStep);
-    
-    // Get the actual investment amount (either from preset selection or custom input)
-    const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
-    
-    if (currentStep === 'amount' && actualAmount < minimumInvestment) {
-      toast({
-        title: "Invalid Amount",
-        description: `Minimum investment is $${minimumInvestment}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep === 'amount' && actualAmount > maximumInvestment) {
-      toast({
-        title: "Invalid Amount",
-        description: `Maximum investment is $${maximumInvestment}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep === 'auth' && !isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in or create an account to continue",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep === 'terms' && !agreedToTerms) {
-      toast({
-        title: "Terms Required",
-        description: "Please agree to the terms and conditions",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep === 'signature' && !signatureData.trim()) {
-      toast({
-        title: "Signature Required",
-        description: "Please provide your digital signature",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep === 'payment') {
-      handlePayment();
-      return;
-    }
-
-    if (currentIndex < stepOrder.length - 1) {
-      setCurrentStep(stepOrder[currentIndex + 1]);
-    }
-  };
-
-  const handlePrevStep = () => {
-    const stepOrder: InvestmentStep[] = ['amount', 'auth', 'safe-review', 'terms', 'signature', 'payment', 'confirmation'];
-    const currentIndex = stepOrder.indexOf(currentStep);
-    
-    if (currentIndex > 0) {
-      setCurrentStep(stepOrder[currentIndex - 1]);
-    }
-  };
-
-  const handleAuth = async () => {
-    if (authMode === 'signin') {
-      await handleSignIn();
-    } else {
-      await handleSignUp();
-    }
-  };
-
-  const handleSignIn = async () => {
-    setIsAuthenticating(true);
-    try {
-      const response = await apiRequest('POST', '/api/auth/login', {
-        email: authData.email,
-        password: authData.password
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-        toast({
-          title: "Signed In Successfully",
-          description: "Welcome back! Proceeding with your investment.",
-        });
-        setCurrentStep('safe-review');
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || errorData.error || 'Invalid credentials');
-      }
-    } catch (error: any) {
-      toast({
-        title: "Sign In Failed",
-        description: error.message || "Invalid credentials",
-        variant: "destructive",
-      });
-    } finally {
       setIsAuthenticating(false);
     }
   };
@@ -730,13 +528,8 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         const errorData = await response.json();
         throw new Error(errorData.message || errorData.error || 'Invalid credentials');
       }
-    } catch (error: any) {
-      toast({
-        title: "Registration Failed",
-        description: error.message || "Failed to create account",
-        variant: "destructive",
-      });
-    } finally {
+    },
+      }
       setIsAuthenticating(false);
     }
   };
@@ -780,13 +573,6 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         }
       }, 500);
       
-    } catch (error: any) {
-      toast({
-        title: "Commitment Failed",
-        description: error.message || "Failed to commit investment",
-        variant: "destructive",
-      });
-    } finally {
       setIsProcessingPayment(false);
     }
   };

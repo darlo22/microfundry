@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import path from "path";
 
 // Add process-level error handlers to prevent crashes
 process.on('uncaughtException', (error) => {
@@ -105,15 +106,17 @@ process.on('unhandledRejection', (reason, promise) => {
     const isDev = process.env.NODE_ENV !== "production";
     
     if (isDev) {
-      // Temporarily bypass Vite due to config issues
-      console.log("Development mode - serving static fallback");
-      app.use(express.static('dist', { fallthrough: true }));
-      app.get('*', (req, res) => {
-        if (req.path.startsWith('/api')) {
-          return res.status(404).json({ message: 'API endpoint not found' });
-        }
-        res.sendFile(path.resolve('index.html'));
-      });
+      try {
+        await setupVite(app, server);
+      } catch (error) {
+        console.log("Vite setup failed, running API-only mode:", error.message);
+        app.get('*', (req, res) => {
+          if (req.path.startsWith('/api')) {
+            return res.status(404).json({ message: 'API endpoint not found' });
+          }
+          res.send('<html><body><h1>Fundry Development Server</h1><p>API endpoints are running on port 5000</p></body></html>');
+        });
+      }
     } else {
       serveStatic(app);
     }

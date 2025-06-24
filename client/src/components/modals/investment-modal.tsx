@@ -165,9 +165,6 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       }
     },
   });
-  });
-  });
-  });
 
     return (
       <div className="space-y-6">

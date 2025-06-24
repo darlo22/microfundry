@@ -114,8 +114,12 @@ process.on('unhandledRejection', (reason, promise) => {
     // doesn't interfere with the other routes
     const isDev = process.env.NODE_ENV !== "production";
     
-    // Simple static file serving for stability
+    // Serve static files and frontend
     app.use(express.static('.'));
+    app.use('/src', express.static('src'));
+    app.use('/client', express.static('client'));
+    
+    // Catch-all for frontend routes
     app.get('*', (req, res) => {
       if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
         res.sendFile(path.join(process.cwd(), 'index.html'));

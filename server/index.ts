@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { log } from "./vite";
 import path from "path";
 
 // Add process-level error handlers to prevent crashes
@@ -106,9 +106,17 @@ process.on('unhandledRejection', (reason, promise) => {
     const isDev = process.env.NODE_ENV !== "production";
     
     if (isDev) {
-      await setupVite(app, server);
+      // Simple static file serving for development
+      app.use(express.static(path.join(process.cwd(), 'src')));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(process.cwd(), 'index.html'));
+      });
     } else {
-      serveStatic(app);
+      // Production static file serving
+      app.use(express.static(path.join(process.cwd(), 'dist')));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(process.cwd(), 'dist/index.html'));
+      });
     }
 
     // ALWAYS serve the app on port 5000

@@ -105,7 +105,15 @@ process.on('unhandledRejection', (reason, promise) => {
     const isDev = process.env.NODE_ENV !== "production";
     
     if (isDev) {
-      await setupVite(app, server);
+      // Temporarily bypass Vite due to config issues
+      console.log("Development mode - serving static fallback");
+      app.use(express.static('dist', { fallthrough: true }));
+      app.get('*', (req, res) => {
+        if (req.path.startsWith('/api')) {
+          return res.status(404).json({ message: 'API endpoint not found' });
+        }
+        res.sendFile(path.resolve('index.html'));
+      });
     } else {
       serveStatic(app);
     }

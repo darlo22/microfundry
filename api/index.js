@@ -52,6 +52,12 @@ app.listen(port, () => {
   console.log(`Fundry deployment server running on port ${port}`);
 });
 
+
+// Handle all auth routes
+app.all("/api/auth/*", (req, res, next) => {
+  res.setHeader("Content-Type", "application/json");
+  next();
+});
 export default app;
 
 // Login endpoint

@@ -199,7 +199,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
                         '::placeholder': {
                           color: '#9CA3AF',
                         },
-                  }}
+                  }
                 />
               </div>
             </div>

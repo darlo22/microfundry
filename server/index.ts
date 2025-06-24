@@ -114,20 +114,31 @@ process.on('unhandledRejection', (reason, promise) => {
     // doesn't interfere with the other routes
     const isDev = process.env.NODE_ENV !== "production";
     
-    // Simple static file serving for all environments
-    app.use(express.static('.', {
-      setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.tsx') || filePath.endsWith('.ts') || filePath.endsWith('.jsx') || filePath.endsWith('.js')) {
-          res.setHeader('Content-Type', 'application/javascript');
+    // Development and production file serving
+    if (isDev) {
+      // Import Vite setup with error handling
+      try {
+        const { setupVite } = await import('./vite');
+        await setupVite(app, server);
+      } catch (viteError) {
+        log(`Vite setup failed: ${viteError.message}, using static fallback`);
+        // Fallback to static serving if Vite fails
+        app.use(express.static('.'));
+        app.get('*', (req, res) => {
+          if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+            res.sendFile(path.join(process.cwd(), 'index.html'));
+          }
+        });
+      }
+    } else {
+      // Production static serving
+      app.use(express.static(path.join(process.cwd(), 'dist')));
+      app.get('*', (req, res) => {
+        if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+          res.sendFile(path.join(process.cwd(), 'dist/index.html'));
         }
-      }
-    }));
-    
-    app.get('*', (req, res) => {
-      if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
-        res.sendFile(path.join(process.cwd(), 'index.html'));
-      }
-    });
+      });
+    }
 
     // ALWAYS serve the app on port 5000
     // this serves both the API and the client.

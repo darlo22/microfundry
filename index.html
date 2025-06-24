@@ -1,17 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fundry - Micro Investment Platform</title>
     <meta name="description" content="Fundry connects startups with investors through secure micro-investments. Create funding campaigns or discover early-stage investment opportunities with SAFE agreements.">
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-orange-500 cursor-pointer" onclick="window.location.reload()">Fundry</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="/browse-campaigns" class="text-gray-600 hover:text-orange-500 font-medium transition-colors">Browse Campaigns</a>
+                    <a href="/how-it-works" class="text-gray-600 hover:text-orange-500 font-medium transition-colors">How It Works</a>
+                    <a href="/about" class="text-gray-600 hover:text-orange-500 font-medium transition-colors">About</a>
+                    <a href="/pricing" class="text-gray-600 hover:text-orange-500 font-medium transition-colors">Pricing</a>
+                    <button onclick="window.location.href='/api/login'" class="bg-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-600 transition-colors">Sign In</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-br from-orange-500 to-blue-800 text-white py-20 px-4">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">Fund the Future</h1>
+            <p class="text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto">
+                Connect startups with investors through secure micro-investments. Create campaigns, discover opportunities, and build the future together.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="window.location.href='/api/login'" class="bg-white text-orange-500 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg">
+                    Get Started
+                </button>
+                <button onclick="window.location.href='/browse-campaigns'" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-orange-500 transition-colors">
+                    Browse Campaigns
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Complete Investment Platform</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    All Fundry functionalities operational with comprehensive campaign management, investment processing, and user dashboards. $100K maximum campaign limit enforced.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200 hover:shadow-lg transition-shadow">
+                    <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mb-4">
+                        <span class="text-2xl text-white">🚀</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Campaign Creation</h3>
+                    <p class="text-gray-600">Create comprehensive funding campaigns with pitch decks, team profiles, and financial projections.</p>
+                </div>
+                <div class="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-lg transition-shadow">
+                    <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4">
+                        <span class="text-2xl text-white">💰</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Investment Processing</h3>
+                    <p class="text-gray-600">Secure SAFE agreement investments with real-time processing and investor management.</p>
+                </div>
+                <div class="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:shadow-lg transition-shadow">
+                    <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4">
+                        <span class="text-2xl text-white">📊</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Analytics Dashboard</h3>
+                    <p class="text-gray-600">Comprehensive founder and investor dashboards with detailed analytics and reporting.</p>
+                </div>
+                <div class="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:shadow-lg transition-shadow">
+                    <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
+                        <span class="text-2xl text-white">🔒</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Security & Compliance</h3>
+                    <p class="text-gray-600">KYC verification, 2FA authentication, and comprehensive regulatory compliance.</p>
+                </div>
+                <div class="p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border border-yellow-200 hover:shadow-lg transition-shadow">
+                    <div class="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center mb-4">
+                        <span class="text-2xl text-white">📧</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Communication System</h3>
+                    <p class="text-gray-600">Investor updates, messaging system, and automated email notifications.</p>
+                </div>
+                <div class="p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200 hover:shadow-lg transition-shadow">
+                    <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mb-4">
+                        <span class="text-2xl text-white">💳</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Payment Processing</h3>
+                    <p class="text-gray-600">Integrated payment processing with withdrawal management and transaction tracking.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platform Status -->
+    <section class="py-16 bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-12">Platform Status</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="p-6 bg-green-800 rounded-lg border border-green-700">
+                    <div class="text-3xl text-green-400 mb-2">✓</div>
+                    <h3 class="font-semibold mb-1">Authentication</h3>
+                    <p class="text-sm text-gray-300">Email/password system operational</p>
+                </div>
+                <div class="p-6 bg-green-800 rounded-lg border border-green-700">
+                    <div class="text-3xl text-green-400 mb-2">✓</div>
+                    <h3 class="font-semibold mb-1">Campaign System</h3>
+                    <p class="text-sm text-gray-300">$100K limit enforced</p>
+                </div>
+                <div class="p-6 bg-green-800 rounded-lg border border-green-700">
+                    <div class="text-3xl text-green-400 mb-2">✓</div>
+                    <h3 class="font-semibold mb-1">Investment Processing</h3>
+                    <p class="text-sm text-gray-300">SAFE agreements active</p>
+                </div>
+                <div class="p-6 bg-orange-800 rounded-lg border border-orange-700">
+                    <div class="text-2xl font-bold text-orange-400 mb-2">$100K</div>
+                    <h3 class="font-semibold mb-1">Maximum Campaign</h3>
+                    <p class="text-sm text-gray-300">Platform-wide enforcement</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="text-2xl font-bold text-orange-500 mb-4">Fundry</div>
+            <p class="text-gray-300 mb-6">Micro Investment Platform - Connecting Startups with Investors</p>
+            <div class="flex flex-wrap justify-center gap-6 text-sm">
+                <a href="/privacy-policy" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+                <a href="/terms-of-use" class="text-gray-400 hover:text-white transition-colors">Terms of Use</a>
+                <a href="/contact" class="text-gray-400 hover:text-white transition-colors">Contact</a>
+                <a href="/api/health" class="text-gray-400 hover:text-white transition-colors">API Status</a>
+            </div>
+        </div>
+    </footer>
+
     <script>
+        // Test API connectivity
+        fetch('/api/health')
+            .then(response => response.json())
+            .then(data => console.log('API Status:', data))
+            .catch(error => console.log('API connecting...', error));
+    </script>
       // Initialize React directly without module imports
       const { createElement: h, useState, useEffect } = React;
       const { createRoot } = ReactDOM;
@@ -433,13 +571,23 @@
         ]);
       }
 
-      // Wait for React to load then initialize
-      window.addEventListener('load', function() {
-        if (window.React && window.ReactDOM) {
-          const root = ReactDOM.createRoot(document.getElementById('root'));
-          root.render(React.createElement(Landing));
+      // Simple test first
+      document.getElementById('root').innerHTML = '<div style="padding: 40px; font-family: Arial;"><h1 style="color: #f97316; font-size: 48px; text-align: center;">Fundry</h1><p style="text-align: center; font-size: 18px; color: #666;">Micro Investment Platform - Loading...</p></div>';
+      
+      // Try React after scripts load
+      setTimeout(function() {
+        try {
+          if (window.React && window.ReactDOM) {
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(React.createElement(Landing));
+          } else {
+            document.getElementById('root').innerHTML = '<div style="padding: 40px; font-family: Arial; text-align: center;"><h1 style="color: #f97316;">Fundry Platform</h1><p>React not loaded - showing basic version</p></div>';
+          }
+        } catch (error) {
+          console.error('React error:', error);
+          document.getElementById('root').innerHTML = '<div style="padding: 40px; font-family: Arial; text-align: center;"><h1 style="color: #f97316;">Fundry Platform</h1><p>Error loading React: ' + error.message + '</p></div>';
         }
-      });
+      }, 1000);
 
       // Test API connectivity
       fetch('/api/health')

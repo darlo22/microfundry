@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fundry - Micro Investment Platform</title>
     <meta name="description" content="Fundry connects startups with investors through secure micro-investments. Create funding campaigns or discover early-stage investment opportunities with SAFE agreements.">
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div id="root"></div>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script>
       // Initialize React directly without module imports
       const { createElement: h, useState, useEffect } = React;
@@ -430,9 +433,13 @@
         ]);
       }
 
-      // Initialize the application
-      const root = createRoot(document.getElementById('root'));
-      root.render(h(Landing));
+      // Wait for React to load then initialize
+      window.addEventListener('load', function() {
+        if (window.React && window.ReactDOM) {
+          const root = ReactDOM.createRoot(document.getElementById('root'));
+          root.render(React.createElement(Landing));
+        }
+      });
 
       // Test API connectivity
       fetch('/api/health')
@@ -440,8 +447,5 @@
         .then(data => console.log('API Status:', data))
         .catch(error => console.log('API connecting...', error));
     </script>
-  </head>
-  <body>
-    <div id="root"></div>
   </body>
 </html>

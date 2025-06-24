@@ -165,6 +165,9 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       }
     },
   });
+  });
+  });
+  });
 
     return (
       <div className="space-y-6">
@@ -199,11 +202,23 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
                         '::placeholder': {
                           color: '#9CA3AF',
                         },
+  });
+  });
+  });
                       },
+  });
+  });
+  });
                       invalid: {
                         color: '#EF4444',
                       },
+  });
+  });
+  });
                     },
+  });
+  });
+  });
                   }}
                 />
               </div>
@@ -413,124 +428,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         throw new Error(errorData.message || errorData.error || 'Invalid credentials');
       }
     },
-      }
-            } else {
-              toast({
-                title: "Payment Incomplete",
-                description: "Payment was not completed. Please try again.",
-                variant: "destructive",
-              });
-            }
-          }
-        }, 1000);
-
-      } else {
-        throw new Error(result.message || 'Failed to create payment link');
-      }
-    },
-      }
-
-            setIsProcessingNaira(false);
-          }
-        },
-        onClose: () => {
-          console.log('Budpay modal closed');
-          setIsProcessingNaira(false);
-        }
-      };
-
-      console.log('Budpay config:', budpayPaymentConfig);
-
-      // Function to initialize Budpay
-      const initializeBudpay = () => {
-        console.log('Initializing Budpay checkout...');
-        if (window.BudPayCheckout) {
-          console.log('BudPayCheckout found, calling it...');
-          window.BudPayCheckout(budpayPaymentConfig);
-        } else {
-          console.error('BudPayCheckout not found on window object');
-          toast({
-            title: "Payment Error",
-            description: "Budpay checkout failed to load",
-            variant: "destructive",
-          });
-          setIsProcessingNaira(false);
-        }
-      };
-
-      // Load Budpay script and initialize payment
-      if (window.BudPayCheckout && typeof window.BudPayCheckout === 'function') {
-        console.log('Budpay script already loaded');
-        initializeBudpay();
-      } else {
-        console.log('Loading Budpay script...');
-        
-        // Use the correct Budpay checkout script URL
-        const budpayScriptUrl = 'https://inlinecheckout.budpay.com/budpay-inline-checkout.js';
-        
-        const loadBudpayScript = () => {
-          const script = document.createElement('script');
-          script.src = budpayScriptUrl;
-          script.onload = () => {
-            console.log('Budpay script loaded successfully');
-            // Wait a bit for the script to initialize
-            setTimeout(() => {
-              if ('BudPayCheckout' in window && typeof window.BudPayCheckout === 'function') {
-                initializeBudpay();
-              } else {
-                console.warn('BudPayCheckout not available, using direct API approach');
-                handleDirectBudpayPayment();
-              }
-            }, 500);
-          };
-          script.onerror = () => {
-            console.warn('Failed to load Budpay script, using direct API approach');
-            handleDirectBudpayPayment();
-          };
-          document.head.appendChild(script);
-        };
-
-        // Skip script loading, use direct API approach
-        console.log('Using direct Budpay payment processing');
-        handleDirectBudpayPayment();
-      }
-
-      setIsAuthenticating(false);
-    }
-  };
-
-  const handleSignUp = async () => {
-    if (authData.password !== authData.confirmPassword) {
-      toast({
-        title: "Password Mismatch",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsAuthenticating(true);
-    try {
-      const response = await apiRequest('POST', '/api/auth/login', {
-        email: authData.email,
-        password: authData.password
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-        toast({
-          title: "Signed In Successfully",
-          description: "Welcome back! Proceeding with your investment.",
-        });
-        setCurrentStep('safe-review');
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || errorData.error || 'Invalid credentials');
-      }
-    },
   });
-
   const handlePayment = async () => {
     setIsProcessingPayment(true);
     

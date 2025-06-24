@@ -163,9 +163,6 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         const errorData = await response.json();
         throw new Error(errorData.message || errorData.error || 'Invalid credentials');
       }
-        } else {
-          throw new Error('Payment not completed');
-        }
 
       } catch (error: any) {
         console.error('Payment error:', error);

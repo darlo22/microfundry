@@ -80,7 +80,7 @@ The deployment uses:
 
 ## Changelog
 
-- June 24, 2025. Successfully implemented $100,000 maximum campaign goal enforcement across all platform endpoints: comprehensive validation active in server/routes.ts (lines 1342, 1500, 1619) rejecting campaigns exceeding limit; fixed CVE-2025-30208 security vulnerability with Vite upgrade; resolved application startup and module resolution issues; development server operational on port 5000 with proper API responses and database connectivity; live site deployment configuration optimized for Vercel with custom domain microfundry.com
+- June 24, 2025. Successfully implemented $100,000 maximum campaign goal enforcement across all platform endpoints: comprehensive validation active in server/routes.ts (lines 1342, 1500, 1619) rejecting campaigns exceeding limit; fixed CVE-2025-30208 security vulnerability with Vite upgrade; resolved Vercel deployment build failures by fixing client build configuration and main.tsx entry point; development server operational on port 5000 with proper API responses and database connectivity; live site deployment optimized for microfundry.com with proper client build process
 - June 16, 2025. Initial setup
 - June 16, 2025. Added comprehensive footer with About, Pricing pages and transparent fee structure (5% above $1,000, free below)
 - June 16, 2025. Created extensive page ecosystem including Browse Campaigns, How It Works, Success Stories, Resources, Contact, Blog, Privacy Policy, Terms of Use, Cookie Policy, and Investment Disclaimer pages for professional platform presentation

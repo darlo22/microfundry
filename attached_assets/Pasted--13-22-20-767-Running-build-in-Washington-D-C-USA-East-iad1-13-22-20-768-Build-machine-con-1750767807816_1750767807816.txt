@@ -1,0 +1,54 @@
+[13:22:20.767] Running build in Washington, D.C., USA (East) – iad1
+[13:22:20.768] Build machine configuration: 2 cores, 8 GB
+[13:22:20.793] Cloning github.com/darlo22/microfundry (Branch: main, Commit: 424bba0)
+[13:22:24.830] Cloning completed: 4.036s
+[13:22:25.015] Restored build cache from previous deployment (7Qz8mHxJSuP2PQFwszW4FHqA1org)
+[13:22:25.586] Running "vercel build"
+[13:22:26.030] Vercel CLI 43.3.0
+[13:22:26.819] Running "install" command: `npm install`...
+[13:22:30.116] npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+[13:22:30.132] npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+[13:22:30.285] npm warn deprecated gm@1.25.1: The gm module has been sunset. Please migrate to an alternative. https://github.com/aheckmann/gm?tab=readme-ov-file#2025-02-24-this-project-is-not-maintained
+[13:22:33.097] 
+[13:22:33.098] added 297 packages, removed 5 packages, changed 2 packages, and audited 613 packages in 6s
+[13:22:33.100] 
+[13:22:33.101] 88 packages are looking for funding
+[13:22:33.101]   run `npm fund` for details
+[13:22:33.139] 
+[13:22:33.140] 6 vulnerabilities (5 moderate, 1 high)
+[13:22:33.140] 
+[13:22:33.140] To address all issues possible (including breaking changes), run:
+[13:22:33.140]   npm audit fix --force
+[13:22:33.140] 
+[13:22:33.140] Some issues need review, and may require choosing
+[13:22:33.141] a different dependency.
+[13:22:33.141] 
+[13:22:33.141] Run `npm audit` for details.
+[13:22:33.429] 
+[13:22:33.429] > rest-express@1.0.0 build
+[13:22:33.429] > cd client && npm install && npm run build && cd .. && mkdir -p dist && cp -r client/dist/* dist/
+[13:22:33.429] 
+[13:22:44.179] 
+[13:22:44.179] added 69 packages, and audited 70 packages in 11s
+[13:22:44.179] 
+[13:22:44.180] 9 packages are looking for funding
+[13:22:44.180]   run `npm fund` for details
+[13:22:44.187] 
+[13:22:44.188] found 0 vulnerabilities
+[13:22:44.312] 
+[13:22:44.312] > microfundry-client@1.0.0 build
+[13:22:44.312] > vite build
+[13:22:44.312] 
+[13:22:44.556] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+[13:22:44.611] [32m✓[39m 0 modules transformed.
+[13:22:44.618] [31m✗[39m Build failed in 34ms
+[13:22:44.618] [31merror during build:
+[13:22:44.619] [31m[vite:build-html] Failed to resolve /src/main.tsx from /vercel/path0/client/index.html[31m
+[13:22:44.619] file: [36m/vercel/path0/client/index.html[31m
+[13:22:44.620]     at file:///vercel/path0/client/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:36310:29
+[13:22:44.620]     at async Promise.all (index 0)
+[13:22:44.620]     at async Object.handler (file:///vercel/path0/client/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:36507:11)
+[13:22:44.621]     at async transform (file:///vercel/path0/client/node_modules/rollup/dist/es/shared/node-entry.js:21001:16)
+[13:22:44.621]     at async ModuleLoader.addModuleSource (file:///vercel/path0/client/node_modules/rollup/dist/es/shared/node-entry.js:21214:36)[39m
+[13:22:44.645] Error: Command "npm run build" exited with 1
+[13:22:44.926] 

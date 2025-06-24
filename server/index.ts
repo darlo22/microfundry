@@ -114,18 +114,13 @@ process.on('unhandledRejection', (reason, promise) => {
     // doesn't interfere with the other routes
     const isDev = process.env.NODE_ENV !== "production";
     
-    // Setup Vite development server
-    if (isDev) {
-      const { setupVite } = await import('./vite');
-      await setupVite(app, server);
-    } else {
-      app.use(express.static(path.join(process.cwd(), 'dist')));
-      app.get('*', (req, res) => {
-        if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
-          res.sendFile(path.join(process.cwd(), 'dist/index.html'));
-        }
-      });
-    }
+    // Simple static file serving for stability
+    app.use(express.static('.'));
+    app.get('*', (req, res) => {
+      if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+        res.sendFile(path.join(process.cwd(), 'index.html'));
+      }
+    });
 
 
     // ALWAYS serve the app on port 5000

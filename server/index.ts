@@ -98,8 +98,14 @@ app.use((req, res, next) => {
     
     // Setup Vite development server
     if (isDev) {
-      const { setupVite } = await import('./vite');
-      await setupVite(app, server);
+      try {
+        const { setupVite } = await import('./vite');
+        await setupVite(app, server);
+        log('Vite development server setup complete', 'vite');
+      } catch (viteError) {
+        log(`Vite setup error: ${viteError.message}`, 'vite');
+        // Continue without Vite for now
+      }
     } else {
       app.use(express.static(path.join(process.cwd(), 'dist')));
       app.get('*', (req, res) => {

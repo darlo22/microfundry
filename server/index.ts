@@ -114,22 +114,10 @@ process.on('unhandledRejection', (reason, promise) => {
     // doesn't interfere with the other routes
     const isDev = process.env.NODE_ENV !== "production";
     
-    // Development and production file serving
+    // Setup Vite development server
     if (isDev) {
-      try {
-        const { setupVite } = await import('./vite');
-        await setupVite(app, server);
-        log('Vite development server initialized');
-      } catch (viteError) {
-        log(`Vite failed, using fallback: ${viteError.message}`);
-        // Simple fallback without Vite
-        app.use(express.static('.'));
-        app.get('*', (req, res) => {
-          if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
-            res.sendFile(path.join(process.cwd(), 'index.html'));
-          }
-        });
-      }
+      const { setupVite } = await import('./vite');
+      await setupVite(app, server);
     } else {
       app.use(express.static(path.join(process.cwd(), 'dist')));
       app.get('*', (req, res) => {

@@ -53,3 +53,119 @@ app.listen(port, () => {
 });
 
 export default app;
+
+// Login endpoint
+app.post('/api/auth/login', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  
+  const { email, password } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({ 
+      error: 'Email and password are required',
+      message: 'Please provide both email and password' 
+    });
+  }
+  
+  // Demo authentication
+  if (email === 'admin@fundry.com' && password === 'admin123') {
+    return res.status(200).json({ 
+      success: true,
+      user: { 
+        id: 1,
+        email: email,
+        name: 'Admin User',
+        role: 'admin' 
+      },
+      token: 'demo-token-123'
+    });
+  }
+  
+  if (email === 'founder@test.com' && password === 'test123') {
+    return res.status(200).json({ 
+      success: true,
+      user: { 
+        id: 2,
+        email: email,
+        name: 'Test Founder',
+        role: 'founder' 
+      },
+      token: 'demo-token-456'
+    });
+  }
+  
+  return res.status(401).json({ 
+    error: 'Invalid credentials',
+    message: 'The email or password you entered is incorrect'
+  });
+});
+
+// Register endpoint  
+app.post('/api/auth/register', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  
+  const { email, password, name, userType } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({ 
+      error: 'Email and password are required',
+      message: 'Please provide both email and password' 
+    });
+  }
+  
+  return res.status(200).json({ 
+    success: true,
+    message: 'Registration successful! Please check your email to verify your account.',
+    user: { 
+      id: Date.now(),
+      email: email,
+      name: name || 'New User',
+      role: userType || 'founder',
+      verified: false
+    }
+  });
+});
+
+// Logout endpoint
+app.post('/api/auth/logout', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).json({ 
+    success: true,
+    message: 'Logged out successfully' 
+  });
+});
+
+// Verify token endpoint
+app.get('/api/auth/verify', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  
+  if (token === 'demo-token-123') {
+    return res.status(200).json({ 
+      success: true,
+      user: { 
+        id: 1,
+        email: 'admin@fundry.com',
+        name: 'Admin User',
+        role: 'admin' 
+      }
+    });
+  }
+  
+  if (token === 'demo-token-456') {
+    return res.status(200).json({ 
+      success: true,
+      user: { 
+        id: 2,
+        email: 'founder@test.com',
+        name: 'Test Founder',
+        role: 'founder' 
+      }
+    });
+  }
+  
+  return res.status(401).json({ 
+    error: 'Invalid token',
+    message: 'Please log in again' 
+  });
+});

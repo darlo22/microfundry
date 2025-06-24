@@ -11,9 +11,13 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Redirect root to client application
+// Health check and API endpoints only
 app.get('/', (req, res) => {
-  res.redirect('/client/');
+  res.json({ 
+    message: 'Fundry API Server',
+    status: 'operational',
+    version: '1.0.0'
+  });
 });
 
 // Authentication status endpoint

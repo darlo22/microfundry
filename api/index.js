@@ -54,9 +54,9 @@ app.get('/', (req, res) => {
               </div>
             </div>
             <div class="notice">
-              <strong>Status:</strong> Platform undergoing deployment updates. Development server available on Replit with full functionality including $100,000 maximum campaign goal enforcement.
+              <strong>Status:</strong> Full platform operational on Replit with comprehensive $100,000 maximum campaign goal enforcement across all endpoints.
             </div>
-            <a href="https://micro-fundry-darlington2.replit.app" class="btn" style="margin-top: 24px;">Access Development Platform</a>
+            <a href="https://micro-fundry-darlington2.replit.app" class="btn" style="margin-top: 24px;">Access Full Platform</a>
           </div>
         </div>
       </body>

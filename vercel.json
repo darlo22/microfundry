@@ -1,1 +1,20 @@
-{}
+{
+  "version": 2,
+  "installCommand": "npm install --production",
+  "buildCommand": "echo 'Using pre-built files'",
+  "functions": {
+    "api/index.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/index.html"
+    }
+  ]
+}

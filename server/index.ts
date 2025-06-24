@@ -115,13 +115,14 @@ process.on('unhandledRejection', (reason, promise) => {
     const isDev = process.env.NODE_ENV !== "production";
     
     if (isDev) {
-      // Simple static file serving for development
-      app.use(express.static(path.join(process.cwd(), 'src')));
-      app.get('*', (req, res) => {
-        res.sendFile(path.join(process.cwd(), 'index.html'));
+      const { createServer: createViteServer } = await import('vite');
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa'
       });
+      app.use(vite.ssrFixStacktrace);
+      app.use(vite.middlewares);
     } else {
-      // Production static file serving
       app.use(express.static(path.join(process.cwd(), 'dist')));
       app.get('*', (req, res) => {
         res.sendFile(path.join(process.cwd(), 'dist/index.html'));

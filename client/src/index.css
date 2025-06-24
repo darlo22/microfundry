@@ -134,3 +134,16 @@
     color: white !important;
   }
 }
+
+/* Force destructive toast styling */
+.toast[data-type="destructive"],
+.toast.destructive,
+[data-variant="destructive"] {
+  background-color: #ef4444 !important;
+  color: white !important;
+  border-color: #dc2626 !important;
+}
+
+[data-variant="destructive"] * {
+  color: white !important;
+}

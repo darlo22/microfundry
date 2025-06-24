@@ -146,140 +146,23 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
   // Investment mutation
   const createInvestmentMutation = useMutation({
     mutationFn: async (investmentData: any) => {
-      const response = await apiRequest('POST', '/api/investments', investmentData);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-    }
-  });
-
-  // Handle creating investment commitment and redirecting to dashboard
-  const handleCreateInvestment = async () => {
-    try {
-      const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
-
-      if (actualAmount < campaign.minimumInvestment) {
-        toast({
-          title: "Invalid Amount",
-          description: `Minimum investment is $${campaign.minimumInvestment}`,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const investmentData = {
-        campaignId: campaign.id,
-        amount: actualAmount,
-        status: 'committed',
-        paymentStatus: 'pending',
-        investorDetails: {
-          ...investorDetails,
-          signature: signatureData,
-          agreedToTerms,
-          investmentDate: new Date().toISOString()
-        }
-      };
-
-      const result = await createInvestmentMutation.mutateAsync(investmentData);
-
-      toast({
-        title: "Investment Committed!",
-        description: "Redirecting to your dashboard to complete payment...",
+      const response = await apiRequest('POST', '/api/auth/login', {
+        email: authData.email,
+        password: authData.password
       });
-
-      // Close modal and redirect to dashboard
-      onClose();
-      setLocation('/investor-dashboard');
-
-      // Clear investment context
-      localStorage.removeItem('investmentContext');
-
-    } catch (error: any) {
-      console.error('Investment creation error:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create investment. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Stripe Payment Form Component
-  const StripePaymentForm = () => {
-    const stripe = useStripe();
-    const elements = useElements();
-    const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
-
-    const handlePayment = async () => {
-      if (!stripe || !elements) {
+      
+      if (response.ok) {
+        const data = await response.json();
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
         toast({
-          title: "Payment Error",
-          description: "Payment system is not ready. Please try again.",
-          variant: "destructive",
+          title: "Signed In Successfully",
+          description: "Welcome back! Proceeding with your investment.",
         });
-        return;
+        setCurrentStep('safe-review');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || errorData.error || 'Invalid credentials');
       }
-
-      // Validate cardholder name
-      if (!cardholderName.trim()) {
-        toast({
-          title: "Missing Information",
-          description: "Please enter the cardholder name",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setIsPaymentProcessing(true);
-
-      try {
-        const cardElement = elements.getElement(CardElement);
-        if (!cardElement) {
-          throw new Error('Card element not found');
-        }
-
-        // Create payment method with Stripe Elements
-        const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
-          type: 'card',
-          card: cardElement,
-          billing_details: {
-            name: cardholderName,
-            email: user?.email,
-          },
-        });
-
-        if (paymentMethodError) {
-          throw new Error(paymentMethodError.message);
-        }
-
-        // Confirm payment intent with the payment method
-        const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-          payment_method: paymentMethod.id,
-        });
-
-        if (confirmError) {
-          console.error('Stripe payment error:', confirmError);
-          throw new Error(confirmError.message);
-        }
-
-        if (paymentIntent && paymentIntent.status === 'succeeded') {
-          // Update investment status to 'paid' on backend
-          await apiRequest('PUT', `/api/investments/${createdInvestment?.id}/status`, {
-            status: 'paid'
-          });
-
-          toast({
-            title: "Payment Successful!",
-            description: `You have successfully invested $${selectedAmount} in ${campaign.title}`,
-          });
-          
-          // Invalidate queries to refresh data
-          queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-          
-          setCurrentStep('confirmation');
         } else {
           throw new Error('Payment not completed');
         }
@@ -525,38 +408,23 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       };
 
       // Call backend to create Budpay payment link
-      const response = await apiRequest('POST', '/api/create-budpay-payment', paymentData);
-      const result = await response.json();
-
-      if (result.success && result.paymentUrl) {
-        // Open Budpay payment page in a new window
-        const paymentWindow = window.open(
-          result.paymentUrl,
-          'budpay-payment',
-          'width=600,height=700,scrollbars=yes,resizable=yes'
-        );
-
-        // Poll for payment completion
-        const pollPayment = setInterval(async () => {
-          if (paymentWindow?.closed) {
-            clearInterval(pollPayment);
-            setIsProcessingNaira(false);
-            
-            // Check payment status
-            const statusResponse = await apiRequest('GET', `/api/check-payment-status/${paymentData.reference}`);
-            const statusResult = await statusResponse.json();
-            
-            if (statusResult.success && statusResult.status === 'success') {
-              toast({
-                title: "Payment Successful!",
-                description: `You have successfully invested ₦${ngnAmount?.toLocaleString()} in ${campaign.title}`,
-              });
-              
-              // Invalidate queries to refresh data
-              queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-              queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-              
-              setCurrentStep('confirmation');
+      const response = await apiRequest('POST', '/api/auth/login', {
+        email: authData.email,
+        password: authData.password
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+        toast({
+          title: "Signed In Successfully",
+          description: "Welcome back! Proceeding with your investment.",
+        });
+        setCurrentStep('safe-review');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || errorData.error || 'Invalid credentials');
+      }
             } else {
               toast({
                 title: "Payment Incomplete",
@@ -602,118 +470,23 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
       const investmentResponse = await createInvestmentMutation.mutateAsync(investmentData);
 
       // Process Stripe payment with required fields
-      const response = await apiRequest('POST', '/api/create-payment-intent', {
-        amount: selectedAmount.toString(),
-        investmentId: investmentResponse.investment.id
+      const response = await apiRequest('POST', '/api/auth/login', {
+        email: authData.email,
+        password: authData.password
       });
-
+      
       if (response.ok) {
-        const { clientSecret } = await response.json();
-        // Store client secret for inline payment processing
-        setClientSecret(clientSecret);
-        // Stay on payment step to show Stripe form
-        setShowStripeForm(true);
+        const data = await response.json();
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+        toast({
+          title: "Signed In Successfully",
+          description: "Welcome back! Proceeding with your investment.",
+        });
+        setCurrentStep('safe-review');
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create payment intent');
+        throw new Error(errorData.message || errorData.error || 'Invalid credentials');
       }
-      
-    } catch (error: any) {
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process USD payment",
-        variant: "destructive",
-      });
-      setIsProcessingPayment(false);
-    }
-  };
-
-  const handleNairaPayment = async () => {
-    console.log('Naira payment button clicked');
-    console.log('NGN Amount:', ngnAmount);
-    console.log('Selected Amount:', selectedAmount);
-    
-    if (!ngnAmount) {
-      toast({
-        title: "Currency Error",
-        description: "Naira amount not available",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!import.meta.env.VITE_BUDPAY_PUBLIC_KEY) {
-      toast({
-        title: "Configuration Error",
-        description: "Budpay public key not configured",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsProcessingNaira(true);
-    
-    toast({
-      title: "Initializing Payment",
-      description: "Setting up Budpay checkout...",
-    });
-
-    try {
-      // Get the actual investment amount
-      const actualAmount = selectedAmount || parseFloat(customAmount) || 0;
-      
-      // Create Budpay payment request
-      const paymentData = {
-        campaignId: campaign.id,
-        amount: actualAmount,
-        currency: 'NGN',
-        ngnAmount: ngnAmount,
-        paymentMethod: 'budpay',
-        investorDetails: {
-          ...investorDetails,
-          signature: signatureData,
-          agreedToTerms,
-          investmentDate: new Date().toISOString()
-        }
-      };
-
-      // Initialize Budpay payment
-      const budpayPaymentConfig = {
-        key: import.meta.env.VITE_BUDPAY_PUBLIC_KEY,  
-        email: user?.email || investorDetails.firstName + '@example.com',
-        amount: Math.round(ngnAmount), // Amount in Naira, Budpay handles kobo conversion
-        currency: 'NGN',
-        ref: `inv_${campaign.id}_${Date.now()}`,
-        callback: async (response: any) => {
-          console.log('Budpay callback response:', response);
-          try {
-            if (response.status === 'success') {
-              toast({
-                title: "Processing Payment",
-                description: "Verifying payment with backend...",
-              });
-
-              // Process the payment on the backend
-              const backendResponse = await apiRequest('POST', '/api/budpay-payment', {
-                ...paymentData,
-                budpayReference: response.reference,
-                budpayTransactionId: response.trans
-              });
-
-              const result = await backendResponse.json();
-              console.log('Backend verification result:', result);
-
-              if (result.success) {
-                toast({
-                  title: "Payment Successful!",
-                  description: `You have successfully invested ₦${ngnAmount.toLocaleString()} in ${campaign.title}`,
-                });
-                
-                // Invalidate queries to refresh data
-                queryClient.invalidateQueries({ queryKey: ['/api/investments'] });
-                queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
-                
-                setCurrentStep('confirmation');
               } else {
                 throw new Error(result.message || 'Payment verification failed');
               }
@@ -910,12 +683,18 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         password: authData.password
       });
       
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      toast({
-        title: "Signed In Successfully",
-        description: "Welcome back! Proceeding with your investment.",
-      });
-      setCurrentStep('safe-review');
+      if (response.ok) {
+        const data = await response.json();
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+        toast({
+          title: "Signed In Successfully",
+          description: "Welcome back! Proceeding with your investment.",
+        });
+        setCurrentStep('safe-review');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || errorData.error || 'Invalid credentials');
+      }
     } catch (error: any) {
       toast({
         title: "Sign In Failed",
@@ -939,28 +718,23 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
 
     setIsAuthenticating(true);
     try {
-      const response = await apiRequest('POST', '/api/auth/register', {
+      const response = await apiRequest('POST', '/api/auth/login', {
         email: authData.email,
-        password: authData.password,
-        firstName: authData.firstName,
-        lastName: authData.lastName,
-        userType: 'investor'
+        password: authData.password
       });
       
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      
-      // Set investor details with firstName and lastName from auth form
-      setInvestorDetails(prev => ({
-        ...prev,
-        firstName: authData.firstName,
-        lastName: authData.lastName
-      }));
-      
-      toast({
-        title: "Account Created Successfully",
-        description: "Welcome to Fundry! Proceeding with your investment.",
-      });
-      setCurrentStep('safe-review');
+      if (response.ok) {
+        const data = await response.json();
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+        toast({
+          title: "Signed In Successfully",
+          description: "Welcome back! Proceeding with your investment.",
+        });
+        setCurrentStep('safe-review');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || errorData.error || 'Invalid credentials');
+      }
     } catch (error: any) {
       toast({
         title: "Registration Failed",

@@ -529,10 +529,7 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
         throw new Error(errorData.message || errorData.error || 'Invalid credentials');
       }
     },
-      }
-      setIsAuthenticating(false);
-    }
-  };
+  });
 
   const handlePayment = async () => {
     setIsProcessingPayment(true);

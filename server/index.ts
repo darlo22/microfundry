@@ -96,30 +96,13 @@ app.use((req, res, next) => {
     // doesn't interfere with the other routes
     const isDev = process.env.NODE_ENV !== "production";
     
-    // Setup Vite development server for frontend
-    if (isDev) {
-      try {
-        const { setupVite } = await import('./vite');
-        await setupVite(app, server);
-        log('Vite development server setup complete', 'vite');
-      } catch (viteError) {
-        log(`Vite setup failed: ${viteError.message}`, 'vite');
-        // Fallback: serve the main index.html
-        app.use(express.static('.'));
-        app.get('*', (req, res) => {
-          if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
-            res.sendFile(path.join(process.cwd(), 'index.html'));
-          }
-        });
+    // Serve the React application
+    app.use(express.static('.'));
+    app.get('*', (req, res) => {
+      if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+        res.sendFile(path.join(process.cwd(), 'index.html'));
       }
-    } else {
-      app.use(express.static(path.join(process.cwd(), 'dist')));
-      app.get('*', (req, res) => {
-        if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
-          res.sendFile(path.join(process.cwd(), 'dist/index.html'));
-        }
-      });
-    }
+    });
 
 
     // ALWAYS serve the app on port 5000

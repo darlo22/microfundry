@@ -199,23 +199,6 @@ export default function InvestmentModal({ isOpen, onClose, campaign, initialAmou
                         '::placeholder': {
                           color: '#9CA3AF',
                         },
-  });
-  });
-  });
-                      },
-  });
-  });
-  });
-                      invalid: {
-                        color: '#EF4444',
-                      },
-  });
-  });
-  });
-                    },
-  });
-  });
-  });
                   }}
                 />
               </div>

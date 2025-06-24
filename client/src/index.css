@@ -145,3 +145,30 @@
 .bg-fundry-orange-gradient {
   background: linear-gradient(135deg, var(--fundry-orange) 0%, hsl(16, 100%, 70%) 100%);
 }
+
+/* Fix border artifacts and improve layout */
+@layer components {
+  .section-clean {
+    border: none !important;
+    outline: none !important;
+  }
+  
+  .content-wrapper {
+    border: none;
+    box-shadow: none;
+  }
+  
+  /* Remove default borders on images and content */
+  img, picture, figure {
+    border: none;
+    outline: none;
+  }
+  
+  /* Clean up any unwanted borders */
+  .hero-section,
+  .features-section,
+  .steps-section {
+    border: none;
+    box-shadow: none;
+  }
+}

@@ -1338,6 +1338,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const files = req.files as Express.Multer.File[];
       const updateData: any = { ...req.body };
 
+      // Validate funding goal maximum of $100,000
+      if (updateData.fundingGoal && parseFloat(updateData.fundingGoal) > 100000) {
+        return res.status(400).json({ message: 'Funding goal cannot exceed $100,000' });
+      }
+
       // Handle logo file
       const logoFile = files.find(file => file.fieldname === 'logo');
       if (logoFile) {
@@ -1491,6 +1496,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })(),
       };
 
+      // Validate funding goal maximum of $100,000
+      if (campaignData.fundingGoal && parseFloat(campaignData.fundingGoal) > 100000) {
+        return res.status(400).json({ message: 'Funding goal cannot exceed $100,000' });
+      }
+
       const validatedData = insertCampaignSchema.parse(campaignData);
       
       // Add founderId back after validation (schema omits it)
@@ -1603,6 +1613,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const campaign = await storage.getCampaign(parseInt(id));
       if (!campaign || campaign.founderId !== userId) {
         return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Validate funding goal maximum of $100,000
+      if (req.body.fundingGoal && parseFloat(req.body.fundingGoal) > 100000) {
+        return res.status(400).json({ message: 'Funding goal cannot exceed $100,000' });
       }
       
       const updatedCampaign = await storage.updateCampaign(parseInt(id), req.body);

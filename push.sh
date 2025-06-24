@@ -1,11 +1,11 @@
 #!/bin/bash
 
-echo "Pushing Fundry platform updates..."
+echo "Pushing complete Fundry platform with all investment functionalities..."
 
 git add .
 
-git commit -m "Deploy complete Fundry investment platform with all functionalities"
+git commit -m "Deploy full Fundry React platform - complete investment system"
 
 git push origin main
 
-echo "Push complete - Full Fundry platform deploying to microfundry.com"
+echo "Deployment complete - microfundry.com will show full platform"

@@ -114,25 +114,13 @@ process.on('unhandledRejection', (reason, promise) => {
     // doesn't interfere with the other routes
     const isDev = process.env.NODE_ENV !== "production";
     
-    if (isDev) {
-      try {
-        const { setupVite } = await import('./vite');
-        await setupVite(app, server);
-      } catch (error) {
-        console.log('Vite setup failed, using static files:', error.message);
-        app.use(express.static('.'));
-        app.get('*', (req, res) => {
-          if (!req.path.startsWith('/api')) {
-            res.sendFile(path.join(process.cwd(), 'index.html'));
-          }
-        });
+    // Serve static files and handle routing
+    app.use(express.static('.'));
+    app.get('*', (req, res) => {
+      if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+        res.sendFile(path.join(process.cwd(), 'index.html'));
       }
-    } else {
-      app.use(express.static(path.join(process.cwd(), 'dist')));
-      app.get('*', (req, res) => {
-        res.sendFile(path.join(process.cwd(), 'dist/index.html'));
-      });
-    }
+    });
 
     // ALWAYS serve the app on port 5000
     // this serves both the API and the client.

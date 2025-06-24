@@ -3,8 +3,6 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, requireAuth, hashPassword, comparePasswords } from "./auth";
-
-import { isAuthenticated } from "./replitAuth";
 import { db, pool } from "./db";
 import { 
   insertBusinessProfileSchema,
@@ -3828,7 +3826,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   // Payment Methods API endpoints
   app.get("/api/payment-methods", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.sendStatus(401);
     }
 
@@ -3842,7 +3840,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   app.post("/api/payment-methods", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.sendStatus(401);
     }
 
@@ -3875,7 +3873,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   app.delete("/api/payment-methods/:id", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.sendStatus(401);
     }
 
@@ -3891,7 +3889,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   // Notification Preferences API endpoints
   app.get("/api/notification-preferences", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.sendStatus(401);
     }
 
@@ -3905,7 +3903,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   app.put("/api/notification-preferences", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.sendStatus(401);
     }
 
@@ -4081,7 +4079,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   // Admin middleware - check admin access
   const requireAdmin = (req: any, res: any, next: any) => {
-    if (!req.isAuthenticated() || req.user.userType !== 'admin') {
+    if (!req.requireAuth() || req.user.userType !== 'admin') {
       return res.status(403).json({ message: "Admin access required" });
     }
     next();
@@ -4090,7 +4088,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Admin verification endpoint
   app.get("/api/admin/verify", async (req, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user) {
+      if (!req.requireAuth() || !req.user) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
@@ -5692,7 +5690,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     try {
       const { founderId } = req.params;
       
-      if (!req.isAuthenticated() || req.user.id !== founderId) {
+      if (!req.requireAuth() || req.user.id !== founderId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -5732,7 +5730,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     try {
       const { founderId } = req.params;
       
-      if (!req.isAuthenticated() || req.user.id !== founderId) {
+      if (!req.requireAuth() || req.user.id !== founderId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -5797,7 +5795,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
     try {
       const { founderId } = req.params;
       
-      if (!req.isAuthenticated() || req.user.id !== founderId) {
+      if (!req.requireAuth() || req.user.id !== founderId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -5838,7 +5836,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const { questionId } = req.params;
       const { answer } = req.body;
       
-      if (!req.isAuthenticated()) {
+      if (!req.requireAuth()) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -5915,7 +5913,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const { campaignId } = req.params;
       const { content } = req.body;
       
-      if (!req.isAuthenticated()) {
+      if (!req.requireAuth()) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -5987,7 +5985,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       const { campaignId } = req.params;
       const { question, isPublic = true } = req.body;
       
-      if (!req.isAuthenticated()) {
+      if (!req.requireAuth()) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -6189,7 +6187,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Get founder email settings
   app.get('/api/founder/email-settings', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+      if (!req.requireAuth() || req.user.userType !== 'founder') {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -6213,7 +6211,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Create or update founder email settings
   app.post('/api/founder/email-settings', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+      if (!req.requireAuth() || req.user.userType !== 'founder') {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -6268,7 +6266,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Get investor directory (Admin-curated + Platform users) with pagination
   app.get('/api/founder/investor-directory', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+      if (!req.requireAuth() || req.user.userType !== 'founder') {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -6417,7 +6415,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Get founder's custom investor lists
   app.get('/api/founder/investor-lists', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+      if (!req.requireAuth() || req.user.userType !== 'founder') {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -6437,7 +6435,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Create custom investor list
   app.post('/api/founder/investor-lists', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+      if (!req.requireAuth() || req.user.userType !== 'founder') {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -6467,7 +6465,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Get email templates
   app.get('/api/founder/email-templates', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+      if (!req.requireAuth() || req.user.userType !== 'founder') {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -6491,7 +6489,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Check daily email rate limit
   app.get('/api/founder/email-rate-limit', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+      if (!req.requireAuth() || req.user.userType !== 'founder') {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -6526,7 +6524,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Create and send email campaign
   app.post('/api/founder/email-campaigns', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+      if (!req.requireAuth() || req.user.userType !== 'founder') {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -6762,7 +6760,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Get founder's email campaigns and analytics
   app.get('/api/founder/email-campaigns', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+      if (!req.requireAuth() || req.user.userType !== 'founder') {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -6827,7 +6825,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   // Get detailed email campaign analytics
   app.get('/api/founder/email-campaigns/:campaignId/analytics', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || req.user.userType !== 'founder') {
+      if (!req.requireAuth() || req.user.userType !== 'founder') {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
@@ -7219,7 +7217,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   // Email Analytics API endpoints for Reports tab
   app.get("/api/admin/email-analytics", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.userType !== 'admin') {
+    if (!req.requireAuth() || req.user.userType !== 'admin') {
       return res.status(401).json({ message: "Admin access required" });
     }
 
@@ -7326,7 +7324,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   // Outreach Analytics API endpoint for dedicated report page
   app.get("/api/admin/outreach-analytics", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.userType !== 'admin') {
+    if (!req.requireAuth() || req.user.userType !== 'admin') {
       return res.status(401).json({ message: "Admin access required" });
     }
 
@@ -7434,7 +7432,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   // Campaign Outreach Details API endpoint
   app.get("/api/admin/campaign-outreach", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.userType !== 'admin') {
+    if (!req.requireAuth() || req.user.userType !== 'admin') {
       return res.status(401).json({ message: "Admin access required" });
     }
 
@@ -7534,7 +7532,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   app.get("/api/admin/founder-activity", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.userType !== 'admin') {
+    if (!req.requireAuth() || req.user.userType !== 'admin') {
       return res.status(401).json({ message: "Admin access required" });
     }
 
@@ -7574,7 +7572,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   app.get("/api/admin/top-campaigns", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.userType !== 'admin') {
+    if (!req.requireAuth() || req.user.userType !== 'admin') {
       return res.status(401).json({ message: "Admin access required" });
     }
 
@@ -7629,7 +7627,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   // Email Replies and Responses Management API endpoints
   app.get("/api/email-replies", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
@@ -7715,7 +7713,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   app.get("/api/email-replies/:id", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
@@ -7772,7 +7770,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   app.patch("/api/email-replies/:id", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
@@ -7808,7 +7806,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   app.post("/api/email-replies/:id/respond", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
@@ -7867,7 +7865,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   app.get("/api/email-replies/stats", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
@@ -7955,7 +7953,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   // Contact Management API endpoints
   app.get("/api/contacts", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
@@ -8011,7 +8009,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   });
 
   app.post("/api/contacts", async (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
@@ -8035,7 +8033,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
   // Email replies management endpoints
   app.get("/api/email-replies", safeHandler(async (req: any, res: any) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.status(401).json({ message: "Not authenticated" });
     }
 
@@ -8088,7 +8086,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   }));
 
   app.get("/api/email-replies/stats", safeHandler(async (req: any, res: any) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.status(401).json({ message: "Not authenticated" });
     }
 
@@ -8162,7 +8160,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   }));
 
   app.patch("/api/email-replies/:id", safeHandler(async (req: any, res: any) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.status(401).json({ message: "Not authenticated" });
     }
 
@@ -8193,7 +8191,7 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
   }));
 
   app.post("/api/email-replies/:id/respond", safeHandler(async (req: any, res: any) => {
-    if (!req.isAuthenticated()) {
+    if (!req.requireAuth()) {
       return res.status(401).json({ message: "Not authenticated" });
     }
 

@@ -6,7 +6,8 @@
   "scripts": {
     "dev:server": "tsx -r dotenv/config server/index.ts",
     "dev:client": "npm --prefix client run dev",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "build": "cd client && npm run build && cd .. && tsc -p server"
   },
   "dependencies": {
     "@budpay/react": "^1.0.13",

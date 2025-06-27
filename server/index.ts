@@ -1,12 +1,9 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("Loaded DATABASE_URL:", process.env.DATABASE_URL ?? "NOT SET");
-
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import path from "path";
-
 
 function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -25,28 +22,31 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Serve static files from uploads directory with proper MIME types
-app.use('/uploads', express.static('uploads', {
-  setHeaders: (res, path, stat) => {
-    // Set video MIME type for large files (likely videos)
-    if (stat.size > 1024 * 1024) {
-      res.setHeader('Content-Type', 'video/mp4');
-    } else if (path.endsWith('.mp4')) {
-      res.setHeader('Content-Type', 'video/mp4');
-    } else if (path.endsWith('.mov')) {
-      res.setHeader('Content-Type', 'video/quicktime');
-    } else if (path.endsWith('.webm')) {
-      res.setHeader('Content-Type', 'video/webm');
-    } else if (path.endsWith('.avi')) {
-      res.setHeader('Content-Type', 'video/x-msvideo');
-    }
-    // Enable range requests for video streaming
-    res.setHeader('Accept-Ranges', 'bytes');
-    res.setHeader('Cache-Control', 'public, max-age=3600');
-  }
-}));
+app.use(
+  "/uploads",
+  express.static("uploads", {
+    setHeaders: (res, path, stat) => {
+      // Set video MIME type for large files (likely videos)
+      if (stat.size > 1024 * 1024) {
+        res.setHeader("Content-Type", "video/mp4");
+      } else if (path.endsWith(".mp4")) {
+        res.setHeader("Content-Type", "video/mp4");
+      } else if (path.endsWith(".mov")) {
+        res.setHeader("Content-Type", "video/quicktime");
+      } else if (path.endsWith(".webm")) {
+        res.setHeader("Content-Type", "video/webm");
+      } else if (path.endsWith(".avi")) {
+        res.setHeader("Content-Type", "video/x-msvideo");
+      }
+      // Enable range requests for video streaming
+      res.setHeader("Accept-Ranges", "bytes");
+      res.setHeader("Cache-Control", "public, max-age=3600");
+    },
+  })
+);
 
 // Serve assets (logos, etc.)
-app.use('/assets', express.static('client/src/assets'));
+app.use("/assets", express.static("client/src/assets"));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -88,8 +88,8 @@ app.use((req, res, next) => {
       const status = err.status || err.statusCode || 500;
       const message = err.message || "Internal Server Error";
 
-      console.error('Server error:', err);
-      
+      console.error("Server error:", err);
+
       // Ensure response is sent if not already sent
       if (!res.headersSent) {
         res.status(status).json({ message });
@@ -101,34 +101,37 @@ app.use((req, res, next) => {
     // setting up all the other routes so the catch-all route
     // doesn't interfere with the other routes
     const isDev = process.env.NODE_ENV !== "production";
-    
+
     // Serve the React application
-    app.use(express.static('.'));
-    app.get('*', (req, res) => {
-      if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
-        res.sendFile(path.join(process.cwd(), 'index.html'));
+    app.use(express.static("."));
+    app.get("*", (req, res) => {
+      if (!req.path.startsWith("/api") && !req.path.startsWith("/uploads")) {
+        res.sendFile(path.join(process.cwd(), "index.html"));
       }
     });
-
 
     // ALWAYS serve the app on port 5000
     // this serves both the API and the client.
     // It is the only port that is not firewalled.
     const port = 5000;
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
-    });
+    server.listen(
+      {
+        port,
+        host: "0.0.0.0",
+        reusePort: true,
+      },
+      () => {
+        log(`serving on port ${port}`);
+      }
+    );
 
     // Handle server errors
-    server.on('error', (error) => {
-      console.error('Server error:', error);
+    server.on("error", (error) => {
+      console.error("Server error:", error);
     });
-
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error("Failed to start server:", error);
   }
 })();
+
+export default app;

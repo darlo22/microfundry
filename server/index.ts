@@ -15,18 +15,21 @@ function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
-// Remove problematic error handlers
-
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Request logger middleware
+app.use((req, _res, next) => {
+  log(`Incoming request: ${req.method} ${req.url}`);
+  next();
+});
 
 // Serve static files from uploads directory with proper MIME types
 app.use(
   "/uploads",
   express.static("uploads", {
     setHeaders: (res, path, stat) => {
-      // Set video MIME type for large files (likely videos)
       if (stat.size > 1024 * 1024) {
         res.setHeader("Content-Type", "video/mp4");
       } else if (path.endsWith(".mp4")) {
@@ -38,7 +41,6 @@ app.use(
       } else if (path.endsWith(".avi")) {
         res.setHeader("Content-Type", "video/x-msvideo");
       }
-      // Enable range requests for video streaming
       res.setHeader("Accept-Ranges", "bytes");
       res.setHeader("Cache-Control", "public, max-age=3600");
     },
@@ -48,61 +50,46 @@ app.use(
 // Serve assets (logos, etc.)
 app.use("/assets", express.static("client/src/assets"));
 
+// JSON response logger for /api routes
 app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  if (req.path.startsWith("/api")) {
+    const start = Date.now();
+    let capturedJsonResponse: Record<string, any> | undefined;
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
+    const originalJson = res.json.bind(res);
+    res.json = (body) => {
+      capturedJsonResponse = body;
+      return originalJson(body);
+    };
 
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+    res.on("finish", () => {
+      const duration = Date.now() - start;
+      let logLine = `${req.method} ${req.path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        const jsonStr = JSON.stringify(capturedJsonResponse);
+        logLine += ` :: ${jsonStr.length > 80 ? jsonStr.slice(0, 79) + "…" : jsonStr}`;
       }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
       log(logLine);
-    }
-  });
-
+    });
+  }
   next();
 });
-
-// Clean error handling
 
 (async () => {
   try {
     const server = await registerRoutes(app);
 
+    // Error handler middleware
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;
       const message = err.message || "Internal Server Error";
-
       console.error("Server error:", err);
-
-      // Ensure response is sent if not already sent
       if (!res.headersSent) {
         res.status(status).json({ message });
       }
-      // Don't re-throw the error to prevent crashes
     });
 
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
-    const isDev = process.env.NODE_ENV !== "production";
-
-    // Serve the React application
+    // Serve React app for non-api and non-uploads requests
     app.use(express.static("."));
     app.get("*", (req, res) => {
       if (!req.path.startsWith("/api") && !req.path.startsWith("/uploads")) {
@@ -110,10 +97,8 @@ app.use((req, res, next) => {
       }
     });
 
-    // ALWAYS serve the app on port 5000
-    // this serves both the API and the client.
-    // It is the only port that is not firewalled.
-    const port = 5000;
+    const port = process.env.PORT ? Number(process.env.PORT) : 5000;
+
     server.listen(
       {
         port,
@@ -125,7 +110,6 @@ app.use((req, res, next) => {
       }
     );
 
-    // Handle server errors
     server.on("error", (error) => {
       console.error("Server error:", error);
     });

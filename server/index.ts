@@ -1,6 +1,12 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+console.log("Loaded DATABASE_URL:", process.env.DATABASE_URL ?? "NOT SET");
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import path from "path";
+
 
 function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {

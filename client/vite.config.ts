@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
@@ -11,11 +11,11 @@ export default defineConfig({
     },
   },
   css: {
-    postcss: './postcss.config.js'
+    postcss: "./postcss.config.js",
   },
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
+    outDir: "dist",
+    assetsDir: "assets",
     rollupOptions: {
       output: {
         manualChunks: undefined,
@@ -24,6 +24,9 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    host: '0.0.0.0'
-  }
-})
+    host: "0.0.0.0",
+    proxy: {
+      "/api": "http://127.0.0.1:5000",
+    },
+  },
+});

@@ -30,17 +30,20 @@ import {
   type InsertNotificationPreferences,
   type KycVerification,
   type InsertKycVerification,
-} from "@shared/schema";
-import { db } from "./db";
+} from "@shared/schema.js";
+import { db } from "./db.js";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 // Helper function to wrap database operations with error handling
-const safeDbOperation = async <T>(operation: () => Promise<T>, fallback?: T): Promise<T | undefined> => {
+const safeDbOperation = async <T>(
+  operation: () => Promise<T>,
+  fallback?: T
+): Promise<T | undefined> => {
   try {
     return await operation();
   } catch (error) {
-    console.error('Database operation failed:', error);
+    console.error("Database operation failed:", error);
     if (fallback !== undefined) {
       return fallback;
     }
@@ -57,17 +60,28 @@ export interface IStorage {
   updateUser(id: string, updates: Partial<UpsertUser>): Promise<User>;
 
   // Business profile operations
-  createBusinessProfile(profile: InsertBusinessProfile): Promise<BusinessProfile>;
+  createBusinessProfile(
+    profile: InsertBusinessProfile
+  ): Promise<BusinessProfile>;
   getBusinessProfile(userId: string): Promise<BusinessProfile | undefined>;
-  updateBusinessProfile(userId: string, updates: Partial<InsertBusinessProfile>): Promise<BusinessProfile>;
+  updateBusinessProfile(
+    userId: string,
+    updates: Partial<InsertBusinessProfile>
+  ): Promise<BusinessProfile>;
 
   // Campaign operations
-  createCampaign(campaign: InsertCampaign, privateLink: string): Promise<Campaign>;
+  createCampaign(
+    campaign: InsertCampaign,
+    privateLink: string
+  ): Promise<Campaign>;
   getCampaign(id: number): Promise<Campaign | undefined>;
   getCampaignByPrivateLink(privateLink: string): Promise<Campaign | undefined>;
   getCampaignsByFounder(founderId: string): Promise<Campaign[]>;
   getAllActiveCampaigns(): Promise<Campaign[]>;
-  updateCampaign(id: number, updates: Partial<InsertCampaign>): Promise<Campaign>;
+  updateCampaign(
+    id: number,
+    updates: Partial<InsertCampaign>
+  ): Promise<Campaign>;
   getCampaignStats(campaignId: number): Promise<{
     totalRaised: string;
     investorCount: number;
@@ -79,13 +93,19 @@ export interface IStorage {
   getInvestment(id: number): Promise<Investment | undefined>;
   getInvestmentsByInvestor(investorId: string): Promise<Investment[]>;
   getInvestmentsByCampaign(campaignId: number): Promise<Investment[]>;
-  updateInvestment(id: number, updates: Partial<InsertInvestment>): Promise<Investment>;
+  updateInvestment(
+    id: number,
+    updates: Partial<InsertInvestment>
+  ): Promise<Investment>;
   deleteInvestment(id: number): Promise<void>;
 
   // SAFE agreement operations
   createSafeAgreement(agreement: InsertSafeAgreement): Promise<SafeAgreement>;
   getSafeAgreement(investmentId: number): Promise<SafeAgreement | undefined>;
-  updateSafeAgreement(id: number, updates: Partial<InsertSafeAgreement>): Promise<SafeAgreement>;
+  updateSafeAgreement(
+    id: number,
+    updates: Partial<InsertSafeAgreement>
+  ): Promise<SafeAgreement>;
 
   // Campaign update operations
   createCampaignUpdate(update: InsertCampaignUpdate): Promise<CampaignUpdate>;
@@ -116,13 +136,21 @@ export interface IStorage {
 
   // KYC operations
   getKycVerification(userId: string): Promise<KycVerification | undefined>;
-  createKycVerification(kycData: InsertKycVerification): Promise<KycVerification>;
-  updateKycVerification(userId: string, kycData: Partial<InsertKycVerification>): Promise<KycVerification | undefined>;
-  updateUserKycStatus(userId: string, kycData: {
-    status: string;
-    submittedAt: Date;
-    data: any;
-  }): Promise<void>;
+  createKycVerification(
+    kycData: InsertKycVerification
+  ): Promise<KycVerification>;
+  updateKycVerification(
+    userId: string,
+    kycData: Partial<InsertKycVerification>
+  ): Promise<KycVerification | undefined>;
+  updateUserKycStatus(
+    userId: string,
+    kycData: {
+      status: string;
+      submittedAt: Date;
+      data: any;
+    }
+  ): Promise<void>;
 
   // Account management operations
   deactivateUser(userId: string, reason: string): Promise<void>;
@@ -133,8 +161,13 @@ export interface IStorage {
   removePaymentMethod(paymentMethodId: number, userId: string): Promise<void>;
 
   // Notification preferences operations
-  getNotificationPreferences(userId: string): Promise<NotificationPreferences | undefined>;
-  updateNotificationPreferences(userId: string, preferences: Partial<InsertNotificationPreferences>): Promise<NotificationPreferences>;
+  getNotificationPreferences(
+    userId: string
+  ): Promise<NotificationPreferences | undefined>;
+  updateNotificationPreferences(
+    userId: string,
+    preferences: Partial<InsertNotificationPreferences>
+  ): Promise<NotificationPreferences>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -148,7 +181,10 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     return safeDbOperation(async () => {
-      const [user] = await db.select().from(users).where(eq(users.email, email));
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email));
       return user;
     });
   }
@@ -199,7 +235,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Business profile operations
-  async createBusinessProfile(profile: InsertBusinessProfile): Promise<BusinessProfile> {
+  async createBusinessProfile(
+    profile: InsertBusinessProfile
+  ): Promise<BusinessProfile> {
     return safeDbOperation(async () => {
       const [businessProfile] = await db
         .insert(businessProfiles)
@@ -209,7 +247,9 @@ export class DatabaseStorage implements IStorage {
     }) as Promise<BusinessProfile>;
   }
 
-  async getBusinessProfile(userId: string): Promise<BusinessProfile | undefined> {
+  async getBusinessProfile(
+    userId: string
+  ): Promise<BusinessProfile | undefined> {
     return safeDbOperation(async () => {
       const [profile] = await db
         .select()
@@ -219,7 +259,10 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  async updateBusinessProfile(userId: string, updates: Partial<InsertBusinessProfile>): Promise<BusinessProfile> {
+  async updateBusinessProfile(
+    userId: string,
+    updates: Partial<InsertBusinessProfile>
+  ): Promise<BusinessProfile> {
     return safeDbOperation(async () => {
       const [profile] = await db
         .update(businessProfiles)
@@ -231,7 +274,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Campaign operations
-  async createCampaign(campaign: InsertCampaign, privateLink: string): Promise<Campaign> {
+  async createCampaign(
+    campaign: InsertCampaign,
+    privateLink: string
+  ): Promise<Campaign> {
     return safeDbOperation(async () => {
       const [newCampaign] = await db
         .insert(campaigns)
@@ -251,7 +297,9 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  async getCampaignByPrivateLink(privateLink: string): Promise<Campaign | undefined> {
+  async getCampaignByPrivateLink(
+    privateLink: string
+  ): Promise<Campaign | undefined> {
     const [campaign] = await db
       .select()
       .from(campaigns)
@@ -294,7 +342,7 @@ export class DatabaseStorage implements IStorage {
                  AND payment_status = 'completed'), 0
               ) / CAST(campaigns.funding_goal AS NUMERIC)) * 100, 1)
             ELSE 0 
-          END`
+          END`,
         })
         .from(campaigns)
         .where(eq(campaigns.founderId, founderId))
@@ -312,7 +360,10 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(campaigns.createdAt));
   }
 
-  async updateCampaign(id: number, updates: Partial<InsertCampaign>): Promise<Campaign> {
+  async updateCampaign(
+    id: number,
+    updates: Partial<InsertCampaign>
+  ): Promise<Campaign> {
     const [campaign] = await db
       .update(campaigns)
       .set({ ...updates, updatedAt: new Date() })
@@ -344,8 +395,11 @@ export class DatabaseStorage implements IStorage {
       .from(campaigns)
       .where(eq(campaigns.id, campaignId));
 
-    const progressPercent = campaign?.fundingGoal 
-      ? Math.round((parseFloat(stats.totalRaised) / parseFloat(campaign.fundingGoal)) * 100)
+    const progressPercent = campaign?.fundingGoal
+      ? Math.round(
+          (parseFloat(stats.totalRaised) / parseFloat(campaign.fundingGoal)) *
+            100
+        )
       : 0;
 
     return {
@@ -379,14 +433,18 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(campaigns, eq(investments.campaignId, campaigns.id))
       .where(eq(investments.investorId, investorId))
       .orderBy(desc(investments.createdAt));
-    
-    return result.map(row => ({
+
+    return result.map((row) => ({
       ...row.investments,
-      campaign: row.campaigns
+      campaign: row.campaigns,
     }));
   }
 
-  async getInvestmentsByCampaign(campaignId: number): Promise<(Investment & { investor: { firstName: string; lastName: string; email: string } })[]> {
+  async getInvestmentsByCampaign(campaignId: number): Promise<
+    (Investment & {
+      investor: { firstName: string; lastName: string; email: string };
+    })[]
+  > {
     return await db
       .select({
         id: investments.id,
@@ -408,7 +466,7 @@ export class DatabaseStorage implements IStorage {
           firstName: users.firstName,
           lastName: users.lastName,
           email: users.email,
-        }
+        },
       })
       .from(investments)
       .innerJoin(users, eq(investments.investorId, users.id))
@@ -416,7 +474,10 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(investments.createdAt));
   }
 
-  async updateInvestment(id: number, updates: Partial<InsertInvestment>): Promise<Investment> {
+  async updateInvestment(
+    id: number,
+    updates: Partial<InsertInvestment>
+  ): Promise<Investment> {
     const [investment] = await db
       .update(investments)
       .set({ ...updates, updatedAt: new Date() })
@@ -427,18 +488,16 @@ export class DatabaseStorage implements IStorage {
 
   async deleteInvestment(id: number): Promise<void> {
     // First delete any associated SAFE agreements
-    await db
-      .delete(safeAgreements)
-      .where(eq(safeAgreements.investmentId, id));
-    
+    await db.delete(safeAgreements).where(eq(safeAgreements.investmentId, id));
+
     // Then delete the investment
-    await db
-      .delete(investments)
-      .where(eq(investments.id, id));
+    await db.delete(investments).where(eq(investments.id, id));
   }
 
   // SAFE agreement operations
-  async createSafeAgreement(agreement: InsertSafeAgreement): Promise<SafeAgreement> {
+  async createSafeAgreement(
+    agreement: InsertSafeAgreement
+  ): Promise<SafeAgreement> {
     const [safeAgreement] = await db
       .insert(safeAgreements)
       .values(agreement)
@@ -446,7 +505,9 @@ export class DatabaseStorage implements IStorage {
     return safeAgreement;
   }
 
-  async getSafeAgreement(investmentId: number): Promise<SafeAgreement | undefined> {
+  async getSafeAgreement(
+    investmentId: number
+  ): Promise<SafeAgreement | undefined> {
     const [agreement] = await db
       .select()
       .from(safeAgreements)
@@ -454,7 +515,10 @@ export class DatabaseStorage implements IStorage {
     return agreement;
   }
 
-  async updateSafeAgreement(id: number, updates: Partial<InsertSafeAgreement>): Promise<SafeAgreement> {
+  async updateSafeAgreement(
+    id: number,
+    updates: Partial<InsertSafeAgreement>
+  ): Promise<SafeAgreement> {
     const [agreement] = await db
       .update(safeAgreements)
       .set({ ...updates, updatedAt: new Date() })
@@ -464,12 +528,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Campaign update operations
-  async createCampaignUpdate(update: InsertCampaignUpdate): Promise<CampaignUpdate> {
+  async createCampaignUpdate(
+    update: InsertCampaignUpdate
+  ): Promise<CampaignUpdate> {
     const [campaignUpdate] = await db
       .insert(campaignUpdates)
       .values({
         ...update,
-        attachmentUrls: update.attachmentUrls || null
+        attachmentUrls: update.attachmentUrls || null,
       })
       .returning();
     return campaignUpdate;
@@ -485,10 +551,7 @@ export class DatabaseStorage implements IStorage {
 
   // File upload operations
   async createFileUpload(file: InsertFileUpload): Promise<FileUpload> {
-    const [fileUpload] = await db
-      .insert(fileUploads)
-      .values(file)
-      .returning();
+    const [fileUpload] = await db.insert(fileUploads).values(file).returning();
     return fileUpload;
   }
 
@@ -516,52 +579,77 @@ export class DatabaseStorage implements IStorage {
     conversionRate: number;
   }> {
     console.log(`DEBUG: getFounderStats called with founderId: ${founderId}`);
-    
+
     // Get founder's campaigns
     const founderCampaigns = await db
       .select()
       .from(campaigns)
       .where(eq(campaigns.founderId, founderId));
 
-    console.log(`DEBUG: Found ${founderCampaigns.length} campaigns for founder ${founderId}`);
-    console.log(`DEBUG: Campaign IDs:`, founderCampaigns.map(c => c.id));
+    console.log(
+      `DEBUG: Found ${founderCampaigns.length} campaigns for founder ${founderId}`
+    );
+    console.log(
+      `DEBUG: Campaign IDs:`,
+      founderCampaigns.map((c) => c.id)
+    );
 
     // Get investments for these campaigns
-    const campaignIds = founderCampaigns.map(c => c.id);
-    const campaignInvestments = campaignIds.length > 0 
-      ? await db
-          .select()
-          .from(investments)
-          .where(sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`)
-      : [];
+    const campaignIds = founderCampaigns.map((c) => c.id);
+    const campaignInvestments =
+      campaignIds.length > 0
+        ? await db
+            .select()
+            .from(investments)
+            .where(
+              sql`${investments.campaignId} IN (${sql.join(
+                campaignIds.map((id) => sql`${id}`),
+                sql`, `
+              )})`
+            )
+        : [];
 
     console.log(`DEBUG: Found ${campaignInvestments.length} total investments`);
-    console.log(`DEBUG: Investment details:`, campaignInvestments.map(inv => ({
-      id: inv.id,
-      campaignId: inv.campaignId,
-      amount: inv.amount,
-      paymentStatus: inv.paymentStatus,
-      status: inv.status
-    })));
+    console.log(
+      `DEBUG: Investment details:`,
+      campaignInvestments.map((inv) => ({
+        id: inv.id,
+        campaignId: inv.campaignId,
+        amount: inv.amount,
+        paymentStatus: inv.paymentStatus,
+        status: inv.status,
+      }))
+    );
 
-    const completedInvestments = campaignInvestments.filter(inv => inv.paymentStatus === 'completed');
-    console.log(`DEBUG: Found ${completedInvestments.length} completed investments`);
+    const completedInvestments = campaignInvestments.filter(
+      (inv) => inv.paymentStatus === "completed"
+    );
+    console.log(
+      `DEBUG: Found ${completedInvestments.length} completed investments`
+    );
 
-    const totalRaised = completedInvestments
-      .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+    const totalRaised = completedInvestments.reduce(
+      (sum, inv) => sum + parseFloat(inv.amount),
+      0
+    );
 
     console.log(`DEBUG: Total raised calculated: ${totalRaised}`);
 
-    const activeCampaigns = founderCampaigns.filter(c => c.status === 'active').length;
-    const validInvestments = campaignInvestments.filter(inv => 
-      inv.paymentStatus === 'completed'
+    const activeCampaigns = founderCampaigns.filter(
+      (c) => c.status === "active"
+    ).length;
+    const validInvestments = campaignInvestments.filter(
+      (inv) => inv.paymentStatus === "completed"
     );
-    const totalInvestors = new Set(validInvestments.map(inv => inv.investorId)).size;
-    
+    const totalInvestors = new Set(
+      validInvestments.map((inv) => inv.investorId)
+    ).size;
+
     // Calculate conversion rate based on campaigns and investments
-    const conversionRate = founderCampaigns.length > 0 
-      ? Math.round((validInvestments.length / founderCampaigns.length) * 100) 
-      : 0;
+    const conversionRate =
+      founderCampaigns.length > 0
+        ? Math.round((validInvestments.length / founderCampaigns.length) * 100)
+        : 0;
 
     const result = {
       totalRaised: totalRaised.toString(),
@@ -585,16 +673,18 @@ export class DatabaseStorage implements IStorage {
       .where(eq(investments.investorId, investorId));
 
     // Only count completed payments for total invested amount
-    const completedInvestments = investorInvestments.filter(inv => 
-      inv.paymentStatus === 'completed'
+    const completedInvestments = investorInvestments.filter(
+      (inv) => inv.paymentStatus === "completed"
     );
-    
-    const totalInvested = completedInvestments
-      .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+
+    const totalInvested = completedInvestments.reduce(
+      (sum, inv) => sum + parseFloat(inv.amount),
+      0
+    );
 
     // Active investments are those with completed payments
     const activeInvestments = completedInvestments.length;
-    
+
     const estimatedValue = (totalInvested * 1.164).toFixed(2); // Growth calculation
 
     return {
@@ -605,71 +695,105 @@ export class DatabaseStorage implements IStorage {
   }
 
   // KYC operations
-  async getKycVerification(userId: string): Promise<KycVerification | undefined> {
+  async getKycVerification(
+    userId: string
+  ): Promise<KycVerification | undefined> {
     try {
-      const [kyc] = await db.select().from(kycVerifications).where(eq(kycVerifications.userId, userId));
+      const [kyc] = await db
+        .select()
+        .from(kycVerifications)
+        .where(eq(kycVerifications.userId, userId));
       return kyc;
     } catch (error) {
-      console.error('Failed to get KYC verification:', error);
+      console.error("Failed to get KYC verification:", error);
       return undefined;
     }
   }
 
-  async createKycVerification(kycData: InsertKycVerification): Promise<KycVerification> {
+  async createKycVerification(
+    kycData: InsertKycVerification
+  ): Promise<KycVerification> {
     try {
-      console.log('Creating KYC verification with data:', kycData);
-      const [kyc] = await db.insert(kycVerifications).values(kycData).returning();
-      console.log('KYC verification created successfully:', kyc);
+      console.log("Creating KYC verification with data:", kycData);
+      const [kyc] = await db
+        .insert(kycVerifications)
+        .values(kycData)
+        .returning();
+      console.log("KYC verification created successfully:", kyc);
       return kyc;
     } catch (error) {
-      console.error('Failed to create KYC verification:', error);
+      console.error("Failed to create KYC verification:", error);
       throw error;
     }
   }
 
-  async updateKycVerification(userId: string, kycData: Partial<InsertKycVerification>): Promise<KycVerification | undefined> {
+  async updateKycVerification(
+    userId: string,
+    kycData: Partial<InsertKycVerification>
+  ): Promise<KycVerification | undefined> {
     try {
-      console.log('Updating KYC verification for user:', userId, 'with data:', kycData);
+      console.log(
+        "Updating KYC verification for user:",
+        userId,
+        "with data:",
+        kycData
+      );
       const [kyc] = await db
         .update(kycVerifications)
         .set({ ...kycData, updatedAt: new Date() })
         .where(eq(kycVerifications.userId, userId))
         .returning();
-      console.log('KYC verification updated successfully:', kyc);
+      console.log("KYC verification updated successfully:", kyc);
       return kyc;
     } catch (error) {
-      console.error('Failed to update KYC verification:', error);
+      console.error("Failed to update KYC verification:", error);
       throw error;
     }
   }
 
-  async updateUserKycStatus(userId: string, kycData: {
-    status: string;
-    submittedAt: Date;
-    data: any;
-  }): Promise<void> {
+  async updateUserKycStatus(
+    userId: string,
+    kycData: {
+      status: string;
+      submittedAt: Date;
+      data: any;
+    }
+  ): Promise<void> {
     try {
-      console.log('Updating KYC status for user:', userId, 'with data:', kycData);
-      
+      console.log(
+        "Updating KYC status for user:",
+        userId,
+        "with data:",
+        kycData
+      );
+
       // Check if KYC verification record exists
       const existingKyc = await this.getKycVerification(userId);
-      
+
       // Properly handle array data for JSONB fields
-      const governmentIdFiles = Array.isArray(kycData.data.governmentId) 
-        ? kycData.data.governmentId 
-        : (kycData.data.governmentId ? [kycData.data.governmentId] : []);
-      
-      const utilityBillFiles = Array.isArray(kycData.data.utilityBill) 
-        ? kycData.data.utilityBill 
-        : (kycData.data.utilityBill ? [kycData.data.utilityBill] : []);
-      
-      const otherDocumentFiles = Array.isArray(kycData.data.otherDocuments) 
-        ? kycData.data.otherDocuments 
-        : (kycData.data.otherDocuments ? [kycData.data.otherDocuments] : []);
+      const governmentIdFiles = Array.isArray(kycData.data.governmentId)
+        ? kycData.data.governmentId
+        : kycData.data.governmentId
+          ? [kycData.data.governmentId]
+          : [];
+
+      const utilityBillFiles = Array.isArray(kycData.data.utilityBill)
+        ? kycData.data.utilityBill
+        : kycData.data.utilityBill
+          ? [kycData.data.utilityBill]
+          : [];
+
+      const otherDocumentFiles = Array.isArray(kycData.data.otherDocuments)
+        ? kycData.data.otherDocuments
+        : kycData.data.otherDocuments
+          ? [kycData.data.otherDocuments]
+          : [];
 
       const kycRecord = {
         status: kycData.status,
-        dateOfBirth: kycData.data.dateOfBirth ? new Date(kycData.data.dateOfBirth) : null,
+        dateOfBirth: kycData.data.dateOfBirth
+          ? new Date(kycData.data.dateOfBirth)
+          : null,
         address: kycData.data.address || null,
         city: kycData.data.city || null,
         state: kycData.data.state || null,
@@ -683,21 +807,21 @@ export class DatabaseStorage implements IStorage {
         otherDocumentFiles: otherDocumentFiles,
         submittedAt: kycData.submittedAt,
       };
-      
+
       if (existingKyc) {
-        console.log('Updating existing KYC record');
+        console.log("Updating existing KYC record");
         await this.updateKycVerification(userId, kycRecord);
       } else {
-        console.log('Creating new KYC record');
+        console.log("Creating new KYC record");
         await this.createKycVerification({
           userId,
-          ...kycRecord
+          ...kycRecord,
         });
       }
-      
-      console.log('KYC status update completed successfully');
+
+      console.log("KYC status update completed successfully");
     } catch (error) {
-      console.error('Error updating KYC status:', error);
+      console.error("Error updating KYC status:", error);
       throw error;
     }
   }
@@ -712,7 +836,10 @@ export class DatabaseStorage implements IStorage {
     return result.rows;
   }
 
-  async markNotificationAsRead(notificationId: number, userId: string): Promise<void> {
+  async markNotificationAsRead(
+    notificationId: number,
+    userId: string
+  ): Promise<void> {
     await db.execute(sql`
       UPDATE notifications 
       SET is_read = true 
@@ -734,25 +861,34 @@ export class DatabaseStorage implements IStorage {
       FROM notifications 
       WHERE user_id = ${userId} AND is_read = false
     `);
-    return parseInt(String(result.rows[0]?.count || '0'));
+    return parseInt(String(result.rows[0]?.count || "0"));
   }
 
-  async createNotification(userId: string, type: string, title: string, message: string, metadata?: string): Promise<any> {
+  async createNotification(
+    userId: string,
+    type: string,
+    title: string,
+    message: string,
+    metadata?: string
+  ): Promise<any> {
     const result = await db.execute(sql`
       INSERT INTO notifications (user_id, type, title, message, metadata, is_read, created_at)
-      VALUES (${userId}, ${type}, ${title}, ${message}, ${metadata || ''}, false, NOW())
+      VALUES (${userId}, ${type}, ${title}, ${message}, ${metadata || ""}, false, NOW())
       RETURNING *
     `);
     return result.rows[0];
   }
 
   // Security methods
-  async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
+  async updateUserPassword(
+    userId: string,
+    hashedPassword: string
+  ): Promise<void> {
     await db
       .update(users)
-      .set({ 
+      .set({
         password: hashedPassword,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
   }
@@ -760,20 +896,23 @@ export class DatabaseStorage implements IStorage {
   async updateUser2FA(userId: string, enabled: boolean): Promise<void> {
     await db
       .update(users)
-      .set({ 
+      .set({
         twoFactorEnabled: enabled,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
   }
 
   // Enhanced 2FA methods
-  async updateUser2FASettings(userId: string, settings: {
-    twoFactorEnabled: boolean;
-    twoFactorMethod: 'app' | 'email' | null;
-    twoFactorSecret: string | null;
-    twoFactorBackupCodes: string[] | null;
-  }): Promise<void> {
+  async updateUser2FASettings(
+    userId: string,
+    settings: {
+      twoFactorEnabled: boolean;
+      twoFactorMethod: "app" | "email" | null;
+      twoFactorSecret: string | null;
+      twoFactorBackupCodes: string[] | null;
+    }
+  ): Promise<void> {
     await db
       .update(users)
       .set({
@@ -781,17 +920,20 @@ export class DatabaseStorage implements IStorage {
         twoFactorMethod: settings.twoFactorMethod as any,
         twoFactorSecret: settings.twoFactorSecret,
         twoFactorBackupCodes: settings.twoFactorBackupCodes,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
   }
 
-  async updateUserBackupCodes(userId: string, backupCodes: string[]): Promise<void> {
+  async updateUserBackupCodes(
+    userId: string,
+    backupCodes: string[]
+  ): Promise<void> {
     await db
       .update(users)
       .set({
         twoFactorBackupCodes: backupCodes,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
   }
@@ -812,7 +954,11 @@ export class DatabaseStorage implements IStorage {
     return result.rows[0];
   }
 
-  async getValidOTPCode(userId: string, code: string, type: string): Promise<any> {
+  async getValidOTPCode(
+    userId: string,
+    code: string,
+    type: string
+  ): Promise<any> {
     const result = await db.execute(sql`
       SELECT * FROM otp_codes 
       WHERE user_id = ${userId} 
@@ -858,52 +1004,80 @@ export class DatabaseStorage implements IStorage {
   // Payment methods operations
   async getPaymentMethods(userId: string): Promise<PaymentMethod[]> {
     return safeDbOperation(async () => {
-      const methods = await db.select().from(paymentMethods).where(eq(paymentMethods.userId, userId));
+      const methods = await db
+        .select()
+        .from(paymentMethods)
+        .where(eq(paymentMethods.userId, userId));
       return methods;
     }, []) as Promise<PaymentMethod[]>;
   }
 
-  async addPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod> {
+  async addPaymentMethod(
+    paymentMethod: InsertPaymentMethod
+  ): Promise<PaymentMethod> {
     return safeDbOperation(async () => {
-      const [method] = await db.insert(paymentMethods).values(paymentMethod).returning();
+      const [method] = await db
+        .insert(paymentMethods)
+        .values(paymentMethod)
+        .returning();
       return method;
     }) as Promise<PaymentMethod>;
   }
 
-  async removePaymentMethod(paymentMethodId: number, userId: string): Promise<void> {
+  async removePaymentMethod(
+    paymentMethodId: number,
+    userId: string
+  ): Promise<void> {
     await safeDbOperation(async () => {
-      await db.delete(paymentMethods).where(
-        and(eq(paymentMethods.id, paymentMethodId), eq(paymentMethods.userId, userId))
-      );
+      await db
+        .delete(paymentMethods)
+        .where(
+          and(
+            eq(paymentMethods.id, paymentMethodId),
+            eq(paymentMethods.userId, userId)
+          )
+        );
     });
   }
 
   // Notification preferences operations
-  async getNotificationPreferences(userId: string): Promise<NotificationPreferences | undefined> {
+  async getNotificationPreferences(
+    userId: string
+  ): Promise<NotificationPreferences | undefined> {
     return safeDbOperation(async () => {
-      const [preferences] = await db.select().from(notificationPreferences).where(eq(notificationPreferences.userId, userId));
-      
+      const [preferences] = await db
+        .select()
+        .from(notificationPreferences)
+        .where(eq(notificationPreferences.userId, userId));
+
       // If no preferences exist, create default ones
       if (!preferences) {
-        const [newPreferences] = await db.insert(notificationPreferences).values({
-          userId: userId,
-          emailInvestmentUpdates: true,
-          emailNewOpportunities: true,
-          emailSecurityAlerts: true,
-          emailMarketingCommunications: false,
-          pushCampaignUpdates: true,
-          pushInvestmentReminders: false,
-        }).returning();
+        const [newPreferences] = await db
+          .insert(notificationPreferences)
+          .values({
+            userId: userId,
+            emailInvestmentUpdates: true,
+            emailNewOpportunities: true,
+            emailSecurityAlerts: true,
+            emailMarketingCommunications: false,
+            pushCampaignUpdates: true,
+            pushInvestmentReminders: false,
+          })
+          .returning();
         return newPreferences;
       }
-      
+
       return preferences;
     });
   }
 
-  async updateNotificationPreferences(userId: string, preferences: Partial<InsertNotificationPreferences>): Promise<NotificationPreferences> {
+  async updateNotificationPreferences(
+    userId: string,
+    preferences: Partial<InsertNotificationPreferences>
+  ): Promise<NotificationPreferences> {
     return safeDbOperation(async () => {
-      const [updated] = await db.update(notificationPreferences)
+      const [updated] = await db
+        .update(notificationPreferences)
         .set({ ...preferences, updatedAt: new Date() })
         .where(eq(notificationPreferences.userId, userId))
         .returning();
@@ -912,7 +1086,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Analytics methods
-  async getInvestmentTrends(founderId: string): Promise<Array<{ date: string; amount: number; investors: number }>> {
+  async getInvestmentTrends(
+    founderId: string
+  ): Promise<Array<{ date: string; amount: number; investors: number }>> {
     return safeDbOperation(async () => {
       // Get founder's campaigns
       const founderCampaigns = await db
@@ -920,13 +1096,13 @@ export class DatabaseStorage implements IStorage {
         .from(campaigns)
         .where(eq(campaigns.founderId, founderId));
 
-      const campaignIds = founderCampaigns.map(c => c.id);
-      
+      const campaignIds = founderCampaigns.map((c) => c.id);
+
       if (campaignIds.length === 0) {
         return Array.from({ length: 6 }, (_, i) => ({
           date: `Week ${i + 1}`,
           amount: 0,
-          investors: 0
+          investors: 0,
         }));
       }
 
@@ -934,28 +1110,43 @@ export class DatabaseStorage implements IStorage {
       const campaignInvestments = await db
         .select()
         .from(investments)
-        .where(sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`)
+        .where(
+          sql`${investments.campaignId} IN (${sql.join(
+            campaignIds.map((id) => sql`${id}`),
+            sql`, `
+          )})`
+        )
         .orderBy(investments.createdAt);
 
       // Group investments by week
       const now = new Date();
       const weeklyData = Array.from({ length: 6 }, (_, i) => {
-        const weekStart = new Date(now.getTime() - (5 - i) * 7 * 24 * 60 * 60 * 1000);
+        const weekStart = new Date(
+          now.getTime() - (5 - i) * 7 * 24 * 60 * 60 * 1000
+        );
         const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-        
-        const weekInvestments = campaignInvestments.filter(inv => {
+
+        const weekInvestments = campaignInvestments.filter((inv) => {
           const investmentDate = new Date(inv.createdAt || 0);
-          return investmentDate >= weekStart && investmentDate < weekEnd &&
-                 inv.paymentStatus === 'completed';
+          return (
+            investmentDate >= weekStart &&
+            investmentDate < weekEnd &&
+            inv.paymentStatus === "completed"
+          );
         });
 
-        const totalAmount = weekInvestments.reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
-        const uniqueInvestors = new Set(weekInvestments.map(inv => inv.investorId)).size;
+        const totalAmount = weekInvestments.reduce(
+          (sum, inv) => sum + parseFloat(inv.amount),
+          0
+        );
+        const uniqueInvestors = new Set(
+          weekInvestments.map((inv) => inv.investorId)
+        ).size;
 
         return {
           date: `Week ${i + 1}`,
           amount: Math.round(totalAmount),
-          investors: uniqueInvestors
+          investors: uniqueInvestors,
         };
       });
 
@@ -963,7 +1154,9 @@ export class DatabaseStorage implements IStorage {
     }) as Promise<Array<{ date: string; amount: number; investors: number }>>;
   }
 
-  async getInvestorDistribution(founderId: string): Promise<Array<{ name: string; value: number; color: string }>> {
+  async getInvestorDistribution(
+    founderId: string
+  ): Promise<Array<{ name: string; value: number; color: string }>> {
     return safeDbOperation(async () => {
       // Get founder's campaigns
       const founderCampaigns = await db
@@ -971,8 +1164,8 @@ export class DatabaseStorage implements IStorage {
         .from(campaigns)
         .where(eq(campaigns.founderId, founderId));
 
-      const campaignIds = founderCampaigns.map(c => c.id);
-      
+      const campaignIds = founderCampaigns.map((c) => c.id);
+
       if (campaignIds.length === 0) {
         return [
           { name: "Small ($25-$500)", value: 0, color: "#22C55E" },
@@ -987,13 +1180,18 @@ export class DatabaseStorage implements IStorage {
         .from(investments)
         .where(
           and(
-            sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`,
-            eq(investments.paymentStatus, 'completed')
+            sql`${investments.campaignId} IN (${sql.join(
+              campaignIds.map((id) => sql`${id}`),
+              sql`, `
+            )})`,
+            eq(investments.paymentStatus, "completed")
           )
         );
 
-      let small = 0, medium = 0, large = 0;
-      
+      let small = 0,
+        medium = 0,
+        large = 0;
+
       campaignInvestments.forEach((inv: any) => {
         const amount = parseFloat(inv.amount);
         if (amount >= 25 && amount < 500) small++;
@@ -1002,7 +1200,7 @@ export class DatabaseStorage implements IStorage {
       });
 
       const total = small + medium + large;
-      
+
       if (total === 0) {
         return [
           { name: "Small ($25-$500)", value: 0, color: "#22C55E" },
@@ -1012,33 +1210,52 @@ export class DatabaseStorage implements IStorage {
       }
 
       return [
-        { name: "Small ($25-$500)", value: Math.round((small / total) * 100), color: "#22C55E" },
-        { name: "Medium ($500-$2K)", value: Math.round((medium / total) * 100), color: "#F59E0B" },
-        { name: "Large ($2K+)", value: Math.round((large / total) * 100), color: "#EF4444" },
+        {
+          name: "Small ($25-$500)",
+          value: Math.round((small / total) * 100),
+          color: "#22C55E",
+        },
+        {
+          name: "Medium ($500-$2K)",
+          value: Math.round((medium / total) * 100),
+          color: "#F59E0B",
+        },
+        {
+          name: "Large ($2K+)",
+          value: Math.round((large / total) * 100),
+          color: "#EF4444",
+        },
       ];
     }) as Promise<Array<{ name: string; value: number; color: string }>>;
   }
 
-  async getMonthlyGrowth(founderId: string): Promise<Array<{ month: string; campaigns: number; investors: number; revenue: number }>> {
+  async getMonthlyGrowth(founderId: string): Promise<
+    Array<{
+      month: string;
+      campaigns: number;
+      investors: number;
+      revenue: number;
+    }>
+  > {
     return safeDbOperation(async () => {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
       const now = new Date();
       const currentYear = now.getFullYear();
-      
+
       // Get founder's campaigns
       const founderCampaigns = await db
         .select()
         .from(campaigns)
         .where(eq(campaigns.founderId, founderId));
 
-      const campaignIds = founderCampaigns.map(c => c.id);
-      
+      const campaignIds = founderCampaigns.map((c) => c.id);
+
       if (campaignIds.length === 0) {
-        return months.map(month => ({
+        return months.map((month) => ({
           month,
           campaigns: 0,
           investors: 0,
-          revenue: 0
+          revenue: 0,
         }));
       }
 
@@ -1048,17 +1265,20 @@ export class DatabaseStorage implements IStorage {
         .from(investments)
         .where(
           and(
-            sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`,
-            eq(investments.paymentStatus, 'completed')
+            sql`${investments.campaignId} IN (${sql.join(
+              campaignIds.map((id) => sql`${id}`),
+              sql`, `
+            )})`,
+            eq(investments.paymentStatus, "completed")
           )
         );
 
       const monthlyData = months.map((month, index) => {
         const monthStart = new Date(currentYear, index, 1);
         const monthEnd = new Date(currentYear, index + 1, 0);
-        
+
         // Campaigns created in this month
-        const monthCampaigns = founderCampaigns.filter(campaign => {
+        const monthCampaigns = founderCampaigns.filter((campaign) => {
           const campaignDate = new Date(campaign.createdAt || 0);
           return campaignDate >= monthStart && campaignDate <= monthEnd;
         }).length;
@@ -1069,19 +1289,31 @@ export class DatabaseStorage implements IStorage {
           return investmentDate >= monthStart && investmentDate <= monthEnd;
         });
 
-        const uniqueInvestors = new Set(monthInvestments.map((inv: any) => inv.investorId)).size;
-        const revenue = monthInvestments.reduce((sum: any, inv: any) => sum + parseFloat(inv.amount), 0);
+        const uniqueInvestors = new Set(
+          monthInvestments.map((inv: any) => inv.investorId)
+        ).size;
+        const revenue = monthInvestments.reduce(
+          (sum: any, inv: any) => sum + parseFloat(inv.amount),
+          0
+        );
 
         return {
           month,
           campaigns: monthCampaigns,
           investors: uniqueInvestors,
-          revenue: Math.round(revenue)
+          revenue: Math.round(revenue),
         };
       });
 
       return monthlyData;
-    }) as Promise<Array<{ month: string; campaigns: number; investors: number; revenue: number }>>;
+    }) as Promise<
+      Array<{
+        month: string;
+        campaigns: number;
+        investors: number;
+        revenue: number;
+      }>
+    >;
   }
 
   async getInvestorInsights(founderId: string): Promise<{
@@ -1089,82 +1321,106 @@ export class DatabaseStorage implements IStorage {
     investorRetentionRate: number;
     averageDecisionTime: number;
   }> {
-    return safeDbOperation(async () => {
-      // Get founder's campaigns
-      const founderCampaigns = await db
-        .select()
-        .from(campaigns)
-        .where(eq(campaigns.founderId, founderId));
+    return safeDbOperation(
+      async () => {
+        // Get founder's campaigns
+        const founderCampaigns = await db
+          .select()
+          .from(campaigns)
+          .where(eq(campaigns.founderId, founderId));
 
-      if (founderCampaigns.length === 0) {
-        return {
-          averageInvestmentSize: 0,
-          investorRetentionRate: 0,
-          averageDecisionTime: 0
-        };
-      }
+        if (founderCampaigns.length === 0) {
+          return {
+            averageInvestmentSize: 0,
+            investorRetentionRate: 0,
+            averageDecisionTime: 0,
+          };
+        }
 
-      const campaignIds = founderCampaigns.map(c => c.id);
+        const campaignIds = founderCampaigns.map((c) => c.id);
 
-      // Get all investments for these campaigns
-      const allInvestments = await db
-        .select()
-        .from(investments)
-        .where(
-          and(
-            sql`${investments.campaignId} IN (${sql.join(campaignIds.map(id => sql`${id}`), sql`, `)})`,
-            eq(investments.paymentStatus, 'completed')
-          )
+        // Get all investments for these campaigns
+        const allInvestments = await db
+          .select()
+          .from(investments)
+          .where(
+            and(
+              sql`${investments.campaignId} IN (${sql.join(
+                campaignIds.map((id) => sql`${id}`),
+                sql`, `
+              )})`,
+              eq(investments.paymentStatus, "completed")
+            )
+          );
+
+        if (allInvestments.length === 0) {
+          return {
+            averageInvestmentSize: 0,
+            investorRetentionRate: 0,
+            averageDecisionTime: 0,
+          };
+        }
+
+        // Calculate average investment size
+        const totalAmount = allInvestments.reduce(
+          (sum: any, inv: any) => sum + parseFloat(inv.amount),
+          0
+        );
+        const averageInvestmentSize = Math.round(
+          totalAmount / allInvestments.length
         );
 
-      if (allInvestments.length === 0) {
+        // Calculate investor retention rate (investors who invested in multiple campaigns)
+        const investorCampaignCounts = new Map();
+        allInvestments.forEach((inv: any) => {
+          const count = investorCampaignCounts.get(inv.investorId) || 0;
+          investorCampaignCounts.set(inv.investorId, count + 1);
+        });
+
+        const repeatInvestors = Array.from(
+          investorCampaignCounts.values()
+        ).filter((count) => count > 1).length;
+        const totalUniqueInvestors = investorCampaignCounts.size;
+        const investorRetentionRate =
+          totalUniqueInvestors > 0
+            ? Math.round((repeatInvestors / totalUniqueInvestors) * 100)
+            : 0;
+
+        // Calculate average decision time (simplified - using creation time difference)
+        const decisionTimes = allInvestments.map((inv: any) => {
+          const campaign = founderCampaigns.find(
+            (c) => c.id === inv.campaignId
+          );
+          if (campaign && campaign.createdAt && inv.createdAt) {
+            const campaignStart = new Date(campaign.createdAt).getTime();
+            const investmentDate = new Date(inv.createdAt).getTime();
+            return Math.max(
+              1,
+              Math.round(
+                (investmentDate - campaignStart) / (1000 * 60 * 60 * 24)
+              )
+            ); // days
+          }
+          return 3; // default 3 days
+        });
+
+        const averageDecisionTime = Math.round(
+          decisionTimes.reduce((sum, time) => sum + time, 0) /
+            decisionTimes.length
+        );
+
         return {
-          averageInvestmentSize: 0,
-          investorRetentionRate: 0,
-          averageDecisionTime: 0
+          averageInvestmentSize,
+          investorRetentionRate,
+          averageDecisionTime,
         };
+      },
+      {
+        averageInvestmentSize: 0,
+        investorRetentionRate: 0,
+        averageDecisionTime: 0,
       }
-
-      // Calculate average investment size
-      const totalAmount = allInvestments.reduce((sum: any, inv: any) => sum + parseFloat(inv.amount), 0);
-      const averageInvestmentSize = Math.round(totalAmount / allInvestments.length);
-
-      // Calculate investor retention rate (investors who invested in multiple campaigns)
-      const investorCampaignCounts = new Map();
-      allInvestments.forEach((inv: any) => {
-        const count = investorCampaignCounts.get(inv.investorId) || 0;
-        investorCampaignCounts.set(inv.investorId, count + 1);
-      });
-
-      const repeatInvestors = Array.from(investorCampaignCounts.values()).filter(count => count > 1).length;
-      const totalUniqueInvestors = investorCampaignCounts.size;
-      const investorRetentionRate = totalUniqueInvestors > 0 ? Math.round((repeatInvestors / totalUniqueInvestors) * 100) : 0;
-
-      // Calculate average decision time (simplified - using creation time difference)
-      const decisionTimes = allInvestments.map((inv: any) => {
-        const campaign = founderCampaigns.find(c => c.id === inv.campaignId);
-        if (campaign && campaign.createdAt && inv.createdAt) {
-          const campaignStart = new Date(campaign.createdAt).getTime();
-          const investmentDate = new Date(inv.createdAt).getTime();
-          return Math.max(1, Math.round((investmentDate - campaignStart) / (1000 * 60 * 60 * 24))); // days
-        }
-        return 3; // default 3 days
-      });
-
-      const averageDecisionTime = Math.round(
-        decisionTimes.reduce((sum, time) => sum + time, 0) / decisionTimes.length
-      );
-
-      return {
-        averageInvestmentSize,
-        investorRetentionRate,
-        averageDecisionTime
-      };
-    }, {
-      averageInvestmentSize: 0,
-      investorRetentionRate: 0,
-      averageDecisionTime: 0
-    }) as Promise<{
+    ) as Promise<{
       averageInvestmentSize: number;
       investorRetentionRate: number;
       averageDecisionTime: number;

@@ -1,14 +1,14 @@
-import speakeasy from 'speakeasy';
-import QRCode from 'qrcode';
-import nodemailer from 'nodemailer';
-import { randomBytes } from 'crypto';
-import { storage } from './storage';
+import speakeasy from "speakeasy";
+import QRCode from "qrcode";
+import nodemailer from "nodemailer";
+import { randomBytes } from "crypto";
+import { storage } from "./storage.js";
 
 // Email transporter configuration
 const emailTransporter = nodemailer.createTransport({
   // Using a simple SMTP configuration - in production, use proper email service
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.SMTP_PORT || "587"),
   secure: false,
   auth: {
     user: process.env.SMTP_USER,
@@ -18,18 +18,21 @@ const emailTransporter = nodemailer.createTransport({
 
 export class TwoFactorService {
   // Generate TOTP secret for authenticator apps
-  static generateTOTPSecret(email: string): { secret: string; qrCodeUrl: string } {
+  static generateTOTPSecret(email: string): {
+    secret: string;
+    qrCodeUrl: string;
+  } {
     const secret = speakeasy.generateSecret({
       name: `Fundry (${email})`,
-      issuer: 'Fundry',
+      issuer: "Fundry",
       length: 32,
     });
 
     const qrCodeUrl = speakeasy.otpauthURL({
       secret: secret.base32,
       label: email,
-      issuer: 'Fundry',
-      encoding: 'base32',
+      issuer: "Fundry",
+      encoding: "base32",
     });
 
     return {
@@ -44,8 +47,8 @@ export class TwoFactorService {
       const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl);
       return qrCodeDataUrl;
     } catch (error) {
-      console.error('Error generating QR code:', error);
-      throw new Error('Failed to generate QR code');
+      console.error("Error generating QR code:", error);
+      throw new Error("Failed to generate QR code");
     }
   }
 
@@ -53,7 +56,7 @@ export class TwoFactorService {
   static verifyTOTPCode(secret: string, token: string): boolean {
     return speakeasy.totp.verify({
       secret,
-      encoding: 'base32',
+      encoding: "base32",
       token,
       window: 2, // Allow 2 time steps before and after current time
     });
@@ -63,7 +66,7 @@ export class TwoFactorService {
   static generateBackupCodes(count: number = 8): string[] {
     const codes: string[] = [];
     for (let i = 0; i < count; i++) {
-      const code = randomBytes(4).toString('hex').toUpperCase();
+      const code = randomBytes(4).toString("hex").toUpperCase();
       codes.push(code);
     }
     return codes;
@@ -75,9 +78,13 @@ export class TwoFactorService {
   }
 
   // Send email OTP
-  static async sendEmailOTP(email: string, code: string, purpose: string = '2FA verification'): Promise<void> {
+  static async sendEmailOTP(
+    email: string,
+    code: string,
+    purpose: string = "2FA verification"
+  ): Promise<void> {
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.log('Email configuration not set up. OTP code would be:', code);
+      console.log("Email configuration not set up. OTP code would be:", code);
       return; // Skip sending in development if email not configured
     }
 
@@ -114,18 +121,22 @@ export class TwoFactorService {
     try {
       await emailTransporter.sendMail(mailOptions);
     } catch (error) {
-      console.error('Error sending email OTP:', error);
-      throw new Error('Failed to send verification email');
+      console.error("Error sending email OTP:", error);
+      throw new Error("Failed to send verification email");
     }
   }
 
   // Store email OTP in database
-  static async storeEmailOTP(userId: string, code: string, type: string = 'email_2fa'): Promise<void> {
+  static async storeEmailOTP(
+    userId: string,
+    code: string,
+    type: string = "email_2fa"
+  ): Promise<void> {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
-    
+
     // Clean up old unused codes for this user and type
     await storage.cleanupExpiredOTP(userId, type);
-    
+
     // Store new code
     await storage.createOTPCode({
       userId,
@@ -137,9 +148,13 @@ export class TwoFactorService {
   }
 
   // Verify email OTP
-  static async verifyEmailOTP(userId: string, code: string, type: string = 'email_2fa'): Promise<boolean> {
+  static async verifyEmailOTP(
+    userId: string,
+    code: string,
+    type: string = "email_2fa"
+  ): Promise<boolean> {
     const otpRecord = await storage.getValidOTPCode(userId, code, type);
-    
+
     if (!otpRecord) {
       return false;
     }
@@ -150,7 +165,10 @@ export class TwoFactorService {
   }
 
   // Verify backup code
-  static async verifyBackupCode(userId: string, code: string): Promise<boolean> {
+  static async verifyBackupCode(
+    userId: string,
+    code: string
+  ): Promise<boolean> {
     const user = await storage.getUser(userId);
     if (!user || !user.twoFactorBackupCodes) {
       return false;
@@ -158,7 +176,7 @@ export class TwoFactorService {
 
     const backupCodes = user.twoFactorBackupCodes as string[];
     const codeIndex = backupCodes.indexOf(code.toUpperCase());
-    
+
     if (codeIndex === -1) {
       return false;
     }
@@ -166,14 +184,18 @@ export class TwoFactorService {
     // Remove used backup code
     backupCodes.splice(codeIndex, 1);
     await storage.updateUserBackupCodes(userId, backupCodes);
-    
+
     return true;
   }
 
   // Enable 2FA for user
-  static async enable2FA(userId: string, method: 'app' | 'email', secret?: string): Promise<void> {
+  static async enable2FA(
+    userId: string,
+    method: "app" | "email",
+    secret?: string
+  ): Promise<void> {
     const backupCodes = this.generateBackupCodes();
-    
+
     await storage.updateUser2FASettings(userId, {
       twoFactorEnabled: true,
       twoFactorMethod: method,

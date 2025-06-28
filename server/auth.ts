@@ -4,11 +4,11 @@ import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { storage } from "./storage";
-import { User as SelectUser, emailVerificationTokens } from "@shared/schema";
+import { storage } from "./storage.js";
+import { User as SelectUser, emailVerificationTokens } from "@shared/schema.js";
 import connectPg from "connect-pg-simple";
-import { emailService } from "./services/email";
-import { db } from "./db";
+import { emailService } from "./services/email.js";
+import { db } from "./db.js";
 import { nanoid } from "nanoid";
 import { eq } from "drizzle-orm";
 
@@ -35,7 +35,7 @@ export async function comparePasswords(supplied: string, stored: string) {
 
 export function setupAuth(app: Express) {
   const PostgresSessionStore = connectPg(session);
-  
+
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "dev-secret-key-change-in-production",
     resave: false,
@@ -66,15 +66,21 @@ export function setupAuth(app: Express) {
       async (email, password, done) => {
         try {
           const user = await storage.getUserByEmail(email);
-          if (!user || !user.password || !(await comparePasswords(password, user.password))) {
+          if (
+            !user ||
+            !user.password ||
+            !(await comparePasswords(password, user.password))
+          ) {
             return done(null, false, { message: "Invalid email or password" });
           }
-          
+
           // Check if email is verified
           if (!user.isEmailVerified) {
-            return done(null, false, { message: "Please verify your email address before signing in" });
+            return done(null, false, {
+              message: "Please verify your email address before signing in",
+            });
           }
-          
+
           return done(null, user);
         } catch (error) {
           return done(error);
@@ -93,7 +99,7 @@ export function setupAuth(app: Express) {
       }
       done(null, user);
     } catch (error) {
-      console.error('Session deserialization error:', error);
+      console.error("Session deserialization error:", error);
       // Clear the session if there's an error retrieving the user
       done(null, false);
     }
@@ -116,7 +122,9 @@ export function setupAuth(app: Express) {
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(400).json({ message: "User already exists with this email" });
+        return res
+          .status(400)
+          .json({ message: "User already exists with this email" });
       }
 
       // Create user with email verification disabled initially
@@ -144,17 +152,22 @@ export function setupAuth(app: Express) {
       });
 
       // Send verification email
-      const emailSent = await emailService.sendVerificationEmail(user.email, token, user.firstName);
-      
+      const emailSent = await emailService.sendVerificationEmail(
+        user.email,
+        token,
+        user.firstName
+      );
+
       if (!emailSent) {
         console.error("Failed to send verification email for user:", user.id);
       }
 
       // Return user info without auto-login (require email verification first)
-      res.status(201).json({ 
+      res.status(201).json({
         userId: user.id,
-        message: "Account created successfully. Please check your email to verify your account.",
-        emailSent
+        message:
+          "Account created successfully. Please check your email to verify your account.",
+        emailSent,
       });
     } catch (error) {
       console.error("Registration error:", error);
@@ -169,7 +182,9 @@ export function setupAuth(app: Express) {
         return res.status(500).json({ message: "Internal server error" });
       }
       if (!user) {
-        return res.status(401).json({ message: info?.message || "Invalid credentials" });
+        return res
+          .status(401)
+          .json({ message: info?.message || "Invalid credentials" });
       }
       req.login(user, (err) => {
         if (err) {
@@ -200,17 +215,17 @@ export function setupAuth(app: Express) {
       if (!user) {
         // User no longer exists, clear session
         req.logout((err) => {
-          if (err) console.error('Logout error:', err);
+          if (err) console.error("Logout error:", err);
         });
         return res.status(401).json({ message: "Not authenticated" });
       }
 
       res.json(user);
     } catch (error) {
-      console.error('User authentication check failed:', error);
+      console.error("User authentication check failed:", error);
       // Clear session on error
       req.logout((err) => {
-        if (err) console.error('Logout error:', err);
+        if (err) console.error("Logout error:", err);
       });
       res.status(401).json({ message: "Not authenticated" });
     }
@@ -220,16 +235,16 @@ export function setupAuth(app: Express) {
   app.post("/api/clear-session", (req, res) => {
     req.logout((err) => {
       if (err) {
-        console.error('Session clear error:', err);
-        return res.status(500).json({ message: 'Failed to clear session' });
+        console.error("Session clear error:", err);
+        return res.status(500).json({ message: "Failed to clear session" });
       }
       req.session.destroy((err) => {
         if (err) {
-          console.error('Session destroy error:', err);
-          return res.status(500).json({ message: 'Failed to destroy session' });
+          console.error("Session destroy error:", err);
+          return res.status(500).json({ message: "Failed to destroy session" });
         }
-        res.clearCookie('connect.sid');
-        res.json({ message: 'Session cleared successfully' });
+        res.clearCookie("connect.sid");
+        res.json({ message: "Session cleared successfully" });
       });
     });
   });

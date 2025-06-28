@@ -1,21 +1,21 @@
 import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import { setupAuth, requireAuth, hashPassword, comparePasswords } from "./auth";
-import { db, pool } from "./db";
+import { db, pool } from "./db.js";
 import {
   insertBusinessProfileSchema,
   insertCampaignSchema,
   insertInvestmentSchema,
   insertSafeAgreementSchema,
-} from "@shared/schema";
+} from "@shared/schema.js";
 import { nanoid } from "nanoid";
 import multer from "multer";
 import path from "path";
 import * as XLSX from "xlsx";
-import { TwoFactorService } from "./twoFactorService";
-import { emailService } from "./services/email";
+import { TwoFactorService } from "./twoFactorService.js";
+import { emailService } from "./services/email.js";
 import {
   eq,
   and,
@@ -529,11 +529,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { password } = req.body;
 
         if (!password) {
-          return res
-            .status(400)
-            .json({
-              message: "Password is required to regenerate backup codes",
-            });
+          return res.status(400).json({
+            message: "Password is required to regenerate backup codes",
+          });
         }
 
         // Verify user's password
@@ -732,12 +730,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       if (!emailSent) {
-        return res
-          .status(500)
-          .json({
-            message:
-              "Failed to send verification email. Please check your email address and try again.",
-          });
+        return res.status(500).json({
+          message:
+            "Failed to send verification email. Please check your email address and try again.",
+        });
       }
 
       res.json({ message: "Verification email sent successfully" });
@@ -1598,11 +1594,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (pitchMediaFile) {
           // Check file size (10MB limit)
           if (pitchMediaFile.size > 10 * 1024 * 1024) {
-            return res
-              .status(400)
-              .json({
-                message: "Pitch video/image file size must be under 10MB",
-              });
+            return res.status(400).json({
+              message: "Pitch video/image file size must be under 10MB",
+            });
           }
           updateData.pitchMediaUrl = `/uploads/${pitchMediaFile.filename}`;
         }
@@ -1731,11 +1725,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           files.pitchMedia?.[0] &&
           files.pitchMedia[0].size > 10 * 1024 * 1024
         ) {
-          return res
-            .status(400)
-            .json({
-              message: "Pitch video/image file size must be under 10MB",
-            });
+          return res.status(400).json({
+            message: "Pitch video/image file size must be under 10MB",
+          });
         }
 
         const campaignData = {
@@ -2370,11 +2362,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Verify campaign ownership
         const campaign = await storage.getCampaign(campaignId);
         if (!campaign || campaign.founderId !== founderId) {
-          return res
-            .status(403)
-            .json({
-              message: "Access denied: You can only update your own campaigns",
-            });
+          return res.status(403).json({
+            message: "Access denied: You can only update your own campaigns",
+          });
         }
 
         // Verify campaign has actual investors before allowing updates
@@ -2583,11 +2573,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Strict authorization: only allow investors to access their own updates
         if (investorId !== req.user.id) {
-          return res
-            .status(403)
-            .json({
-              message: "Access denied: You can only view your own updates",
-            });
+          return res.status(403).json({
+            message: "Access denied: You can only view your own updates",
+          });
         }
 
         // Get all confirmed investments by this investor (committed, paid, completed statuses)
@@ -2863,12 +2851,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .limit(1);
 
         if (!userInvestment.length) {
-          return res
-            .status(403)
-            .json({
-              message:
-                "Only investors who have invested in this campaign can reply to updates",
-            });
+          return res.status(403).json({
+            message:
+              "Only investors who have invested in this campaign can reply to updates",
+          });
         }
 
         // Create the reply
@@ -3555,12 +3541,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         });
       } catch (error) {
         console.error("Error creating checkout session:", error);
-        res
-          .status(500)
-          .json({
-            message: "Failed to create checkout session",
-            error: error.message,
-          });
+        res.status(500).json({
+          message: "Failed to create checkout session",
+          error: error.message,
+        });
       }
     }
   );
@@ -4101,12 +4085,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         }
       } catch (error) {
         console.error("Error verifying payment success:", error);
-        res
-          .status(500)
-          .json({
-            message: "Failed to verify payment",
-            error: (error as Error).message,
-          });
+        res.status(500).json({
+          message: "Failed to verify payment",
+          error: (error as Error).message,
+        });
       }
     }
   );
@@ -4202,12 +4184,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       res.json({ checkoutUrl: session.url });
     } catch (error) {
       console.error("Error creating payment session:", error);
-      res
-        .status(500)
-        .json({
-          message: "Failed to create payment session",
-          error: (error as Error).message,
-        });
+      res.status(500).json({
+        message: "Failed to create payment session",
+        error: (error as Error).message,
+      });
     }
   });
 
@@ -4248,12 +4228,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       res.json(updatedInvestment);
     } catch (error) {
       console.error("Error updating investment:", error);
-      res
-        .status(500)
-        .json({
-          message: "Failed to update investment",
-          error: (error as Error).message,
-        });
+      res.status(500).json({
+        message: "Failed to update investment",
+        error: (error as Error).message,
+      });
     }
   });
 
@@ -4274,12 +4252,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         investment.status === "completed" ||
         investment.paymentStatus === "completed"
       ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Cannot delete investments that have been paid or completed",
-          });
+        return res.status(400).json({
+          message: "Cannot delete investments that have been paid or completed",
+        });
       }
 
       // Delete the investment
@@ -4288,12 +4263,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       res.json({ message: "Investment deleted successfully" });
     } catch (error) {
       console.error("Error deleting investment:", error);
-      res
-        .status(500)
-        .json({
-          message: "Failed to delete investment",
-          error: (error as Error).message,
-        });
+      res.status(500).json({
+        message: "Failed to delete investment",
+        error: (error as Error).message,
+      });
     }
   });
 
@@ -4317,12 +4290,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
       res.json(updatedInvestment);
     } catch (error) {
       console.error("Error updating investment status:", error);
-      res
-        .status(500)
-        .json({
-          message: "Failed to update investment status",
-          error: (error as Error).message,
-        });
+      res.status(500).json({
+        message: "Failed to update investment status",
+        error: (error as Error).message,
+      });
     }
   });
 
@@ -4333,12 +4304,10 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       // Validate required fields for payment modal flow
       if (!amount || !investmentId) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Missing required fields: amount and investmentId are required",
-          });
+        return res.status(400).json({
+          message:
+            "Missing required fields: amount and investmentId are required",
+        });
       }
 
       // Get the existing investment
@@ -4428,12 +4397,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
         // Check if investment is in pending status
         if (investment.status !== "pending") {
-          return res
-            .status(400)
-            .json({
-              message:
-                "Investment must be in pending status to process payment",
-            });
+          return res.status(400).json({
+            message: "Investment must be in pending status to process payment",
+          });
         }
 
         const amountInCents = Math.round(parseFloat(investment.amount) * 100);
@@ -4856,11 +4822,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
       // Check if email is verified
       if (!user.isEmailVerified) {
-        return res
-          .status(401)
-          .json({
-            message: "Please verify your email before accessing admin panel",
-          });
+        return res.status(401).json({
+          message: "Please verify your email before accessing admin panel",
+        });
       }
 
       // Log successful admin login (simplified for now)
@@ -6630,11 +6594,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
 
         // Validate settings
         if (minimumWithdrawal < 0 || minimumWithdrawal > 1000) {
-          return res
-            .status(400)
-            .json({
-              message: "Minimum withdrawal must be between $0 and $1,000",
-            });
+          return res.status(400).json({
+            message: "Minimum withdrawal must be between $0 and $1,000",
+          });
         }
 
         if (minimumGoalPercentage < 0 || minimumGoalPercentage > 100) {
@@ -8090,11 +8052,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
         ) {
           workbook = XLSX.read(fileBuffer, { type: "buffer" });
         } else {
-          return res
-            .status(400)
-            .json({
-              message: "Invalid file format. Please upload Excel or CSV file.",
-            });
+          return res.status(400).json({
+            message: "Invalid file format. Please upload Excel or CSV file.",
+          });
         }
 
         const sheetName = workbook.SheetNames[0];
@@ -8200,11 +8160,9 @@ IMPORTANT NOTICE: This investment involves significant risk and may result in th
             cellText: false,
           });
         } else {
-          return res
-            .status(400)
-            .json({
-              message: "Invalid file format. Please upload Excel or CSV file.",
-            });
+          return res.status(400).json({
+            message: "Invalid file format. Please upload Excel or CSV file.",
+          });
         }
 
         const sheetName = workbook.SheetNames[0];

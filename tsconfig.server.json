@@ -1,7 +1,6 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "noEmit": false,
         "outDir": "dist/server",
         "rootDir": "server",
         "moduleResolution": "node",

@@ -4,11 +4,11 @@ import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { storage } from "./storage.js";
-import { User as SelectUser, emailVerificationTokens } from "@shared/schema.js";
+import { storage } from "./storage";
+import { User as SelectUser, emailVerificationTokens } from "@shared/schema";
 import connectPg from "connect-pg-simple";
-import { emailService } from "./services/email.js";
-import { db } from "./db.js";
+import { emailService } from "./services/email";
+import { db } from "./db";
 import { nanoid } from "nanoid";
 import { eq } from "drizzle-orm";
 

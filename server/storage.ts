@@ -30,8 +30,8 @@ import {
   type InsertNotificationPreferences,
   type KycVerification,
   type InsertKycVerification,
-} from "@shared/schema.js";
-import { db } from "./db.js";
+} from "@shared/schema";
+import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 

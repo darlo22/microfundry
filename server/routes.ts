@@ -1,21 +1,21 @@
 import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage.js";
+import { storage } from "./storage";
 import { setupAuth, requireAuth, hashPassword, comparePasswords } from "./auth";
-import { db, pool } from "./db.js";
+import { db, pool } from "./db";
 import {
   insertBusinessProfileSchema,
   insertCampaignSchema,
   insertInvestmentSchema,
   insertSafeAgreementSchema,
-} from "@shared/schema.js";
+} from "@shared/schema";
 import { nanoid } from "nanoid";
 import multer from "multer";
 import path from "path";
 import * as XLSX from "xlsx";
-import { TwoFactorService } from "./twoFactorService.js";
-import { emailService } from "./services/email.js";
+import { TwoFactorService } from "./twoFactorService";
+import { emailService } from "./services/email";
 import {
   eq,
   and,

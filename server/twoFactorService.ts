@@ -2,7 +2,7 @@ import speakeasy from "speakeasy";
 import QRCode from "qrcode";
 import nodemailer from "nodemailer";
 import { randomBytes } from "crypto";
-import { storage } from "./storage.js";
+import { storage } from "./storage";
 
 // Email transporter configuration
 const emailTransporter = nodemailer.createTransport({

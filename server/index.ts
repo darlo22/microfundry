@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes.js";
+import { registerRoutes } from "./routes";
 import path from "path";
 
 function log(message: string, source = "express") {
